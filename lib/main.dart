@@ -31,7 +31,7 @@ class MyApp extends ConsumerWidget {
     final authState = Supabase.instance.client.auth.onAuthStateChange;
 
     return MaterialApp(
-      title: 'EthioMed',
+      title: AppConfig.appTitle,
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
