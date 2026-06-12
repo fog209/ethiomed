@@ -1,29 +1,10 @@
 class AppConfig {
-  const AppConfig._();
+  // Your Supabase Project URL
+  static const String supabaseUrl = 'https://kxcdzlyirdonkipcymvc.supabase.co';
 
-  static const String _supabaseUrlDartDefineKey = 'ETHIOMED_SUPABASE_URL';
-  static const String _supabaseAnonKeyDartDefineKey =
-      'ETHIOMED_SUPABASE_ANON_KEY';
+  // Your Supabase Anon Key (Public Key)
+  static const String supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt4Y2R6bHlpcmRvbmtpcGN5bXZjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwMTgxNzcsImV4cCI6MjA5NjU5NDE3N30.S70lUuSwgQBb05BFdcjRAP8F4x2ydeVppljuS6yKlQY';
 
-  static String get supabaseUrl {
-    final value = const String.fromEnvironment(_supabaseUrlDartDefineKey);
-    if (value.trim().isEmpty) {
-      throw StateError(
-        'Missing required Supabase URL: --dart-define=$_supabaseUrlDartDefineKey',
-      );
-    }
-
-    return value.trim();
-  }
-
-  static String get supabaseAnonKey {
-    final value = const String.fromEnvironment(_supabaseAnonKeyDartDefineKey);
-    if (value.trim().isEmpty) {
-      throw StateError(
-        'Missing required Supabase anon key: --dart-define=$_supabaseAnonKeyDartDefineKey',
-      );
-    }
-
-    return value.trim();
-  }
+  // Base title for the app
+  static const String appTitle = 'EthioMed';
 }
