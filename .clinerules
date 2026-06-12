@@ -27,7 +27,7 @@ Do NOT change pubspec.yaml without instruction · Do NOT delete files without co
 Do NOT change Supabase schema without confirmation · Do NOT add Firebase before Phase 4 ·
 Do NOT expose Supabase keys · Do NOT skip error handling · Do NOT use dynamic type
 
-## Error Handling
+## Error Handling (always use this pattern)
 try {
   final result = await supabase.from('table').select();
   return result;
@@ -38,10 +38,3 @@ try {
   debugPrint('Error: $e');
   throw AppException('Something went wrong');
 }
-
-## Prompt Format
-BAD: "Build the article viewer"
-GOOD: "In lib/features/articles/article_viewer_screen.dart, create a StatelessWidget
-called ArticleViewerScreen that takes an Article model parameter. Show title, category,
-definition, etiology, diagnosis sections. Use flutter_markdown. Follow patterns in
-lib/features/auth/login_screen.dart. Do NOT add navigation. Do NOT touch any other files."
