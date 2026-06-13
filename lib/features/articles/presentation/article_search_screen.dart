@@ -1,25 +1,38 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../data/article_repository.dart';
+
+import '../data/article_search_provider.dart';
 import 'article_detail_screen.dart';
 
 class ArticleSearchScreen extends ConsumerStatefulWidget {
   const ArticleSearchScreen({super.key});
 
   @override
-  ConsumerState<ArticleSearchScreen> createState() => _ArticleSearchScreenState();
+  ConsumerState<ArticleSearchScreen> createState() {
+    return _ArticleSearchScreenState();
+  }
 }
 
 class _ArticleSearchScreenState extends ConsumerState<ArticleSearchScreen> {
   final TextEditingController _controller = TextEditingController();
-  String _query = '';
-  String? _selectedCategory;
-
-  final List<String> _categories = [
-    'Cardiology', 'Pulmonology', 'Infectious Diseases', 
-    'Gastroenterology', 'Neurology', 'Nephrology', 
-    'Endocrinology', 'Hematology', 'OB/GYN', 'Pharmacology'
+  final List<String> _categories = const <String>[
+    'Cardiology',
+    'Pulmonology',
+    'Infectious Diseases',
+    'Gastroenterology',
+    'Neurology',
+    'Nephrology',
+    'Endocrinology',
+    'Hematology',
+    'OB/GYN',
+    'Pharmacology',
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    ref.read(articleSearchControllerProvider.notifier).updateCategory(null);
+  }
 
   @override
   void dispose() {
@@ -29,7 +42,7 @@ class _ArticleSearchScreenState extends ConsumerState<ArticleSearchScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final articlesAsync = ref.watch(allArticlesProvider);
+    final searchState = ref.watch(articleSearchControllerProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -46,75 +59,136 @@ class _ArticleSearchScreenState extends ConsumerState<ArticleSearchScreen> {
             hintStyle: TextStyle(color: Colors.white60),
             border: InputBorder.none,
           ),
-          onChanged: (value) => setState(() => _query = value.toLowerCase()),
+          onChanged: (value) {
+            ref
+                .read(articleSearchControllerProvider.notifier)
+                .updateQuery(value);
+          },
         ),
       ),
       body: Column(
-        children: [
-          // CATEGORY FILTER CHIPS
-          Container(
-            height: 60,
-            padding: const EdgeInsets.symmetric(vertical: 10),
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: _categories.length,
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              itemBuilder: (context, index) {
-                final category = _categories[index];
-                final isSelected = _selectedCategory == category;
-                return Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: FilterChip(
-                    label: Text(category),
-                    selected: isSelected,
-                    selectedColor: const Color(0xFFFFB300),
-                    onSelected: (bool selected) {
-                      setState(() {
-                        _selectedCategory = selected ? category : null;
-                      });
-                    },
-                  ),
-                );
-              },
+        children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+            child: Text(
+              '${searchState.count} results found',
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: Colors.grey),
             ),
           ),
-          
-          // SEARCH RESULTS
-          Expanded(
-            child: articlesAsync.when(
-              data: (articles) {
-                final filtered = articles.where((a) {
-                  final matchesQuery = a.title.toLowerCase().contains(_query);
-                  final matchesCategory = _selectedCategory == null || a.category == _selectedCategory;
-                  return matchesQuery && matchesCategory;
-                }).toList();
-
-                if (filtered.isEmpty) {
-                  return const Center(child: Text('No matching articles found.'));
-                }
-
-                return ListView.builder(
-                  itemCount: filtered.length,
-                  itemBuilder: (context, index) {
-                    final article = filtered[index];
-                    return ListTile(
-                      leading: const Icon(Icons.search, color: Color(0xFF1A237E)),
-                      title: Text(article.title),
-                      subtitle: Text(article.category ?? ''),
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => ArticleDetailScreen(article: article)),
-                      ),
-                    );
-                  },
-                );
-              },
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (err, st) => Center(child: Text('Error: $err')),
-            ),
-          ),
+          _buildCategoryChips(searchState.category),
+          Expanded(child: _buildResults(searchState)),
         ],
       ),
     );
+  }
+
+  Widget _buildCategoryChips(String? selectedCategory) {
+    return Container(
+      height: 60,
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: _categories.length,
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        itemBuilder: (context, index) {
+          final category = _categories[index];
+          final isSelected = selectedCategory == category;
+
+          return Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: FilterChip(
+              label: Text(category),
+              selected: isSelected,
+              selectedColor: const Color(0xFFFFB300),
+              onSelected: (selected) {
+                ref
+                    .read(articleSearchControllerProvider.notifier)
+                    .updateCategory(selected ? category : null);
+              },
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildResults(ArticleSearchState searchState) {
+    if (searchState.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (searchState.hasError) {
+      return Center(child: Text(searchState.message ?? 'Search failed.'));
+    }
+
+    if (searchState.results.isEmpty) {
+      return const Center(child: Text('No results. Try browsing by category.'));
+    }
+
+    return ListView.builder(
+      itemCount: searchState.results.length,
+      itemBuilder: (context, index) {
+        final article = searchState.results[index];
+
+        return ListTile(
+          leading: const Icon(Icons.search, color: Color(0xFF1A237E)),
+          title: _buildHighlightedTitle(article.title, searchState.query),
+          subtitle: Text(article.category ?? ''),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ArticleDetailScreen(article: article),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildHighlightedTitle(String title, String query) {
+    final trimmedQuery = query.trim();
+    if (trimmedQuery.isEmpty) {
+      return Text(title);
+    }
+
+    final matches = RegExp(
+      RegExp.escape(trimmedQuery),
+      caseSensitive: false,
+    ).allMatches(title);
+
+    if (matches.isEmpty) {
+      return Text(title);
+    }
+
+    final spans = <InlineSpan>[];
+    var currentIndex = 0;
+
+    for (final match in matches) {
+      if (match.start > currentIndex) {
+        spans.add(TextSpan(text: title.substring(currentIndex, match.start)));
+      }
+
+      spans.add(
+        TextSpan(
+          text: title.substring(match.start, match.end),
+          style: const TextStyle(
+            color: Color(0xFFF9A825),
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      );
+
+      currentIndex = match.end;
+    }
+
+    if (currentIndex < title.length) {
+      spans.add(TextSpan(text: title.substring(currentIndex)));
+    }
+
+    return Text.rich(TextSpan(children: spans));
   }
 }
