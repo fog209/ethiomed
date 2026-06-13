@@ -31,13 +31,19 @@ class _ArticleSearchScreenState extends ConsumerState<ArticleSearchScreen> {
   @override
   void initState() {
     super.initState();
-    ref.read(articleSearchControllerProvider.notifier).updateCategory(null);
+    _runAfterBuild(() {
+      ref.read(articleSearchControllerProvider.notifier).updateCategory(null);
+    });
   }
 
   @override
   void dispose() {
     _controller.dispose();
     super.dispose();
+  }
+
+  void _runAfterBuild(VoidCallback callback) {
+    Future.microtask(callback);
   }
 
   @override
@@ -60,9 +66,11 @@ class _ArticleSearchScreenState extends ConsumerState<ArticleSearchScreen> {
             border: InputBorder.none,
           ),
           onChanged: (value) {
-            ref
-                .read(articleSearchControllerProvider.notifier)
-                .updateQuery(value);
+            _runAfterBuild(() {
+              ref
+                  .read(articleSearchControllerProvider.notifier)
+                  .updateQuery(value);
+            });
           },
         ),
       ),
@@ -103,9 +111,11 @@ class _ArticleSearchScreenState extends ConsumerState<ArticleSearchScreen> {
               selected: isSelected,
               selectedColor: const Color(0xFFFFB300),
               onSelected: (selected) {
-                ref
-                    .read(articleSearchControllerProvider.notifier)
-                    .updateCategory(selected ? category : null);
+                _runAfterBuild(() {
+                  ref
+                      .read(articleSearchControllerProvider.notifier)
+                      .updateCategory(selected ? category : null);
+                });
               },
             ),
           );

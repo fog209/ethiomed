@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/database/app_database.dart';
 import '../../articles/data/article_repository.dart';
 import '../../articles/presentation/article_detail_screen.dart';
 
@@ -35,6 +36,7 @@ class _ArticleListScreenState extends ConsumerState<ArticleListScreen> {
   void dispose() {
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
+    ref.invalidate(articleListControllerProvider);
     super.dispose();
   }
 
@@ -51,15 +53,24 @@ class _ArticleListScreenState extends ConsumerState<ArticleListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final category = widget.category;
     final listState = ref.watch(articleListControllerProvider);
+    final filteredArticles = listState.category == category
+        ? listState.articles
+              .where((article) => article.category == category)
+              .toList(growable: false)
+        : const <ArticleLocal>[];
+    final bodyState = listState.category == category
+        ? listState.copyWith(articles: filteredArticles)
+        : ArticleListState(category: category);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.category),
+        title: Text(category),
         backgroundColor: const Color(0xFF1A237E),
         foregroundColor: const Color(0xFFFFB300),
       ),
-      body: _buildBody(listState),
+      body: _buildBody(bodyState),
     );
   }
 

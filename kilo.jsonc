@@ -1,0 +1,12 @@
+{
+  "instructions": [
+    ".kilo/rules/01-stack.md",
+    ".kilo/rules/02-patterns.md",
+    ".kilo/rules/03-wardready.md"
+  ],
+  "permission": {
+    "bash": "ask",
+    "read": "allow",
+    "edit": "allow"
+  }
+}
