@@ -22,16 +22,14 @@ class ArticleListScreen extends ConsumerWidget {
       body: articlesAsync.when(
         data: (articles) {
           final filtered = articles
-              .where((a) => a.category == category)
+              .where((a) => a.category?.trim() == category.trim())
               .toList();
           debugPrint(
-            'Total articles: ${articles.length}, Filtered for $category: ${filtered.length}',
+            'DEBUG: Looking for $category. Found ${filtered.length} articles.',
           );
 
           if (filtered.isEmpty) {
-            return const Center(
-              child: Text('No articles in this section yet.'),
-            );
+            return Text('No articles found in $category');
           }
 
           return ListView.builder(

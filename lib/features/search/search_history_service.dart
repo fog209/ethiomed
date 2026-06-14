@@ -1,73 +1,35 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-const _kSearchHistoryKey = 'search_history';
-const _kMaxHistoryEntries = 10;
-
-/// Provides access to [SearchHistoryService].
-final searchHistoryServiceProvider = Provider<SearchHistoryService>((ref) {
-  return SearchHistoryService();
+// This provider manages the list of recent search strings
+final searchHistoryProvider = StateNotifierProvider<SearchHistoryNotifier, List<String>>((ref) {
+  return SearchHistoryNotifier();
 });
 
-/// Riverpod provider that exposes the current search history list.
-/// Call `ref.invalidate(searchHistoryProvider)` after mutations to refresh.
-final searchHistoryProvider = FutureProvider<List<String>>((ref) async {
-  final service = ref.watch(searchHistoryServiceProvider);
-  return service.getHistory();
-});
+class SearchHistoryNotifier extends StateNotifier<List<String>> {
+  SearchHistoryNotifier() : super([]) {
+    _loadHistory();
+  }
 
-/// Manages a capped, de-duplicated search history backed by [SharedPreferences].
-class SearchHistoryService {
-  /// Persists [query] to history.
-  ///
-  /// Rules:
-  /// * Blank / whitespace-only strings are ignored.
-  /// * Duplicate entries (case-insensitive comparison on trimmed value) are
-  ///   moved to the front rather than duplicated.
-  /// * History is capped at [_kMaxHistoryEntries] most-recent entries.
+  static const _key = 'recent_searches';
+
+  Future<void> _loadHistory() async {
+    final prefs = await SharedPreferences.getInstance();
+    state = prefs.getStringList(_key) ?? [];
+  }
+
   Future<void> saveSearch(String query) async {
-    final trimmed = query.trim();
-    if (trimmed.isEmpty) return;
-
+    if (query.trim().isEmpty) return;
     final prefs = await SharedPreferences.getInstance();
-    final history = _readList(prefs);
-
-    // Remove existing duplicate (case-insensitive).
-    history.removeWhere(
-      (entry) => entry.toLowerCase() == trimmed.toLowerCase(),
-    );
-
-    // Prepend the new entry.
-    history.insert(0, trimmed);
-
-    // Enforce cap.
-    if (history.length > _kMaxHistoryEntries) {
-      history.removeRange(_kMaxHistoryEntries, history.length);
-    }
-
-    await prefs.setStringList(_kSearchHistoryKey, history);
+    // Remove if exists to move to top, take max 10
+    final updated = [query, ...state.where((e) => e != query)].take(10).toList();
+    await prefs.setStringList(_key, updated);
+    state = updated;
   }
 
-  /// Returns the stored history list, newest first.
-  /// Returns an empty list when no history has been saved yet.
-  Future<List<String>> getHistory() async {
-    final prefs = await SharedPreferences.getInstance();
-    return _readList(prefs);
-  }
-
-  /// Removes all search history entries.
   Future<void> clearHistory() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_kSearchHistoryKey);
-  }
-
-  // ---------------------------------------------------------------------------
-  // Helpers
-  // ---------------------------------------------------------------------------
-
-  List<String> _readList(SharedPreferences prefs) {
-    return List<String>.from(
-      prefs.getStringList(_kSearchHistoryKey) ?? <String>[],
-    );
+    await prefs.remove(_key);
+    state = [];
   }
 }

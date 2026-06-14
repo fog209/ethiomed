@@ -46,3 +46,6 @@ app.*.map.json
 /build/
 /.dart_tool/
 *.pavg
+
+# fdb session state
+.fdb/
