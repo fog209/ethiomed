@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:ethiomed/features/articles/data/article_repository.dart';
-import 'package:ethiomed/features/articles/presentation/article_detail_screen.dart';
+import '../../articles/data/article_repository.dart';
+import '../../articles/presentation/article_detail_screen.dart';
 import 'search_history_service.dart';
 
 class ArticleSearchScreen extends ConsumerStatefulWidget {
   const ArticleSearchScreen({super.key});
-
   @override
   ConsumerState<ArticleSearchScreen> createState() => _ArticleSearchScreenState();
 }
@@ -14,12 +13,9 @@ class ArticleSearchScreen extends ConsumerStatefulWidget {
 class _ArticleSearchScreenState extends ConsumerState<ArticleSearchScreen> {
   final TextEditingController _controller = TextEditingController();
   String _query = '';
+  String? _selectedCategory;
 
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
+  final List<String> _categories = ['Cardiology', 'Pulmonology', 'Infectious Diseases', 'Gastroenterology', 'Neurology', 'Nephrology', 'Endocrinology'];
 
   @override
   Widget build(BuildContext context) {
@@ -29,70 +25,62 @@ class _ArticleSearchScreenState extends ConsumerState<ArticleSearchScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color(0xFF1A237E),
-        foregroundColor: const Color(0xFFFFB300),
         title: TextField(
           controller: _controller,
-          autofocus: true,
           style: const TextStyle(color: Colors.white),
-          decoration: const InputDecoration(
-            hintText: 'Search diseases...',
-            hintStyle: TextStyle(color: Colors.white60),
-            border: InputBorder.none,
-          ),
-          onChanged: (value) => setState(() => _query = value.toLowerCase()),
+          decoration: const InputDecoration(hintText: 'Search WardReady...', hintStyle: TextStyle(color: Colors.white60), border: InputBorder.none),
+          onChanged: (v) => setState(() => _query = v.toLowerCase()),
         ),
       ),
       body: Column(
         children: [
-          // Show history only when query is empty
-          if (_query.isEmpty && history.isNotEmpty) ...[
-            const Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Text("Recent Searches", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
+          // 1. CHIPS WITH UNCLICK LOGIC
+          SizedBox(
+            height: 50,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              children: _categories.map((cat) => Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                child: ChoiceChip(
+                  label: Text(cat),
+                  selected: _selectedCategory == cat,
+                  onSelected: (selected) => setState(() => _selectedCategory = selected ? cat : null),
+                ),
+              )).toList(),
             ),
-            ...history.map((h) => ListTile(
-                  leading: const Icon(Icons.history, color: Colors.grey),
-                  title: Text(h),
-                  onTap: () {
-                    setState(() {
-                      _controller.text = h;
-                      _query = h.toLowerCase();
-                    });
-                  },
-                )),
-          ],
+          ),
+          // 2. HISTORY OR RESULTS
           Expanded(
-            child: articlesAsync.when(
-              data: (articles) {
-                final filtered = articles.where((a) => a.title.toLowerCase().contains(_query)).toList();
-
-                if (_query.isNotEmpty && filtered.isEmpty) {
-                  return const Center(child: Text("No results found."));
-                }
-
-                return ListView.builder(
-                  itemCount: filtered.length,
-                  itemBuilder: (context, index) {
-                    final article = filtered[index];
-                    return ListTile(
-                      leading: const Icon(Icons.search, color: Color(0xFF1A237E)),
-                      title: Text(article.title),
-                      subtitle: Text(article.category ?? ''),
-                      onTap: () {
-                        // Save to history when an article is tapped
-                        ref.read(searchHistoryProvider.notifier).saveSearch(article.title);
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => ArticleDetailScreen(article: article)),
-                        );
-                      },
-                    );
-                  },
-                );
-              },
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (err, st) => Center(child: Text('Error: $err')),
-            ),
+            child: _query.isEmpty && history.isNotEmpty
+                ? ListView(children: [
+                    const ListTile(title: Text("Recent Searches", style: TextStyle(fontWeight: FontWeight.bold))),
+                    ...history.map((h) => ListTile(
+                          leading: const Icon(Icons.history),
+                          title: Text(h),
+                          onTap: () => setState(() { _controller.text = h; _query = h.toLowerCase(); }),
+                        ))
+                  ])
+                : articlesAsync.when(
+                    data: (articles) {
+                      final filtered = articles.where((a) {
+                        final mQuery = a.title.toLowerCase().contains(_query);
+                        final mCat = _selectedCategory == null || a.category == _selectedCategory;
+                        return mQuery && mCat;
+                      }).toList();
+                      return ListView.builder(
+                        itemCount: filtered.length,
+                        itemBuilder: (c, i) => ListTile(
+                          title: Text(filtered[i].title),
+                          onTap: () {
+                            ref.read(searchHistoryProvider.notifier).saveSearch(filtered[i].title);
+                            Navigator.push(context, MaterialPageRoute(builder: (c) => ArticleDetailScreen(article: filtered[i])));
+                          },
+                        ),
+                      );
+                    },
+                    loading: () => const Center(child: CircularProgressIndicator()),
+                    error: (e, s) => Center(child: Text('Error: $e')),
+                  ),
           ),
         ],
       ),

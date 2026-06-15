@@ -1,35 +1,29 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-// This provider manages the list of recent search strings
-final searchHistoryProvider = StateNotifierProvider<SearchHistoryNotifier, List<String>>((ref) {
-  return SearchHistoryNotifier();
-});
+final searchHistoryProvider = StateNotifierProvider<SearchHistoryNotifier, List<String>>((ref) => SearchHistoryNotifier());
 
 class SearchHistoryNotifier extends StateNotifier<List<String>> {
-  SearchHistoryNotifier() : super([]) {
-    _loadHistory();
-  }
-
+  SearchHistoryNotifier() : super([]) { _load(); }
   static const _key = 'recent_searches';
 
-  Future<void> _loadHistory() async {
-    final prefs = await SharedPreferences.getInstance();
-    state = prefs.getStringList(_key) ?? [];
+  Future<void> _load() async {
+    final p = await SharedPreferences.getInstance();
+    state = p.getStringList(_key) ?? [];
   }
 
-  Future<void> saveSearch(String query) async {
-    if (query.trim().isEmpty) return;
-    final prefs = await SharedPreferences.getInstance();
-    // Remove if exists to move to top, take max 10
-    final updated = [query, ...state.where((e) => e != query)].take(10).toList();
-    await prefs.setStringList(_key, updated);
+  Future<void> saveSearch(String q) async {
+    final term = q.trim();
+    if (term.isEmpty) return;
+    final p = await SharedPreferences.getInstance();
+    final updated = [term, ...state.where((e) => e.toLowerCase() != term.toLowerCase())].take(10).toList();
+    await p.setStringList(_key, updated);
     state = updated;
   }
 
   Future<void> clearHistory() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_key);
+    final p = await SharedPreferences.getInstance();
+    await p.remove(_key);
     state = [];
   }
 }
