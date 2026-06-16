@@ -118,13 +118,17 @@ class ArticleDetailScreen extends ConsumerWidget {
               sections['clinicalFeatures'],
               Icons.list_alt,
             ),
+            _buildRedFlagsSection(sections),
             _buildSection('Diagnosis', sections['diagnosis'], Icons.search),
+            _buildApproachSection(sections),
             _buildSection('Treatment', sections['treatment'], Icons.medication),
+            _buildContraindicationsSection(sections),
             _buildSection(
               'Complications',
               sections['complications'],
               Icons.warning_amber_rounded,
             ),
+            _buildClinicalPearlsSection(sections),
             _buildEthiopianContextSection(sections),
             _buildMnemonicsSection(sections),
 
@@ -207,6 +211,70 @@ class ArticleDetailScreen extends ConsumerWidget {
     );
   }
 
+  Widget _buildRedFlagsSection(Map<String, Object?> sections) {
+    final redFlags = _markdownContent(sections['redFlags']);
+    if (redFlags == null) {
+      return const SizedBox.shrink();
+    }
+
+    return _buildMarkdownExpansionTile(
+      title: 'Red Flags',
+      content: redFlags,
+      icon: Icons.warning_rounded,
+      initiallyExpanded: true,
+      backgroundColor: const Color(0xFFFFEBEE),
+      borderColor: const Color(0xFFD32F2F),
+    );
+  }
+
+  Widget _buildApproachSection(Map<String, Object?> sections) {
+    final approach = _markdownContent(sections['approach']);
+    if (approach == null) {
+      return const SizedBox.shrink();
+    }
+
+    return _buildMarkdownExpansionTile(
+      title: 'Approach',
+      content: approach,
+      icon: Icons.format_list_numbered,
+      initiallyExpanded: true,
+      backgroundColor: const Color(0xFFE3F2FD),
+      borderColor: const Color(0xFF1976D2),
+    );
+  }
+
+  Widget _buildContraindicationsSection(Map<String, Object?> sections) {
+    final contraindications = _markdownContent(sections['contraindications']);
+    if (contraindications == null) {
+      return const SizedBox.shrink();
+    }
+
+    return _buildMarkdownExpansionTile(
+      title: 'Contraindications',
+      content: contraindications,
+      icon: Icons.report_problem_outlined,
+      initiallyExpanded: false,
+      backgroundColor: const Color(0xFFFFF3E0),
+      borderColor: const Color(0xFFF57C00),
+    );
+  }
+
+  Widget _buildClinicalPearlsSection(Map<String, Object?> sections) {
+    final clinicalPearls = _markdownContent(sections['clinicalPearls']);
+    if (clinicalPearls == null) {
+      return const SizedBox.shrink();
+    }
+
+    return _buildMarkdownExpansionTile(
+      title: 'Clinical Pearls',
+      content: clinicalPearls,
+      icon: Icons.lightbulb_outline,
+      initiallyExpanded: false,
+      backgroundColor: const Color(0xFFFFF8E1),
+      borderColor: const Color(0xFFF9A825),
+    );
+  }
+
   Widget _buildMnemonicsSection(Map<String, Object?> sections) {
     final mnemonics = _optionalString(sections['mnemonics']);
     if (mnemonics == null || mnemonics.trim().isEmpty) {
@@ -275,6 +343,34 @@ class ArticleDetailScreen extends ConsumerWidget {
     }
 
     return const <String, Object?>{};
+  }
+
+  String? _markdownContent(Object? value) {
+    if (value is String) {
+      if (value.trim().isEmpty) {
+        return null;
+      }
+      return value;
+    }
+
+    if (value is List<Object?>) {
+      final items = value
+          .whereType<String>()
+          .where((item) => item.trim().isNotEmpty)
+          .toList(growable: false);
+      if (items.isEmpty) {
+        return null;
+      }
+      return items
+          .asMap()
+          .entries
+          .map((entry) {
+            return '${entry.key + 1}. ${entry.value}';
+          })
+          .join('\n');
+    }
+
+    return null;
   }
 
   String? _optionalString(Object? value) {
