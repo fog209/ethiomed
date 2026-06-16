@@ -1,47 +1,103 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../data/subscription_repository.dart';
 
 class PaywallScreen extends ConsumerWidget {
   const PaywallScreen({super.key});
 
+  // CHANGE THIS TO YOUR REAL TELEBIRR NUMBER
+  static const String telebirrNumber = "0911223344"; 
+  static const String telegramAdmin = "https://t.me/WardReadyAdmin";
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      backgroundColor: const Color(0xFF1A237E),
-      body: Padding(
-        padding: const EdgeInsets.all(30.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.lock_outline, size: 100, color: Color(0xFFFFB300)),
-            const SizedBox(height: 20),
-            const Text(
-              "Premium Access Required",
-              style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 20),
-            const Text(
-              "To unlock 200+ articles and offline mode, please pay 500 ETB via Telebirr.",
-              textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.white70, fontSize: 16),
-            ),
-            const SizedBox(height: 10),
-            const Text(
-              "Telebirr: 0911 22 33 44",
-              style: TextStyle(color: Color(0xFFFFB300), fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 40),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFFFB300),
-                foregroundColor: const Color(0xFF1A237E),
-                minimumSize: const Size(double.infinity, 50),
+      backgroundColor: const Color(0xFF1A237E), // Navy
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(30.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.stars_rounded, size: 100, color: Color(0xFFFFB300)),
+              const SizedBox(height: 20),
+              const Text(
+                "WardReady Premium",
+                style: TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold),
               ),
-              onPressed: () => ref.refresh(isSubscribedProvider),
-              child: const Text("I HAVE PAID - REFRESH"),
-            ),
-          ],
+              const SizedBox(height: 10),
+              const Text(
+                "Unlock 267+ clinical articles, diagrams, and offline access.",
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.white70, fontSize: 16),
+              ),
+              const SizedBox(height: 30),
+              
+              // PAYMENT INSTRUCTIONS CARD
+              Card(
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                child: Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Column(
+                    children: [
+                      const Text("HOW TO ACTIVATE", style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF1A237E))),
+                      const SizedBox(height: 15),
+                      const Text("1. Pay 500 ETB via Telebirr to:", textAlign: TextAlign.center),
+                      const SizedBox(height: 5),
+                      SelectableText(
+                        telebirrNumber,
+                        style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF1A237E)),
+                      ),
+                      const SizedBox(height: 15),
+                      ElevatedButton.icon(
+                        icon: const Icon(Icons.copy),
+                        label: const Text("Copy Number"),
+                        onPressed: () {
+                          Clipboard.setData(const ClipboardData(text: telebirrNumber));
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Number copied to clipboard!")));
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              
+              const SizedBox(height: 20),
+              
+              // TELEGRAM BUTTON
+              OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: const Color(0xFFFFB300),
+                  side: const BorderSide(color: Color(0xFFFFB300)),
+                  minimumSize: const Size(double.infinity, 50),
+                ),
+                icon: const Icon(Icons.send),
+                label: const Text("SEND PAYMENT SCREENSHOT (TELEGRAM)"),
+                onPressed: () async {
+                  final url = Uri.parse(telegramAdmin);
+                  if (await canLaunchUrl(url)) {
+                    await launchUrl(url, mode: LaunchMode.externalApplication);
+                  }
+                },
+              ),
+              
+              const SizedBox(height: 40),
+              
+              // REFRESH BUTTON
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFFFB300),
+                  foregroundColor: const Color(0xFF1A237E),
+                  minimumSize: const Size(double.infinity, 55),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                onPressed: () => ref.refresh(isSubscribedProvider),
+                child: const Text("I HAVE PAID - CHECK STATUS", style: TextStyle(fontWeight: FontWeight.bold)),
+              ),
+            ],
+          ),
         ),
       ),
     );

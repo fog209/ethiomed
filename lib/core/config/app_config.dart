@@ -1,4 +1,6 @@
 class AppConfig {
+  static const String chapaPublicKey = 'CHAPUBK_TEST-bzVPZFrR882oqCj9porT9A6qQ1BrLIhg';
+
   static const String appTitle = 'WardReady';
   
   static const String supabaseUrl = 'https://kxcdzlyirdonkipcymvc.supabase.co';
