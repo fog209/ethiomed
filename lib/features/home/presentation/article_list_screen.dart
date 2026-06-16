@@ -20,7 +20,13 @@ class ArticleListScreen extends ConsumerWidget {
       body: articlesAsync.when(
         data: (articles) {
           // Robust filter: handles trim and case
-          final filtered = articles.where((a) => a.category?.trim().toLowerCase() == category.trim().toLowerCase()).toList();
+          final filtered = articles
+              .where(
+                (a) =>
+                    a.category?.trim().toLowerCase() ==
+                    category.trim().toLowerCase(),
+              )
+              .toList();
 
           // RESTORED BOOK ICON
           if (filtered.isEmpty) {
@@ -28,9 +34,16 @@ class ArticleListScreen extends ConsumerWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.menu_book_rounded, size: 80, color: const Color(0xFF1A237E).withOpacity(0.2)),
+                  Icon(
+                    Icons.menu_book_rounded,
+                    size: 80,
+                    color: const Color(0xFF1A237E).withValues(alpha: 0.2),
+                  ),
                   const SizedBox(height: 16),
-                  Text('No articles in $category yet', style: const TextStyle(color: Colors.grey)),
+                  Text(
+                    'No articles in $category yet',
+                    style: const TextStyle(color: Colors.grey),
+                  ),
                 ],
               ),
             );
@@ -44,9 +57,17 @@ class ArticleListScreen extends ConsumerWidget {
               return Card(
                 margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: ListTile(
-                  title: Text(article.title, style: const TextStyle(fontWeight: FontWeight.bold)),
+                  title: Text(
+                    article.title,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
                   trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (c) => ArticleDetailScreen(article: article))),
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (c) => ArticleDetailScreen(article: article),
+                    ),
+                  ),
                 ),
               );
             },
