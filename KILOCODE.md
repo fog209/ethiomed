@@ -1,5 +1,32 @@
 # KILOCODE.md — KiloCode Project Context
 
+## Environment
+- OS: Windows 11
+- Flutter: 3.44.2 (Dart SDK 3.12.1+)
+- Android SDK: installed via Android Studio
+- Java JDK: required for Android builds
+- Git: required for version control
+- Device: Nex N2 Pro (ID: SOAYYD7HEE65QKY5) via USB
+
+## Required Tools — verify all are working
+- flutter doctor -v (must show no critical errors)
+- flutter analyze (must show zero errors)
+- adb devices (must show SOAYYD7HEE65QKY5)
+- dart run build_runner build --delete-conflicting-outputs (regenerates *.g.dart)
+- git status (must show clean working tree before every task)
+
+## Before Every KiloCode Session
+1. git status — confirm clean tree
+2. flutter analyze — confirm zero errors
+3. adb devices — confirm device connected
+4. Then give KiloCode the task
+
+## After Every KiloCode Session
+1. flutter analyze — must be zero errors
+2. flutter run -d SOAYYD7HEE65QKY5 — test on device
+3. git add . && git commit -m "feat: what was done"
+4. git push origin master
+
 ## App Identity
 - Name: WardReady (was EthioMed)
 - Type: Offline-first Flutter Android APK
@@ -48,7 +75,7 @@ lib/
     sync/        → sync_service.dart
     subscription/→ subscription_service.dart
 
-## Article Model— 14 Fields in content JSONB
+## Article Model — 14 Fields in content JSONB
 definition, epidemiology, etiology, pathophysiology,
 clinicalFeatures, redFlags, approach, diagnosis,
 treatment, contraindications, complications,
@@ -81,8 +108,14 @@ clinicalPearls, ethiopianContext, mnemonics
 - Run on device: flutter run -d SOAYYD7HEE65QKY5
 - Commit after every working change: git add . && git commit -m "feat: ..."
 
+## Diagnostics — run these before asking KiloCode about any bug
+git status
+flutter analyze
+adb devices
+flutter doctor -v
+
 ## Critical Deadlines
-- June 23: Nex N2 Pro free tier ends — must have APK built before this
+- June 23: Nex N2 Pro free tier ends — APK must be built before this
 - June 27: Distribution target
 
 ## Do Not Touch
