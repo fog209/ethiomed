@@ -44,8 +44,27 @@ class ArticleRepository {
     }
   }
 
-  Stream<List<ArticleLocal>> watchLocalArticles() {
-    return _db.select(_db.articles).watch();
+  Stream<List<ArticleLocal>> watchLocalArticles({
+    int limit = 0,
+    int offset = 0,
+    String? category,
+  }) {
+    final hasLimit = limit > 0;
+    final safeLimit = hasLimit ? limit : _articlesPageSize;
+    final safeOffset = offset < 0 ? 0 : offset;
+    final query = _db.select(_db.articles)
+      ..orderBy([(table) => OrderingTerm.asc(table.title)]);
+
+    if (category != null && category.trim().isNotEmpty) {
+      query.where((table) => table.category.equals(category.trim()));
+    }
+
+    if (hasLimit) {
+      final limitedQuery = query.limit(safeLimit, offset: safeOffset);
+      return limitedQuery.watch();
+    }
+
+    return query.watch();
   }
 
   Future<List<ArticleLocal>> fetchArticlesPage({
@@ -72,6 +91,44 @@ final articleRepositoryProvider = Provider<ArticleRepository>((ref) {
 final allArticlesProvider = StreamProvider<List<ArticleLocal>>((ref) {
   return ref.watch(articleRepositoryProvider).watchLocalArticles();
 });
+
+class ArticlePageQuery {
+  const ArticlePageQuery({
+    required this.limit,
+    required this.offset,
+    this.category,
+    required this.requestId,
+  });
+
+  final int limit;
+  final int offset;
+  final String? category;
+  final int requestId;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        other is ArticlePageQuery &&
+            other.limit == limit &&
+            other.offset == offset &&
+            other.category == category &&
+            other.requestId == requestId;
+  }
+
+  @override
+  int get hashCode => Object.hash(limit, offset, category, requestId);
+}
+
+final paginatedArticlesProvider =
+    StreamProvider.family<List<ArticleLocal>, ArticlePageQuery>((ref, query) {
+      return ref
+          .watch(articleRepositoryProvider)
+          .watchLocalArticles(
+            limit: query.limit,
+            offset: query.offset,
+            category: query.category,
+          );
+    });
 
 enum ArticleListStatus { initial, loading, ready, error }
 

@@ -8,6 +8,22 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/database/app_database.dart';
 
+class _ClinicalSectionConfig {
+  const _ClinicalSectionConfig({
+    required this.title,
+    required this.icon,
+    required this.backgroundColor,
+    required this.borderColor,
+    this.initiallyExpanded = false,
+  });
+
+  final String title;
+  final IconData icon;
+  final Color backgroundColor;
+  final Color borderColor;
+  final bool initiallyExpanded;
+}
+
 class ArticleDetailScreen extends ConsumerWidget {
   final ArticleLocal article;
 
@@ -97,40 +113,7 @@ class ArticleDetailScreen extends ConsumerWidget {
               ),
             ),
 
-            _buildSection(
-              'Definition',
-              sections['definition'],
-              Icons.info_outline,
-            ),
-            _buildSection(
-              'Epidemiology',
-              sections['epidemiology'],
-              Icons.public,
-            ),
-            _buildSection('Etiology', sections['etiology'], Icons.biotech),
-            _buildSection(
-              'Pathophysiology',
-              sections['pathophysiology'],
-              Icons.psychology_outlined,
-            ),
-            _buildSection(
-              'Clinical Features',
-              sections['clinicalFeatures'],
-              Icons.list_alt,
-            ),
-            _buildRedFlagsSection(sections),
-            _buildSection('Diagnosis', sections['diagnosis'], Icons.search),
-            _buildApproachSection(sections),
-            _buildSection('Treatment', sections['treatment'], Icons.medication),
-            _buildContraindicationsSection(sections),
-            _buildSection(
-              'Complications',
-              sections['complications'],
-              Icons.warning_amber_rounded,
-            ),
-            _buildClinicalPearlsSection(sections),
-            _buildEthiopianContextSection(sections),
-            _buildMnemonicsSection(sections),
+            ..._buildClinicalSections(sections),
 
             const SizedBox(height: 20),
 
@@ -161,134 +144,151 @@ class ArticleDetailScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildSection(String title, Object? content, IconData icon) {
-    if (content == null || content.toString().isEmpty) {
-      return const SizedBox.shrink();
-    }
+  static const _clinicalSectionOrder = <String>[
+    'definition',
+    'epidemiology',
+    'etiology',
+    'pathophysiology',
+    'clinicalFeatures',
+    'redFlags',
+    'approach',
+    'diagnosis',
+    'treatment',
+    'contraindications',
+    'dontMiss',
+    'complications',
+    'clinicalPearls',
+    'ethiopianContext',
+    'mnemonics',
+    'examTraps',
+  ];
 
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        side: BorderSide(color: Colors.grey.shade300),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      margin: const EdgeInsets.only(bottom: 12),
-      child: ExpansionTile(
-        leading: Icon(icon, color: const Color(0xFF1A237E)),
-        title: Text(
-          title,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF1A237E),
-          ),
-        ),
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              content.toString(),
-              style: const TextStyle(fontSize: 16, height: 1.5),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildEthiopianContextSection(Map<String, Object?> sections) {
-    final ethiopianContext = _optionalString(sections['ethiopianContext']);
-    if (ethiopianContext == null || ethiopianContext.trim().isEmpty) {
-      return const SizedBox.shrink();
-    }
-
-    return _buildMarkdownExpansionTile(
-      title: '🇪🇹 Ethiopian Clinical Pearl',
-      content: ethiopianContext,
-      icon: Icons.local_hospital_outlined,
-      initiallyExpanded: true,
-      backgroundColor: const Color(0xFFFFF8E1),
-      borderColor: const Color(0xFFF9A825),
-    );
-  }
-
-  Widget _buildRedFlagsSection(Map<String, Object?> sections) {
-    final redFlags = _markdownContent(sections['redFlags']);
-    if (redFlags == null) {
-      return const SizedBox.shrink();
-    }
-
-    return _buildMarkdownExpansionTile(
-      title: 'Red Flags',
-      content: redFlags,
+  static const _clinicalSections = <String, _ClinicalSectionConfig>{
+    'definition': _ClinicalSectionConfig(
+      title: '📝 Definition',
+      icon: Icons.info_outline,
+      backgroundColor: Color(0xFFE8EAF6),
+      borderColor: Color(0xFF1A237E),
+    ),
+    'epidemiology': _ClinicalSectionConfig(
+      title: '🌍 Epidemiology',
+      icon: Icons.public,
+      backgroundColor: Color(0xFFE3F2FD),
+      borderColor: Color(0xFF1976D2),
+    ),
+    'etiology': _ClinicalSectionConfig(
+      title: '🧬 Etiology',
+      icon: Icons.biotech,
+      backgroundColor: Color(0xFFE8F5E9),
+      borderColor: Color(0xFF4CAF50),
+    ),
+    'pathophysiology': _ClinicalSectionConfig(
+      title: '🔬 Pathophysiology',
+      icon: Icons.psychology_outlined,
+      backgroundColor: Color(0xFFE3F2FD),
+      borderColor: Color(0xFF1976D2),
+    ),
+    'clinicalFeatures': _ClinicalSectionConfig(
+      title: '🩺 Clinical Features',
+      icon: Icons.list_alt,
+      backgroundColor: Color(0xFFE8F5E9),
+      borderColor: Color(0xFF4CAF50),
+    ),
+    'redFlags': _ClinicalSectionConfig(
+      title: '🚩 Red Flags',
       icon: Icons.warning_rounded,
+      backgroundColor: Color(0xFFFFEBEE),
+      borderColor: Color(0xFFD32F2F),
       initiallyExpanded: true,
-      backgroundColor: const Color(0xFFFFEBEE),
-      borderColor: const Color(0xFFD32F2F),
-    );
-  }
-
-  Widget _buildApproachSection(Map<String, Object?> sections) {
-    final approach = _markdownContent(sections['approach']);
-    if (approach == null) {
-      return const SizedBox.shrink();
-    }
-
-    return _buildMarkdownExpansionTile(
-      title: 'Approach',
-      content: approach,
+    ),
+    'approach': _ClinicalSectionConfig(
+      title: '🧭 Approach',
       icon: Icons.format_list_numbered,
+      backgroundColor: Color(0xFFE3F2FD),
+      borderColor: Color(0xFF1976D2),
       initiallyExpanded: true,
-      backgroundColor: const Color(0xFFE3F2FD),
-      borderColor: const Color(0xFF1976D2),
-    );
-  }
-
-  Widget _buildContraindicationsSection(Map<String, Object?> sections) {
-    final contraindications = _markdownContent(sections['contraindications']);
-    if (contraindications == null) {
-      return const SizedBox.shrink();
-    }
-
-    return _buildMarkdownExpansionTile(
-      title: 'Contraindications',
-      content: contraindications,
+    ),
+    'diagnosis': _ClinicalSectionConfig(
+      title: '🔎 Diagnosis',
+      icon: Icons.search,
+      backgroundColor: Color(0xFFE8EAF6),
+      borderColor: Color(0xFF1A237E),
+    ),
+    'treatment': _ClinicalSectionConfig(
+      title: '💊 Treatment',
+      icon: Icons.medication,
+      backgroundColor: Color(0xFFE8F5E9),
+      borderColor: Color(0xFF4CAF50),
+    ),
+    'contraindications': _ClinicalSectionConfig(
+      title: '🛑 Contraindications',
       icon: Icons.report_problem_outlined,
-      initiallyExpanded: false,
-      backgroundColor: const Color(0xFFFFF3E0),
-      borderColor: const Color(0xFFF57C00),
-    );
-  }
-
-  Widget _buildClinicalPearlsSection(Map<String, Object?> sections) {
-    final clinicalPearls = _markdownContent(sections['clinicalPearls']);
-    if (clinicalPearls == null) {
-      return const SizedBox.shrink();
-    }
-
-    return _buildMarkdownExpansionTile(
-      title: 'Clinical Pearls',
-      content: clinicalPearls,
+      backgroundColor: Color(0xFFFFF3E0),
+      borderColor: Color(0xFFF57C00),
+    ),
+    'dontMiss': _ClinicalSectionConfig(
+      title: "🚨 Don't Miss",
+      icon: Icons.priority_high,
+      backgroundColor: Color(0xFFFFF8E1),
+      borderColor: Color(0xFFF9A825),
+    ),
+    'complications': _ClinicalSectionConfig(
+      title: '⚠️ Complications',
+      icon: Icons.warning_amber_rounded,
+      backgroundColor: Color(0xFFFFF3E0),
+      borderColor: Color(0xFFF57C00),
+    ),
+    'clinicalPearls': _ClinicalSectionConfig(
+      title: '💡 Clinical Pearls',
       icon: Icons.lightbulb_outline,
-      initiallyExpanded: false,
-      backgroundColor: const Color(0xFFFFF8E1),
-      borderColor: const Color(0xFFF9A825),
-    );
-  }
-
-  Widget _buildMnemonicsSection(Map<String, Object?> sections) {
-    final mnemonics = _optionalString(sections['mnemonics']);
-    if (mnemonics == null || mnemonics.trim().isEmpty) {
-      return const SizedBox.shrink();
-    }
-
-    return _buildMarkdownExpansionTile(
+      backgroundColor: Color(0xFFFFF8E1),
+      borderColor: Color(0xFFF9A825),
+    ),
+    'ethiopianContext': _ClinicalSectionConfig(
+      title: '🇪🇹 Ethiopian Clinical Pearl',
+      icon: Icons.local_hospital_outlined,
+      backgroundColor: Color(0xFFFFF8E1),
+      borderColor: Color(0xFFF9A825),
+      initiallyExpanded: true,
+    ),
+    'mnemonics': _ClinicalSectionConfig(
       title: '🧠 Mnemonics',
-      content: mnemonics,
       icon: Icons.auto_awesome_mosaic_outlined,
-      initiallyExpanded: false,
-      backgroundColor: const Color(0xFFE8F5E9),
-      borderColor: const Color(0xFF4CAF50),
-    );
+      backgroundColor: Color(0xFFE8F5E9),
+      borderColor: Color(0xFF4CAF50),
+    ),
+    'examTraps': _ClinicalSectionConfig(
+      title: '🪤 Exam Traps',
+      icon: Icons.quiz_outlined,
+      backgroundColor: Color(0xFFEDE7F6),
+      borderColor: Color(0xFF673AB7),
+    ),
+  };
+
+  List<Widget> _buildClinicalSections(Map<String, Object?> sections) {
+    return _clinicalSectionOrder
+        .map((key) {
+          final config = _clinicalSections[key];
+          if (config == null) {
+            return null;
+          }
+
+          final content = _markdownContent(sections[key]);
+          if (content == null) {
+            return null;
+          }
+
+          return _buildMarkdownExpansionTile(
+            title: config.title,
+            content: content,
+            icon: config.icon,
+            initiallyExpanded: config.initiallyExpanded,
+            backgroundColor: config.backgroundColor,
+            borderColor: config.borderColor,
+          );
+        })
+        .whereType<Widget>()
+        .toList(growable: false);
   }
 
   Widget _buildMarkdownExpansionTile({
@@ -368,14 +368,6 @@ class ArticleDetailScreen extends ConsumerWidget {
             return '${entry.key + 1}. ${entry.value}';
           })
           .join('\n');
-    }
-
-    return null;
-  }
-
-  String? _optionalString(Object? value) {
-    if (value is String) {
-      return value;
     }
 
     return null;
