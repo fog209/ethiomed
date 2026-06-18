@@ -60,11 +60,25 @@ class ArticleRepository {
     }
 
     if (hasLimit) {
-      final limitedQuery = query.limit(safeLimit, offset: safeOffset);
-      return limitedQuery.watch();
+      return (query..limit(safeLimit, offset: safeOffset)).watch();
     }
 
     return query.watch();
+  }
+
+  Future<int> countArticlesInCategory(String category) async {
+    final rows = await _db
+        .customSelect(
+          'SELECT COUNT(*) AS count FROM articles WHERE category = ?',
+          variables: [Variable(category.trim())],
+        )
+        .get();
+
+    if (rows.isEmpty) {
+      return 0;
+    }
+
+    return rows.first.read<int>('count');
   }
 
   Future<List<ArticleLocal>> fetchArticlesPage({
@@ -129,6 +143,13 @@ final paginatedArticlesProvider =
             category: query.category,
           );
     });
+
+final articlesCountInCategoryProvider = FutureProvider.family<int, String>((
+  ref,
+  category,
+) {
+  return ref.watch(articleRepositoryProvider).countArticlesInCategory(category);
+});
 
 enum ArticleListStatus { initial, loading, ready, error }
 

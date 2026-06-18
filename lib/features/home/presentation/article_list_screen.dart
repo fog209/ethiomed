@@ -51,6 +51,10 @@ class _ArticleListScreenState extends ConsumerState<ArticleListScreen> {
     super.dispose();
   }
 
+  void _runAfterBuild(VoidCallback callback) {
+    Future.microtask(callback);
+  }
+
   void _resetPagination() {
     ref.read(articleCurrentCategoryProvider.notifier).state = widget.category;
     ref.read(articleRequestIdProvider.notifier).state =
@@ -65,7 +69,7 @@ class _ArticleListScreenState extends ConsumerState<ArticleListScreen> {
 
   void _onScroll() {
     final position = _scrollController.position;
-    if (position.pixels >= position.maxScrollExtent * 0.9) {
+    if (position.pixels >= position.maxScrollExtent * 0.8) {
       _loadMoreArticles();
     }
   }
@@ -175,6 +179,13 @@ class _ArticleListScreenState extends ConsumerState<ArticleListScreen> {
     final isLoadingMore = ref.watch(articleIsLoadingMoreProvider);
     final hasMore = ref.watch(articleHasMoreProvider);
     final errorMessage = ref.watch(articleErrorMessageProvider);
+    final totalArticlesAsync = ref.watch(
+      articlesCountInCategoryProvider(widget.category),
+    );
+    final totalArticles = totalArticlesAsync.valueOrNull;
+    final hasMoreFromCount = totalArticles == null
+        ? hasMore
+        : loadedArticles.length < totalArticles;
     final paginatedProvider = paginatedArticlesProvider(
       ArticlePageQuery(
         limit: _articlesPageSize,
@@ -197,14 +208,18 @@ class _ArticleListScreenState extends ConsumerState<ArticleListScreen> {
       }
 
       if (next.isLoading && offset > 0) {
-        ref.read(articleIsLoadingMoreProvider.notifier).state = true;
+        _runAfterBuild(() {
+          ref.read(articleIsLoadingMoreProvider.notifier).state = true;
+        });
         return;
       }
 
       if (next.hasError) {
-        ref.read(articleIsLoadingMoreProvider.notifier).state = false;
-        ref.read(articleErrorMessageProvider.notifier).state =
-            'Unable to load articles.';
+        _runAfterBuild(() {
+          ref.read(articleIsLoadingMoreProvider.notifier).state = false;
+          ref.read(articleErrorMessageProvider.notifier).state =
+              'Unable to load articles.';
+        });
         return;
       }
 
@@ -213,15 +228,24 @@ class _ArticleListScreenState extends ConsumerState<ArticleListScreen> {
         final previousArticles = currentOffset == 0
             ? const <ArticleLocal>[]
             : ref.read(articleLoadedArticlesProvider);
+        final loadedCount = currentOffset == 0
+            ? pageArticles.length
+            : previousArticles.length + pageArticles.length;
+        final totalArticles = ref
+            .read(articlesCountInCategoryProvider(widget.category))
+            .valueOrNull;
 
-        ref.read(articleLoadedArticlesProvider.notifier).state = <ArticleLocal>[
-          ...previousArticles,
-          ...pageArticles,
-        ];
-        ref.read(articleHasMoreProvider.notifier).state =
-            pageArticles.length == _articlesPageSize;
-        ref.read(articleIsLoadingMoreProvider.notifier).state = false;
-        ref.read(articleErrorMessageProvider.notifier).state = null;
+        _runAfterBuild(() {
+          ref.read(articleLoadedArticlesProvider.notifier).state =
+              <ArticleLocal>[...previousArticles, ...pageArticles];
+          ref
+              .read(articleHasMoreProvider.notifier)
+              .state = totalArticles == null
+              ? pageArticles.length == _articlesPageSize
+              : loadedCount < totalArticles;
+          ref.read(articleIsLoadingMoreProvider.notifier).state = false;
+          ref.read(articleErrorMessageProvider.notifier).state = null;
+        });
       });
     });
 
@@ -235,7 +259,7 @@ class _ArticleListScreenState extends ConsumerState<ArticleListScreen> {
         data: (_) => _buildArticleList(
           articles: loadedArticles,
           isLoadingMore: isLoadingMore,
-          hasMore: hasMore,
+          hasMore: hasMoreFromCount,
           errorMessage: errorMessage,
         ),
         loading: () {
@@ -243,7 +267,7 @@ class _ArticleListScreenState extends ConsumerState<ArticleListScreen> {
             return _buildArticleList(
               articles: loadedArticles,
               isLoadingMore: true,
-              hasMore: hasMore,
+              hasMore: hasMoreFromCount,
               errorMessage: errorMessage,
             );
           }
@@ -255,7 +279,7 @@ class _ArticleListScreenState extends ConsumerState<ArticleListScreen> {
             return _buildArticleList(
               articles: loadedArticles,
               isLoadingMore: false,
-              hasMore: hasMore,
+              hasMore: hasMoreFromCount,
               errorMessage: 'Unable to load articles.',
             );
           }
