@@ -38,6 +38,27 @@ class $ArticlesTable extends Articles
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _subcategoryMeta = const VerificationMeta(
+    'subcategory',
+  );
+  @override
+  late final GeneratedColumn<String> subcategory = GeneratedColumn<String>(
+    'subcategory',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _slugMeta = const VerificationMeta('slug');
+  @override
+  late final GeneratedColumn<String> slug = GeneratedColumn<String>(
+    'slug',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'),
+  );
   static const VerificationMeta _contentMeta = const VerificationMeta(
     'content',
   );
@@ -76,6 +97,8 @@ class $ArticlesTable extends Articles
     id,
     title,
     category,
+    subcategory,
+    slug,
     content,
     imageUrl,
     videoUrl,
@@ -109,6 +132,21 @@ class $ArticlesTable extends Articles
       context.handle(
         _categoryMeta,
         category.isAcceptableOrUnknown(data['category']!, _categoryMeta),
+      );
+    }
+    if (data.containsKey('subcategory')) {
+      context.handle(
+        _subcategoryMeta,
+        subcategory.isAcceptableOrUnknown(
+          data['subcategory']!,
+          _subcategoryMeta,
+        ),
+      );
+    }
+    if (data.containsKey('slug')) {
+      context.handle(
+        _slugMeta,
+        slug.isAcceptableOrUnknown(data['slug']!, _slugMeta),
       );
     }
     if (data.containsKey('content')) {
@@ -150,6 +188,14 @@ class $ArticlesTable extends Articles
         DriftSqlType.string,
         data['${effectivePrefix}category'],
       ),
+      subcategory: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}subcategory'],
+      ),
+      slug: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}slug'],
+      ),
       content: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}content'],
@@ -175,6 +221,8 @@ class ArticleLocal extends DataClass implements Insertable<ArticleLocal> {
   final String id;
   final String title;
   final String? category;
+  final String? subcategory;
+  final String? slug;
   final String? content;
   final String? imageUrl;
   final String? videoUrl;
@@ -182,6 +230,8 @@ class ArticleLocal extends DataClass implements Insertable<ArticleLocal> {
     required this.id,
     required this.title,
     this.category,
+    this.subcategory,
+    this.slug,
     this.content,
     this.imageUrl,
     this.videoUrl,
@@ -193,6 +243,12 @@ class ArticleLocal extends DataClass implements Insertable<ArticleLocal> {
     map['title'] = Variable<String>(title);
     if (!nullToAbsent || category != null) {
       map['category'] = Variable<String>(category);
+    }
+    if (!nullToAbsent || subcategory != null) {
+      map['subcategory'] = Variable<String>(subcategory);
+    }
+    if (!nullToAbsent || slug != null) {
+      map['slug'] = Variable<String>(slug);
     }
     if (!nullToAbsent || content != null) {
       map['content'] = Variable<String>(content);
@@ -213,6 +269,10 @@ class ArticleLocal extends DataClass implements Insertable<ArticleLocal> {
       category: category == null && nullToAbsent
           ? const Value.absent()
           : Value(category),
+      subcategory: subcategory == null && nullToAbsent
+          ? const Value.absent()
+          : Value(subcategory),
+      slug: slug == null && nullToAbsent ? const Value.absent() : Value(slug),
       content: content == null && nullToAbsent
           ? const Value.absent()
           : Value(content),
@@ -234,6 +294,8 @@ class ArticleLocal extends DataClass implements Insertable<ArticleLocal> {
       id: serializer.fromJson<String>(json['id']),
       title: serializer.fromJson<String>(json['title']),
       category: serializer.fromJson<String?>(json['category']),
+      subcategory: serializer.fromJson<String?>(json['subcategory']),
+      slug: serializer.fromJson<String?>(json['slug']),
       content: serializer.fromJson<String?>(json['content']),
       imageUrl: serializer.fromJson<String?>(json['imageUrl']),
       videoUrl: serializer.fromJson<String?>(json['videoUrl']),
@@ -246,6 +308,8 @@ class ArticleLocal extends DataClass implements Insertable<ArticleLocal> {
       'id': serializer.toJson<String>(id),
       'title': serializer.toJson<String>(title),
       'category': serializer.toJson<String?>(category),
+      'subcategory': serializer.toJson<String?>(subcategory),
+      'slug': serializer.toJson<String?>(slug),
       'content': serializer.toJson<String?>(content),
       'imageUrl': serializer.toJson<String?>(imageUrl),
       'videoUrl': serializer.toJson<String?>(videoUrl),
@@ -256,6 +320,8 @@ class ArticleLocal extends DataClass implements Insertable<ArticleLocal> {
     String? id,
     String? title,
     Value<String?> category = const Value.absent(),
+    Value<String?> subcategory = const Value.absent(),
+    Value<String?> slug = const Value.absent(),
     Value<String?> content = const Value.absent(),
     Value<String?> imageUrl = const Value.absent(),
     Value<String?> videoUrl = const Value.absent(),
@@ -263,6 +329,8 @@ class ArticleLocal extends DataClass implements Insertable<ArticleLocal> {
     id: id ?? this.id,
     title: title ?? this.title,
     category: category.present ? category.value : this.category,
+    subcategory: subcategory.present ? subcategory.value : this.subcategory,
+    slug: slug.present ? slug.value : this.slug,
     content: content.present ? content.value : this.content,
     imageUrl: imageUrl.present ? imageUrl.value : this.imageUrl,
     videoUrl: videoUrl.present ? videoUrl.value : this.videoUrl,
@@ -272,6 +340,10 @@ class ArticleLocal extends DataClass implements Insertable<ArticleLocal> {
       id: data.id.present ? data.id.value : this.id,
       title: data.title.present ? data.title.value : this.title,
       category: data.category.present ? data.category.value : this.category,
+      subcategory: data.subcategory.present
+          ? data.subcategory.value
+          : this.subcategory,
+      slug: data.slug.present ? data.slug.value : this.slug,
       content: data.content.present ? data.content.value : this.content,
       imageUrl: data.imageUrl.present ? data.imageUrl.value : this.imageUrl,
       videoUrl: data.videoUrl.present ? data.videoUrl.value : this.videoUrl,
@@ -284,6 +356,8 @@ class ArticleLocal extends DataClass implements Insertable<ArticleLocal> {
           ..write('id: $id, ')
           ..write('title: $title, ')
           ..write('category: $category, ')
+          ..write('subcategory: $subcategory, ')
+          ..write('slug: $slug, ')
           ..write('content: $content, ')
           ..write('imageUrl: $imageUrl, ')
           ..write('videoUrl: $videoUrl')
@@ -292,8 +366,16 @@ class ArticleLocal extends DataClass implements Insertable<ArticleLocal> {
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, title, category, content, imageUrl, videoUrl);
+  int get hashCode => Object.hash(
+    id,
+    title,
+    category,
+    subcategory,
+    slug,
+    content,
+    imageUrl,
+    videoUrl,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -301,6 +383,8 @@ class ArticleLocal extends DataClass implements Insertable<ArticleLocal> {
           other.id == this.id &&
           other.title == this.title &&
           other.category == this.category &&
+          other.subcategory == this.subcategory &&
+          other.slug == this.slug &&
           other.content == this.content &&
           other.imageUrl == this.imageUrl &&
           other.videoUrl == this.videoUrl);
@@ -310,6 +394,8 @@ class ArticlesCompanion extends UpdateCompanion<ArticleLocal> {
   final Value<String> id;
   final Value<String> title;
   final Value<String?> category;
+  final Value<String?> subcategory;
+  final Value<String?> slug;
   final Value<String?> content;
   final Value<String?> imageUrl;
   final Value<String?> videoUrl;
@@ -318,6 +404,8 @@ class ArticlesCompanion extends UpdateCompanion<ArticleLocal> {
     this.id = const Value.absent(),
     this.title = const Value.absent(),
     this.category = const Value.absent(),
+    this.subcategory = const Value.absent(),
+    this.slug = const Value.absent(),
     this.content = const Value.absent(),
     this.imageUrl = const Value.absent(),
     this.videoUrl = const Value.absent(),
@@ -327,6 +415,8 @@ class ArticlesCompanion extends UpdateCompanion<ArticleLocal> {
     required String id,
     required String title,
     this.category = const Value.absent(),
+    this.subcategory = const Value.absent(),
+    this.slug = const Value.absent(),
     this.content = const Value.absent(),
     this.imageUrl = const Value.absent(),
     this.videoUrl = const Value.absent(),
@@ -337,6 +427,8 @@ class ArticlesCompanion extends UpdateCompanion<ArticleLocal> {
     Expression<String>? id,
     Expression<String>? title,
     Expression<String>? category,
+    Expression<String>? subcategory,
+    Expression<String>? slug,
     Expression<String>? content,
     Expression<String>? imageUrl,
     Expression<String>? videoUrl,
@@ -346,6 +438,8 @@ class ArticlesCompanion extends UpdateCompanion<ArticleLocal> {
       if (id != null) 'id': id,
       if (title != null) 'title': title,
       if (category != null) 'category': category,
+      if (subcategory != null) 'subcategory': subcategory,
+      if (slug != null) 'slug': slug,
       if (content != null) 'content': content,
       if (imageUrl != null) 'image_url': imageUrl,
       if (videoUrl != null) 'video_url': videoUrl,
@@ -357,6 +451,8 @@ class ArticlesCompanion extends UpdateCompanion<ArticleLocal> {
     Value<String>? id,
     Value<String>? title,
     Value<String?>? category,
+    Value<String?>? subcategory,
+    Value<String?>? slug,
     Value<String?>? content,
     Value<String?>? imageUrl,
     Value<String?>? videoUrl,
@@ -366,6 +462,8 @@ class ArticlesCompanion extends UpdateCompanion<ArticleLocal> {
       id: id ?? this.id,
       title: title ?? this.title,
       category: category ?? this.category,
+      subcategory: subcategory ?? this.subcategory,
+      slug: slug ?? this.slug,
       content: content ?? this.content,
       imageUrl: imageUrl ?? this.imageUrl,
       videoUrl: videoUrl ?? this.videoUrl,
@@ -384,6 +482,12 @@ class ArticlesCompanion extends UpdateCompanion<ArticleLocal> {
     }
     if (category.present) {
       map['category'] = Variable<String>(category.value);
+    }
+    if (subcategory.present) {
+      map['subcategory'] = Variable<String>(subcategory.value);
+    }
+    if (slug.present) {
+      map['slug'] = Variable<String>(slug.value);
     }
     if (content.present) {
       map['content'] = Variable<String>(content.value);
@@ -406,6 +510,8 @@ class ArticlesCompanion extends UpdateCompanion<ArticleLocal> {
           ..write('id: $id, ')
           ..write('title: $title, ')
           ..write('category: $category, ')
+          ..write('subcategory: $subcategory, ')
+          ..write('slug: $slug, ')
           ..write('content: $content, ')
           ..write('imageUrl: $imageUrl, ')
           ..write('videoUrl: $videoUrl, ')
@@ -629,6 +735,8 @@ typedef $$ArticlesTableCreateCompanionBuilder =
       required String id,
       required String title,
       Value<String?> category,
+      Value<String?> subcategory,
+      Value<String?> slug,
       Value<String?> content,
       Value<String?> imageUrl,
       Value<String?> videoUrl,
@@ -639,6 +747,8 @@ typedef $$ArticlesTableUpdateCompanionBuilder =
       Value<String> id,
       Value<String> title,
       Value<String?> category,
+      Value<String?> subcategory,
+      Value<String?> slug,
       Value<String?> content,
       Value<String?> imageUrl,
       Value<String?> videoUrl,
@@ -689,6 +799,16 @@ class $$ArticlesTableFilterComposer
 
   ColumnFilters<String> get category => $composableBuilder(
     column: $table.category,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get subcategory => $composableBuilder(
+    column: $table.subcategory,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get slug => $composableBuilder(
+    column: $table.slug,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -757,6 +877,16 @@ class $$ArticlesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get subcategory => $composableBuilder(
+    column: $table.subcategory,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get slug => $composableBuilder(
+    column: $table.slug,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get content => $composableBuilder(
     column: $table.content,
     builder: (column) => ColumnOrderings(column),
@@ -790,6 +920,14 @@ class $$ArticlesTableAnnotationComposer
 
   GeneratedColumn<String> get category =>
       $composableBuilder(column: $table.category, builder: (column) => column);
+
+  GeneratedColumn<String> get subcategory => $composableBuilder(
+    column: $table.subcategory,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get slug =>
+      $composableBuilder(column: $table.slug, builder: (column) => column);
 
   GeneratedColumn<String> get content =>
       $composableBuilder(column: $table.content, builder: (column) => column);
@@ -857,6 +995,8 @@ class $$ArticlesTableTableManager
                 Value<String> id = const Value.absent(),
                 Value<String> title = const Value.absent(),
                 Value<String?> category = const Value.absent(),
+                Value<String?> subcategory = const Value.absent(),
+                Value<String?> slug = const Value.absent(),
                 Value<String?> content = const Value.absent(),
                 Value<String?> imageUrl = const Value.absent(),
                 Value<String?> videoUrl = const Value.absent(),
@@ -865,6 +1005,8 @@ class $$ArticlesTableTableManager
                 id: id,
                 title: title,
                 category: category,
+                subcategory: subcategory,
+                slug: slug,
                 content: content,
                 imageUrl: imageUrl,
                 videoUrl: videoUrl,
@@ -875,6 +1017,8 @@ class $$ArticlesTableTableManager
                 required String id,
                 required String title,
                 Value<String?> category = const Value.absent(),
+                Value<String?> subcategory = const Value.absent(),
+                Value<String?> slug = const Value.absent(),
                 Value<String?> content = const Value.absent(),
                 Value<String?> imageUrl = const Value.absent(),
                 Value<String?> videoUrl = const Value.absent(),
@@ -883,6 +1027,8 @@ class $$ArticlesTableTableManager
                 id: id,
                 title: title,
                 category: category,
+                subcategory: subcategory,
+                slug: slug,
                 content: content,
                 imageUrl: imageUrl,
                 videoUrl: videoUrl,

@@ -12,7 +12,9 @@ class Articles extends Table {
   TextColumn get id => text()();
   TextColumn get title => text()();
   TextColumn get category => text().nullable()();
-  TextColumn get content => text().nullable()(); 
+  TextColumn get subcategory => text().nullable()();
+  TextColumn get slug => text().nullable().unique()();
+  TextColumn get content => text().nullable()();
   TextColumn get imageUrl => text().nullable()();
   TextColumn get videoUrl => text().nullable()();
   @override
@@ -30,9 +32,9 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
-  // NEW: This tells the phone how to upgrade from Version 1 to Version 2
+  // NEW: This tells the phone how to upgrade from Version 1 to Version 3
   @override
   MigrationStrategy get migration {
     return MigrationStrategy(
@@ -44,10 +46,15 @@ class AppDatabase extends _$AppDatabase {
           // Add the new Bookmarks table if upgrading from version 1
           await m.createTable(bookmarks);
         }
+        if (from < 3) {
+          await m.addColumn(articles, articles.subcategory);
+          await m.addColumn(articles, articles.slug);
+        }
       },
     );
   }
 }
+
 LazyDatabase _openConnection() {
   return LazyDatabase(() async {
     final dbFolder = await getApplicationDocumentsDirectory();
