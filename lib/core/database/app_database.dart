@@ -39,12 +39,33 @@ class QuizQuestions extends Table {
   TextColumn get difficulty => text().nullable()();
 }
 
-@DriftDatabase(tables: [Articles, Bookmarks, QuizQuestions])
+@TableIndex(name: 'idx_quiz_table_category', columns: {#category})
+@DataClassName('QuizQuestionEntity')
+class QuizTable extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get remoteId => text().unique()();
+  TextColumn get articleId => text()();
+  TextColumn get stem => text()();
+  TextColumn get optionA => text()();
+  TextColumn get optionB => text()();
+  TextColumn get optionC => text()();
+  TextColumn get optionD => text()();
+  TextColumn get correctOption => text().withLength(min: 1, max: 1)();
+  TextColumn get explanation => text()();
+  TextColumn get category => text()();
+  TextColumn get difficulty => text().withDefault(const Constant('medium'))();
+  TextColumn get testedField =>
+      text().withDefault(const Constant('clinicalFeatures'))();
+  IntColumn get wrongCount => integer().withDefault(const Constant(0))();
+  DateTimeColumn get lastAttemptedAt => dateTime().nullable()();
+}
+
+@DriftDatabase(tables: [Articles, Bookmarks, QuizQuestions, QuizTable])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration {
@@ -56,6 +77,12 @@ class AppDatabase extends _$AppDatabase {
         }
         if (from < 3) {
           await m.createTable(quizQuestions);
+        }
+        if (from < 4) {
+          if (from >= 3) {
+            await m.drop(quizQuestions);
+          }
+          await m.createTable(quizTable);
         }
       },
     );

@@ -1,136 +1,52 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../core/database/app_database.dart';
-import 'data/quiz_sync_service.dart';
 
-enum QuizOption { a, b, c, d }
+import '../../../core/config/app_config.dart';
+import 'quiz_notifier.dart';
+import 'quiz_option.dart';
 
-class QuizState {
-  const QuizState({
-    required this.isLoading,
-    required this.hasQuestions,
-    required this.questions,
-    this.currentIndex = 0,
-    this.selectedOption,
-    this.showExplanation = false,
-  });
+const _defaultQuizCategory = AppConfig.internalMedicineCategory;
 
-  final bool isLoading;
-  final bool hasQuestions;
-  final List<QuizQuestionLocal> questions;
-  final int currentIndex;
-  final QuizOption? selectedOption;
-  final bool showExplanation;
-
-  QuizQuestionLocal? get currentQuestion =>
-      hasQuestions ? questions[currentIndex] : null;
-
-  bool get isLastQuestion =>
-      !hasQuestions || currentIndex >= questions.length - 1;
-
-  QuizState copyWith({
-    bool? isLoading,
-    bool? hasQuestions,
-    List<QuizQuestionLocal>? questions,
-    int? currentIndex,
-    QuizOption? selectedOption,
-    bool? showExplanation,
-  }) {
-    return QuizState(
-      isLoading: isLoading ?? this.isLoading,
-      hasQuestions: hasQuestions ?? this.hasQuestions,
-      questions: questions ?? this.questions,
-      currentIndex: currentIndex ?? this.currentIndex,
-      selectedOption: selectedOption ?? this.selectedOption,
-      showExplanation: showExplanation ?? this.showExplanation,
-    );
-  }
-}
-
-class QuizNotifier extends StateNotifier<QuizState> {
-  final AppDatabase _db;
-  final QuizSyncService _syncService;
-
-  QuizNotifier(this._db, this._syncService)
-    : super(
-        const QuizState(
-          isLoading: true,
-          hasQuestions: false,
-          questions: <QuizQuestionLocal>[],
-        ),
-      );
-
-  Future<void> loadLocalQuestions() async {
-    state = state.copyWith(isLoading: true);
-    final questions = await _db.select(_db.quizQuestions).get();
-    if (questions.isEmpty) {
-      state = const QuizState(
-        isLoading: false,
-        hasQuestions: false,
-        questions: <QuizQuestionLocal>[],
-      );
-      return;
-    }
-
-    state = QuizState(
-      isLoading: false,
-      hasQuestions: true,
-      questions: questions,
-    );
-  }
-
-  Future<void> downloadQuestions() async {
-    state = state.copyWith(isLoading: true);
-    await _syncService.syncQuestions();
-    await loadLocalQuestions();
-  }
-
-  void selectOption(QuizOption option) {
-    state = state.copyWith(selectedOption: option, showExplanation: true);
-  }
-
-  void nextQuestion() {
-    if (state.isLastQuestion) {
-      return;
-    }
-
-    state = state.copyWith(
-      currentIndex: state.currentIndex + 1,
-      selectedOption: null,
-      showExplanation: false,
-    );
-  }
-}
-
-final quizNotifierProvider = StateNotifierProvider<QuizNotifier, QuizState>(
-  (ref) => QuizNotifier(
-    ref.watch(databaseProvider),
-    ref.watch(quizSyncServiceProvider),
-  ),
-);
-
-class QuizScreen extends ConsumerWidget {
+class QuizScreen extends ConsumerStatefulWidget {
   const QuizScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(quizNotifierProvider);
-    final notifier = ref.read(quizNotifierProvider.notifier);
+  ConsumerState<QuizScreen> createState() => _QuizScreenState();
+}
+
+class _QuizScreenState extends ConsumerState<QuizScreen> {
+  @override
+  void dispose() {
+    ref.read(quizNotifierProvider(_defaultQuizCategory).notifier).reset();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final state = ref.watch(quizNotifierProvider(_defaultQuizCategory));
+    final notifier = ref.read(
+      quizNotifierProvider(_defaultQuizCategory).notifier,
+    );
 
     return Scaffold(
       appBar: AppBar(
+        leading: const CloseButton(),
         title: const Text('MCQ Practice'),
         backgroundColor: const Color(0xFF1A237E),
         foregroundColor: const Color(0xFFFFB300),
       ),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: state.isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : !state.hasQuestions
-              ? _buildEmptyState(notifier)
-              : _buildQuiz(state, notifier),
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: state.when(
+              data: (questions) => questions.isEmpty
+                  ? _buildEmptyState(notifier)
+                  : _buildQuiz(context, questions, notifier),
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (error, _) => _buildErrorState(notifier),
+            ),
+          ),
         ),
       ),
     );
@@ -139,6 +55,7 @@ class QuizScreen extends ConsumerWidget {
   Widget _buildEmptyState(QuizNotifier notifier) {
     return Center(
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const Icon(Icons.quiz_outlined, size: 72, color: Color(0xFF1A237E)),
@@ -157,7 +74,7 @@ class QuizScreen extends ConsumerWidget {
                 backgroundColor: const Color(0xFFFFB300),
                 foregroundColor: const Color(0xFF1A237E),
               ),
-              onPressed: notifier.downloadQuestions,
+              onPressed: notifier.syncQuestions,
               child: const Text('Download Questions'),
             ),
           ),
@@ -166,13 +83,49 @@ class QuizScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildQuiz(QuizState state, QuizNotifier notifier) {
-    final question = state.currentQuestion;
+  Widget _buildErrorState(QuizNotifier notifier) {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.error_outline, size: 72, color: Color(0xFF1A237E)),
+          const SizedBox(height: 16),
+          const Text(
+            'Unable to load quiz questions.',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 24),
+          SizedBox(
+            width: double.infinity,
+            height: 52,
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFFFB300),
+                foregroundColor: const Color(0xFF1A237E),
+              ),
+              onPressed: notifier.syncQuestions,
+              child: const Text('Try Again'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQuiz(
+    BuildContext context,
+    List<QuizTableData> questions,
+    QuizNotifier notifier,
+  ) {
+    final question = notifier.currentQuestion;
     if (question == null) {
       return const SizedBox.shrink();
     }
 
     return Column(
+      mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _buildQuestionHeader(question),
@@ -180,32 +133,40 @@ class QuizScreen extends ConsumerWidget {
         _buildOptionButton(
           label: 'A',
           text: question.optionA,
-          selectedOption: state.selectedOption,
-          correctOption: question.correctOption,
+          isCorrectOption:
+              question.correctOption == QuizOption.a.name.toUpperCase(),
+          isSelectedOption: notifier.selectedOption == QuizOption.a,
+          isAnswerRevealed: notifier.isAnswerRevealed,
           onTap: () => notifier.selectOption(QuizOption.a),
         ),
         _buildOptionButton(
           label: 'B',
           text: question.optionB,
-          selectedOption: state.selectedOption,
-          correctOption: question.correctOption,
+          isCorrectOption:
+              question.correctOption == QuizOption.b.name.toUpperCase(),
+          isSelectedOption: notifier.selectedOption == QuizOption.b,
+          isAnswerRevealed: notifier.isAnswerRevealed,
           onTap: () => notifier.selectOption(QuizOption.b),
         ),
         _buildOptionButton(
           label: 'C',
           text: question.optionC,
-          selectedOption: state.selectedOption,
-          correctOption: question.correctOption,
+          isCorrectOption:
+              question.correctOption == QuizOption.c.name.toUpperCase(),
+          isSelectedOption: notifier.selectedOption == QuizOption.c,
+          isAnswerRevealed: notifier.isAnswerRevealed,
           onTap: () => notifier.selectOption(QuizOption.c),
         ),
         _buildOptionButton(
           label: 'D',
           text: question.optionD,
-          selectedOption: state.selectedOption,
-          correctOption: question.correctOption,
+          isCorrectOption:
+              question.correctOption == QuizOption.d.name.toUpperCase(),
+          isSelectedOption: notifier.selectedOption == QuizOption.d,
+          isAnswerRevealed: notifier.isAnswerRevealed,
           onTap: () => notifier.selectOption(QuizOption.d),
         ),
-        if (state.showExplanation) ...[
+        if (notifier.isAnswerRevealed) ...[
           const SizedBox(height: 16),
           Container(
             padding: const EdgeInsets.all(16),
@@ -220,7 +181,6 @@ class QuizScreen extends ConsumerWidget {
             ),
           ),
         ],
-        const Spacer(),
         SizedBox(
           height: 52,
           child: ElevatedButton(
@@ -228,23 +188,26 @@ class QuizScreen extends ConsumerWidget {
               backgroundColor: const Color(0xFFFFB300),
               foregroundColor: const Color(0xFF1A237E),
             ),
-            onPressed: state.isLastQuestion ? null : notifier.nextQuestion,
-            child: Text(state.isLastQuestion ? 'End of Quiz' : 'Next Question'),
+            onPressed: notifier.isLastQuestion
+                ? () => Navigator.of(context).pop()
+                : notifier.nextQuestion,
+            child: Text(notifier.isLastQuestion ? 'End Quiz' : 'Next Question'),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildQuestionHeader(QuizQuestionLocal question) {
+  Widget _buildQuestionHeader(QuizTableData question) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
             Expanded(
               child: Text(
-                question.category ?? 'Practice',
+                question.category.isEmpty ? 'Practice' : question.category,
                 style: const TextStyle(
                   color: Color(0xFFFFB300),
                   fontWeight: FontWeight.bold,
@@ -252,7 +215,7 @@ class QuizScreen extends ConsumerWidget {
               ),
             ),
             Text(
-              question.difficulty ?? '',
+              question.difficulty,
               style: const TextStyle(color: Colors.grey),
             ),
           ],
@@ -273,17 +236,17 @@ class QuizScreen extends ConsumerWidget {
   Widget _buildOptionButton({
     required String label,
     required String text,
-    required QuizOption? selectedOption,
-    required String correctOption,
+    required bool isCorrectOption,
+    required bool isSelectedOption,
+    required bool isAnswerRevealed,
     required VoidCallback onTap,
   }) {
-    final isSelected = selectedOption != null;
-    final selectedLetter = selectedOption?.name.toUpperCase();
-    final isCorrect = selectedLetter == correctOption;
-    final borderColor = isSelected
-        ? isCorrect
-              ? const Color(0xFFFFB300)
-              : const Color(0xFFD32F2F)
+    final isCorrectRevealed = isCorrectOption && isAnswerRevealed;
+    final isIncorrectSelection = isSelectedOption && !isCorrectOption;
+    final borderColor = isCorrectRevealed
+        ? const Color(0xFFFFB300)
+        : isIncorrectSelection
+        ? const Color(0xFFD32F2F)
         : Colors.grey.shade300;
 
     return Padding(

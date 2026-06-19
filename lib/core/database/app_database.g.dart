@@ -1277,12 +1277,881 @@ class QuizQuestionsCompanion extends UpdateCompanion<QuizQuestionLocal> {
   }
 }
 
+class $QuizTableTable extends QuizTable
+    with TableInfo<$QuizTableTable, QuizQuestionEntity> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $QuizTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _remoteIdMeta = const VerificationMeta(
+    'remoteId',
+  );
+  @override
+  late final GeneratedColumn<String> remoteId = GeneratedColumn<String>(
+    'remote_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'),
+  );
+  static const VerificationMeta _articleIdMeta = const VerificationMeta(
+    'articleId',
+  );
+  @override
+  late final GeneratedColumn<String> articleId = GeneratedColumn<String>(
+    'article_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _stemMeta = const VerificationMeta('stem');
+  @override
+  late final GeneratedColumn<String> stem = GeneratedColumn<String>(
+    'stem',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _optionAMeta = const VerificationMeta(
+    'optionA',
+  );
+  @override
+  late final GeneratedColumn<String> optionA = GeneratedColumn<String>(
+    'option_a',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _optionBMeta = const VerificationMeta(
+    'optionB',
+  );
+  @override
+  late final GeneratedColumn<String> optionB = GeneratedColumn<String>(
+    'option_b',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _optionCMeta = const VerificationMeta(
+    'optionC',
+  );
+  @override
+  late final GeneratedColumn<String> optionC = GeneratedColumn<String>(
+    'option_c',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _optionDMeta = const VerificationMeta(
+    'optionD',
+  );
+  @override
+  late final GeneratedColumn<String> optionD = GeneratedColumn<String>(
+    'option_d',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _correctOptionMeta = const VerificationMeta(
+    'correctOption',
+  );
+  @override
+  late final GeneratedColumn<String> correctOption = GeneratedColumn<String>(
+    'correct_option',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 1,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _explanationMeta = const VerificationMeta(
+    'explanation',
+  );
+  @override
+  late final GeneratedColumn<String> explanation = GeneratedColumn<String>(
+    'explanation',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _categoryMeta = const VerificationMeta(
+    'category',
+  );
+  @override
+  late final GeneratedColumn<String> category = GeneratedColumn<String>(
+    'category',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _difficultyMeta = const VerificationMeta(
+    'difficulty',
+  );
+  @override
+  late final GeneratedColumn<String> difficulty = GeneratedColumn<String>(
+    'difficulty',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('medium'),
+  );
+  static const VerificationMeta _testedFieldMeta = const VerificationMeta(
+    'testedField',
+  );
+  @override
+  late final GeneratedColumn<String> testedField = GeneratedColumn<String>(
+    'tested_field',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('clinicalFeatures'),
+  );
+  static const VerificationMeta _wrongCountMeta = const VerificationMeta(
+    'wrongCount',
+  );
+  @override
+  late final GeneratedColumn<int> wrongCount = GeneratedColumn<int>(
+    'wrong_count',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _lastAttemptedAtMeta = const VerificationMeta(
+    'lastAttemptedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> lastAttemptedAt =
+      GeneratedColumn<DateTime>(
+        'last_attempted_at',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    remoteId,
+    articleId,
+    stem,
+    optionA,
+    optionB,
+    optionC,
+    optionD,
+    correctOption,
+    explanation,
+    category,
+    difficulty,
+    testedField,
+    wrongCount,
+    lastAttemptedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'quiz_table';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<QuizQuestionEntity> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('remote_id')) {
+      context.handle(
+        _remoteIdMeta,
+        remoteId.isAcceptableOrUnknown(data['remote_id']!, _remoteIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_remoteIdMeta);
+    }
+    if (data.containsKey('article_id')) {
+      context.handle(
+        _articleIdMeta,
+        articleId.isAcceptableOrUnknown(data['article_id']!, _articleIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_articleIdMeta);
+    }
+    if (data.containsKey('stem')) {
+      context.handle(
+        _stemMeta,
+        stem.isAcceptableOrUnknown(data['stem']!, _stemMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_stemMeta);
+    }
+    if (data.containsKey('option_a')) {
+      context.handle(
+        _optionAMeta,
+        optionA.isAcceptableOrUnknown(data['option_a']!, _optionAMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_optionAMeta);
+    }
+    if (data.containsKey('option_b')) {
+      context.handle(
+        _optionBMeta,
+        optionB.isAcceptableOrUnknown(data['option_b']!, _optionBMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_optionBMeta);
+    }
+    if (data.containsKey('option_c')) {
+      context.handle(
+        _optionCMeta,
+        optionC.isAcceptableOrUnknown(data['option_c']!, _optionCMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_optionCMeta);
+    }
+    if (data.containsKey('option_d')) {
+      context.handle(
+        _optionDMeta,
+        optionD.isAcceptableOrUnknown(data['option_d']!, _optionDMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_optionDMeta);
+    }
+    if (data.containsKey('correct_option')) {
+      context.handle(
+        _correctOptionMeta,
+        correctOption.isAcceptableOrUnknown(
+          data['correct_option']!,
+          _correctOptionMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_correctOptionMeta);
+    }
+    if (data.containsKey('explanation')) {
+      context.handle(
+        _explanationMeta,
+        explanation.isAcceptableOrUnknown(
+          data['explanation']!,
+          _explanationMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_explanationMeta);
+    }
+    if (data.containsKey('category')) {
+      context.handle(
+        _categoryMeta,
+        category.isAcceptableOrUnknown(data['category']!, _categoryMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_categoryMeta);
+    }
+    if (data.containsKey('difficulty')) {
+      context.handle(
+        _difficultyMeta,
+        difficulty.isAcceptableOrUnknown(data['difficulty']!, _difficultyMeta),
+      );
+    }
+    if (data.containsKey('tested_field')) {
+      context.handle(
+        _testedFieldMeta,
+        testedField.isAcceptableOrUnknown(
+          data['tested_field']!,
+          _testedFieldMeta,
+        ),
+      );
+    }
+    if (data.containsKey('wrong_count')) {
+      context.handle(
+        _wrongCountMeta,
+        wrongCount.isAcceptableOrUnknown(data['wrong_count']!, _wrongCountMeta),
+      );
+    }
+    if (data.containsKey('last_attempted_at')) {
+      context.handle(
+        _lastAttemptedAtMeta,
+        lastAttemptedAt.isAcceptableOrUnknown(
+          data['last_attempted_at']!,
+          _lastAttemptedAtMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  QuizQuestionEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return QuizQuestionEntity(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      remoteId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}remote_id'],
+      )!,
+      articleId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}article_id'],
+      )!,
+      stem: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}stem'],
+      )!,
+      optionA: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}option_a'],
+      )!,
+      optionB: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}option_b'],
+      )!,
+      optionC: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}option_c'],
+      )!,
+      optionD: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}option_d'],
+      )!,
+      correctOption: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}correct_option'],
+      )!,
+      explanation: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}explanation'],
+      )!,
+      category: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}category'],
+      )!,
+      difficulty: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}difficulty'],
+      )!,
+      testedField: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}tested_field'],
+      )!,
+      wrongCount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}wrong_count'],
+      )!,
+      lastAttemptedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}last_attempted_at'],
+      ),
+    );
+  }
+
+  @override
+  $QuizTableTable createAlias(String alias) {
+    return $QuizTableTable(attachedDatabase, alias);
+  }
+}
+
+class QuizQuestionEntity extends DataClass
+    implements Insertable<QuizQuestionEntity> {
+  final int id;
+  final String remoteId;
+  final String articleId;
+  final String stem;
+  final String optionA;
+  final String optionB;
+  final String optionC;
+  final String optionD;
+  final String correctOption;
+  final String explanation;
+  final String category;
+  final String difficulty;
+  final String testedField;
+  final int wrongCount;
+  final DateTime? lastAttemptedAt;
+  const QuizQuestionEntity({
+    required this.id,
+    required this.remoteId,
+    required this.articleId,
+    required this.stem,
+    required this.optionA,
+    required this.optionB,
+    required this.optionC,
+    required this.optionD,
+    required this.correctOption,
+    required this.explanation,
+    required this.category,
+    required this.difficulty,
+    required this.testedField,
+    required this.wrongCount,
+    this.lastAttemptedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['remote_id'] = Variable<String>(remoteId);
+    map['article_id'] = Variable<String>(articleId);
+    map['stem'] = Variable<String>(stem);
+    map['option_a'] = Variable<String>(optionA);
+    map['option_b'] = Variable<String>(optionB);
+    map['option_c'] = Variable<String>(optionC);
+    map['option_d'] = Variable<String>(optionD);
+    map['correct_option'] = Variable<String>(correctOption);
+    map['explanation'] = Variable<String>(explanation);
+    map['category'] = Variable<String>(category);
+    map['difficulty'] = Variable<String>(difficulty);
+    map['tested_field'] = Variable<String>(testedField);
+    map['wrong_count'] = Variable<int>(wrongCount);
+    if (!nullToAbsent || lastAttemptedAt != null) {
+      map['last_attempted_at'] = Variable<DateTime>(lastAttemptedAt);
+    }
+    return map;
+  }
+
+  QuizTableCompanion toCompanion(bool nullToAbsent) {
+    return QuizTableCompanion(
+      id: Value(id),
+      remoteId: Value(remoteId),
+      articleId: Value(articleId),
+      stem: Value(stem),
+      optionA: Value(optionA),
+      optionB: Value(optionB),
+      optionC: Value(optionC),
+      optionD: Value(optionD),
+      correctOption: Value(correctOption),
+      explanation: Value(explanation),
+      category: Value(category),
+      difficulty: Value(difficulty),
+      testedField: Value(testedField),
+      wrongCount: Value(wrongCount),
+      lastAttemptedAt: lastAttemptedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastAttemptedAt),
+    );
+  }
+
+  factory QuizQuestionEntity.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return QuizQuestionEntity(
+      id: serializer.fromJson<int>(json['id']),
+      remoteId: serializer.fromJson<String>(json['remoteId']),
+      articleId: serializer.fromJson<String>(json['articleId']),
+      stem: serializer.fromJson<String>(json['stem']),
+      optionA: serializer.fromJson<String>(json['optionA']),
+      optionB: serializer.fromJson<String>(json['optionB']),
+      optionC: serializer.fromJson<String>(json['optionC']),
+      optionD: serializer.fromJson<String>(json['optionD']),
+      correctOption: serializer.fromJson<String>(json['correctOption']),
+      explanation: serializer.fromJson<String>(json['explanation']),
+      category: serializer.fromJson<String>(json['category']),
+      difficulty: serializer.fromJson<String>(json['difficulty']),
+      testedField: serializer.fromJson<String>(json['testedField']),
+      wrongCount: serializer.fromJson<int>(json['wrongCount']),
+      lastAttemptedAt: serializer.fromJson<DateTime?>(json['lastAttemptedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'remoteId': serializer.toJson<String>(remoteId),
+      'articleId': serializer.toJson<String>(articleId),
+      'stem': serializer.toJson<String>(stem),
+      'optionA': serializer.toJson<String>(optionA),
+      'optionB': serializer.toJson<String>(optionB),
+      'optionC': serializer.toJson<String>(optionC),
+      'optionD': serializer.toJson<String>(optionD),
+      'correctOption': serializer.toJson<String>(correctOption),
+      'explanation': serializer.toJson<String>(explanation),
+      'category': serializer.toJson<String>(category),
+      'difficulty': serializer.toJson<String>(difficulty),
+      'testedField': serializer.toJson<String>(testedField),
+      'wrongCount': serializer.toJson<int>(wrongCount),
+      'lastAttemptedAt': serializer.toJson<DateTime?>(lastAttemptedAt),
+    };
+  }
+
+  QuizQuestionEntity copyWith({
+    int? id,
+    String? remoteId,
+    String? articleId,
+    String? stem,
+    String? optionA,
+    String? optionB,
+    String? optionC,
+    String? optionD,
+    String? correctOption,
+    String? explanation,
+    String? category,
+    String? difficulty,
+    String? testedField,
+    int? wrongCount,
+    Value<DateTime?> lastAttemptedAt = const Value.absent(),
+  }) => QuizQuestionEntity(
+    id: id ?? this.id,
+    remoteId: remoteId ?? this.remoteId,
+    articleId: articleId ?? this.articleId,
+    stem: stem ?? this.stem,
+    optionA: optionA ?? this.optionA,
+    optionB: optionB ?? this.optionB,
+    optionC: optionC ?? this.optionC,
+    optionD: optionD ?? this.optionD,
+    correctOption: correctOption ?? this.correctOption,
+    explanation: explanation ?? this.explanation,
+    category: category ?? this.category,
+    difficulty: difficulty ?? this.difficulty,
+    testedField: testedField ?? this.testedField,
+    wrongCount: wrongCount ?? this.wrongCount,
+    lastAttemptedAt: lastAttemptedAt.present
+        ? lastAttemptedAt.value
+        : this.lastAttemptedAt,
+  );
+  QuizQuestionEntity copyWithCompanion(QuizTableCompanion data) {
+    return QuizQuestionEntity(
+      id: data.id.present ? data.id.value : this.id,
+      remoteId: data.remoteId.present ? data.remoteId.value : this.remoteId,
+      articleId: data.articleId.present ? data.articleId.value : this.articleId,
+      stem: data.stem.present ? data.stem.value : this.stem,
+      optionA: data.optionA.present ? data.optionA.value : this.optionA,
+      optionB: data.optionB.present ? data.optionB.value : this.optionB,
+      optionC: data.optionC.present ? data.optionC.value : this.optionC,
+      optionD: data.optionD.present ? data.optionD.value : this.optionD,
+      correctOption: data.correctOption.present
+          ? data.correctOption.value
+          : this.correctOption,
+      explanation: data.explanation.present
+          ? data.explanation.value
+          : this.explanation,
+      category: data.category.present ? data.category.value : this.category,
+      difficulty: data.difficulty.present
+          ? data.difficulty.value
+          : this.difficulty,
+      testedField: data.testedField.present
+          ? data.testedField.value
+          : this.testedField,
+      wrongCount: data.wrongCount.present
+          ? data.wrongCount.value
+          : this.wrongCount,
+      lastAttemptedAt: data.lastAttemptedAt.present
+          ? data.lastAttemptedAt.value
+          : this.lastAttemptedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('QuizQuestionEntity(')
+          ..write('id: $id, ')
+          ..write('remoteId: $remoteId, ')
+          ..write('articleId: $articleId, ')
+          ..write('stem: $stem, ')
+          ..write('optionA: $optionA, ')
+          ..write('optionB: $optionB, ')
+          ..write('optionC: $optionC, ')
+          ..write('optionD: $optionD, ')
+          ..write('correctOption: $correctOption, ')
+          ..write('explanation: $explanation, ')
+          ..write('category: $category, ')
+          ..write('difficulty: $difficulty, ')
+          ..write('testedField: $testedField, ')
+          ..write('wrongCount: $wrongCount, ')
+          ..write('lastAttemptedAt: $lastAttemptedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    remoteId,
+    articleId,
+    stem,
+    optionA,
+    optionB,
+    optionC,
+    optionD,
+    correctOption,
+    explanation,
+    category,
+    difficulty,
+    testedField,
+    wrongCount,
+    lastAttemptedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is QuizQuestionEntity &&
+          other.id == this.id &&
+          other.remoteId == this.remoteId &&
+          other.articleId == this.articleId &&
+          other.stem == this.stem &&
+          other.optionA == this.optionA &&
+          other.optionB == this.optionB &&
+          other.optionC == this.optionC &&
+          other.optionD == this.optionD &&
+          other.correctOption == this.correctOption &&
+          other.explanation == this.explanation &&
+          other.category == this.category &&
+          other.difficulty == this.difficulty &&
+          other.testedField == this.testedField &&
+          other.wrongCount == this.wrongCount &&
+          other.lastAttemptedAt == this.lastAttemptedAt);
+}
+
+class QuizTableCompanion extends UpdateCompanion<QuizQuestionEntity> {
+  final Value<int> id;
+  final Value<String> remoteId;
+  final Value<String> articleId;
+  final Value<String> stem;
+  final Value<String> optionA;
+  final Value<String> optionB;
+  final Value<String> optionC;
+  final Value<String> optionD;
+  final Value<String> correctOption;
+  final Value<String> explanation;
+  final Value<String> category;
+  final Value<String> difficulty;
+  final Value<String> testedField;
+  final Value<int> wrongCount;
+  final Value<DateTime?> lastAttemptedAt;
+  const QuizTableCompanion({
+    this.id = const Value.absent(),
+    this.remoteId = const Value.absent(),
+    this.articleId = const Value.absent(),
+    this.stem = const Value.absent(),
+    this.optionA = const Value.absent(),
+    this.optionB = const Value.absent(),
+    this.optionC = const Value.absent(),
+    this.optionD = const Value.absent(),
+    this.correctOption = const Value.absent(),
+    this.explanation = const Value.absent(),
+    this.category = const Value.absent(),
+    this.difficulty = const Value.absent(),
+    this.testedField = const Value.absent(),
+    this.wrongCount = const Value.absent(),
+    this.lastAttemptedAt = const Value.absent(),
+  });
+  QuizTableCompanion.insert({
+    this.id = const Value.absent(),
+    required String remoteId,
+    required String articleId,
+    required String stem,
+    required String optionA,
+    required String optionB,
+    required String optionC,
+    required String optionD,
+    required String correctOption,
+    required String explanation,
+    required String category,
+    this.difficulty = const Value.absent(),
+    this.testedField = const Value.absent(),
+    this.wrongCount = const Value.absent(),
+    this.lastAttemptedAt = const Value.absent(),
+  }) : remoteId = Value(remoteId),
+       articleId = Value(articleId),
+       stem = Value(stem),
+       optionA = Value(optionA),
+       optionB = Value(optionB),
+       optionC = Value(optionC),
+       optionD = Value(optionD),
+       correctOption = Value(correctOption),
+       explanation = Value(explanation),
+       category = Value(category);
+  static Insertable<QuizQuestionEntity> custom({
+    Expression<int>? id,
+    Expression<String>? remoteId,
+    Expression<String>? articleId,
+    Expression<String>? stem,
+    Expression<String>? optionA,
+    Expression<String>? optionB,
+    Expression<String>? optionC,
+    Expression<String>? optionD,
+    Expression<String>? correctOption,
+    Expression<String>? explanation,
+    Expression<String>? category,
+    Expression<String>? difficulty,
+    Expression<String>? testedField,
+    Expression<int>? wrongCount,
+    Expression<DateTime>? lastAttemptedAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (remoteId != null) 'remote_id': remoteId,
+      if (articleId != null) 'article_id': articleId,
+      if (stem != null) 'stem': stem,
+      if (optionA != null) 'option_a': optionA,
+      if (optionB != null) 'option_b': optionB,
+      if (optionC != null) 'option_c': optionC,
+      if (optionD != null) 'option_d': optionD,
+      if (correctOption != null) 'correct_option': correctOption,
+      if (explanation != null) 'explanation': explanation,
+      if (category != null) 'category': category,
+      if (difficulty != null) 'difficulty': difficulty,
+      if (testedField != null) 'tested_field': testedField,
+      if (wrongCount != null) 'wrong_count': wrongCount,
+      if (lastAttemptedAt != null) 'last_attempted_at': lastAttemptedAt,
+    });
+  }
+
+  QuizTableCompanion copyWith({
+    Value<int>? id,
+    Value<String>? remoteId,
+    Value<String>? articleId,
+    Value<String>? stem,
+    Value<String>? optionA,
+    Value<String>? optionB,
+    Value<String>? optionC,
+    Value<String>? optionD,
+    Value<String>? correctOption,
+    Value<String>? explanation,
+    Value<String>? category,
+    Value<String>? difficulty,
+    Value<String>? testedField,
+    Value<int>? wrongCount,
+    Value<DateTime?>? lastAttemptedAt,
+  }) {
+    return QuizTableCompanion(
+      id: id ?? this.id,
+      remoteId: remoteId ?? this.remoteId,
+      articleId: articleId ?? this.articleId,
+      stem: stem ?? this.stem,
+      optionA: optionA ?? this.optionA,
+      optionB: optionB ?? this.optionB,
+      optionC: optionC ?? this.optionC,
+      optionD: optionD ?? this.optionD,
+      correctOption: correctOption ?? this.correctOption,
+      explanation: explanation ?? this.explanation,
+      category: category ?? this.category,
+      difficulty: difficulty ?? this.difficulty,
+      testedField: testedField ?? this.testedField,
+      wrongCount: wrongCount ?? this.wrongCount,
+      lastAttemptedAt: lastAttemptedAt ?? this.lastAttemptedAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (remoteId.present) {
+      map['remote_id'] = Variable<String>(remoteId.value);
+    }
+    if (articleId.present) {
+      map['article_id'] = Variable<String>(articleId.value);
+    }
+    if (stem.present) {
+      map['stem'] = Variable<String>(stem.value);
+    }
+    if (optionA.present) {
+      map['option_a'] = Variable<String>(optionA.value);
+    }
+    if (optionB.present) {
+      map['option_b'] = Variable<String>(optionB.value);
+    }
+    if (optionC.present) {
+      map['option_c'] = Variable<String>(optionC.value);
+    }
+    if (optionD.present) {
+      map['option_d'] = Variable<String>(optionD.value);
+    }
+    if (correctOption.present) {
+      map['correct_option'] = Variable<String>(correctOption.value);
+    }
+    if (explanation.present) {
+      map['explanation'] = Variable<String>(explanation.value);
+    }
+    if (category.present) {
+      map['category'] = Variable<String>(category.value);
+    }
+    if (difficulty.present) {
+      map['difficulty'] = Variable<String>(difficulty.value);
+    }
+    if (testedField.present) {
+      map['tested_field'] = Variable<String>(testedField.value);
+    }
+    if (wrongCount.present) {
+      map['wrong_count'] = Variable<int>(wrongCount.value);
+    }
+    if (lastAttemptedAt.present) {
+      map['last_attempted_at'] = Variable<DateTime>(lastAttemptedAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('QuizTableCompanion(')
+          ..write('id: $id, ')
+          ..write('remoteId: $remoteId, ')
+          ..write('articleId: $articleId, ')
+          ..write('stem: $stem, ')
+          ..write('optionA: $optionA, ')
+          ..write('optionB: $optionB, ')
+          ..write('optionC: $optionC, ')
+          ..write('optionD: $optionD, ')
+          ..write('correctOption: $correctOption, ')
+          ..write('explanation: $explanation, ')
+          ..write('category: $category, ')
+          ..write('difficulty: $difficulty, ')
+          ..write('testedField: $testedField, ')
+          ..write('wrongCount: $wrongCount, ')
+          ..write('lastAttemptedAt: $lastAttemptedAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $ArticlesTable articles = $ArticlesTable(this);
   late final $BookmarksTable bookmarks = $BookmarksTable(this);
   late final $QuizQuestionsTable quizQuestions = $QuizQuestionsTable(this);
+  late final $QuizTableTable quizTable = $QuizTableTable(this);
+  late final Index idxQuizTableCategory = Index(
+    'idx_quiz_table_category',
+    'CREATE INDEX idx_quiz_table_category ON quiz_table (category)',
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -1291,6 +2160,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     articles,
     bookmarks,
     quizQuestions,
+    quizTable,
+    idxQuizTableCategory,
   ];
 }
 
@@ -2175,6 +3046,402 @@ typedef $$QuizQuestionsTableProcessedTableManager =
       QuizQuestionLocal,
       PrefetchHooks Function()
     >;
+typedef $$QuizTableTableCreateCompanionBuilder =
+    QuizTableCompanion Function({
+      Value<int> id,
+      required String remoteId,
+      required String articleId,
+      required String stem,
+      required String optionA,
+      required String optionB,
+      required String optionC,
+      required String optionD,
+      required String correctOption,
+      required String explanation,
+      required String category,
+      Value<String> difficulty,
+      Value<String> testedField,
+      Value<int> wrongCount,
+      Value<DateTime?> lastAttemptedAt,
+    });
+typedef $$QuizTableTableUpdateCompanionBuilder =
+    QuizTableCompanion Function({
+      Value<int> id,
+      Value<String> remoteId,
+      Value<String> articleId,
+      Value<String> stem,
+      Value<String> optionA,
+      Value<String> optionB,
+      Value<String> optionC,
+      Value<String> optionD,
+      Value<String> correctOption,
+      Value<String> explanation,
+      Value<String> category,
+      Value<String> difficulty,
+      Value<String> testedField,
+      Value<int> wrongCount,
+      Value<DateTime?> lastAttemptedAt,
+    });
+
+class $$QuizTableTableFilterComposer
+    extends Composer<_$AppDatabase, $QuizTableTable> {
+  $$QuizTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get remoteId => $composableBuilder(
+    column: $table.remoteId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get articleId => $composableBuilder(
+    column: $table.articleId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get stem => $composableBuilder(
+    column: $table.stem,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get optionA => $composableBuilder(
+    column: $table.optionA,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get optionB => $composableBuilder(
+    column: $table.optionB,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get optionC => $composableBuilder(
+    column: $table.optionC,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get optionD => $composableBuilder(
+    column: $table.optionD,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get correctOption => $composableBuilder(
+    column: $table.correctOption,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get explanation => $composableBuilder(
+    column: $table.explanation,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get category => $composableBuilder(
+    column: $table.category,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get difficulty => $composableBuilder(
+    column: $table.difficulty,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get testedField => $composableBuilder(
+    column: $table.testedField,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get wrongCount => $composableBuilder(
+    column: $table.wrongCount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get lastAttemptedAt => $composableBuilder(
+    column: $table.lastAttemptedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$QuizTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $QuizTableTable> {
+  $$QuizTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get remoteId => $composableBuilder(
+    column: $table.remoteId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get articleId => $composableBuilder(
+    column: $table.articleId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get stem => $composableBuilder(
+    column: $table.stem,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get optionA => $composableBuilder(
+    column: $table.optionA,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get optionB => $composableBuilder(
+    column: $table.optionB,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get optionC => $composableBuilder(
+    column: $table.optionC,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get optionD => $composableBuilder(
+    column: $table.optionD,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get correctOption => $composableBuilder(
+    column: $table.correctOption,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get explanation => $composableBuilder(
+    column: $table.explanation,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get category => $composableBuilder(
+    column: $table.category,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get difficulty => $composableBuilder(
+    column: $table.difficulty,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get testedField => $composableBuilder(
+    column: $table.testedField,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get wrongCount => $composableBuilder(
+    column: $table.wrongCount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get lastAttemptedAt => $composableBuilder(
+    column: $table.lastAttemptedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$QuizTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $QuizTableTable> {
+  $$QuizTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get remoteId =>
+      $composableBuilder(column: $table.remoteId, builder: (column) => column);
+
+  GeneratedColumn<String> get articleId =>
+      $composableBuilder(column: $table.articleId, builder: (column) => column);
+
+  GeneratedColumn<String> get stem =>
+      $composableBuilder(column: $table.stem, builder: (column) => column);
+
+  GeneratedColumn<String> get optionA =>
+      $composableBuilder(column: $table.optionA, builder: (column) => column);
+
+  GeneratedColumn<String> get optionB =>
+      $composableBuilder(column: $table.optionB, builder: (column) => column);
+
+  GeneratedColumn<String> get optionC =>
+      $composableBuilder(column: $table.optionC, builder: (column) => column);
+
+  GeneratedColumn<String> get optionD =>
+      $composableBuilder(column: $table.optionD, builder: (column) => column);
+
+  GeneratedColumn<String> get correctOption => $composableBuilder(
+    column: $table.correctOption,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get explanation => $composableBuilder(
+    column: $table.explanation,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get category =>
+      $composableBuilder(column: $table.category, builder: (column) => column);
+
+  GeneratedColumn<String> get difficulty => $composableBuilder(
+    column: $table.difficulty,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get testedField => $composableBuilder(
+    column: $table.testedField,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get wrongCount => $composableBuilder(
+    column: $table.wrongCount,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get lastAttemptedAt => $composableBuilder(
+    column: $table.lastAttemptedAt,
+    builder: (column) => column,
+  );
+}
+
+class $$QuizTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $QuizTableTable,
+          QuizQuestionEntity,
+          $$QuizTableTableFilterComposer,
+          $$QuizTableTableOrderingComposer,
+          $$QuizTableTableAnnotationComposer,
+          $$QuizTableTableCreateCompanionBuilder,
+          $$QuizTableTableUpdateCompanionBuilder,
+          (
+            QuizQuestionEntity,
+            BaseReferences<_$AppDatabase, $QuizTableTable, QuizQuestionEntity>,
+          ),
+          QuizQuestionEntity,
+          PrefetchHooks Function()
+        > {
+  $$QuizTableTableTableManager(_$AppDatabase db, $QuizTableTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$QuizTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$QuizTableTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$QuizTableTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> remoteId = const Value.absent(),
+                Value<String> articleId = const Value.absent(),
+                Value<String> stem = const Value.absent(),
+                Value<String> optionA = const Value.absent(),
+                Value<String> optionB = const Value.absent(),
+                Value<String> optionC = const Value.absent(),
+                Value<String> optionD = const Value.absent(),
+                Value<String> correctOption = const Value.absent(),
+                Value<String> explanation = const Value.absent(),
+                Value<String> category = const Value.absent(),
+                Value<String> difficulty = const Value.absent(),
+                Value<String> testedField = const Value.absent(),
+                Value<int> wrongCount = const Value.absent(),
+                Value<DateTime?> lastAttemptedAt = const Value.absent(),
+              }) => QuizTableCompanion(
+                id: id,
+                remoteId: remoteId,
+                articleId: articleId,
+                stem: stem,
+                optionA: optionA,
+                optionB: optionB,
+                optionC: optionC,
+                optionD: optionD,
+                correctOption: correctOption,
+                explanation: explanation,
+                category: category,
+                difficulty: difficulty,
+                testedField: testedField,
+                wrongCount: wrongCount,
+                lastAttemptedAt: lastAttemptedAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String remoteId,
+                required String articleId,
+                required String stem,
+                required String optionA,
+                required String optionB,
+                required String optionC,
+                required String optionD,
+                required String correctOption,
+                required String explanation,
+                required String category,
+                Value<String> difficulty = const Value.absent(),
+                Value<String> testedField = const Value.absent(),
+                Value<int> wrongCount = const Value.absent(),
+                Value<DateTime?> lastAttemptedAt = const Value.absent(),
+              }) => QuizTableCompanion.insert(
+                id: id,
+                remoteId: remoteId,
+                articleId: articleId,
+                stem: stem,
+                optionA: optionA,
+                optionB: optionB,
+                optionC: optionC,
+                optionD: optionD,
+                correctOption: correctOption,
+                explanation: explanation,
+                category: category,
+                difficulty: difficulty,
+                testedField: testedField,
+                wrongCount: wrongCount,
+                lastAttemptedAt: lastAttemptedAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$QuizTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $QuizTableTable,
+      QuizQuestionEntity,
+      $$QuizTableTableFilterComposer,
+      $$QuizTableTableOrderingComposer,
+      $$QuizTableTableAnnotationComposer,
+      $$QuizTableTableCreateCompanionBuilder,
+      $$QuizTableTableUpdateCompanionBuilder,
+      (
+        QuizQuestionEntity,
+        BaseReferences<_$AppDatabase, $QuizTableTable, QuizQuestionEntity>,
+      ),
+      QuizQuestionEntity,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -2185,4 +3452,6 @@ class $AppDatabaseManager {
       $$BookmarksTableTableManager(_db, _db.bookmarks);
   $$QuizQuestionsTableTableManager get quizQuestions =>
       $$QuizQuestionsTableTableManager(_db, _db.quizQuestions);
+  $$QuizTableTableTableManager get quizTable =>
+      $$QuizTableTableTableManager(_db, _db.quizTable);
 }
