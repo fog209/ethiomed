@@ -1,5 +1,12 @@
 # .kilocodeignore — excludes generated/build files from KiloCode context
-
+# Large documentation files — not needed for coding
+*.txt
+*.md
+!README.md
+!AGENTS.md
+!KILOCODE.md
+!CURRENT_STATE.md
+!TASK.md
 # Dart generated files
 **/*.g.dart
 **/*.freezed.dart

@@ -8,3 +8,5 @@ linux/
 windows/
 macos/
 web/
+*.txt
+docs/

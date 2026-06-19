@@ -1,4 +1,4 @@
-
+-- REFERENCE ONLY. Do not auto-apply. Run manually in Supabase SQL Editor.
 
 ```sql
 -- WardReady — Supabase Schema Snapshot

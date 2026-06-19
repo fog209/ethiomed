@@ -1,113 +1,121 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/database/app_database.dart';
+import 'data/quiz_sync_service.dart';
 
 enum QuizOption { a, b, c, d }
 
-class QuizQuestionState {
-  const QuizQuestionState({
-    required this.question,
+class QuizState {
+  const QuizState({
+    required this.isLoading,
+    required this.hasQuestions,
+    required this.questions,
+    this.currentIndex = 0,
     this.selectedOption,
     this.showExplanation = false,
   });
 
-  final QuizQuestionLocal question;
+  final bool isLoading;
+  final bool hasQuestions;
+  final List<QuizQuestionLocal> questions;
+  final int currentIndex;
   final QuizOption? selectedOption;
   final bool showExplanation;
 
-  QuizQuestionState copyWith({
-    QuizQuestionLocal? question,
+  QuizQuestionLocal? get currentQuestion =>
+      hasQuestions ? questions[currentIndex] : null;
+
+  bool get isLastQuestion =>
+      !hasQuestions || currentIndex >= questions.length - 1;
+
+  QuizState copyWith({
+    bool? isLoading,
+    bool? hasQuestions,
+    List<QuizQuestionLocal>? questions,
+    int? currentIndex,
     QuizOption? selectedOption,
     bool? showExplanation,
   }) {
-    return QuizQuestionState(
-      question: question ?? this.question,
+    return QuizState(
+      isLoading: isLoading ?? this.isLoading,
+      hasQuestions: hasQuestions ?? this.hasQuestions,
+      questions: questions ?? this.questions,
+      currentIndex: currentIndex ?? this.currentIndex,
       selectedOption: selectedOption ?? this.selectedOption,
       showExplanation: showExplanation ?? this.showExplanation,
     );
   }
 }
 
-class QuizController extends StateNotifier<QuizQuestionState> {
-  static const _questions = <QuizQuestionLocal>[
-    QuizQuestionLocal(
-      id: 1,
-      articleId: null,
-      stem: 'Which finding is most consistent with iron deficiency anemia?',
-      optionA: 'Microcytic anemia with low ferritin',
-      optionB: 'Macrocytic anemia with high B12',
-      optionC: 'Normocytic anemia with normal ferritin',
-      optionD: 'Hemolytic anemia with high reticulocytes',
-      correctOption: 'A',
-      explanation:
-          'Iron deficiency typically causes microcytic anemia and reduced ferritin because ferritin reflects iron stores.',
-      category: 'Hematology',
-      difficulty: 'Easy',
-    ),
-    QuizQuestionLocal(
-      id: 2,
-      articleId: null,
-      stem:
-          'What is the first-line treatment for uncomplicated falciparum malaria in Ethiopia?',
-      optionA: 'IV ceftriaxone',
-      optionB: 'Artemether-lumefantrine (Coartem)',
-      optionC: 'High-dose oral prednisolone',
-      optionD: 'Metronidazole alone',
-      correctOption: 'B',
-      explanation:
-          'Artemisinin-based combination therapy, especially Coartem, is the standard first-line treatment for uncomplicated falciparum malaria.',
-      category: 'Infectious Diseases',
-      difficulty: 'Easy',
-    ),
-    QuizQuestionLocal(
-      id: 3,
-      articleId: null,
-      stem: 'Which symptom is a red flag in a child with fever?',
-      optionA: 'Mild runny nose',
-      optionB: 'Brief cough',
-      optionC: 'Unable to drink or breastfeed',
-      optionD: 'Passing urine normally',
-      correctOption: 'C',
-      explanation:
-          'Inability to drink or breastfeed is a danger sign and requires urgent assessment.',
-      category: 'Pediatrics',
-      difficulty: 'Easy',
-    ),
-  ];
+class QuizNotifier extends StateNotifier<QuizState> {
+  final AppDatabase _db;
+  final QuizSyncService _syncService;
 
-  QuizController() : super(QuizQuestionState(question: _questions.first));
+  QuizNotifier(this._db, this._syncService)
+    : super(
+        const QuizState(
+          isLoading: true,
+          hasQuestions: false,
+          questions: <QuizQuestionLocal>[],
+        ),
+      );
 
-  int get _index =>
-      _questions.indexWhere((question) => question.id == state.question.id);
+  Future<void> loadLocalQuestions() async {
+    state = state.copyWith(isLoading: true);
+    final questions = await _db.select(_db.quizQuestions).get();
+    if (questions.isEmpty) {
+      state = const QuizState(
+        isLoading: false,
+        hasQuestions: false,
+        questions: <QuizQuestionLocal>[],
+      );
+      return;
+    }
+
+    state = QuizState(
+      isLoading: false,
+      hasQuestions: true,
+      questions: questions,
+    );
+  }
+
+  Future<void> downloadQuestions() async {
+    state = state.copyWith(isLoading: true);
+    await _syncService.syncQuestions();
+    await loadLocalQuestions();
+  }
 
   void selectOption(QuizOption option) {
     state = state.copyWith(selectedOption: option, showExplanation: true);
   }
 
   void nextQuestion() {
-    final nextIndex = _index + 1;
-    if (nextIndex >= _questions.length) {
+    if (state.isLastQuestion) {
       return;
     }
 
-    state = QuizQuestionState(question: _questions[nextIndex]);
+    state = state.copyWith(
+      currentIndex: state.currentIndex + 1,
+      selectedOption: null,
+      showExplanation: false,
+    );
   }
-
-  bool get isLastQuestion => _index >= _questions.length - 1;
 }
 
-final quizControllerProvider =
-    StateNotifierProvider<QuizController, QuizQuestionState>((ref) {
-      return QuizController();
-    });
+final quizNotifierProvider = StateNotifierProvider<QuizNotifier, QuizState>(
+  (ref) => QuizNotifier(
+    ref.watch(databaseProvider),
+    ref.watch(quizSyncServiceProvider),
+  ),
+);
 
 class QuizScreen extends ConsumerWidget {
   const QuizScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(quizControllerProvider);
-    final controller = ref.read(quizControllerProvider.notifier);
+    final state = ref.watch(quizNotifierProvider);
+    final notifier = ref.read(quizNotifierProvider.notifier);
 
     return Scaffold(
       appBar: AppBar(
@@ -118,78 +126,117 @@ class QuizScreen extends ConsumerWidget {
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _buildQuestionHeader(state),
-              const SizedBox(height: 16),
-              _buildOptionButton(
-                label: 'A',
-                text: state.question.optionA,
-                selectedOption: state.selectedOption,
-                correctOption: state.question.correctOption,
-                onTap: () => controller.selectOption(QuizOption.a),
-              ),
-              _buildOptionButton(
-                label: 'B',
-                text: state.question.optionB,
-                selectedOption: state.selectedOption,
-                correctOption: state.question.correctOption,
-                onTap: () => controller.selectOption(QuizOption.b),
-              ),
-              _buildOptionButton(
-                label: 'C',
-                text: state.question.optionC,
-                selectedOption: state.selectedOption,
-                correctOption: state.question.correctOption,
-                onTap: () => controller.selectOption(QuizOption.c),
-              ),
-              _buildOptionButton(
-                label: 'D',
-                text: state.question.optionD,
-                selectedOption: state.selectedOption,
-                correctOption: state.question.correctOption,
-                onTap: () => controller.selectOption(QuizOption.d),
-              ),
-              if (state.showExplanation) ...[
-                const SizedBox(height: 16),
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFFF8E1),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: const Color(0xFFFFB300)),
-                  ),
-                  child: Text(
-                    'Explanation: ${state.question.explanation}',
-                    style: const TextStyle(height: 1.5),
-                  ),
-                ),
-              ],
-              const Spacer(),
-              SizedBox(
-                height: 52,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFFFB300),
-                    foregroundColor: const Color(0xFF1A237E),
-                  ),
-                  onPressed: controller.isLastQuestion
-                      ? null
-                      : controller.nextQuestion,
-                  child: Text(
-                    controller.isLastQuestion ? 'End of Quiz' : 'Next Question',
-                  ),
-                ),
-              ),
-            ],
-          ),
+          child: state.isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : !state.hasQuestions
+              ? _buildEmptyState(notifier)
+              : _buildQuiz(state, notifier),
         ),
       ),
     );
   }
 
-  Widget _buildQuestionHeader(QuizQuestionState state) {
+  Widget _buildEmptyState(QuizNotifier notifier) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.quiz_outlined, size: 72, color: Color(0xFF1A237E)),
+          const SizedBox(height: 16),
+          const Text(
+            'No practice questions downloaded yet.',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 24),
+          SizedBox(
+            width: double.infinity,
+            height: 52,
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFFFB300),
+                foregroundColor: const Color(0xFF1A237E),
+              ),
+              onPressed: notifier.downloadQuestions,
+              child: const Text('Download Questions'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQuiz(QuizState state, QuizNotifier notifier) {
+    final question = state.currentQuestion;
+    if (question == null) {
+      return const SizedBox.shrink();
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _buildQuestionHeader(question),
+        const SizedBox(height: 16),
+        _buildOptionButton(
+          label: 'A',
+          text: question.optionA,
+          selectedOption: state.selectedOption,
+          correctOption: question.correctOption,
+          onTap: () => notifier.selectOption(QuizOption.a),
+        ),
+        _buildOptionButton(
+          label: 'B',
+          text: question.optionB,
+          selectedOption: state.selectedOption,
+          correctOption: question.correctOption,
+          onTap: () => notifier.selectOption(QuizOption.b),
+        ),
+        _buildOptionButton(
+          label: 'C',
+          text: question.optionC,
+          selectedOption: state.selectedOption,
+          correctOption: question.correctOption,
+          onTap: () => notifier.selectOption(QuizOption.c),
+        ),
+        _buildOptionButton(
+          label: 'D',
+          text: question.optionD,
+          selectedOption: state.selectedOption,
+          correctOption: question.correctOption,
+          onTap: () => notifier.selectOption(QuizOption.d),
+        ),
+        if (state.showExplanation) ...[
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFFF8E1),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: const Color(0xFFFFB300)),
+            ),
+            child: Text(
+              'Explanation: ${question.explanation}',
+              style: const TextStyle(height: 1.5),
+            ),
+          ),
+        ],
+        const Spacer(),
+        SizedBox(
+          height: 52,
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFFFB300),
+              foregroundColor: const Color(0xFF1A237E),
+            ),
+            onPressed: state.isLastQuestion ? null : notifier.nextQuestion,
+            child: Text(state.isLastQuestion ? 'End of Quiz' : 'Next Question'),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildQuestionHeader(QuizQuestionLocal question) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -197,7 +244,7 @@ class QuizScreen extends ConsumerWidget {
           children: [
             Expanded(
               child: Text(
-                state.question.category ?? 'Practice',
+                question.category ?? 'Practice',
                 style: const TextStyle(
                   color: Color(0xFFFFB300),
                   fontWeight: FontWeight.bold,
@@ -205,14 +252,14 @@ class QuizScreen extends ConsumerWidget {
               ),
             ),
             Text(
-              state.question.difficulty ?? '',
+              question.difficulty ?? '',
               style: const TextStyle(color: Colors.grey),
             ),
           ],
         ),
         const SizedBox(height: 12),
         Text(
-          state.question.stem,
+          question.stem,
           style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,

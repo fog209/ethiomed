@@ -6,7 +6,7 @@ _KiloCode reads this on startup. One task at a time — never two._
 
 ## 🎯 Current Task
 
-No active task.
+always overwrite TASK.md with your actual task BEFORE starting a KiloCode session.
 
 ---
 
