@@ -12,7 +12,7 @@ class Articles extends Table {
   TextColumn get id => text()();
   TextColumn get title => text()();
   TextColumn get category => text().nullable()();
-  TextColumn get content => text().nullable()(); 
+  TextColumn get content => text().nullable()();
   TextColumn get imageUrl => text().nullable()();
   TextColumn get videoUrl => text().nullable()();
   @override
@@ -37,9 +37,6 @@ class QuizQuestions extends Table {
   TextColumn get explanation => text().nullable()();
   TextColumn get category => text().nullable()();
   TextColumn get difficulty => text().nullable()();
-
-  @override
-  Set<Column> get primaryKey => {id};
 }
 
 @DriftDatabase(tables: [Articles, Bookmarks, QuizQuestions])

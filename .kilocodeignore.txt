@@ -1,0 +1,33 @@
+# .kilocodeignore — excludes generated/build files from KiloCode context
+
+# Dart generated files
+**/*.g.dart
+**/*.freezed.dart
+**/*.mocks.dart
+**/*.config.dart
+**/*.drift.dart
+
+# Build output
+build/
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# Android build artifacts
+android/.gradle/
+android/app/build/
+android/build/
+
+# iOS
+ios/Pods/
+ios/.symlinks/
+
+# KiloCode SHOULD still read:
+# lib/**/*.dart  (your source files)
+# pubspec.yaml
+# android/app/build.gradle
+# AGENTS.md
+# KILOCODE.md
+# CURRENT_STATE.md
+# TASK.md
+# supabase/schema.sql

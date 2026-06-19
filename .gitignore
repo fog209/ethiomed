@@ -52,4 +52,7 @@ app.*.map.json
 
 **/android/key.properties
 **/*.jks
-**/*.keystore
+**/*.keystorebuild/
+.dart_tool/
+android/.gradle/
+*.pavg
