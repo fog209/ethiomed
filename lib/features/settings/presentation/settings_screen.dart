@@ -1,4 +1,3 @@
-// ignore_for_file: depend_on_referenced_packages, uri_does_not_exist, undefined_identifier
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -10,6 +9,9 @@ import '../../auth/data/auth_service.dart';
 
 class SettingsScreen extends ConsumerWidget {
   static const String _adminTelegramUrl = 'https://t.me/WardReadyAdmin';
+  static const String _shareMessage =
+      'Check out WardReady — the offline medical library for Ethiopian students! Download here: [Link]';
+  static const String _appVersion = 'WardReady v1.0.0 (Beta)';
 
   const SettingsScreen({super.key});
 
@@ -67,9 +69,9 @@ class SettingsScreen extends ConsumerWidget {
             error: (error, stack) => const SizedBox.shrink(),
           ),
           const Padding(
-            padding: EdgeInsets.fromLTRB(16, 20, 16, 8),
+            padding: EdgeInsets.fromLTRB(16, 24, 16, 8),
             child: Text(
-              'Support & Feedback',
+              'Social & Support',
               style: TextStyle(
                 color: Colors.grey,
                 fontSize: 13,
@@ -78,28 +80,28 @@ class SettingsScreen extends ConsumerWidget {
             ),
           ),
           ListTile(
-            leading: const Icon(Icons.bug_report, color: Color(0xFF1A237E)),
-            title: const Text('Report a Medical Error'),
-            onTap: _openAdminTelegram,
-          ),
-          ListTile(
-            leading: const Icon(Icons.help_outline, color: Color(0xFF1A237E)),
-            title: const Text('Subscription Help'),
-            onTap: _openAdminTelegram,
-          ),
-          ListTile(
             leading: const Icon(Icons.share, color: Color(0xFF1A237E)),
             title: const Text('Share WardReady'),
             onTap: () {
               final box = context.findRenderObject() as RenderBox?;
               if (box != null) {
                 Share.share(
-                  'Check out WardReady — the offline medical library for Ethiopian students!',
+                  _shareMessage,
                   sharePositionOrigin:
                       box.localToGlobal(Offset.zero) & box.size,
                 );
               }
             },
+          ),
+          ListTile(
+            leading: const Icon(Icons.bug_report, color: Color(0xFF1A237E)),
+            title: const Text('Report Medical Error'),
+            onTap: _openAdminTelegram,
+          ),
+          ListTile(
+            leading: const Icon(Icons.help_outline, color: Color(0xFF1A237E)),
+            title: const Text('Technical Support'),
+            onTap: _openAdminTelegram,
           ),
           const Divider(),
           ListTile(
@@ -109,6 +111,14 @@ class SettingsScreen extends ConsumerWidget {
               await ref.read(authServiceProvider).signOut();
               if (context.mounted) context.go('/login');
             },
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 20),
+            child: Text(
+              _appVersion,
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: Colors.grey, fontSize: 13),
+            ),
           ),
         ],
       ),
