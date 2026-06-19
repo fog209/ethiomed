@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'core/config/app_config.dart';
 import 'features/auth/presentation/login_screen.dart';
+import 'features/legal/disclaimer_screen.dart';
 import 'app/main_shell.dart'; // This is your new bottom nav shell
 import 'features/subscription/presentation/paywall_screen.dart';
 import 'features/subscription/data/subscription_repository.dart';
@@ -15,46 +17,103 @@ void main() async {
     publishableKey: AppConfig.supabaseAnonKey,
   );
 
-  runApp(
-    const ProviderScope(
-      child: MyApp(),
-    ),
-  );
+  runApp(const ProviderScope(child: MyApp()));
 }
 
-class MyApp extends ConsumerWidget {
+class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // Listen to Auth State (Login/Logout)
-    final authState = Supabase.instance.client.auth.onAuthStateChange;
-
+  Widget build(BuildContext context) {
     return MaterialApp(
       title: AppConfig.appTitle,
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF1A237E), // Navy
+          seedColor: const Color(0xFF1A237E),
           primary: const Color(0xFF1A237E),
-          secondary: const Color(0xFFFFB300), // Gold
+          secondary: const Color(0xFFFFB300),
         ),
       ),
-      home: StreamBuilder<AuthState>(
-        stream: authState,
-        builder: (context, snapshot) {
-          final session = snapshot.data?.session;
+      home: const DisclaimerGate(),
+    );
+  }
+}
 
-          if (session == null) {
-            // User not logged in? Show Login Screen
-            return const LoginScreen();
-          } else {
-            // User is logged in? Check if they have paid
-            return const SubscriptionGuard();
-          }
-        },
-      ),
+class DisclaimerGate extends StatefulWidget {
+  const DisclaimerGate({super.key});
+
+  @override
+  State<DisclaimerGate> createState() => _DisclaimerGateState();
+}
+
+class _DisclaimerGateState extends State<DisclaimerGate> {
+  static const String _hasSeenDisclaimerKey = 'hasSeenDisclaimer';
+
+  bool? _hasSeenDisclaimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadDisclaimerState();
+  }
+
+  Future<void> _loadDisclaimerState() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _hasSeenDisclaimer = prefs.getBool(_hasSeenDisclaimerKey) ?? false;
+    });
+  }
+
+  Future<void> _acceptDisclaimer() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_hasSeenDisclaimerKey, true);
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _hasSeenDisclaimer = true;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_hasSeenDisclaimer == null) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
+    if (_hasSeenDisclaimer == true) {
+      return const AppEntrance();
+    }
+
+    return DisclaimerScreen(onAccepted: _acceptDisclaimer);
+  }
+}
+
+class AppEntrance extends ConsumerWidget {
+  const AppEntrance({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final authState = Supabase.instance.client.auth.onAuthStateChange;
+
+    return StreamBuilder<AuthState>(
+      stream: authState,
+      builder: (context, snapshot) {
+        final session = snapshot.data?.session;
+
+        if (session == null) {
+          return const LoginScreen();
+        }
+
+        return const SubscriptionGuard();
+      },
     );
   }
 }
@@ -75,12 +134,10 @@ class SubscriptionGuard extends ConsumerWidget {
           return const PaywallScreen(); // LOCKED: Show the payment instructions
         }
       },
-      loading: () => const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      ),
-      error: (err, stack) => Scaffold(
-        body: Center(child: Text("Sync Error: $err")),
-      ),
+      loading: () =>
+          const Scaffold(body: Center(child: CircularProgressIndicator())),
+      error: (err, stack) =>
+          Scaffold(body: Center(child: Text("Sync Error: $err"))),
     );
   }
 }
