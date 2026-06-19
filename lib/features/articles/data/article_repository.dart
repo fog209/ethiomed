@@ -66,6 +66,18 @@ class ArticleRepository {
     return query.watch();
   }
 
+  Stream<List<ArticleLocal>> watchArticlesPaged({
+    required String category,
+    required int limit,
+    required int offset,
+  }) {
+    return (_db.select(_db.articles)
+          ..where((table) => table.category.equals(category))
+          ..orderBy([(table) => OrderingTerm.asc(table.title)])
+          ..limit(limit, offset: offset < 0 ? 0 : offset))
+        .watch();
+  }
+
   Future<int> countArticlesInCategory(String category) async {
     final rows = await _db
         .customSelect(
@@ -137,10 +149,10 @@ final paginatedArticlesProvider =
     StreamProvider.family<List<ArticleLocal>, ArticlePageQuery>((ref, query) {
       return ref
           .watch(articleRepositoryProvider)
-          .watchLocalArticles(
+          .watchArticlesPaged(
+            category: query.category ?? '',
             limit: query.limit,
             offset: query.offset,
-            category: query.category,
           );
     });
 

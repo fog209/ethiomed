@@ -1,11 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shimmer/shimmer.dart';
+import '../../../core/database/app_database.dart';
 import '../../articles/data/article_repository.dart';
 import '../../articles/presentation/article_detail_screen.dart';
 
+const int _articlesPageSize = 20;
+
+final articleOffsetProvider = StateProvider<int>((ref) => 0);
+final articleRequestIdProvider = StateProvider<int>((ref) => 0);
+final articleLoadedArticlesProvider = StateProvider<List<ArticleLocal>>(
+  (ref) => const <ArticleLocal>[],
+);
+final articleHasMoreProvider = StateProvider<bool>((ref) => true);
+final articleIsLoadingMoreProvider = StateProvider<bool>((ref) => false);
+final articleCurrentCategoryProvider = StateProvider<String?>((ref) => null);
+
 class ArticleListScreen extends ConsumerStatefulWidget {
   final String category;
+
   const ArticleListScreen({super.key, required this.category});
 
   @override
@@ -13,19 +25,139 @@ class ArticleListScreen extends ConsumerStatefulWidget {
 }
 
 class _ArticleListScreenState extends ConsumerState<ArticleListScreen> {
+  late final ScrollController _scrollController;
+
   @override
   void initState() {
     super.initState();
-    // SAFE: Triggering logic in initState is allowed
-    Future.microtask(() {
-      ref.read(articleRepositoryProvider).fetchAndSyncArticles();
-    });
+    _scrollController = ScrollController();
+    _scrollController.addListener(_onScroll);
+    _resetPagination();
+  }
+
+  @override
+  void didUpdateWidget(covariant ArticleListScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.category != widget.category) {
+      _resetPagination();
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _runAfterBuild(VoidCallback callback) {
+    Future.microtask(callback);
+  }
+
+  void _resetPagination() {
+    ref.read(articleCurrentCategoryProvider.notifier).state = widget.category;
+    ref.read(articleRequestIdProvider.notifier).state =
+        ref.read(articleRequestIdProvider) + 1;
+    ref.read(articleOffsetProvider.notifier).state = 0;
+    ref.read(articleLoadedArticlesProvider.notifier).state =
+        const <ArticleLocal>[];
+    ref.read(articleHasMoreProvider.notifier).state = true;
+    ref.read(articleIsLoadingMoreProvider.notifier).state = false;
+  }
+
+  void _onScroll() {
+    final position = _scrollController.position;
+    if (position.pixels >= position.maxScrollExtent * 0.8) {
+      _loadMoreArticles();
+    }
+  }
+
+  void _loadMoreArticles() {
+    final hasMore = ref.read(articleHasMoreProvider);
+    final isLoadingMore = ref.read(articleIsLoadingMoreProvider);
+
+    if (!hasMore || isLoadingMore) {
+      return;
+    }
+
+    ref.read(articleIsLoadingMoreProvider.notifier).state = true;
+    ref.read(articleOffsetProvider.notifier).state =
+        ref.read(articleOffsetProvider) + _articlesPageSize;
   }
 
   @override
   Widget build(BuildContext context) {
-    // ONLY READ here. No ".state =" or "ref.read(...).state" allowed.
-    final articlesAsync = ref.watch(allArticlesProvider);
+    final offset = ref.watch(articleOffsetProvider);
+    final requestId = ref.watch(articleRequestIdProvider);
+    final loadedArticles = ref.watch(articleLoadedArticlesProvider);
+    final isLoadingMore = ref.watch(articleIsLoadingMoreProvider);
+    final hasMore = ref.watch(articleHasMoreProvider);
+    final totalArticlesAsync = ref.watch(
+      articlesCountInCategoryProvider(widget.category),
+    );
+    final totalArticles = totalArticlesAsync.valueOrNull;
+    final hasMoreFromCount = totalArticles == null
+        ? hasMore
+        : loadedArticles.length < totalArticles;
+    final paginatedProvider = paginatedArticlesProvider(
+      ArticlePageQuery(
+        limit: _articlesPageSize,
+        offset: offset,
+        category: widget.category,
+        requestId: requestId,
+      ),
+    );
+    final articlesAsync = ref.watch(paginatedProvider);
+
+    ref.listen<AsyncValue<List<ArticleLocal>>>(paginatedProvider, (
+      previous,
+      next,
+    ) {
+      final currentCategory = ref.read(articleCurrentCategoryProvider);
+      final currentRequestId = ref.read(articleRequestIdProvider);
+
+      if (currentCategory != widget.category || currentRequestId != requestId) {
+        return;
+      }
+
+      if (next.isLoading && offset > 0) {
+        _runAfterBuild(() {
+          ref.read(articleIsLoadingMoreProvider.notifier).state = true;
+        });
+        return;
+      }
+
+      if (next.hasError) {
+        _runAfterBuild(() {
+          ref.read(articleIsLoadingMoreProvider.notifier).state = false;
+        });
+        return;
+      }
+
+      next.whenData((pageArticles) {
+        final currentOffset = ref.read(articleOffsetProvider);
+        final previousArticles = currentOffset == 0
+            ? const <ArticleLocal>[]
+            : ref.read(articleLoadedArticlesProvider);
+        final loadedCount = currentOffset == 0
+            ? pageArticles.length
+            : previousArticles.length + pageArticles.length;
+        final totalArticles = ref
+            .read(articlesCountInCategoryProvider(widget.category))
+            .valueOrNull;
+
+        _runAfterBuild(() {
+          ref.read(articleLoadedArticlesProvider.notifier).state =
+              <ArticleLocal>[...previousArticles, ...pageArticles];
+          ref
+              .read(articleHasMoreProvider.notifier)
+              .state = totalArticles == null
+              ? pageArticles.length == _articlesPageSize
+              : loadedCount < totalArticles;
+          ref.read(articleIsLoadingMoreProvider.notifier).state = false;
+        });
+      });
+    });
 
     return Scaffold(
       appBar: AppBar(
@@ -34,60 +166,103 @@ class _ArticleListScreenState extends ConsumerState<ArticleListScreen> {
         foregroundColor: const Color(0xFFFFB300),
       ),
       body: articlesAsync.when(
-        data: (articles) {
-          final filtered = articles.where((a) => 
-            a.category?.trim().toLowerCase() == widget.category.trim().toLowerCase()
-          ).toList();
-
-          if (filtered.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.menu_book_rounded, size: 80, color: const Color(0xFF1A237E).withValues(alpha: 0.2)),
-                  const SizedBox(height: 16),
-                  Text('No articles in ${widget.category} yet'),
-                ],
-              ),
+        data: (_) => _buildArticleList(
+          articles: loadedArticles,
+          isLoadingMore: isLoadingMore,
+          hasMore: hasMoreFromCount,
+        ),
+        loading: () {
+          if (offset > 0 && loadedArticles.isNotEmpty) {
+            return _buildArticleList(
+              articles: loadedArticles,
+              isLoadingMore: true,
+              hasMore: hasMoreFromCount,
             );
           }
 
-          return ListView.builder(
-            itemCount: filtered.length,
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            itemBuilder: (context, index) {
-              final article = filtered[index];
-              return Card(
-                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: ListTile(
-                  title: Text(article.title, style: const TextStyle(fontWeight: FontWeight.bold)),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => Navigator.push(
-                    context, 
-                    MaterialPageRoute(builder: (c) => ArticleDetailScreen(article: article))
-                  ),
-                ),
-              );
-            },
-          );
+          return const Center(child: CircularProgressIndicator());
         },
-        loading: () => _buildShimmer(),
-        error: (err, stack) => Center(child: Text('Error: $err')),
+        error: (err, stack) {
+          if (loadedArticles.isNotEmpty) {
+            return _buildArticleList(
+              articles: loadedArticles,
+              isLoadingMore: false,
+              hasMore: hasMoreFromCount,
+              errorMessage: 'Unable to load articles.',
+            );
+          }
+
+          return Center(child: Text('Error: $err'));
+        },
       ),
     );
   }
 
-  Widget _buildShimmer() {
-    return ListView.builder(
-      itemCount: 6,
-      itemBuilder: (context, index) => Shimmer.fromColors(
-        baseColor: Colors.grey[300]!,
-        highlightColor: Colors.grey[100]!,
-        child: ListTile(
-          leading: const CircleAvatar(backgroundColor: Colors.white),
-          title: Container(height: 15, width: 100, color: Colors.white),
+  Widget _buildArticleList({
+    required List<ArticleLocal> articles,
+    required bool isLoadingMore,
+    required bool hasMore,
+    String? errorMessage,
+  }) {
+    final showLoadingMore = isLoadingMore && hasMore;
+    final showErrorMessage = errorMessage != null && !showLoadingMore;
+    final itemCount =
+        articles.length + (showLoadingMore || showErrorMessage ? 1 : 0);
+
+    if (articles.isEmpty && !showLoadingMore && !showErrorMessage) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.menu_book_rounded,
+              size: 80,
+              color: const Color(0xFF1A237E).withValues(alpha: 0.2),
+            ),
+            const SizedBox(height: 16),
+            Text('No articles in ${widget.category} yet'),
+          ],
         ),
-      ),
+      );
+    }
+
+    return ListView.builder(
+      controller: _scrollController,
+      itemCount: itemCount,
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      itemBuilder: (context, index) {
+        if (index == articles.length) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 20),
+            child: showLoadingMore
+                ? const Center(child: CircularProgressIndicator())
+                : Center(
+                    child: Text(
+                      errorMessage ?? '',
+                      style: const TextStyle(color: Colors.red),
+                    ),
+                  ),
+          );
+        }
+
+        final article = articles[index];
+        return Card(
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: ListTile(
+            title: Text(
+              article.title,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (c) => ArticleDetailScreen(article: article),
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }
