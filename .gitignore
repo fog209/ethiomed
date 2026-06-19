@@ -49,3 +49,7 @@ app.*.map.json
 
 # fdb session state
 .fdb/
+
+**/android/key.properties
+**/*.jks
+**/*.keystore
