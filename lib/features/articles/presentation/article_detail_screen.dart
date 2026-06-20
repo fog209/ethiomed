@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/database/app_database.dart';
+import '../../../features/progress/streak_notifier.dart';
 import '../../../features/quiz/weakness_service.dart';
 
 class _ClinicalSectionConfig {
@@ -25,29 +26,47 @@ class _ClinicalSectionConfig {
   final bool initiallyExpanded;
 }
 
-class ArticleDetailScreen extends ConsumerWidget {
+class ArticleDetailScreen extends ConsumerStatefulWidget {
   final ArticleLocal article;
 
   const ArticleDetailScreen({super.key, required this.article});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ArticleDetailScreen> createState() =>
+      _ArticleDetailScreenState();
+}
+
+class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      if (!mounted) {
+        return;
+      }
+      ref.read(streakNotifierProvider.notifier).recordArticleRead();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final ref = this.ref;
     final db = ref.watch(databaseProvider);
-    final weakFields = ref.watch(weakFieldsProvider(article.id));
-    final sections = _decodeSections(article.content);
-    final imageUrl = article.imageUrl;
-    final videoUrl = article.videoUrl;
+    final weakFields = ref.watch(weakFieldsProvider(widget.article.id));
+    final sections = _decodeSections(widget.article.content);
+    final imageUrl = widget.article.imageUrl;
+    final videoUrl = widget.article.videoUrl;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(article.title),
+        title: Text(widget.article.title),
         backgroundColor: const Color(0xFF1A237E),
         foregroundColor: const Color(0xFFFFB300),
         actions: [
           StreamBuilder<List<Bookmark>>(
             stream: (db.select(
               db.bookmarks,
-            )..where((t) => t.articleId.equals(article.id))).watch(),
+            )..where((t) => t.articleId.equals(widget.article.id))).watch(),
             builder: (context, snapshot) {
               final bookmarkList = snapshot.data;
               final isBookmarked =
@@ -58,14 +77,16 @@ class ArticleDetailScreen extends ConsumerWidget {
                 ),
                 onPressed: () async {
                   if (isBookmarked) {
-                    await (db.delete(
-                      db.bookmarks,
-                    )..where((t) => t.articleId.equals(article.id))).go();
+                    await (db.delete(db.bookmarks)
+                          ..where((t) => t.articleId.equals(widget.article.id)))
+                        .go();
                   } else {
                     await db
                         .into(db.bookmarks)
                         .insert(
-                          BookmarksCompanion.insert(articleId: article.id),
+                          BookmarksCompanion.insert(
+                            articleId: widget.article.id,
+                          ),
                         );
                   }
                 },
@@ -106,7 +127,7 @@ class ArticleDetailScreen extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
-                article.category?.toUpperCase() ?? 'GENERAL',
+                widget.article.category?.toUpperCase() ?? 'GENERAL',
                 style: const TextStyle(
                   color: Color(0xFF1A237E),
                   fontWeight: FontWeight.bold,

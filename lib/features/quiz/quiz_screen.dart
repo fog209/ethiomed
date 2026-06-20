@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/config/app_config.dart';
+import '../../../features/progress/streak_notifier.dart';
 import 'quiz_notifier.dart';
 import 'quiz_option.dart';
 
@@ -282,7 +283,13 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
     int quality,
     QuizNotifier notifier,
   ) async {
+    final selectedOption = notifier.selectedOption;
+    final isCorrect =
+        selectedOption != null &&
+        question.correctOption == selectedOption.name.toUpperCase();
+
     await notifier.recordReview(question.id, quality);
+    await ref.read(streakNotifierProvider.notifier).recordQuizResult(isCorrect);
     if (!mounted) {
       return;
     }

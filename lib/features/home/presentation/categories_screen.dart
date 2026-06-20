@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shimmer/shimmer.dart';
 import '../../../core/config/app_config.dart';
+import '../../../features/progress/streak_notifier.dart';
 import '../../articles/data/article_repository.dart';
 import 'article_list_screen.dart';
 
@@ -9,6 +11,8 @@ class CategoriesScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final streak = ref.watch(streakNotifierProvider);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('WardReady Specialties'),
@@ -18,6 +22,15 @@ class CategoriesScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         children: [
+          streak.when(
+            data: _buildStudyStatsRow,
+            loading: _buildStudyStatsLoadingRow,
+            error: (_, _) => _buildStudyStatsRow(const (
+              currentStreak: 0,
+              totalArticles: 0,
+              accuracy: 0.0,
+            )),
+          ),
           _buildSectionHeader('Clinical'),
           _buildCategoryGrid(AppConfig.clinicalCategories),
           const SizedBox(height: 24),
@@ -41,6 +54,73 @@ class CategoriesScreen extends ConsumerWidget {
       ),
     );
   }
+
+  Widget _buildStudyStatsRow(StudyStreakStats stats) {
+    return _buildStudyStatsContainer(
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        alignment: Alignment.centerLeft,
+        child: RichText(
+          text: TextSpan(
+            style: const TextStyle(color: Colors.white, fontSize: 14),
+            children: [
+              const TextSpan(text: '🔥 Day '),
+              TextSpan(
+                text: stats.currentStreak.toString(),
+                style: _goldNumberStyle,
+              ),
+              const TextSpan(text: ' Streak · '),
+              TextSpan(
+                text: '${stats.totalArticles}/441',
+                style: _goldNumberStyle,
+              ),
+              const TextSpan(text: ' Articles · '),
+              TextSpan(
+                text: '${stats.accuracy.round()}%',
+                style: _goldNumberStyle,
+              ),
+              const TextSpan(text: ' Quiz Accuracy'),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStudyStatsLoadingRow() {
+    return Shimmer.fromColors(
+      baseColor: Colors.white24,
+      highlightColor: Colors.white70,
+      child: _buildStudyStatsContainer(
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.centerLeft,
+          child: const Text(
+            '🔥 Day 0 Streak · 0/441 Articles · 0% Quiz Accuracy',
+            style: TextStyle(color: Colors.white, fontSize: 14),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStudyStatsContainer({required Widget child}) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: const BoxDecoration(
+        color: Color(0xFF1A237E),
+        borderRadius: BorderRadius.all(Radius.circular(16)),
+      ),
+      child: child,
+    );
+  }
+
+  static const TextStyle _goldNumberStyle = TextStyle(
+    color: Color(0xFFF9A825),
+    fontWeight: FontWeight.bold,
+  );
 
   Widget _buildSectionHeader(String title) {
     return Padding(
