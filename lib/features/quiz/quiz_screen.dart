@@ -19,12 +19,6 @@ class QuizScreen extends ConsumerStatefulWidget {
 
 class _QuizScreenState extends ConsumerState<QuizScreen> {
   @override
-  void dispose() {
-    ref.read(quizNotifierProvider(_defaultQuizCategory).notifier).reset();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final state = ref.watch(quizNotifierProvider(_defaultQuizCategory));
     final notifier = ref.read(
@@ -33,7 +27,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        leading: CloseButton(onPressed: () => Navigator.of(context).pop()),
+        leading: CloseButton(onPressed: () => _resetQuizAndPop(context)),
         title: Text(notifier.scoreText),
         backgroundColor: _navy,
         foregroundColor: _gold,
@@ -295,11 +289,16 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
     }
 
     if (notifier.isLastQuestion) {
-      Navigator.of(context).pop();
+      _resetQuizAndPop(context);
       return;
     }
 
     await notifier.nextQuestion();
+  }
+
+  void _resetQuizAndPop(BuildContext context) {
+    ref.read(quizNotifierProvider(_defaultQuizCategory).notifier).reset();
+    Navigator.of(context).pop();
   }
 
   String _formatNextReview(int? interval) {
