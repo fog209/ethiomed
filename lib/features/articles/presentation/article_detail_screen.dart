@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/database/app_database.dart';
+import '../../../features/quiz/weakness_service.dart';
 
 class _ClinicalSectionConfig {
   const _ClinicalSectionConfig({
@@ -32,6 +33,7 @@ class ArticleDetailScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final db = ref.watch(databaseProvider);
+    final weakFields = ref.watch(weakFieldsProvider(article.id));
     final sections = _decodeSections(article.content);
     final imageUrl = article.imageUrl;
     final videoUrl = article.videoUrl;
@@ -113,7 +115,10 @@ class ArticleDetailScreen extends ConsumerWidget {
               ),
             ),
 
-            ..._buildClinicalSections(sections),
+            ..._buildClinicalSections(
+              sections,
+              weakFields.value ?? const <String>{},
+            ),
 
             const SizedBox(height: 20),
 
@@ -162,6 +167,11 @@ class ArticleDetailScreen extends ConsumerWidget {
     'mnemonics',
     'examTraps',
   ];
+
+  static const _nonHighlightableWeakFields = <String>{
+    'ethiopianContext',
+    'mnemonics',
+  };
 
   static const _clinicalSections = <String, _ClinicalSectionConfig>{
     'definition': _ClinicalSectionConfig(
@@ -265,7 +275,10 @@ class ArticleDetailScreen extends ConsumerWidget {
     ),
   };
 
-  List<Widget> _buildClinicalSections(Map<String, Object?> sections) {
+  List<Widget> _buildClinicalSections(
+    Map<String, Object?> sections,
+    Set<String> weakFields,
+  ) {
     return _clinicalSectionOrder
         .map((key) {
           final config = _clinicalSections[key];
@@ -278,6 +291,10 @@ class ArticleDetailScreen extends ConsumerWidget {
             return null;
           }
 
+          final isWeak =
+              weakFields.contains(key) &&
+              !_nonHighlightableWeakFields.contains(key);
+
           return _buildMarkdownExpansionTile(
             title: config.title,
             content: content,
@@ -285,10 +302,48 @@ class ArticleDetailScreen extends ConsumerWidget {
             initiallyExpanded: config.initiallyExpanded,
             backgroundColor: config.backgroundColor,
             borderColor: config.borderColor,
+            isWeak: isWeak,
           );
         })
         .whereType<Widget>()
         .toList(growable: false);
+  }
+
+  Widget _buildWeakSectionHeader(String title) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFF8E1),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(
+            Icons.warning_amber_rounded,
+            color: Colors.amber,
+            size: 16,
+          ),
+          const SizedBox(width: 4),
+          const Text(
+            ' Review this section',
+            style: TextStyle(
+              color: Colors.amber,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(width: 4),
+          Text(
+            title,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF1A237E),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildMarkdownExpansionTile({
@@ -298,6 +353,7 @@ class ArticleDetailScreen extends ConsumerWidget {
     required bool initiallyExpanded,
     required Color backgroundColor,
     required Color borderColor,
+    bool isWeak = false,
   }) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -311,13 +367,7 @@ class ArticleDetailScreen extends ConsumerWidget {
         collapsedBackgroundColor: backgroundColor,
         initiallyExpanded: initiallyExpanded,
         leading: Icon(icon, color: const Color(0xFF1A237E)),
-        title: Text(
-          title,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF1A237E),
-          ),
-        ),
+        title: isWeak ? _buildWeakSectionHeader(title) : Text(title),
         children: [
           Padding(
             padding: const EdgeInsets.all(16.0),
