@@ -7,6 +7,78 @@ import '../../../features/progress/streak_notifier.dart';
 import '../../articles/data/article_repository.dart';
 import 'article_list_screen.dart';
 
+int _categoryProgressRead(CategoryProgress? progress) => progress?.read ?? 0;
+
+int _categoryProgressTotal(CategoryProgress? progress) => progress?.total ?? 0;
+
+double _categoryProgressValue(CategoryProgress? progress) {
+  final read = _categoryProgressRead(progress);
+  final total = _categoryProgressTotal(progress);
+  if (total == 0) {
+    return 0;
+  }
+
+  return (read / total).clamp(0.0, 1.0).toDouble();
+}
+
+class _CategoryTile extends ConsumerWidget {
+  const _CategoryTile({required this.name, required this.icon});
+
+  final String name;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final progress = ref.watch(categoryProgressProvider(name));
+
+    return InkWell(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ArticleListScreen(category: name),
+          ),
+        );
+      },
+      child: Card(
+        elevation: 4,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 40, color: const Color(0xFF1A237E)),
+            const SizedBox(height: 10),
+            Text(
+              name,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF1A237E),
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              '${_categoryProgressRead(progress.value)}/${_categoryProgressTotal(progress.value)}',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const Spacer(),
+            LinearProgressIndicator(
+              minHeight: 3,
+              backgroundColor: const Color(0xFF1A237E).withValues(alpha: 0.2),
+              color: const Color(0xFFF9A825),
+              value: _categoryProgressValue(progress.value),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class CategoriesScreen extends ConsumerWidget {
   const CategoriesScreen({super.key});
 
@@ -137,20 +209,6 @@ class CategoriesScreen extends ConsumerWidget {
     );
   }
 
-  int _progressRead(CategoryProgress? progress) => progress?.read ?? 0;
-
-  int _progressTotal(CategoryProgress? progress) => progress?.total ?? 0;
-
-  double _progressValue(CategoryProgress? progress) {
-    final read = _progressRead(progress);
-    final total = _progressTotal(progress);
-    if (total == 0) {
-      return 0;
-    }
-
-    return (read / total).clamp(0.0, 1.0).toDouble();
-  }
-
   Widget _buildCategoryGrid(List<Map<String, Object?>> categories) {
     return GridView.builder(
       shrinkWrap: true,
@@ -166,57 +224,8 @@ class CategoriesScreen extends ConsumerWidget {
         final category = categories[index];
         final name = category['name']?.toString() ?? '';
         final icon = category['icon'] as IconData? ?? Icons.category;
-        final progress = ref.watch(categoryProgressProvider(name));
 
-        return InkWell(
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => ArticleListScreen(category: name),
-              ),
-            );
-          },
-          child: Card(
-            elevation: 4,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(15),
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(icon, size: 40, color: const Color(0xFF1A237E)),
-                const SizedBox(height: 10),
-                Text(
-                  name,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF1A237E),
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  '${_progressRead(progress.value)}/${_progressTotal(progress.value)}',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const Spacer(),
-                LinearProgressIndicator(
-                  minHeight: 3,
-                  backgroundColor: const Color(
-                    0xFF1A237E,
-                  ).withValues(alpha: 0.2),
-                  color: const Color(0xFFF9A825),
-                  value: _progressValue(progress.value),
-                ),
-              ],
-            ),
-          ),
-        );
+        return _CategoryTile(name: name, icon: icon);
       },
     );
   }
