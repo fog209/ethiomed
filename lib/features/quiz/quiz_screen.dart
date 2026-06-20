@@ -6,6 +6,8 @@ import 'quiz_notifier.dart';
 import 'quiz_option.dart';
 
 const _defaultQuizCategory = AppConfig.internalMedicineCategory;
+const _navy = Color(0xFF1A237E);
+const _gold = Color(0xFFF9A825);
 
 class QuizScreen extends ConsumerStatefulWidget {
   const QuizScreen({super.key});
@@ -30,10 +32,10 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        leading: const CloseButton(),
-        title: const Text('MCQ Practice'),
-        backgroundColor: const Color(0xFF1A237E),
-        foregroundColor: const Color(0xFFFFB300),
+        leading: CloseButton(onPressed: () => Navigator.of(context).pop()),
+        title: Text(notifier.scoreText),
+        backgroundColor: _navy,
+        foregroundColor: _gold,
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -58,7 +60,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.quiz_outlined, size: 72, color: Color(0xFF1A237E)),
+          const Icon(Icons.quiz_outlined, size: 72, color: _navy),
           const SizedBox(height: 16),
           const Text(
             'No practice questions downloaded yet.',
@@ -71,8 +73,8 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
             height: 52,
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFFFB300),
-                foregroundColor: const Color(0xFF1A237E),
+                backgroundColor: _gold,
+                foregroundColor: _navy,
               ),
               onPressed: notifier.syncQuestions,
               child: const Text('Download Questions'),
@@ -89,7 +91,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.error_outline, size: 72, color: Color(0xFF1A237E)),
+          const Icon(Icons.error_outline, size: 72, color: _navy),
           const SizedBox(height: 16),
           const Text(
             'Unable to load quiz questions.',
@@ -102,8 +104,8 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
             height: 52,
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFFFB300),
-                foregroundColor: const Color(0xFF1A237E),
+                backgroundColor: _gold,
+                foregroundColor: _navy,
               ),
               onPressed: notifier.syncQuestions,
               child: const Text('Try Again'),
@@ -173,29 +175,164 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
             decoration: BoxDecoration(
               color: const Color(0xFFFFF8E1),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: const Color(0xFFFFB300)),
+              border: Border.all(color: _gold),
             ),
             child: Text(
               'Explanation: ${question.explanation}',
               style: const TextStyle(height: 1.5),
             ),
           ),
+          const SizedBox(height: 16),
+          _buildSm2Buttons(question, notifier),
         ],
-        SizedBox(
-          height: 52,
-          child: ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFFFB300),
-              foregroundColor: const Color(0xFF1A237E),
-            ),
-            onPressed: notifier.isLastQuestion
-                ? () => Navigator.of(context).pop()
-                : notifier.nextQuestion,
-            child: Text(notifier.isLastQuestion ? 'End Quiz' : 'Next Question'),
-          ),
-        ),
       ],
     );
+  }
+
+  Widget _buildSm2Buttons(QuizTableData question, QuizNotifier notifier) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: _buildSm2Button(
+                label: 'Again',
+                quality: 0,
+                backgroundColor: const Color(0xFFD32F2F),
+                foregroundColor: Colors.white,
+                question: question,
+                notifier: notifier,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: _buildSm2Button(
+                label: 'Hard',
+                quality: 2,
+                backgroundColor: const Color(0xFFF57C00),
+                foregroundColor: Colors.white,
+                question: question,
+                notifier: notifier,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: _buildSm2Button(
+                label: 'Good',
+                quality: 4,
+                backgroundColor: _navy,
+                foregroundColor: Colors.white,
+                question: question,
+                notifier: notifier,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: _buildSm2Button(
+                label: 'Easy',
+                quality: 5,
+                backgroundColor: _gold,
+                foregroundColor: _navy,
+                question: question,
+                notifier: notifier,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        _buildNextReviewLabel(notifier.lastReviewInterval),
+      ],
+    );
+  }
+
+  Widget _buildSm2Button({
+    required String label,
+    required int quality,
+    required Color backgroundColor,
+    required Color foregroundColor,
+    required QuizTableData question,
+    required QuizNotifier notifier,
+  }) {
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: backgroundColor,
+        foregroundColor: foregroundColor,
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+        minimumSize: const Size(0, 48),
+      ),
+      onPressed: notifier.isRecordingReview
+          ? null
+          : () => _recordReviewAndAdvance(question, quality, notifier),
+      child: Text(label),
+    );
+  }
+
+  Widget _buildNextReviewLabel(int? interval) {
+    return Text(
+      'Next review: ${_formatNextReview(interval)}',
+      textAlign: TextAlign.center,
+      style: const TextStyle(color: _navy, fontWeight: FontWeight.w600),
+    );
+  }
+
+  Future<void> _recordReviewAndAdvance(
+    QuizTableData question,
+    int quality,
+    QuizNotifier notifier,
+  ) async {
+    await notifier.recordReview(question.id, quality);
+    if (!mounted) {
+      return;
+    }
+
+    if (notifier.isLastQuestion) {
+      Navigator.of(context).pop();
+      return;
+    }
+
+    await notifier.nextQuestion();
+  }
+
+  String _formatNextReview(int? interval) {
+    if (interval == null) {
+      return '—';
+    }
+
+    if (interval <= 0) {
+      return 'today';
+    }
+
+    if (interval == 1) {
+      return 'tomorrow';
+    }
+
+    if (interval <= 7) {
+      return 'in $interval days';
+    }
+
+    final due = DateTime.now().add(Duration(days: interval));
+    return 'in $interval days (${_formatMonthDay(due)})';
+  }
+
+  String _formatMonthDay(DateTime date) {
+    const months = <String>[
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+
+    return '${months[date.month - 1]} ${date.day}';
   }
 
   Widget _buildQuestionHeader(QuizTableData question) {
@@ -209,7 +346,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
               child: Text(
                 question.category.isEmpty ? 'Practice' : question.category,
                 style: const TextStyle(
-                  color: Color(0xFFFFB300),
+                  color: _gold,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -226,7 +363,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
           style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: Color(0xFF1A237E),
+            color: _navy,
           ),
         ),
       ],
@@ -244,7 +381,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
     final isCorrectRevealed = isCorrectOption && isAnswerRevealed;
     final isIncorrectSelection = isSelectedOption && !isCorrectOption;
     final borderColor = isCorrectRevealed
-        ? const Color(0xFFFFB300)
+        ? _gold
         : isIncorrectSelection
         ? const Color(0xFFD32F2F)
         : Colors.grey.shade300;
@@ -264,7 +401,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
           child: Row(
             children: [
               CircleAvatar(
-                backgroundColor: const Color(0xFF1A237E),
+                backgroundColor: _navy,
                 foregroundColor: Colors.white,
                 child: Text(label),
               ),
