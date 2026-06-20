@@ -87,6 +87,54 @@ class AppDatabase extends _$AppDatabase {
       },
     );
   }
+
+  Future<int> countArticlesByCategory(String category) async {
+    final rows = await customSelect(
+      'SELECT COUNT(*) AS count FROM articles WHERE category = ?',
+      variables: [Variable(category)],
+    ).get();
+
+    if (rows.isEmpty) {
+      return 0;
+    }
+
+    return rows.first.read<int>('count');
+  }
+
+  Future<int> countReadArticlesByCategory(String category) async {
+    await _ensureViewHistoryTable();
+    final rows = await customSelect(
+      '''
+      SELECT COUNT(DISTINCT vh.article_id) AS count
+      FROM view_history vh
+      JOIN articles a ON a.id = vh.article_id
+      WHERE a.category = ?
+      ''',
+      variables: [Variable(category)],
+    ).get();
+
+    if (rows.isEmpty) {
+      return 0;
+    }
+
+    return rows.first.read<int>('count');
+  }
+
+  Future<void> _ensureViewHistoryTable() async {
+    await customStatement('''
+      CREATE TABLE IF NOT EXISTS view_history (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        article_id TEXT NOT NULL,
+        opened_at TEXT NOT NULL DEFAULT ''
+      )
+    ''');
+    await customStatement(
+      'ALTER TABLE view_history ADD COLUMN IF NOT EXISTS article_id TEXT',
+    );
+    await customStatement(
+      'ALTER TABLE view_history ADD COLUMN IF NOT EXISTS opened_at TEXT NOT NULL DEFAULT ""',
+    );
+  }
 }
 
 LazyDatabase _openConnection() {
