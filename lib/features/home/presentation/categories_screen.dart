@@ -94,22 +94,10 @@ class CategoriesScreen extends ConsumerWidget {
         backgroundColor: const Color(0xFF1A237E),
         foregroundColor: const Color(0xFFFFB300),
       ),
-      body: ListView(
+      body: ListView.builder(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        children: [
-          streak.when(
-            data: _buildStudyStatsRow,
-            loading: _buildStudyStatsLoadingRow,
-            error: (_, _) => _buildStudyStatsErrorRow(ref),
-          ),
-          if (streak.isLoading) _buildShimmerCategoryGrid(),
-          _buildSectionHeader('Clinical'),
-          _buildCategoryGrid(AppConfig.clinicalCategories),
-          const SizedBox(height: 24),
-          _buildSectionHeader('Preclinical'),
-          _buildCategoryGrid(AppConfig.preclinicalCategories),
-          const SizedBox(height: 80),
-        ],
+        itemCount: _buildBodyItems(streak, ref).length,
+        itemBuilder: (context, index) => _buildBodyItems(streak, ref)[index],
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: const Color(0xFFFFB300),
@@ -125,6 +113,23 @@ class CategoriesScreen extends ConsumerWidget {
         child: const Icon(Icons.sync, color: Color(0xFF1A237E)),
       ),
     );
+  }
+
+  List<Widget> _buildBodyItems(AsyncValue<StudyStreakStats> streak, WidgetRef ref) {
+    return [
+      streak.when(
+        data: _buildStudyStatsRow,
+        loading: _buildStudyStatsLoadingRow,
+        error: (_, _) => _buildStudyStatsErrorRow(ref),
+      ),
+      if (streak.isLoading) _buildShimmerCategoryGrid(),
+      _buildSectionHeader('Clinical'),
+      _buildCategoryGrid(AppConfig.clinicalCategories),
+      const SizedBox(height: 24),
+      _buildSectionHeader('Preclinical'),
+      _buildCategoryGrid(AppConfig.preclinicalCategories),
+      const SizedBox(height: 80),
+    ];
   }
 
   Widget _buildStudyStatsRow(StudyStreakStats stats) {

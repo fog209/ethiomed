@@ -117,16 +117,70 @@ class _ArticleListScreenState extends ConsumerState<ArticleListScreen> {
     );
     final articlesAsync = ref.watch(paginatedProvider);
 
+    _listenToPaginationChanges(context, paginatedProvider, requestId, offset);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.category),
+        backgroundColor: const Color(0xFF1A237E),
+        foregroundColor: const Color(0xFFFFB300),
+        actions: [
+          IconButton(
+            tooltip: 'High-Yield Mode',
+            color: highYieldMode ? const Color(0xFFF9A825) : Colors.grey,
+            onPressed: () {
+              ref.read(highYieldModeProvider.notifier).state = !highYieldMode;
+            },
+            icon: Icon(highYieldMode ? Icons.star : Icons.star_border),
+          ),
+        ],
+      ),
+      body: articlesAsync.when(
+        data: (_) => _buildArticleList(
+          articles: loadedArticles,
+          isLoadingMore: isLoadingMore,
+          hasMore: hasMoreFromCount,
+        ),
+        loading: () {
+          if (offset > 0 && loadedArticles.isNotEmpty) {
+            return _buildArticleList(
+              articles: loadedArticles,
+              isLoadingMore: true,
+              hasMore: hasMoreFromCount,
+            );
+          }
+
+          return _buildShimmerArticleList();
+        },
+        error: (err, stack) {
+          if (loadedArticles.isNotEmpty) {
+            return _buildArticleList(
+              articles: loadedArticles,
+              isLoadingMore: false,
+              hasMore: hasMoreFromCount,
+              errorMessage: 'Unable to load articles.',
+            );
+          }
+
+          return Center(child: Text('Error: $err'));
+        },
+      ),
+    );
+  }
+
+  void _listenToPaginationChanges(
+    BuildContext context,
+    ProviderListenable<AsyncValue<List<ArticleLocal>>> provider,
+    int requestId,
+    int offset,
+  ) {
     ref.listen<bool>(highYieldModeProvider, (previous, next) {
       if (previous != next) {
         _resetPagination();
       }
     });
 
-    ref.listen<AsyncValue<List<ArticleLocal>>>(paginatedProvider, (
-      previous,
-      next,
-    ) {
+    ref.listen<AsyncValue<List<ArticleLocal>>>(provider, (previous, next) {
       final currentCategory = ref.read(articleCurrentCategoryProvider);
       final currentRequestId = ref.read(articleRequestIdProvider);
 
@@ -186,54 +240,6 @@ class _ArticleListScreenState extends ConsumerState<ArticleListScreen> {
         });
       });
     });
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.category),
-        backgroundColor: const Color(0xFF1A237E),
-        foregroundColor: const Color(0xFFFFB300),
-        actions: [
-          IconButton(
-            tooltip: 'High-Yield Mode',
-            color: highYieldMode ? const Color(0xFFF9A825) : Colors.grey,
-            onPressed: () {
-              ref.read(highYieldModeProvider.notifier).state = !highYieldMode;
-            },
-            icon: Icon(highYieldMode ? Icons.star : Icons.star_border),
-          ),
-        ],
-      ),
-      body: articlesAsync.when(
-        data: (_) => _buildArticleList(
-          articles: loadedArticles,
-          isLoadingMore: isLoadingMore,
-          hasMore: hasMoreFromCount,
-        ),
-        loading: () {
-          if (offset > 0 && loadedArticles.isNotEmpty) {
-            return _buildArticleList(
-              articles: loadedArticles,
-              isLoadingMore: true,
-              hasMore: hasMoreFromCount,
-            );
-          }
-
-          return _buildShimmerArticleList();
-        },
-        error: (err, stack) {
-          if (loadedArticles.isNotEmpty) {
-            return _buildArticleList(
-              articles: loadedArticles,
-              isLoadingMore: false,
-              hasMore: hasMoreFromCount,
-              errorMessage: 'Unable to load articles.',
-            );
-          }
-
-          return Center(child: Text('Error: $err'));
-        },
-      ),
-    );
   }
 
   Widget _buildArticleList({

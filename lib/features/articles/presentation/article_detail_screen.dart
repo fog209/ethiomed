@@ -149,78 +149,88 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (imageUrl != null && imageUrl.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 20),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: CachedNetworkImage(
-                    imageUrl: imageUrl,
-                    placeholder: (context, url) => _buildImagePlaceholder(),
-                    errorWidget: (context, url, error) => Container(
-                      color: Colors.grey[200],
-                      child: const Icon(
-                        Icons.image_not_supported,
-                        color: Colors.grey,
-                      ),
+      body: _buildBody(weakFields, highYieldMode, sections, imageUrl, videoUrl),
+    );
+  }
+
+  Widget _buildBody(
+    AsyncValue<Set<String>> weakFields,
+    bool highYieldMode,
+    Map<String, Object?> sections,
+    String? imageUrl,
+    String? videoUrl,
+  ) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (imageUrl != null && imageUrl.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 20),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: CachedNetworkImage(
+                  imageUrl: imageUrl,
+                  placeholder: (context, url) => _buildImagePlaceholder(),
+                  errorWidget: (context, url, error) => Container(
+                    color: Colors.grey[200],
+                    child: const Icon(
+                      Icons.image_not_supported,
+                      color: Colors.grey,
                     ),
                   ),
                 ),
               ),
-
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              margin: const EdgeInsets.only(bottom: 20),
-              decoration: BoxDecoration(
-                color: const Color(0xFFFFB300).withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Text(
-                widget.article.category?.toUpperCase() ?? 'GENERAL',
-                style: const TextStyle(
-                  color: Color(0xFF1A237E),
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12,
-                ),
-              ),
             ),
 
-            ..._buildClinicalSections(
-              sections,
-              weakFields.value ?? const <String>{},
-              highYieldMode,
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            margin: const EdgeInsets.only(bottom: 20),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFFB300).withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Text(
+              widget.article.category?.toUpperCase() ?? 'GENERAL',
+              style: const TextStyle(
+                color: Color(0xFF1A237E),
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+              ),
+            ),
+          ),
+
+          ..._buildClinicalSections(
+            sections,
+            weakFields.value ?? const <String>{},
+            highYieldMode,
+          ),
+
+          const SizedBox(height: 20),
+
+          if (videoUrl != null && videoUrl.isNotEmpty)
+            ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFFFB300),
+                foregroundColor: const Color(0xFF1A237E),
+                minimumSize: const Size(double.infinity, 50),
+              ),
+              icon: const Icon(Icons.play_circle_fill),
+              label: const Text('WATCH INSTRUCTOR VIDEO'),
+              onPressed: () async {
+                final url = Uri.tryParse(videoUrl);
+                if (url == null) {
+                  return;
+                }
+                if (await canLaunchUrl(url)) {
+                  await launchUrl(url, mode: LaunchMode.externalApplication);
+                }
+              },
             ),
 
-            const SizedBox(height: 20),
-
-            if (videoUrl != null && videoUrl.isNotEmpty)
-              ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFFFB300),
-                  foregroundColor: const Color(0xFF1A237E),
-                  minimumSize: const Size(double.infinity, 50),
-                ),
-                icon: const Icon(Icons.play_circle_fill),
-                label: const Text('WATCH INSTRUCTOR VIDEO'),
-                onPressed: () async {
-                  final url = Uri.tryParse(videoUrl);
-                  if (url == null) {
-                    return;
-                  }
-                  if (await canLaunchUrl(url)) {
-                    await launchUrl(url, mode: LaunchMode.externalApplication);
-                  }
-                },
-              ),
-
-            const SizedBox(height: 40),
-          ],
-        ),
+          const SizedBox(height: 40),
+        ],
       ),
     );
   }

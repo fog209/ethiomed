@@ -68,68 +68,59 @@ class _ArticleSearchScreenState extends ConsumerState<ArticleSearchScreen> {
         children: [
           SizedBox(
             height: 50,
-            child: ListView(
+            child: ListView.builder(
               scrollDirection: Axis.horizontal,
-              children: _categories
-                  .map(
-                    (category) => Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4),
-                      child: FilterChip(
-                        label: Text(category),
-                        selected: _selectedCategory == category,
-                        onSelected: (selected) {
-                          _runAfterBuild(() {
-                            setState(() {
-                              _selectedCategory = selected ? category : null;
-                            });
-                          });
-                        },
-                      ),
-                    ),
-                  )
-                  .toList(),
+              itemCount: _categories.length,
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              itemBuilder: (context, index) => _buildCategoryChip(_categories[index]),
             ),
           ),
           Expanded(
             child: _query.isEmpty
                 ? history.isEmpty
                       ? const Center(child: Text('Search for diseases...'))
-                      : ListView(
-                          children: [
-                            const ListTile(
-                              title: Text(
-                                'Recent Searches',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 12,
+                      : ListView.builder(
+                          itemCount: history.length + 2,
+                          itemBuilder: (context, index) {
+                            if (index == 0) {
+                              return const ListTile(
+                                title: Text(
+                                  'Recent Searches',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 12,
+                                  ),
                                 ),
-                              ),
-                            ),
-                            ...history.map(
-                              (historyItem) => ListTile(
-                                leading: const Icon(Icons.history),
-                                title: Text(historyItem),
-                                onTap: () {
+                              );
+                            }
+
+                            if (index == history.length + 1) {
+                              return TextButton(
+                                onPressed: () {
                                   _runAfterBuild(() {
-                                    setState(() {
-                                      _controller.text = historyItem;
-                                      _query = historyItem.toLowerCase();
-                                    });
+                                    ref
+                                        .read(searchHistoryProvider.notifier)
+                                        .clearHistory();
                                   });
                                 },
-                              ),
-                            ),
-                            TextButton(
-                              onPressed: () {
+                                child: const Text('Clear'),
+                              );
+                            }
+
+                            final historyItem = history[index - 1];
+                            return ListTile(
+                              leading: const Icon(Icons.history),
+                              title: Text(historyItem),
+                              onTap: () {
                                 _runAfterBuild(() {
-                                  ref
-                                      .read(searchHistoryProvider.notifier)
-                                      .clearHistory();
+                                  setState(() {
+                                    _controller.text = historyItem;
+                                    _query = historyItem.toLowerCase();
+                                  });
                                 });
                               },
-                              child: const Text('Clear'),
-                            ),
-                          ],
+                            );
+                          },
                         )
                 : articlesAsync.when(
                     data: (articles) {
@@ -182,6 +173,23 @@ class _ArticleSearchScreenState extends ConsumerState<ArticleSearchScreen> {
                   ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildCategoryChip(String category) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      child: FilterChip(
+        label: Text(category),
+        selected: _selectedCategory == category,
+        onSelected: (selected) {
+          _runAfterBuild(() {
+            setState(() {
+              _selectedCategory = selected ? category : null;
+            });
+          });
+        },
       ),
     );
   }
