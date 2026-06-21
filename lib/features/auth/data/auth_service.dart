@@ -54,6 +54,12 @@ class AuthController extends StateNotifier<AuthUiState> {
       );
     } on AppException catch (error) {
       state = AuthUiState(status: AuthUiStatus.error, message: error.message);
+    } catch (error) {
+      debugPrint('Auth sign in unexpected error: $error');
+      state = AuthUiState(
+        status: AuthUiStatus.error,
+        message: 'Unable to sign in. Please try again.',
+      );
     }
   }
 
@@ -78,6 +84,12 @@ class AuthController extends StateNotifier<AuthUiState> {
       );
     } on AppException catch (error) {
       state = AuthUiState(status: AuthUiStatus.error, message: error.message);
+    } catch (error) {
+      debugPrint('Auth sign up unexpected error: $error');
+      state = AuthUiState(
+        status: AuthUiStatus.error,
+        message: 'Unable to create account. Please try again.',
+      );
     }
   }
 
