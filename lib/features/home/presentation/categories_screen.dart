@@ -98,11 +98,7 @@ class CategoriesScreen extends ConsumerWidget {
           streak.when(
             data: _buildStudyStatsRow,
             loading: _buildStudyStatsLoadingRow,
-            error: (_, _) => _buildStudyStatsRow(const (
-              currentStreak: 0,
-              totalArticles: 0,
-              accuracy: 0.0,
-            )),
+            error: (_, _) => _buildStudyStatsErrorRow(ref),
           ),
           _buildSectionHeader('Clinical'),
           _buildCategoryGrid(AppConfig.clinicalCategories),
@@ -173,6 +169,33 @@ class CategoriesScreen extends ConsumerWidget {
             style: TextStyle(color: Colors.white, fontSize: 14),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildStudyStatsErrorRow(WidgetRef ref) {
+    return _buildStudyStatsContainer(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const Text(
+            'Unable to load study progress.',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 8),
+          TextButton(
+            onPressed: () => ref.invalidate(streakNotifierProvider),
+            child: const Text(
+              'Retry',
+              style: TextStyle(color: Color(0xFFF9A825)),
+            ),
+          ),
+        ],
       ),
     );
   }

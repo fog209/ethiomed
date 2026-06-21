@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/database/app_database.dart';
+import '../../../core/errors/app_exception.dart';
 import '../domain/models/article.dart' as model;
 
 const int _articlesPageSize = 20;
@@ -39,8 +40,10 @@ class ArticleRepository {
       }
     } on PostgrestException catch (error) {
       debugPrint('Sync database error: ${error.message}');
+      throw AppException(error.message);
     } catch (error) {
       debugPrint('Sync Error: $error');
+      throw AppException('Unable to sync articles. Please try again.');
     }
   }
 
