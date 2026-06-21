@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/database/app_database.dart';
 import '../../../core/errors/app_exception.dart';
+import '../../../core/services/notification_service.dart';
 
 class SpacedRepetitionReviewResult {
   const SpacedRepetitionReviewResult({
@@ -100,6 +101,16 @@ class SpacedRepetitionService {
             )
             .get();
 
+        try {
+          final dueCount = await _countDueCardsForDate(schedule.dueAt);
+          await NotificationService().scheduleDueReminder(
+            schedule.dueAt,
+            dueCount,
+          );
+        } catch (error) {
+          debugPrint('Unable to schedule due-card reminder: $error');
+        }
+
         return SpacedRepetitionReviewResult(
           interval: schedule.interval,
           dueAt: schedule.dueAt,
@@ -109,6 +120,24 @@ class SpacedRepetitionService {
       debugPrint('Spaced repetition review error: $error');
       throw AppException('Unable to record spaced repetition review.');
     }
+  }
+
+  Future<int> _countDueCardsForDate(DateTime date) async {
+    final startOfDay = DateTime(date.year, date.month, date.day);
+    final endOfDay = startOfDay.add(const Duration(days: 1));
+    final rows = await _db
+        .customSelect(
+          '''
+          SELECT COUNT(*) AS count
+          FROM quiz_table
+          WHERE next_due_at IS NULL
+             OR (next_due_at >= ? AND next_due_at < ?)
+          ''',
+          variables: [Variable(startOfDay), Variable(endOfDay)],
+        )
+        .get();
+
+    return rows.single.read<int>('count');
   }
 
   Future<_QuizQuestionSchedule?> _getQuestion(int id) async {

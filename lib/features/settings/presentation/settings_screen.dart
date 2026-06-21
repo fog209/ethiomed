@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../../core/services/notification_service.dart';
 import '../../admin/data/admin_repository.dart';
 import '../../auth/data/auth_service.dart';
 
@@ -24,7 +25,13 @@ class SettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isAdminAsync = ref.watch(currentAdminProfileProvider);
-    final items = _buildItems(context, ref, isAdminAsync);
+    final dailyRemindersEnabled = ref.watch(dailyStudyRemindersEnabledProvider);
+    final items = _buildItems(
+      context,
+      ref,
+      isAdminAsync,
+      dailyRemindersEnabled,
+    );
 
     return Scaffold(
       appBar: AppBar(title: const Text('Settings')),
@@ -39,6 +46,7 @@ class SettingsScreen extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref,
     AsyncValue<bool> isAdminAsync,
+    bool dailyRemindersEnabled,
   ) {
     final user = ref.watch(authSessionProvider).value?.user;
 
@@ -47,6 +55,20 @@ class SettingsScreen extends ConsumerWidget {
         leading: const Icon(Icons.person, color: Color(0xFF1A237E)),
         title: const Text('Account'),
         subtitle: Text(user?.email ?? 'Not logged in'),
+      ),
+      SwitchListTile(
+        value: dailyRemindersEnabled,
+        title: const Text('Daily study reminders'),
+        subtitle: const Text('Remind me at 8:00 AM when SM-2 cards are due'),
+        secondary: const Icon(Icons.notifications, color: Color(0xFF1A237E)),
+        onChanged: (enabled) async {
+          await ref
+              .read(dailyStudyRemindersEnabledProvider.notifier)
+              .setEnabled(enabled);
+          if (!context.mounted) {
+            return;
+          }
+        },
       ),
       isAdminAsync.when(
         data: (isAdmin) {
