@@ -5,6 +5,7 @@ import 'package:drift/drift.dart' show Variable;
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -100,6 +101,9 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        leading: CloseButton(
+          onPressed: () => context.canPop() ? context.pop() : context.go('/home'),
+        ),
         title: Text(widget.article.title),
         backgroundColor: const Color(0xFF1A237E),
         foregroundColor: const Color(0xFFFFB300),

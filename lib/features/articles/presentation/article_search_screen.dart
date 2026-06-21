@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../data/article_search_provider.dart';
 import '../../../core/widgets/empty_state.dart';
-import 'article_detail_screen.dart';
 
 class ArticleSearchScreen extends ConsumerStatefulWidget {
   const ArticleSearchScreen({super.key});
@@ -152,14 +152,7 @@ class _ArticleSearchScreenState extends ConsumerState<ArticleSearchScreen> {
           leading: const Icon(Icons.search, color: Color(0xFF1A237E)),
           title: _buildHighlightedTitle(article.title, searchState.query),
           subtitle: Text(article.category ?? ''),
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => ArticleDetailScreen(article: article),
-              ),
-            );
-          },
+            onTap: () => context.push('/article-detail', extra: article),
         );
       },
     );

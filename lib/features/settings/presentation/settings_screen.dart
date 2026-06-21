@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../admin/data/admin_repository.dart';
-import '../../admin/presentation/admin_dashboard_screen.dart';
 import '../../auth/data/auth_service.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -66,14 +65,7 @@ class SettingsScreen extends ConsumerWidget {
                 title: const Text('Admin Dashboard'),
                 subtitle: const Text('Manage user subscriptions'),
                 trailing: const Icon(Icons.chevron_right),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (c) => const AdminDashboardScreen(),
-                    ),
-                  );
-                },
+                onTap: () => context.push('/admin'),
               ),
             ],
           );

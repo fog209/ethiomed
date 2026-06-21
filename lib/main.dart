@@ -5,6 +5,10 @@ import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'core/config/app_config.dart';
+import 'core/database/app_database.dart';
+import 'features/admin/presentation/admin_dashboard_screen.dart';
+import 'features/articles/presentation/article_detail_screen.dart';
+import 'features/home/presentation/article_list_screen.dart';
 import 'features/auth/presentation/login_screen.dart';
 import 'features/auth/presentation/signup_screen.dart';
 import 'features/legal/disclaimer_screen.dart';
@@ -73,6 +77,22 @@ final _router = GoRouter(
     GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
     GoRoute(path: '/signup', builder: (context, state) => const SignupScreen()),
     GoRoute(path: '/home', builder: (context, state) => const AppEntrance()),
+    GoRoute(
+      path: '/article-list/:category',
+      builder: (context, state) => ArticleListScreen(
+        category: state.pathParameters['category'] ?? '',
+      ),
+    ),
+    GoRoute(
+      path: '/article-detail',
+      builder: (context, state) => ArticleDetailScreen(
+        article: state.extra! as ArticleLocal,
+      ),
+    ),
+    GoRoute(
+      path: '/admin',
+      builder: (context, state) => const AdminDashboardScreen(),
+    ),
   ],
 );
 

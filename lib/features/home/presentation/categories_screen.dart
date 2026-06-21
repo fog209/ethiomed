@@ -2,12 +2,12 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../../core/config/app_config.dart';
 import '../../../features/progress/category_progress_provider.dart';
 import '../../../features/progress/streak_notifier.dart';
 import '../../articles/data/article_repository.dart';
-import 'article_list_screen.dart';
 
 int _categoryProgressRead(CategoryProgress? progress) => progress?.read ?? 0;
 
@@ -34,14 +34,7 @@ class _CategoryTile extends ConsumerWidget {
     final progress = ref.watch(categoryProgressProvider(name));
 
     return InkWell(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ArticleListScreen(category: name),
-          ),
-        );
-      },
+      onTap: () => context.push('/article-list/${Uri.encodeComponent(name)}'),
       child: Card(
         elevation: 4,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),

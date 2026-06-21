@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../../core/widgets/empty_state.dart';
 
@@ -328,9 +329,19 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
     await notifier.nextQuestion();
   }
 
-  void _resetQuizAndPop(BuildContext context) {
-    ref.read(quizNotifierProvider(_defaultQuizCategory).notifier).reset();
-    Navigator.of(context).pop();
+  Future<void> _resetQuizAndPop(BuildContext context) async {
+    final notifier = ref.read(quizNotifierProvider(_defaultQuizCategory).notifier);
+    await notifier.saveCurrentStateToDrift();
+    if (!context.mounted) {
+      return;
+    }
+
+    notifier.reset();
+    if (context.canPop()) {
+      context.pop();
+    } else {
+      context.go('/home');
+    }
   }
 
   String _formatNextReview(int? interval) {

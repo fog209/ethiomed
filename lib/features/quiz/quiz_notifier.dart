@@ -104,6 +104,16 @@ class QuizNotifier extends FamilyAsyncNotifier<List<QuizTableData>, String> {
     state = AsyncData(questions);
   }
 
+  Future<void> saveCurrentStateToDrift() async {
+    final question = currentQuestion;
+    final option = selectedOption;
+    if (question == null || option == null) {
+      return;
+    }
+
+    await recordReview(question.id, 0);
+  }
+
   Future<void> nextQuestion() async {
     final questions = state.value;
     if (questions == null || questions.isEmpty || isLastQuestion) {

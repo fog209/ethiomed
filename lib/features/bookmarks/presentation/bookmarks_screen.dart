@@ -1,9 +1,9 @@
 import 'package:drift/drift.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/database/app_database.dart';
 import '../../../core/widgets/empty_state.dart';
-import '../../articles/presentation/article_detail_screen.dart';
 
 class BookmarksScreen extends ConsumerWidget {
   const BookmarksScreen({super.key});
@@ -44,12 +44,7 @@ class BookmarksScreen extends ConsumerWidget {
               return ListTile(
                 leading: const Icon(Icons.bookmark, color: Color(0xFF1A237E)),
                 title: Text(article.title),
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ArticleDetailScreen(article: article),
-                  ),
-                ),
+                onTap: () => context.push('/article-detail', extra: article),
               );
             },
           );
