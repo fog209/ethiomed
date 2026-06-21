@@ -82,14 +82,17 @@ class SettingsScreen extends ConsumerWidget {
           ListTile(
             leading: const Icon(Icons.share, color: Color(0xFF1A237E)),
             title: const Text('Share WardReady'),
-            onTap: () {
+            onTap: () async {
               final box = context.findRenderObject() as RenderBox?;
               if (box != null) {
-                Share.share(
+                await Share.share(
                   _shareMessage,
                   sharePositionOrigin:
                       box.localToGlobal(Offset.zero) & box.size,
                 );
+                if (!context.mounted) {
+                  return;
+                }
               }
             },
           ),
