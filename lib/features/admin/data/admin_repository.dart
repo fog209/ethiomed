@@ -26,7 +26,7 @@ class AdminUser {
     // Defensive check for subscriptions list
     final dynamic subsData = json['subscriptions'];
     Map<String, dynamic> sub = {};
-    
+
     if (subsData is List && subsData.isNotEmpty) {
       sub = subsData.first as Map<String, dynamic>;
     } else if (subsData is Map<String, dynamic>) {
@@ -52,14 +52,14 @@ class AdminRepository {
     try {
       final response = await _supabase
           .from('profiles')
-          .select('id, full_name, email, is_admin, subscriptions(status, expiry_date)')
+          .select(
+            'id, full_name, email, is_admin, subscriptions(status, expiry_date)',
+          )
           .order('created_at', ascending: false);
 
       debugPrint('DEBUG_ADMIN: Fetched ${response.length} users');
 
-      return response
-          .map((json) => AdminUser.fromSupabase(json))
-          .toList();
+      return response.map((json) => AdminUser.fromSupabase(json)).toList();
     } on PostgrestException catch (e) {
       debugPrint('DEBUG_ADMIN: Database Error: ${e.message}');
       throw AppException(e.message);
@@ -71,7 +71,10 @@ class AdminRepository {
 
   Future<void> activateUser(String userId) async {
     try {
-      final expiry = DateTime.now().toUtc().add(const Duration(days: 365)).toIso8601String();
+      final expiry = DateTime.now()
+          .toUtc()
+          .add(const Duration(days: 365))
+          .toIso8601String();
       await _supabase.from('subscriptions').upsert({
         'user_id': userId,
         'is_active': true,
@@ -79,14 +82,20 @@ class AdminRepository {
         'expiry_date': expiry,
         'activated_at': DateTime.now().toUtc().toIso8601String(),
       });
+    } on PostgrestException catch (e) {
+      debugPrint('DEBUG_ADMIN: Activation database error: ${e.message}');
+      throw AppException(e.message);
     } catch (e) {
+      debugPrint('DEBUG_ADMIN: Activation error: $e');
       throw AppException('Activation failed.');
     }
   }
 }
 
 // PROVIDERS
-final adminRepositoryProvider = Provider<AdminRepository>((ref) => AdminRepository(Supabase.instance.client));
+final adminRepositoryProvider = Provider<AdminRepository>(
+  (ref) => AdminRepository(Supabase.instance.client),
+);
 
 final adminUsersProvider = FutureProvider<List<AdminUser>>((ref) {
   return ref.watch(adminRepositoryProvider).fetchAllUsers();

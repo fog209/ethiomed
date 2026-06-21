@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/errors/app_exception.dart';
 import '../data/admin_repository.dart';
 
 class AdminDashboardScreen extends ConsumerWidget {
@@ -68,13 +69,34 @@ class AdminDashboardScreen extends ConsumerWidget {
                     onPressed: user.isSubscribed
                         ? null
                         : () async {
-                            await ref
-                                .read(adminRepositoryProvider)
-                                .activateUser(user.userId);
-                            if (!context.mounted) {
-                              return;
+                            try {
+                              await ref
+                                  .read(adminRepositoryProvider)
+                                  .activateUser(user.userId);
+                              if (!context.mounted) {
+                                return;
+                              }
+                              ref.invalidate(adminUsersProvider);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('User activated successfully.'),
+                                  backgroundColor: Color(0xFF2E7D32),
+                                ),
+                              );
+                            } catch (error) {
+                              if (!context.mounted) {
+                                return;
+                              }
+                              final message = error is AppException
+                                  ? error.message
+                                  : 'Activation failed.';
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(message),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
                             }
-                            ref.invalidate(adminUsersProvider);
                           },
                     child: const Text('ACTIVATE'),
                   ),

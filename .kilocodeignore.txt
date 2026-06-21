@@ -13,7 +13,12 @@
 **/*.mocks.dart
 **/*.config.dart
 **/*.drift.dart
-
+*.g.dart
+build/
+.dart_tool/
+android/
+ios/
+test/
 # Build output
 build/
 .dart_tool/
