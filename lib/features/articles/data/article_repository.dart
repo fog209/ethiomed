@@ -83,7 +83,10 @@ class ArticleRepository {
 
     return (query
           ..orderBy([(table) => OrderingTerm.asc(table.title)])
-          ..limit(limit > 0 ? limit : _articlesPageSize, offset: offset < 0 ? 0 : offset))
+          ..limit(
+            limit > 0 ? limit : _articlesPageSize,
+            offset: offset < 0 ? 0 : offset,
+          ))
         .watch();
   }
 
@@ -124,8 +127,8 @@ class ArticleRepository {
         .count(
           where: (table) {
             final categoryFilter = table.category.equals(category.trim());
-            final subcategoryFilter = subcategory == null ||
-                    subcategory.trim().isEmpty
+            final subcategoryFilter =
+                subcategory == null || subcategory.trim().isEmpty
                 ? null
                 : table.subcategory.equals(subcategory.trim());
             final highYieldFilter = highYieldOnly
@@ -186,12 +189,14 @@ class ArticlePageQuery {
     required this.limit,
     required this.offset,
     this.category,
+    this.subcategory,
     required this.requestId,
   });
 
   final int limit;
   final int offset;
   final String? category;
+  final String? subcategory;
   final int requestId;
 
   @override
@@ -201,11 +206,13 @@ class ArticlePageQuery {
             other.limit == limit &&
             other.offset == offset &&
             other.category == category &&
+            other.subcategory == subcategory &&
             other.requestId == requestId;
   }
 
   @override
-  int get hashCode => Object.hash(limit, offset, category, requestId);
+  int get hashCode =>
+      Object.hash(limit, offset, category, subcategory, requestId);
 }
 
 final paginatedArticlesProvider =
@@ -215,6 +222,7 @@ final paginatedArticlesProvider =
           .watch(articleRepositoryProvider)
           .watchArticlesPaged(
             category: query.category ?? '',
+            subcategory: query.subcategory,
             limit: query.limit,
             offset: query.offset,
             highYieldOnly: highYieldOnly,
@@ -231,11 +239,42 @@ final articlesCountInCategoryProvider = FutureProvider.family<int, String>((
       .countArticlesInCategory(category, highYieldOnly: highYieldOnly);
 });
 
+class ArticleCountQuery {
+  const ArticleCountQuery({required this.category, this.subcategory});
+
+  final String category;
+  final String? subcategory;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        other is ArticleCountQuery &&
+            other.category == category &&
+            other.subcategory == subcategory;
+  }
+
+  @override
+  int get hashCode => Object.hash(category, subcategory);
+}
+
+final articlesCountInCategoryAndSubcategoryProvider =
+    FutureProvider.family<int, ArticleCountQuery>((ref, query) {
+      final highYieldOnly = ref.watch(highYieldModeProvider);
+      return ref
+          .watch(articleRepositoryProvider)
+          .countArticlesInCategory(
+            query.category,
+            subcategory: query.subcategory,
+            highYieldOnly: highYieldOnly,
+          );
+    });
+
 enum ArticleListStatus { initial, loading, ready, error }
 
 class ArticleListState {
   const ArticleListState({
     this.category,
+    this.subcategory,
     this.articles = const <ArticleLocal>[],
     this.currentPage = 0,
     this.hasMore = true,
@@ -245,6 +284,7 @@ class ArticleListState {
   });
 
   final String? category;
+  final String? subcategory;
   final List<ArticleLocal> articles;
   final int currentPage;
   final bool hasMore;
@@ -258,6 +298,7 @@ class ArticleListState {
 
   ArticleListState copyWith({
     String? category,
+    String? subcategory,
     List<ArticleLocal>? articles,
     int? currentPage,
     bool? hasMore,
@@ -267,6 +308,7 @@ class ArticleListState {
   }) {
     return ArticleListState(
       category: category ?? this.category,
+      subcategory: subcategory ?? this.subcategory,
       articles: articles ?? this.articles,
       currentPage: currentPage ?? this.currentPage,
       hasMore: hasMore ?? this.hasMore,
@@ -288,17 +330,20 @@ class ArticleListController extends StateNotifier<ArticleListState> {
 
   Future<void> loadNextPage(
     String category, {
+    String? subcategory,
     bool highYieldOnly = false,
   }) async {
     if (state.isLoadingMore || !state.hasMore) {
       return;
     }
 
-    final shouldReset = state.category != category;
+    final shouldReset =
+        state.category != category || state.subcategory != subcategory;
     final nextPage = shouldReset ? 1 : state.currentPage + 1;
 
     state = state.copyWith(
       category: category,
+      subcategory: subcategory,
       currentPage: nextPage,
       isLoadingMore: true,
       status: ArticleListStatus.loading,
@@ -311,6 +356,7 @@ class ArticleListController extends StateNotifier<ArticleListState> {
       final pageArticles = await _repository.fetchArticlesPage(
         category: category,
         page: nextPage,
+        subcategory: subcategory,
         highYieldOnly: highYieldOnly,
       );
 
@@ -318,7 +364,8 @@ class ArticleListController extends StateNotifier<ArticleListState> {
         return;
       }
 
-      final previousArticles = state.category == category
+      final previousArticles =
+          state.category == category && state.subcategory == subcategory
           ? state.articles
           : const <ArticleLocal>[];
       final combinedArticles = <ArticleLocal>[

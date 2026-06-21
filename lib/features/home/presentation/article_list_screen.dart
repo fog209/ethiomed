@@ -62,9 +62,11 @@ class _ArticleListScreenState extends ConsumerState<ArticleListScreen> {
     Future.microtask(callback);
   }
 
-  void _resetPagination() {
+  void _resetPagination({bool resetSubcategory = true}) {
     ref.read(articleCurrentCategoryProvider.notifier).state = widget.category;
-    ref.read(subcategoryFilterProvider.notifier).state = null;
+    if (resetSubcategory) {
+      ref.read(subcategoryFilterProvider.notifier).state = null;
+    }
     ref.read(articleRequestIdProvider.notifier).state =
         ref.read(articleRequestIdProvider) + 1;
     ref.read(articleOffsetProvider.notifier).state = 0;
@@ -90,10 +92,12 @@ class _ArticleListScreenState extends ConsumerState<ArticleListScreen> {
     }
 
     ref.read(articleIsLoadingMoreProvider.notifier).state = true;
+    final selectedSubcategory = ref.read(subcategoryFilterProvider);
     ref
         .read(articleListControllerProvider.notifier)
         .loadNextPage(
           widget.category,
+          subcategory: selectedSubcategory,
           highYieldOnly: ref.read(highYieldModeProvider),
         );
   }
@@ -106,20 +110,26 @@ class _ArticleListScreenState extends ConsumerState<ArticleListScreen> {
     final loadedArticles = ref.watch(articleLoadedArticlesProvider);
     final isLoadingMore = ref.watch(articleIsLoadingMoreProvider);
     final hasMore = ref.watch(articleHasMoreProvider);
+    final subcategories = subcategoriesByCategory[widget.category];
+    final selectedSubcategory = ref.watch(subcategoryFilterProvider);
     final totalArticlesAsync = ref.watch(
-      articlesCountInCategoryProvider(widget.category),
+      articlesCountInCategoryAndSubcategoryProvider(
+        ArticleCountQuery(
+          category: widget.category,
+          subcategory: selectedSubcategory,
+        ),
+      ),
     );
     final totalArticles = totalArticlesAsync.valueOrNull;
     final hasMoreFromCount = totalArticles == null
         ? hasMore
         : loadedArticles.length < totalArticles;
-    final subcategories = subcategoriesByCategory[widget.category];
-    final selectedSubcategory = ref.watch(subcategoryFilterProvider);
     final paginatedProvider = paginatedArticlesProvider(
       ArticlePageQuery(
         limit: _articlesPageSize,
         offset: offset,
         category: widget.category,
+        subcategory: selectedSubcategory,
         requestId: requestId,
       ),
     );
@@ -202,33 +212,29 @@ class _ArticleListScreenState extends ConsumerState<ArticleListScreen> {
                         },
                       ),
                       const SizedBox(width: 8),
-                      ...subcategories.map(
-                        (subcategory) {
-                          final isSelected =
-                              selectedSubcategory == subcategory;
-                          return Padding(
-                            padding: const EdgeInsets.only(right: 8),
-                            child: ChoiceChip(
-                              label: Text(subcategory),
-                              selected: isSelected,
-                              selectedColor: const Color(0xFFF9A825),
-                              backgroundColor: const Color(0xFF1A237E),
-                              labelStyle: TextStyle(
-                                color: isSelected
-                                    ? const Color(0xFF1A237E)
-                                    : Colors.white,
-                              ),
-                              onSelected: (_) {
-                                ref
-                                    .read(
-                                      subcategoryFilterProvider.notifier,
-                                    )
-                                    .state = subcategory;
-                              },
+                      ...subcategories.map((subcategory) {
+                        final isSelected = selectedSubcategory == subcategory;
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 8),
+                          child: ChoiceChip(
+                            label: Text(subcategory),
+                            selected: isSelected,
+                            selectedColor: const Color(0xFFF9A825),
+                            backgroundColor: const Color(0xFF1A237E),
+                            labelStyle: TextStyle(
+                              color: isSelected
+                                  ? const Color(0xFF1A237E)
+                                  : Colors.white,
                             ),
-                          );
-                        },
-                      ),
+                            onSelected: (_) {
+                              ref
+                                      .read(subcategoryFilterProvider.notifier)
+                                      .state =
+                                  subcategory;
+                            },
+                          ),
+                        );
+                      }),
                     ],
                   ),
                 ),
@@ -247,6 +253,12 @@ class _ArticleListScreenState extends ConsumerState<ArticleListScreen> {
     ref.listen<bool>(highYieldModeProvider, (previous, next) {
       if (previous != next) {
         _resetPagination();
+      }
+    });
+
+    ref.listen<String?>(subcategoryFilterProvider, (previous, next) {
+      if (previous != next) {
+        _resetPagination(resetSubcategory: false);
       }
     });
 
@@ -289,7 +301,14 @@ class _ArticleListScreenState extends ConsumerState<ArticleListScreen> {
             ? pageArticles.length
             : previousArticles.length + pageArticles.length;
         final totalArticles = ref
-            .read(articlesCountInCategoryProvider(widget.category))
+            .read(
+              articlesCountInCategoryAndSubcategoryProvider(
+                ArticleCountQuery(
+                  category: widget.category,
+                  subcategory: ref.read(subcategoryFilterProvider),
+                ),
+              ),
+            )
             .valueOrNull;
 
         _runAfterBuild(() {
@@ -399,11 +418,7 @@ class _ArticleListScreenState extends ConsumerState<ArticleListScreen> {
                 color: Colors.white,
               ),
               const SizedBox(height: 10),
-              Container(
-                height: 12,
-                width: 180,
-                color: Colors.white,
-              ),
+              Container(height: 12, width: 180, color: Colors.white),
             ],
           ),
         ),
