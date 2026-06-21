@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../data/article_search_provider.dart';
+import '../../../core/widgets/empty_state.dart';
 import 'article_detail_screen.dart';
 
 class ArticleSearchScreen extends ConsumerStatefulWidget {
@@ -135,7 +136,11 @@ class _ArticleSearchScreenState extends ConsumerState<ArticleSearchScreen> {
     }
 
     if (searchState.results.isEmpty) {
-      return const Center(child: Text('No results. Try browsing by category.'));
+      return const EmptyState(
+        icon: Icons.search_off,
+        title: 'No results found',
+        subtitle: 'Try a different search term',
+      );
     }
 
     return ListView.builder(

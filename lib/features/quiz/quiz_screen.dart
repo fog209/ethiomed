@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shimmer/shimmer.dart';
+import '../../../core/widgets/empty_state.dart';
 
 import '../../../core/config/app_config.dart';
 import '../../../features/progress/streak_notifier.dart';
@@ -85,20 +86,16 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
   }
 
   Widget _buildEmptyState(QuizNotifier notifier) {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.quiz_outlined, size: 72, color: _navy),
-          const SizedBox(height: 16),
-          const Text(
-            'No practice questions downloaded yet.',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 24),
-          SizedBox(
+    return Column(
+      children: [
+        const EmptyState(
+          icon: Icons.check_circle_outline,
+          title: 'All caught up!',
+          subtitle: 'No cards due for review. Come back tomorrow.',
+        ),
+        Padding(
+          padding: const EdgeInsets.all(24),
+          child: SizedBox(
             width: double.infinity,
             height: 52,
             child: ElevatedButton(
@@ -110,8 +107,8 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
               child: const Text('Download Questions'),
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 

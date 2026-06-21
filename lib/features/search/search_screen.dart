@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shimmer/shimmer.dart';
+import '../../../core/widgets/empty_state.dart';
 import 'package:ethiomed/features/articles/data/article_repository.dart';
 import 'package:ethiomed/features/articles/presentation/article_detail_screen.dart';
 import 'search_history_service.dart';
@@ -141,6 +142,14 @@ class _ArticleSearchScreenState extends ConsumerState<ArticleSearchScreen> {
                             article.category == _selectedCategory;
                         return matchesQuery && matchesCategory;
                       }).toList();
+
+                      if (filtered.isEmpty) {
+                        return const EmptyState(
+                          icon: Icons.search_off,
+                          title: 'No results found',
+                          subtitle: 'Try a different search term',
+                        );
+                      }
 
                       return ListView.builder(
                         itemCount: filtered.length,

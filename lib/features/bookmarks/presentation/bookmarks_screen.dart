@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/database/app_database.dart';
+import '../../../core/widgets/empty_state.dart';
 import '../../articles/presentation/article_detail_screen.dart';
 
 class BookmarksScreen extends ConsumerWidget {
@@ -27,7 +28,11 @@ class BookmarksScreen extends ConsumerWidget {
 
           final results = snapshot.data ?? [];
           if (results.isEmpty) {
-            return const Center(child: Text('No saved articles yet.'));
+            return const EmptyState(
+              icon: Icons.bookmark_border,
+              title: 'No bookmarks yet',
+              subtitle: 'Tap the bookmark icon on any article to save it',
+            );
           }
 
           return ListView.builder(

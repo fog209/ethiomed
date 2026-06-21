@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../../core/database/app_database.dart';
+import '../../../core/widgets/empty_state.dart';
 import '../../../features/articles/article_providers.dart';
 import '../../articles/data/article_repository.dart';
 import '../../articles/presentation/article_detail_screen.dart';
@@ -247,19 +248,10 @@ class _ArticleListScreenState extends ConsumerState<ArticleListScreen> {
         articles.length + (showLoadingMore || showErrorMessage ? 1 : 0);
 
     if (articles.isEmpty && !showLoadingMore && !showErrorMessage) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.menu_book_rounded,
-              size: 80,
-              color: const Color(0xFF1A237E).withValues(alpha: 0.2),
-            ),
-            const SizedBox(height: 16),
-            Text('No articles in ${widget.category} yet'),
-          ],
-        ),
+      return const EmptyState(
+        icon: Icons.article_outlined,
+        title: 'No articles yet',
+        subtitle: 'Articles will appear here once synced',
       );
     }
 
