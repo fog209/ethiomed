@@ -10,7 +10,7 @@ class BookmarksScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final db = ref.watch(databaseProvider);
-    
+
     // This query joins Bookmarks with Articles to show the full article data
     final bookmarksStream = db.select(db.articles).join([
       innerJoin(db.bookmarks, db.bookmarks.articleId.equalsExp(db.articles.id)),
@@ -21,23 +21,29 @@ class BookmarksScreen extends ConsumerWidget {
       body: StreamBuilder(
         stream: bookmarksStream,
         builder: (context, snapshot) {
-          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          if (snapshot.hasError) {
+            return const Center(child: Text('Unable to load saved articles.'));
+          }
+
+          final results = snapshot.data ?? [];
+          if (results.isEmpty) {
             return const Center(child: Text('No saved articles yet.'));
           }
 
-          final results = snapshot.data!;
           return ListView.builder(
             itemCount: results.length,
             itemBuilder: (context, index) {
               final row = results[index];
               final article = row.readTable(db.articles);
-              
+
               return ListTile(
                 leading: const Icon(Icons.bookmark, color: Color(0xFF1A237E)),
                 title: Text(article.title),
                 onTap: () => Navigator.push(
-                  context, 
-                  MaterialPageRoute(builder: (context) => ArticleDetailScreen(article: article))
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ArticleDetailScreen(article: article),
+                  ),
                 ),
               );
             },

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:drift/drift.dart' show Variable;
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -45,6 +46,7 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
   @override
   void initState() {
     super.initState();
+    final db = ref.read(databaseProvider);
     Future.microtask(() async {
       if (!mounted) {
         return;
@@ -53,7 +55,36 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
       if (!mounted) {
         return;
       }
+      await _recordViewHistory(db);
+      if (!mounted) {
+        return;
+      }
     });
+  }
+
+  Future<void> _recordViewHistory(AppDatabase db) async {
+    try {
+      await db
+          .customSelect(
+            '''
+            INSERT INTO view_history (
+              article_id,
+              article_title,
+              category,
+              viewed_at
+            ) VALUES (?, ?, ?, ?)
+            ''',
+            variables: [
+              Variable(widget.article.id),
+              Variable(widget.article.title),
+              Variable(widget.article.category ?? ''),
+              Variable(DateTime.now()),
+            ],
+          )
+          .get();
+    } catch (error) {
+      debugPrint('Unable to record article view history: $error');
+    }
   }
 
   @override
