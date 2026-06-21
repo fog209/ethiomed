@@ -22,6 +22,8 @@ class QuizNotifier extends FamilyAsyncNotifier<List<QuizTableData>, String> {
   bool _showExplanation = false;
   int _correctCount = 0;
   int _answeredCount = 0;
+  int _correctThisSession = 0;
+  int _totalThisSession = 0;
   int? _lastReviewInterval;
   bool _isRecordingReview = false;
 
@@ -49,6 +51,10 @@ class QuizNotifier extends FamilyAsyncNotifier<List<QuizTableData>, String> {
   int get correctCount => _correctCount;
 
   int get answeredCount => _answeredCount;
+
+  int get correctThisSession => _correctThisSession;
+
+  int get totalThisSession => _totalThisSession;
 
   int get totalQuestions => state.value?.length ?? 0;
 
@@ -78,6 +84,8 @@ class QuizNotifier extends FamilyAsyncNotifier<List<QuizTableData>, String> {
     _showExplanation = false;
     _correctCount = 0;
     _answeredCount = 0;
+    _correctThisSession = 0;
+    _totalThisSession = 0;
     _lastReviewInterval = null;
     _isRecordingReview = false;
 
@@ -98,8 +106,10 @@ class QuizNotifier extends FamilyAsyncNotifier<List<QuizTableData>, String> {
     _showExplanation = true;
     _isRecordingReview = false;
     _answeredCount += 1;
+    _totalThisSession += 1;
     if (_isCorrectOption(question, option)) {
       _correctCount += 1;
+      _correctThisSession += 1;
     }
     state = AsyncData(questions);
   }

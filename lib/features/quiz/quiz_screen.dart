@@ -33,7 +33,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
     return Scaffold(
       appBar: AppBar(
         leading: CloseButton(onPressed: () => _resetQuizAndPop(context)),
-        title: Text(notifier.scoreText),
+        title: Text('${notifier.correctThisSession} / ${notifier.totalThisSession}'),
         backgroundColor: _navy,
         foregroundColor: _gold,
       ),
