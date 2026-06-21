@@ -17,6 +17,7 @@ final articleLoadedArticlesProvider = StateProvider<List<ArticleLocal>>(
 final articleHasMoreProvider = StateProvider<bool>((ref) => true);
 final articleIsLoadingMoreProvider = StateProvider<bool>((ref) => false);
 final articleCurrentCategoryProvider = StateProvider<String?>((ref) => null);
+final subcategoryFilterProvider = StateProvider<String?>((_) => null);
 
 class ArticleListScreen extends ConsumerStatefulWidget {
   final String category;
@@ -59,6 +60,7 @@ class _ArticleListScreenState extends ConsumerState<ArticleListScreen> {
 
   void _resetPagination() {
     ref.read(articleCurrentCategoryProvider.notifier).state = widget.category;
+    ref.read(subcategoryFilterProvider.notifier).state = null;
     ref.read(articleRequestIdProvider.notifier).state =
         ref.read(articleRequestIdProvider) + 1;
     ref.read(articleOffsetProvider.notifier).state = 0;
