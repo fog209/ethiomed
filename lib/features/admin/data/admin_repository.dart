@@ -2,6 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../core/errors/app_exception.dart';
+
 class AdminUser {
   final String userId;
   final String? email;
@@ -110,11 +112,11 @@ final currentAdminProfileProvider = FutureProvider<bool>((ref) async {
         .eq('id', user.id)
         .maybeSingle();
     return profile?['is_admin'] == true;
-  } on PostgrestException catch (e) {
-    debugPrint('Supabase error: ${e.message}');
-    rethrow;
-  } catch (e) {
-    debugPrint('Error: $e');
-    rethrow;
-  }
+    } on PostgrestException catch (e) {
+      debugPrint('Admin activate error: ${e.message}');
+      throw AppException(e.message);
+    } catch (e) {
+      debugPrint('Admin activate error: $e');
+      throw AppException('Could not activate user.');
+    }
 });

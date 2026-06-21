@@ -1,4 +1,4 @@
-import 'package:drift/drift.dart';
+import 'package:drift/drift.dart' hide Column;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -23,7 +23,19 @@ class BookmarksScreen extends ConsumerWidget {
         stream: bookmarksStream,
         builder: (context, snapshot) {
           if (snapshot.hasError) {
-            return const Center(child: Text('Unable to load saved articles.'));
+            return const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.error_outline, color: Colors.amber, size: 48),
+                  SizedBox(height: 8),
+                  Text(
+                    'Could not load bookmarks.',
+                    style: TextStyle(color: Colors.white70),
+                  ),
+                ],
+              ),
+            );
           }
 
           final results = snapshot.data ?? [];

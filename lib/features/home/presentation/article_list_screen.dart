@@ -183,6 +183,7 @@ class _ArticleListScreenState extends ConsumerState<ArticleListScreen> {
     ref.listen<AsyncValue<List<ArticleLocal>>>(provider, (previous, next) {
       final currentCategory = ref.read(articleCurrentCategoryProvider);
       final currentRequestId = ref.read(articleRequestIdProvider);
+      final requestedOffset = ref.read(articleOffsetProvider);
 
       if (currentCategory != widget.category || currentRequestId != requestId) {
         return;
@@ -200,15 +201,10 @@ class _ArticleListScreenState extends ConsumerState<ArticleListScreen> {
           if (!mounted) {
             return;
           }
+          ref.read(articleOffsetProvider.notifier).state = requestedOffset;
           ref.read(articleIsLoadingMoreProvider.notifier).state = false;
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Text('Unable to load more articles.'),
-              action: SnackBarAction(
-                label: 'Retry',
-                onPressed: _loadMoreArticles,
-              ),
-            ),
+            const SnackBar(content: Text('Could not load more. Try again.')),
           );
         });
         return;
