@@ -113,6 +113,8 @@ class _ArticleListScreenState extends ConsumerState<ArticleListScreen> {
     final hasMoreFromCount = totalArticles == null
         ? hasMore
         : loadedArticles.length < totalArticles;
+    final subcategories = subcategoriesByCategory[widget.category];
+    final selectedSubcategory = ref.watch(subcategoryFilterProvider);
     final paginatedProvider = paginatedArticlesProvider(
       ArticlePageQuery(
         limit: _articlesPageSize,
@@ -122,6 +124,36 @@ class _ArticleListScreenState extends ConsumerState<ArticleListScreen> {
       ),
     );
     final articlesAsync = ref.watch(paginatedProvider);
+    final articleListWidget = articlesAsync.when(
+      data: (_) => _buildArticleList(
+        articles: loadedArticles,
+        isLoadingMore: isLoadingMore,
+        hasMore: hasMoreFromCount,
+      ),
+      loading: () {
+        if (offset > 0 && loadedArticles.isNotEmpty) {
+          return _buildArticleList(
+            articles: loadedArticles,
+            isLoadingMore: true,
+            hasMore: hasMoreFromCount,
+          );
+        }
+
+        return _buildShimmerArticleList();
+      },
+      error: (err, stack) {
+        if (loadedArticles.isNotEmpty) {
+          return _buildArticleList(
+            articles: loadedArticles,
+            isLoadingMore: false,
+            hasMore: hasMoreFromCount,
+            errorMessage: 'Unable to load articles.',
+          );
+        }
+
+        return Center(child: Text('Error: $err'));
+      },
+    );
 
     _listenToPaginationChanges(context, paginatedProvider, requestId, offset);
 
@@ -141,36 +173,68 @@ class _ArticleListScreenState extends ConsumerState<ArticleListScreen> {
           ),
         ],
       ),
-      body: articlesAsync.when(
-        data: (_) => _buildArticleList(
-          articles: loadedArticles,
-          isLoadingMore: isLoadingMore,
-          hasMore: hasMoreFromCount,
-        ),
-        loading: () {
-          if (offset > 0 && loadedArticles.isNotEmpty) {
-            return _buildArticleList(
-              articles: loadedArticles,
-              isLoadingMore: true,
-              hasMore: hasMoreFromCount,
-            );
-          }
-
-          return _buildShimmerArticleList();
-        },
-        error: (err, stack) {
-          if (loadedArticles.isNotEmpty) {
-            return _buildArticleList(
-              articles: loadedArticles,
-              isLoadingMore: false,
-              hasMore: hasMoreFromCount,
-              errorMessage: 'Unable to load articles.',
-            );
-          }
-
-          return Center(child: Text('Error: $err'));
-        },
-      ),
+      body: subcategories == null || subcategories.isEmpty
+          ? articleListWidget
+          : Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  child: Row(
+                    children: [
+                      ChoiceChip(
+                        label: const Text('All'),
+                        selected: selectedSubcategory == null,
+                        selectedColor: const Color(0xFFF9A825),
+                        backgroundColor: const Color(0xFF1A237E),
+                        labelStyle: TextStyle(
+                          color: selectedSubcategory == null
+                              ? const Color(0xFF1A237E)
+                              : Colors.white,
+                        ),
+                        onSelected: (_) {
+                          ref.read(subcategoryFilterProvider.notifier).state =
+                              null;
+                        },
+                      ),
+                      const SizedBox(width: 8),
+                      ...subcategories.map(
+                        (subcategory) {
+                          final isSelected =
+                              selectedSubcategory == subcategory;
+                          return Padding(
+                            padding: const EdgeInsets.only(right: 8),
+                            child: ChoiceChip(
+                              label: Text(subcategory),
+                              selected: isSelected,
+                              selectedColor: const Color(0xFFF9A825),
+                              backgroundColor: const Color(0xFF1A237E),
+                              labelStyle: TextStyle(
+                                color: isSelected
+                                    ? const Color(0xFF1A237E)
+                                    : Colors.white,
+                              ),
+                              onSelected: (_) {
+                                ref
+                                    .read(
+                                      subcategoryFilterProvider.notifier,
+                                    )
+                                    .state = subcategory;
+                              },
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(child: articleListWidget),
+              ],
+            ),
     );
   }
 
