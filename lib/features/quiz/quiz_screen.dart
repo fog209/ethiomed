@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -71,7 +73,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                 backgroundColor: _gold,
                 foregroundColor: _navy,
               ),
-              onPressed: notifier.syncQuestions,
+              onPressed: () => unawaited(notifier.syncQuestions()),
               child: const Text('Download Questions'),
             ),
           ),
@@ -102,7 +104,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                 backgroundColor: _gold,
                 foregroundColor: _navy,
               ),
-              onPressed: notifier.syncQuestions,
+              onPressed: () => unawaited(notifier.syncQuestions()),
               child: const Text('Try Again'),
             ),
           ),

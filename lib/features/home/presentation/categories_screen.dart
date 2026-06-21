@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shimmer/shimmer.dart';
@@ -110,14 +112,14 @@ class CategoriesScreen extends ConsumerWidget {
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: const Color(0xFFFFB300),
-        onPressed: () async {
+        onPressed: () {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Syncing with WardReady Cloud...'),
               duration: Duration(seconds: 1),
             ),
           );
-          await ref.read(articleRepositoryProvider).fetchAndSyncArticles();
+          unawaited(ref.read(articleRepositoryProvider).syncInBackground());
         },
         child: const Icon(Icons.sync, color: Color(0xFF1A237E)),
       ),

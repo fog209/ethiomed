@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../core/providers/connectivity_notifier.dart';
+import '../core/widgets/offline_banner.dart';
 import 'nav_provider.dart';
 import '../features/home/presentation/categories_screen.dart';
 import '../features/articles/presentation/article_search_screen.dart';
@@ -13,6 +15,7 @@ class MainShell extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final selectedIndex = ref.watch(bottomNavIndexProvider);
+    final isOnline = ref.watch(connectivityProvider);
 
     // IndexedStack must have exactly 5 children to match the 5 icons below
     final List<Widget> screens = [
@@ -24,9 +27,16 @@ class MainShell extends ConsumerWidget {
     ];
 
     return Scaffold(
-      body: IndexedStack(
-        index: selectedIndex,
-        children: screens,
+      body: Column(
+        children: [
+          Expanded(
+            child: IndexedStack(
+              index: selectedIndex,
+              children: screens,
+            ),
+          ),
+          if (!isOnline) const OfflineBanner(),
+        ],
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: selectedIndex,

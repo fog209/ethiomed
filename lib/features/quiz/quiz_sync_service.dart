@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -16,9 +18,10 @@ class QuizSyncService {
     } on PostgrestException catch (e) {
       debugPrint('Supabase error: ${e.message}');
       rethrow;
-    } on DioException catch (e) {
-      debugPrint('Error: $e');
-      rethrow;
+    } on SocketException {
+      debugPrint('Offline: serving from local cache');
+    } on DioException {
+      debugPrint('Offline: serving from local cache');
     } catch (e) {
       debugPrint('Error: $e');
       rethrow;

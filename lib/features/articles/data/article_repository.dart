@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:drift/drift.dart';
 import 'package:flutter/material.dart';
@@ -17,7 +19,7 @@ class ArticleRepository {
 
   ArticleRepository(this._supabase, this._db);
 
-  Future<void> fetchAndSyncArticles() async {
+  Future<List<ArticleLocal>> fetchAndSyncArticles() async {
     try {
       final response = await _supabase
           .from('articles')
@@ -44,11 +46,18 @@ class ArticleRepository {
     } on PostgrestException catch (e) {
       debugPrint('Supabase error: ${e.message}');
       rethrow;
+    } on SocketException {
+      debugPrint('Offline: serving from local cache');
+      return _db.select(_db.articles).get();
     } catch (e) {
       debugPrint('Error: $e');
       rethrow;
     }
+
+    return _db.select(_db.articles).get();
   }
+
+  Future<List<ArticleLocal>> syncInBackground() => fetchAndSyncArticles();
 
   Stream<List<ArticleLocal>> watchLocalArticles({
     int limit = 0,

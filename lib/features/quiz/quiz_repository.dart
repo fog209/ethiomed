@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter/foundation.dart';
@@ -34,9 +36,12 @@ class QuizRepository {
     } on PostgrestException catch (e) {
       debugPrint('Supabase error: ${e.message}');
       rethrow;
-    } on DioException catch (e) {
-      debugPrint('Error: $e');
-      rethrow;
+    } on SocketException {
+      debugPrint('Offline: serving from local cache');
+      return getLocalQuestions(category);
+    } on DioException {
+      debugPrint('Offline: serving from local cache');
+      return getLocalQuestions(category);
     } catch (e) {
       debugPrint('Error: $e');
       rethrow;
