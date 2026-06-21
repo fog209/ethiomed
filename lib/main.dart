@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'core/config/app_config.dart';
 import 'features/auth/presentation/login_screen.dart';
+import 'features/auth/presentation/signup_screen.dart';
 import 'features/legal/disclaimer_screen.dart';
 import 'app/main_shell.dart'; // This is your new bottom nav shell
 import 'features/subscription/presentation/paywall_screen.dart';
@@ -20,12 +22,23 @@ void main() async {
   runApp(const ProviderScope(child: MyApp()));
 }
 
+final _router = GoRouter(
+  initialLocation: '/',
+  routes: [
+    GoRoute(path: '/', builder: (context, state) => const DisclaimerGate()),
+    GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
+    GoRoute(path: '/signup', builder: (context, state) => const SignupScreen()),
+    GoRoute(path: '/home', builder: (context, state) => const AppEntrance()),
+  ],
+);
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
+      routerConfig: _router,
       title: AppConfig.appTitle,
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
@@ -36,7 +49,6 @@ class MyApp extends StatelessWidget {
           secondary: const Color(0xFFFFB300),
         ),
       ),
-      home: const DisclaimerGate(),
     );
   }
 }
