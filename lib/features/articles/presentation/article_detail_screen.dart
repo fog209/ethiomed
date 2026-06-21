@@ -106,7 +106,8 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
           IconButton(
             tooltip: 'High-Yield Mode',
             color: highYieldMode ? _wardReadyGold : null,
-            onPressed: () => ref.read(highYieldModeProvider.notifier).toggle(),
+            onPressed: () =>
+                ref.read(highYieldModeProvider.notifier).state = !highYieldMode,
             icon: Icon(highYieldMode ? Icons.bolt : Icons.bolt_outlined),
           ),
           StreamBuilder<List<Bookmark>>(

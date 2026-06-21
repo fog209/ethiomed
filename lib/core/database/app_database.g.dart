@@ -71,6 +71,21 @@ class $ArticlesTable extends Articles
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _isHighYieldMeta = const VerificationMeta(
+    'isHighYield',
+  );
+  @override
+  late final GeneratedColumn<bool> isHighYield = GeneratedColumn<bool>(
+    'is_high_yield',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_high_yield" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -79,6 +94,7 @@ class $ArticlesTable extends Articles
     content,
     imageUrl,
     videoUrl,
+    isHighYield,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -129,6 +145,15 @@ class $ArticlesTable extends Articles
         videoUrl.isAcceptableOrUnknown(data['video_url']!, _videoUrlMeta),
       );
     }
+    if (data.containsKey('is_high_yield')) {
+      context.handle(
+        _isHighYieldMeta,
+        isHighYield.isAcceptableOrUnknown(
+          data['is_high_yield']!,
+          _isHighYieldMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -162,6 +187,10 @@ class $ArticlesTable extends Articles
         DriftSqlType.string,
         data['${effectivePrefix}video_url'],
       ),
+      isHighYield: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_high_yield'],
+      )!,
     );
   }
 
@@ -178,6 +207,7 @@ class ArticleLocal extends DataClass implements Insertable<ArticleLocal> {
   final String? content;
   final String? imageUrl;
   final String? videoUrl;
+  final bool isHighYield;
   const ArticleLocal({
     required this.id,
     required this.title,
@@ -185,6 +215,7 @@ class ArticleLocal extends DataClass implements Insertable<ArticleLocal> {
     this.content,
     this.imageUrl,
     this.videoUrl,
+    required this.isHighYield,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -203,6 +234,7 @@ class ArticleLocal extends DataClass implements Insertable<ArticleLocal> {
     if (!nullToAbsent || videoUrl != null) {
       map['video_url'] = Variable<String>(videoUrl);
     }
+    map['is_high_yield'] = Variable<bool>(isHighYield);
     return map;
   }
 
@@ -222,6 +254,7 @@ class ArticleLocal extends DataClass implements Insertable<ArticleLocal> {
       videoUrl: videoUrl == null && nullToAbsent
           ? const Value.absent()
           : Value(videoUrl),
+      isHighYield: Value(isHighYield),
     );
   }
 
@@ -237,6 +270,7 @@ class ArticleLocal extends DataClass implements Insertable<ArticleLocal> {
       content: serializer.fromJson<String?>(json['content']),
       imageUrl: serializer.fromJson<String?>(json['imageUrl']),
       videoUrl: serializer.fromJson<String?>(json['videoUrl']),
+      isHighYield: serializer.fromJson<bool>(json['isHighYield']),
     );
   }
   @override
@@ -249,6 +283,7 @@ class ArticleLocal extends DataClass implements Insertable<ArticleLocal> {
       'content': serializer.toJson<String?>(content),
       'imageUrl': serializer.toJson<String?>(imageUrl),
       'videoUrl': serializer.toJson<String?>(videoUrl),
+      'isHighYield': serializer.toJson<bool>(isHighYield),
     };
   }
 
@@ -259,6 +294,7 @@ class ArticleLocal extends DataClass implements Insertable<ArticleLocal> {
     Value<String?> content = const Value.absent(),
     Value<String?> imageUrl = const Value.absent(),
     Value<String?> videoUrl = const Value.absent(),
+    bool? isHighYield,
   }) => ArticleLocal(
     id: id ?? this.id,
     title: title ?? this.title,
@@ -266,6 +302,7 @@ class ArticleLocal extends DataClass implements Insertable<ArticleLocal> {
     content: content.present ? content.value : this.content,
     imageUrl: imageUrl.present ? imageUrl.value : this.imageUrl,
     videoUrl: videoUrl.present ? videoUrl.value : this.videoUrl,
+    isHighYield: isHighYield ?? this.isHighYield,
   );
   ArticleLocal copyWithCompanion(ArticlesCompanion data) {
     return ArticleLocal(
@@ -275,6 +312,9 @@ class ArticleLocal extends DataClass implements Insertable<ArticleLocal> {
       content: data.content.present ? data.content.value : this.content,
       imageUrl: data.imageUrl.present ? data.imageUrl.value : this.imageUrl,
       videoUrl: data.videoUrl.present ? data.videoUrl.value : this.videoUrl,
+      isHighYield: data.isHighYield.present
+          ? data.isHighYield.value
+          : this.isHighYield,
     );
   }
 
@@ -286,14 +326,22 @@ class ArticleLocal extends DataClass implements Insertable<ArticleLocal> {
           ..write('category: $category, ')
           ..write('content: $content, ')
           ..write('imageUrl: $imageUrl, ')
-          ..write('videoUrl: $videoUrl')
+          ..write('videoUrl: $videoUrl, ')
+          ..write('isHighYield: $isHighYield')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, title, category, content, imageUrl, videoUrl);
+  int get hashCode => Object.hash(
+    id,
+    title,
+    category,
+    content,
+    imageUrl,
+    videoUrl,
+    isHighYield,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -303,7 +351,8 @@ class ArticleLocal extends DataClass implements Insertable<ArticleLocal> {
           other.category == this.category &&
           other.content == this.content &&
           other.imageUrl == this.imageUrl &&
-          other.videoUrl == this.videoUrl);
+          other.videoUrl == this.videoUrl &&
+          other.isHighYield == this.isHighYield);
 }
 
 class ArticlesCompanion extends UpdateCompanion<ArticleLocal> {
@@ -313,6 +362,7 @@ class ArticlesCompanion extends UpdateCompanion<ArticleLocal> {
   final Value<String?> content;
   final Value<String?> imageUrl;
   final Value<String?> videoUrl;
+  final Value<bool> isHighYield;
   final Value<int> rowid;
   const ArticlesCompanion({
     this.id = const Value.absent(),
@@ -321,6 +371,7 @@ class ArticlesCompanion extends UpdateCompanion<ArticleLocal> {
     this.content = const Value.absent(),
     this.imageUrl = const Value.absent(),
     this.videoUrl = const Value.absent(),
+    this.isHighYield = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   ArticlesCompanion.insert({
@@ -330,6 +381,7 @@ class ArticlesCompanion extends UpdateCompanion<ArticleLocal> {
     this.content = const Value.absent(),
     this.imageUrl = const Value.absent(),
     this.videoUrl = const Value.absent(),
+    this.isHighYield = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        title = Value(title);
@@ -340,6 +392,7 @@ class ArticlesCompanion extends UpdateCompanion<ArticleLocal> {
     Expression<String>? content,
     Expression<String>? imageUrl,
     Expression<String>? videoUrl,
+    Expression<bool>? isHighYield,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -349,6 +402,7 @@ class ArticlesCompanion extends UpdateCompanion<ArticleLocal> {
       if (content != null) 'content': content,
       if (imageUrl != null) 'image_url': imageUrl,
       if (videoUrl != null) 'video_url': videoUrl,
+      if (isHighYield != null) 'is_high_yield': isHighYield,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -360,6 +414,7 @@ class ArticlesCompanion extends UpdateCompanion<ArticleLocal> {
     Value<String?>? content,
     Value<String?>? imageUrl,
     Value<String?>? videoUrl,
+    Value<bool>? isHighYield,
     Value<int>? rowid,
   }) {
     return ArticlesCompanion(
@@ -369,6 +424,7 @@ class ArticlesCompanion extends UpdateCompanion<ArticleLocal> {
       content: content ?? this.content,
       imageUrl: imageUrl ?? this.imageUrl,
       videoUrl: videoUrl ?? this.videoUrl,
+      isHighYield: isHighYield ?? this.isHighYield,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -394,6 +450,9 @@ class ArticlesCompanion extends UpdateCompanion<ArticleLocal> {
     if (videoUrl.present) {
       map['video_url'] = Variable<String>(videoUrl.value);
     }
+    if (isHighYield.present) {
+      map['is_high_yield'] = Variable<bool>(isHighYield.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -409,6 +468,7 @@ class ArticlesCompanion extends UpdateCompanion<ArticleLocal> {
           ..write('content: $content, ')
           ..write('imageUrl: $imageUrl, ')
           ..write('videoUrl: $videoUrl, ')
+          ..write('isHighYield: $isHighYield, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -2327,6 +2387,7 @@ typedef $$ArticlesTableCreateCompanionBuilder =
       Value<String?> content,
       Value<String?> imageUrl,
       Value<String?> videoUrl,
+      Value<bool> isHighYield,
       Value<int> rowid,
     });
 typedef $$ArticlesTableUpdateCompanionBuilder =
@@ -2337,6 +2398,7 @@ typedef $$ArticlesTableUpdateCompanionBuilder =
       Value<String?> content,
       Value<String?> imageUrl,
       Value<String?> videoUrl,
+      Value<bool> isHighYield,
       Value<int> rowid,
     });
 
@@ -2399,6 +2461,11 @@ class $$ArticlesTableFilterComposer
 
   ColumnFilters<String> get videoUrl => $composableBuilder(
     column: $table.videoUrl,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isHighYield => $composableBuilder(
+    column: $table.isHighYield,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2466,6 +2533,11 @@ class $$ArticlesTableOrderingComposer
     column: $table.videoUrl,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<bool> get isHighYield => $composableBuilder(
+    column: $table.isHighYield,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$ArticlesTableAnnotationComposer
@@ -2494,6 +2566,11 @@ class $$ArticlesTableAnnotationComposer
 
   GeneratedColumn<String> get videoUrl =>
       $composableBuilder(column: $table.videoUrl, builder: (column) => column);
+
+  GeneratedColumn<bool> get isHighYield => $composableBuilder(
+    column: $table.isHighYield,
+    builder: (column) => column,
+  );
 
   Expression<T> bookmarksRefs<T extends Object>(
     Expression<T> Function($$BookmarksTableAnnotationComposer a) f,
@@ -2555,6 +2632,7 @@ class $$ArticlesTableTableManager
                 Value<String?> content = const Value.absent(),
                 Value<String?> imageUrl = const Value.absent(),
                 Value<String?> videoUrl = const Value.absent(),
+                Value<bool> isHighYield = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ArticlesCompanion(
                 id: id,
@@ -2563,6 +2641,7 @@ class $$ArticlesTableTableManager
                 content: content,
                 imageUrl: imageUrl,
                 videoUrl: videoUrl,
+                isHighYield: isHighYield,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -2573,6 +2652,7 @@ class $$ArticlesTableTableManager
                 Value<String?> content = const Value.absent(),
                 Value<String?> imageUrl = const Value.absent(),
                 Value<String?> videoUrl = const Value.absent(),
+                Value<bool> isHighYield = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ArticlesCompanion.insert(
                 id: id,
@@ -2581,6 +2661,7 @@ class $$ArticlesTableTableManager
                 content: content,
                 imageUrl: imageUrl,
                 videoUrl: videoUrl,
+                isHighYield: isHighYield,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

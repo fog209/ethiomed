@@ -5,6 +5,7 @@ class Article {
   final Map<String, dynamic>? content;
   final String? imageUrl;
   final String? videoUrl;
+  final bool isHighYield;
 
   Article({
     required this.id,
@@ -13,6 +14,7 @@ class Article {
     this.content,
     this.imageUrl,
     this.videoUrl,
+    this.isHighYield = false,
   });
 
   factory Article.fromJson(Map<String, dynamic> json) {
@@ -23,6 +25,7 @@ class Article {
       content: json['content'] is Map ? json['content'] : null,
       imageUrl: json['image_url'],
       videoUrl: json['video_url'],
+      isHighYield: (json['is_high_yield'] as bool?) ?? false,
     );
   }
 }

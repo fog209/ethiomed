@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/database/app_database.dart';
+import '../../../features/articles/article_providers.dart';
 import '../../articles/data/article_repository.dart';
 import '../../articles/presentation/article_detail_screen.dart';
 
@@ -81,10 +82,17 @@ class _ArticleListScreenState extends ConsumerState<ArticleListScreen> {
     }
 
     ref.read(articleIsLoadingMoreProvider.notifier).state = true;
+    ref
+        .read(articleListControllerProvider.notifier)
+        .loadNextPage(
+          widget.category,
+          highYieldOnly: ref.read(highYieldModeProvider),
+        );
   }
 
   @override
   Widget build(BuildContext context) {
+    final highYieldMode = ref.watch(highYieldModeProvider);
     final offset = ref.watch(articleOffsetProvider);
     final requestId = ref.watch(articleRequestIdProvider);
     final loadedArticles = ref.watch(articleLoadedArticlesProvider);
@@ -106,6 +114,12 @@ class _ArticleListScreenState extends ConsumerState<ArticleListScreen> {
       ),
     );
     final articlesAsync = ref.watch(paginatedProvider);
+
+    ref.listen<bool>(highYieldModeProvider, (previous, next) {
+      if (previous != next) {
+        _resetPagination();
+      }
+    });
 
     ref.listen<AsyncValue<List<ArticleLocal>>>(paginatedProvider, (
       previous,
@@ -176,6 +190,16 @@ class _ArticleListScreenState extends ConsumerState<ArticleListScreen> {
         title: Text(widget.category),
         backgroundColor: const Color(0xFF1A237E),
         foregroundColor: const Color(0xFFFFB300),
+        actions: [
+          IconButton(
+            tooltip: 'High-Yield Mode',
+            color: highYieldMode ? const Color(0xFFF9A825) : Colors.grey,
+            onPressed: () {
+              ref.read(highYieldModeProvider.notifier).state = !highYieldMode;
+            },
+            icon: Icon(highYieldMode ? Icons.star : Icons.star_border),
+          ),
+        ],
       ),
       body: articlesAsync.when(
         data: (_) => _buildArticleList(
@@ -261,9 +285,20 @@ class _ArticleListScreenState extends ConsumerState<ArticleListScreen> {
         return Card(
           margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: ListTile(
-            title: Text(
-              article.title,
-              style: const TextStyle(fontWeight: FontWeight.bold),
+            title: Row(
+              children: [
+                if (article.isHighYield)
+                  const Padding(
+                    padding: EdgeInsets.only(right: 6),
+                    child: Icon(Icons.star, size: 14, color: Color(0xFFF9A825)),
+                  ),
+                Expanded(
+                  child: Text(
+                    article.title,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ],
             ),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => Navigator.push(

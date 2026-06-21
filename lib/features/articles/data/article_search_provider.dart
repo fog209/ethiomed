@@ -195,7 +195,8 @@ class ArticleSearchRepository {
         a.category,
         a.content,
         a.image_url AS imageUrl,
-        a.video_url AS videoUrl
+        a.video_url AS videoUrl,
+        a.is_high_yield AS isHighYield
       FROM article_search_fts
       JOIN articles a ON a.id = article_search_fts.article_id
       WHERE article_search_fts MATCH ?
@@ -218,6 +219,7 @@ class ArticleSearchRepository {
             content: row.read<String?>('content'),
             imageUrl: row.read<String?>('imageUrl'),
             videoUrl: row.read<String?>('videoUrl'),
+            isHighYield: row.read<bool?>('isHighYield') ?? false,
           ),
         )
         .toList(growable: false);

@@ -15,6 +15,7 @@ class Articles extends Table {
   TextColumn get content => text().nullable()();
   TextColumn get imageUrl => text().nullable()();
   TextColumn get videoUrl => text().nullable()();
+  BoolColumn get isHighYield => boolean().withDefault(const Constant(false))();
   @override
   Set<Column> get primaryKey => {id};
 }
@@ -68,7 +69,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration {
@@ -86,6 +87,12 @@ class AppDatabase extends _$AppDatabase {
             await m.drop(quizQuestions);
           }
           await m.createTable(quizTable);
+        }
+        if (from < 6) {
+          await m.addColumn(
+            articles,
+            articles.isHighYield as GeneratedColumn<Object>,
+          );
         }
         if (from < 5) {
           await m.addColumn(

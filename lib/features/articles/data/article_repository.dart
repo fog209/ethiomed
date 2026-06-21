@@ -7,6 +7,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/database/app_database.dart';
 import '../../../core/errors/app_exception.dart';
+import '../article_providers.dart';
 import '../domain/models/article.dart' as model;
 
 const int _articlesPageSize = 20;
@@ -19,7 +20,9 @@ class ArticleRepository {
 
   Future<void> fetchAndSyncArticles() async {
     try {
-      final response = await _supabase.from('articles').select();
+      final response = await _supabase
+          .from('articles')
+          .select('*, is_high_yield');
       final List<model.Article> remoteArticles = response
           .map((json) => model.Article.fromJson(json))
           .toList(growable: false);
@@ -35,6 +38,7 @@ class ArticleRepository {
                 content: Value(jsonEncode(article.content)),
                 imageUrl: Value(article.imageUrl),
                 videoUrl: Value(article.videoUrl),
+                isHighYield: Value(article.isHighYield),
               ),
             );
       }
@@ -51,12 +55,17 @@ class ArticleRepository {
     int limit = 0,
     int offset = 0,
     String? category,
+    bool highYieldOnly = false,
   }) {
     final hasLimit = limit > 0;
     final safeLimit = hasLimit ? limit : _articlesPageSize;
     final safeOffset = offset < 0 ? 0 : offset;
     final query = _db.select(_db.articles)
       ..orderBy([(table) => OrderingTerm.asc(table.title)]);
+
+    if (highYieldOnly) {
+      query.where((table) => table.isHighYield.equals(true));
+    }
 
     if (category != null && category.trim().isNotEmpty) {
       query.where((table) => table.category.equals(category.trim()));
@@ -73,37 +82,49 @@ class ArticleRepository {
     required String category,
     required int limit,
     required int offset,
+    bool highYieldOnly = false,
   }) {
-    return (_db.select(_db.articles)
-          ..where((table) => table.category.equals(category))
+    final query = _db.select(_db.articles)
+      ..where((table) => table.category.equals(category));
+
+    if (highYieldOnly) {
+      query.where((table) => table.isHighYield.equals(true));
+    }
+
+    return (query
           ..orderBy([(table) => OrderingTerm.asc(table.title)])
           ..limit(limit, offset: offset < 0 ? 0 : offset))
         .watch();
   }
 
-  Future<int> countArticlesInCategory(String category) async {
-    final rows = await _db
-        .customSelect(
-          'SELECT COUNT(*) AS count FROM articles WHERE category = ?',
-          variables: [Variable(category.trim())],
+  Future<int> countArticlesInCategory(
+    String category, {
+    bool highYieldOnly = false,
+  }) async {
+    return await _db.articles
+        .count(
+          where: (table) => highYieldOnly
+              ? table.category.equals(category.trim()) &
+                    table.isHighYield.equals(true)
+              : table.category.equals(category.trim()),
         )
-        .get();
-
-    if (rows.isEmpty) {
-      return 0;
-    }
-
-    return rows.first.read<int>('count');
+        .getSingle();
   }
 
   Future<List<ArticleLocal>> fetchArticlesPage({
     required String category,
     required int page,
+    bool highYieldOnly = false,
   }) async {
     final offset = (page - 1) * _articlesPageSize;
+    final query = _db.select(_db.articles)
+      ..where((table) => table.category.equals(category));
 
-    return (_db.select(_db.articles)
-          ..where((table) => table.category.equals(category))
+    if (highYieldOnly) {
+      query.where((table) => table.isHighYield.equals(true));
+    }
+
+    return (query
           ..orderBy([(table) => OrderingTerm.asc(table.title)])
           ..limit(_articlesPageSize, offset: offset))
         .get();
@@ -118,7 +139,10 @@ final articleRepositoryProvider = Provider<ArticleRepository>((ref) {
 });
 
 final allArticlesProvider = StreamProvider<List<ArticleLocal>>((ref) {
-  return ref.watch(articleRepositoryProvider).watchLocalArticles();
+  final highYieldOnly = ref.watch(highYieldModeProvider);
+  return ref
+      .watch(articleRepositoryProvider)
+      .watchLocalArticles(highYieldOnly: highYieldOnly);
 });
 
 class ArticlePageQuery {
@@ -150,12 +174,14 @@ class ArticlePageQuery {
 
 final paginatedArticlesProvider =
     StreamProvider.family<List<ArticleLocal>, ArticlePageQuery>((ref, query) {
+      final highYieldOnly = ref.watch(highYieldModeProvider);
       return ref
           .watch(articleRepositoryProvider)
           .watchArticlesPaged(
             category: query.category ?? '',
             limit: query.limit,
             offset: query.offset,
+            highYieldOnly: highYieldOnly,
           );
     });
 
@@ -163,7 +189,10 @@ final articlesCountInCategoryProvider = FutureProvider.family<int, String>((
   ref,
   category,
 ) {
-  return ref.watch(articleRepositoryProvider).countArticlesInCategory(category);
+  final highYieldOnly = ref.watch(highYieldModeProvider);
+  return ref
+      .watch(articleRepositoryProvider)
+      .countArticlesInCategory(category, highYieldOnly: highYieldOnly);
 });
 
 enum ArticleListStatus { initial, loading, ready, error }
@@ -221,7 +250,10 @@ class ArticleListController extends StateNotifier<ArticleListState> {
 
   final ArticleRepository _repository;
 
-  Future<void> loadNextPage(String category) async {
+  Future<void> loadNextPage(
+    String category, {
+    bool highYieldOnly = false,
+  }) async {
     if (state.isLoadingMore || !state.hasMore) {
       return;
     }
@@ -243,6 +275,7 @@ class ArticleListController extends StateNotifier<ArticleListState> {
       final pageArticles = await _repository.fetchArticlesPage(
         category: category,
         page: nextPage,
+        highYieldOnly: highYieldOnly,
       );
 
       if (!mounted) {
