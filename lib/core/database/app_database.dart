@@ -58,6 +58,9 @@ class QuizTable extends Table {
       text().withDefault(const Constant('clinicalFeatures'))();
   IntColumn get wrongCount => integer().withDefault(const Constant(0))();
   DateTimeColumn get lastAttemptedAt => dateTime().nullable()();
+  IntColumn get srInterval => integer().nullable()();
+  IntColumn get repetitions => integer().nullable()();
+  DateTimeColumn get nextDueAt => dateTime().nullable()();
 }
 
 @DriftDatabase(tables: [Articles, Bookmarks, QuizQuestions, QuizTable])
@@ -65,7 +68,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration {
@@ -83,6 +86,11 @@ class AppDatabase extends _$AppDatabase {
             await m.drop(quizQuestions);
           }
           await m.createTable(quizTable);
+        }
+        if (from < 5) {
+          await m.addColumn(quizTable, quizTable.srInterval);
+          await m.addColumn(quizTable, quizTable.repetitions);
+          await m.addColumn(quizTable, quizTable.nextDueAt);
         }
       },
     );
