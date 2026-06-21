@@ -73,7 +73,7 @@ class SpacedRepetitionService {
         final schedule = _calculateSchedule(
           easeFactor: question.easeFactor,
           interval: question.interval,
-          repetitions: question.repetitions,
+          repetitions: question.repetitions ?? 0,
           quality: quality,
         );
 
@@ -208,12 +208,11 @@ class _QuizQuestionSchedule extends QuizQuestionEntity {
     super.lastAttemptedAt,
     required this.easeFactor,
     required this.interval,
-    required this.repetitions,
+    super.repetitions,
     required this.lastQuality,
   });
 
   final double easeFactor;
   final int interval;
-  final int repetitions;
   final int lastQuality;
 }
