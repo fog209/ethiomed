@@ -7,8 +7,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/database/app_database.dart';
+import '../../../features/articles/article_providers.dart';
 import '../../../features/progress/streak_notifier.dart';
 import '../../../features/quiz/weakness_service.dart';
+
+const _wardReadyGold = Color(0xFFF9A825);
 
 class _ClinicalSectionConfig {
   const _ClinicalSectionConfig({
@@ -37,6 +40,8 @@ class ArticleDetailScreen extends ConsumerStatefulWidget {
 }
 
 class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
+  bool _showLowYieldSections = false;
+
   @override
   void initState() {
     super.initState();
@@ -53,6 +58,7 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
     final ref = this.ref;
     final db = ref.watch(databaseProvider);
     final weakFields = ref.watch(weakFieldsProvider(widget.article.id));
+    final highYieldMode = ref.watch(highYieldModeProvider);
     final sections = _decodeSections(widget.article.content);
     final imageUrl = widget.article.imageUrl;
     final videoUrl = widget.article.videoUrl;
@@ -63,6 +69,12 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
         backgroundColor: const Color(0xFF1A237E),
         foregroundColor: const Color(0xFFFFB300),
         actions: [
+          IconButton(
+            tooltip: 'High-Yield Mode',
+            color: highYieldMode ? _wardReadyGold : null,
+            onPressed: () => ref.read(highYieldModeProvider.notifier).toggle(),
+            icon: Icon(highYieldMode ? Icons.bolt : Icons.bolt_outlined),
+          ),
           StreamBuilder<List<Bookmark>>(
             stream: (db.select(
               db.bookmarks,
@@ -139,6 +151,7 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
             ..._buildClinicalSections(
               sections,
               weakFields.value ?? const <String>{},
+              highYieldMode,
             ),
 
             const SizedBox(height: 20),
@@ -193,6 +206,17 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
     'ethiopianContext',
     'mnemonics',
   };
+
+  static const _highYieldFields = <String>{
+    'clinicalFeatures',
+    'diagnosis',
+    'treatment',
+    'complications',
+  };
+
+  static const _mediumYieldFields = <String>{'etiology', 'pathophysiology'};
+
+  static const _lowYieldFields = <String>{'definition', 'epidemiology'};
 
   static const _clinicalSections = <String, _ClinicalSectionConfig>{
     'definition': _ClinicalSectionConfig(
@@ -299,11 +323,20 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
   List<Widget> _buildClinicalSections(
     Map<String, Object?> sections,
     Set<String> weakFields,
+    bool highYieldMode,
   ) {
     return _clinicalSectionOrder
         .map((key) {
           final config = _clinicalSections[key];
           if (config == null) {
+            return null;
+          }
+
+          final isLowYield = _lowYieldFields.contains(key);
+          if (highYieldMode && isLowYield && !_showLowYieldSections) {
+            if (key == 'definition') {
+              return _buildShowLowYieldButton();
+            }
             return null;
           }
 
@@ -315,19 +348,41 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
           final isWeak =
               weakFields.contains(key) &&
               !_nonHighlightableWeakFields.contains(key);
+          final isHighYield = highYieldMode && _highYieldFields.contains(key);
+          final isMediumYield =
+              highYieldMode && _mediumYieldFields.contains(key);
+          final initiallyExpanded = highYieldMode && isHighYield
+              ? true
+              : isMediumYield
+              ? false
+              : config.initiallyExpanded;
+          final borderColor = isHighYield ? _wardReadyGold : config.borderColor;
+          final borderWidth = isHighYield ? 3.0 : 4.0;
 
           return _buildMarkdownExpansionTile(
             title: config.title,
             content: content,
             icon: config.icon,
-            initiallyExpanded: config.initiallyExpanded,
+            initiallyExpanded: initiallyExpanded,
             backgroundColor: config.backgroundColor,
-            borderColor: config.borderColor,
+            borderColor: borderColor,
+            borderWidth: borderWidth,
             isWeak: isWeak,
           );
         })
         .whereType<Widget>()
         .toList(growable: false);
+  }
+
+  Widget _buildShowLowYieldButton() {
+    return TextButton(
+      onPressed: () {
+        setState(() {
+          _showLowYieldSections = true;
+        });
+      },
+      child: const Text('+ Show low-yield sections'),
+    );
   }
 
   Widget _buildWeakSectionHeader(String title) {
@@ -374,6 +429,7 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
     required bool initiallyExpanded,
     required Color backgroundColor,
     required Color borderColor,
+    double borderWidth = 4.0,
     bool isWeak = false,
   }) {
     return Container(
@@ -381,7 +437,9 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
       decoration: BoxDecoration(
         color: backgroundColor,
         borderRadius: BorderRadius.circular(8),
-        border: Border(left: BorderSide(color: borderColor, width: 4)),
+        border: Border(
+          left: BorderSide(color: borderColor, width: borderWidth),
+        ),
       ),
       child: ExpansionTile(
         backgroundColor: backgroundColor,

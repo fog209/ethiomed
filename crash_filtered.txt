@@ -1,0 +1,138 @@
+
+06-21 03:06:51.441  1924  2908 I OplusHansManager : uid=10239, pkg=com.ethiomed.ethiomed can transition from M to F
+06-21 03:06:51.441  1924  2908 I OplusHansManager : uid=10239, pkg=com.ethiomed.ethiomed F enter(), M stay=10
+06-21 03:06:51.447  1924  2908 I OplusHansManager : freeze uid: 10239 com.ethiomed.ethiomed pids: [1634] scene: LcdOn
+06-21 03:06:58.493  1924 17326 D OplusAppListInterceptManager: shouldFilterTask::packageName = com.ethiomed.ethiomed
+06-21 03:06:58.621  1924  5009 I PowerHalWrapper: amsBoostNotify pid:7202,activity:com.teslacoilsw.launcher.NovaLauncher, package:com.teslacoilsw.launcher, mProcessCreatePackcom.ethiomed.ethiomed 
+06-21 03:06:58.624  1924  8414 E OplusTrack-ApkInfoUtil: java.lang.NullPointerException: Attempt to invoke virtual method 'java.lang.Object android.os.Bundle.get(java.lang.String)' on a null object reference
+06-21 03:06:58.624  1924  8414 W System.err: java.lang.NullPointerException: Attempt to invoke virtual method 'java.lang.Object android.os.Bundle.get(java.lang.String)' on a null object reference
+06-21 03:06:58.709  1924  5009 D OplusAppListInterceptManager: shouldFilterTask::packageName = com.ethiomed.ethiomed
+06-21 03:06:59.306  1924  1951 I PowerHalWrapper: amsBoostNotify pid:6579,activity:com.maxmpz.audioplayer.MainActivity, package:com.maxmpz.audioplayer, mProcessCreatePackcom.ethiomed.ethiomed 
+06-21 03:07:00.425  1924  2986 I PowerHalWrapper: amsBoostNotify pid:27147,activity:com.google.android.youtube.app.honeycomb.Shell$HomeActivity, package:com.google.android.youtube, mProcessCreatePackcom.ethiomed.ethiomed 
+06-21 03:07:05.461  1924  2986 I ActivityTaskManager: START u0 {act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10200000 cmp=com.ethiomed.ethiomed/.MainActivity bnds=[230,1834][437,2228] mCallingUid=10358} from uid 10358
+06-21 03:07:05.467  1924  2986 I OplusHansManager : unfreeze uid: 10239 com.ethiomed.ethiomed pids: [1634] reason: Activity scene: LcdOn
+06-21 03:07:05.469  1924  2908 I OplusHansManager : uid=10239, pkg=com.ethiomed.ethiomed, transition from F to Running, reason=Activity
+06-21 03:07:05.469  1924  2908 I OplusHansManager : uid=10239, pkg=com.ethiomed.ethiomed F exit(), F stay=14, reason=Activity
+06-21 03:07:05.469  1924  2908 I OplusHansManager : uid=10239, pkg=com.ethiomed.ethiomed M exit(), M stay=0
+06-21 03:07:05.470  1924  2986 V OplusZoomWindowManagerService: windowMode: 0 ,stack: Task{9c04575 #320 type=standard I=com.ethiomed.ethiomed/.MainActivity U=0 visible=false visibleRequested=false mode=fullscreen translucent=true sz=1}
+06-21 03:07:05.472  1924  2986 D ActivityTaskManager: onWindowFocusChanged Task{9c04575 #320 type=standard I=com.ethiomed.ethiomed/.MainActivity U=0 visible=true visibleRequested=false mode=fullscreen translucent=true sz=1} would transfer to compact
+06-21 03:07:05.472  1924  2986 I InputDispatcher: setFocusedApplication displayId=0 ActivityRecord{fc0d080 u0 com.ethiomed.ethiomed/.MainActivity} t320}
+06-21 03:07:05.476  1924  2986 D ActivityTaskManager: getStartingWindowType: newTask=false, taskSwitch=true, processRunning=true, allowTaskSnapshot=true, activityCreated=true, snapshot=TaskSnapshot{ mId=1782000382086 mTopActivityComponent=com.ethiomed.ethiomed/.MainActivity mSnapshot=android.hardware.HardwareBuffer@41477e4 (1080x2400) mColorSpace=sRGB IEC61966-2.1 (id=0, model=RGB) mOrientation=1 mRotation=0 mTaskSize=Point(1080, 2400) mContentInsets=[0,110][0,48] mLetterboxInsets=[0,0][0,0] mIsLowResolution=false mIsRealSnapshot=true mWindowingMode=1 mAppearance=0 mIsTranslucent=true mHasImeSurface=false, record:ActivityRecord{fc0d080 u0 com.ethiomed.ethiomed/.MainActivity} t320}
+06-21 03:07:05.478  1924  2986 I PowerHalWrapper: <amsBoostResume> last:com.teslacoilsw.launcher, next:com.ethiomed.ethiomed 
+06-21 03:07:05.482  1924  2986 D OplusUIFirst_FB: com.ethiomed.ethiomed activity event: []
+06-21 03:07:05.483  1924  5020 D OplusFullScreenDisplayManager: adjustWindowParamsLw com.ethiomed.ethiomed, no change cutoutMode: 0
+06-21 03:07:05.487  1924  5020 D OplusFullScreenDisplayManager: adjustWindowParamsLw com.ethiomed.ethiomed, no change cutoutMode: 0
+06-21 03:07:05.497  1924  5020 I OplusHansManager : front pkg: com.ethiomed.ethiomed, uid: 10239, prev pkg: com.teslacoilsw.launcher, prev uid: 10358
+06-21 03:07:05.497  1924  2374 I Osense-DecisionMaker: notifySceneToAthenaPolicy: SCENE_APP_SWITCH, bundle: Bundle[{prevPkgName=com.teslacoilsw.launcher, curUid=10239, curPkgName=com.ethiomed.ethiomed, prevUid=10358}]
+06-21 03:07:05.497  1924  2918 I OplusResourcePreloadManager: resume pkg: com.ethiomed.ethiomed, uid:10239, prev pkg: com.teslacoilsw.launcher, prev uid: 10358
+06-21 03:07:05.497  1924  2908 I OplusHansManager : uid=10239, pkg=com.ethiomed.ethiomed R exit SM
+06-21 03:07:05.497  1924  2908 I OplusHansManager : uid=10239, pkg=com.ethiomed.ethiomed R exit(), R stay=0
+06-21 03:07:05.498  1924  5020 D OplusUIFirst_FB: com.ethiomed.ethiomed activity event: []
+06-21 03:07:05.499  1924  5020 D OplusUIFirst_FB: handleParaSwitch com.ethiomed.ethiomed null null 1
+06-21 03:07:05.499  1924  5020 I PowerHalWrapper: amsBoostNotify pid:1634,activity:com.ethiomed.ethiomed.MainActivity, package:com.ethiomed.ethiomed, mProcessCreatePackcom.ethiomed.ethiomed 
+06-21 03:07:05.499  1924  5020 I mtkpower_client: [Legacy][PowerHal_Wrap_notifyAppState] com.ethiomed.ethiomed/com.ethiomed.ethiomed.MainActivity pid=1634 state:1
+06-21 03:07:05.499  1924  5020 I game_scn: collectForegroundAppList packName=com.ethiomed.ethiomed, actName=com.ethiomed.ethiomed.MainActivity, pid=1634, uid=10239, state:RESUMED
+06-21 03:07:05.499  1084  1144 I libPowerHal: [perfNotifyAppState] foreground:com.ethiomed.ethiomed, pid:1634, uid:10239
+06-21 03:07:05.500  1084  1100 I mtkpower@impl: [notifyAppState] pc:0, com.teslacoilsw.launcher => com.ethiomed.ethiomed
+06-21 03:07:05.502  1924  5020 D TaskFragmentExtImpl: addColorModeOnResume resume=true pkg = com.ethiomed.ethiomed
+06-21 03:07:05.505  1924  3042 V DCSEX-AppSwitchManager: OnAppSwitchObserver: onAppExit, resuming = com.ethiomed.ethiomed, target = com.teslacoilsw.launcher, is ResumingFirstStart =  false, is ResumingMultiApp =  false, extensionInfo =  Bundle[{taskId=320, uid=10239}]
+06-21 03:07:05.506  1924  8414 D DCSEX-AppLaunchEventRecorder: onAppSwitch from = com.teslacoilsw.launcher to = com.ethiomed.ethiomed
+06-21 03:07:05.506  1924  8414 E OplusTrack-ApkInfoUtil: java.lang.NullPointerException: Attempt to invoke virtual method 'java.lang.Object android.os.Bundle.get(java.lang.String)' on a null object reference
+06-21 03:07:05.506  1924  8414 W System.err: java.lang.NullPointerException: Attempt to invoke virtual method 'java.lang.Object android.os.Bundle.get(java.lang.String)' on a null object reference
+06-21 03:07:05.506  1924  3042 D OplusAppSwitchListener: Detect com.ethiomed.ethiomed switch to foreground
+06-21 03:07:05.507  1924  3042 D OplusEapManager: mTargetEnterName :com.ethiomed.ethiomed
+06-21 03:07:05.507  1924  3042 D OplusLatencyOptimizerManager: enter pkg: com.ethiomed.ethiomed isPrevBlackAppTop: false mIsBlackAppTop: false
+06-21 03:07:05.507  1924  3042 V DCSEX-AppSwitchManager: OnAppSwitchObserver: onAppEnter, launchedFrom =  com.teslacoilsw.launcher, target =  com.ethiomed.ethiomed, is firstStart =  false, is multiApp =  false, extensionInfo =  Bundle[{taskId=320, pid=1634, uid=10239, versionCode=1}]
+06-21 03:07:05.507  1924  3042 D VRR [OPlusFrontAppManager]: OnAppSwitchObserver: onAppEnter , info.targetName = com.ethiomed.ethiomed
+06-21 03:07:05.507  1924  3042 D VRR [OPlusFrontAppManager]: packageName: com.ethiomed.ethiomed
+06-21 03:07:05.507  1924  2092 D VRR [OPlusRefreshRateService]: handleFrontAppChange pkgName: com.ethiomed.ethiomed
+06-21 03:07:05.507  1924  2092 D VRR [OPlusExternalRefreshRateManager]: setFrontPackageName pkgName: com.ethiomed.ethiomed CurPkgName: null
+06-21 03:07:05.507  2905  2937 I Athena  : AthenaDynamicReceiver: pre_app:com.teslacoilsw.launcher, next_app:com.ethiomed.ethiomed(10239|1634)
+06-21 03:07:05.508  5112  2500 W Battery : ThermalControlUtils: mForegroundPkg=com.ethiomed.ethiomed
+06-21 03:07:05.515  1924 13880 D OplusUIFirst_FB: com.ethiomed.ethiomed moveToTop:[]
+06-21 03:07:05.515  1924 13880 D OplusUIFirst_FB: com.ethiomed.ethiomed boost hint: 1634
+06-21 03:07:05.515  1924 13880 D OplusUIFirst_FB: handleParaSwitch com.ethiomed.ethiomed null null 0
+06-21 03:07:05.519  1924  5020 I WindowStateExtImpl: onSurfaceShowChange show = true mPackageName = com.ethiomed.ethiomed parentPkgName = com.ethiomed.ethiomed
+06-21 03:07:05.521  1924  5020 I PowerHalWrapper: amsBoostNotify pid:7202,activity:com.teslacoilsw.launcher.NovaLauncher, package:com.teslacoilsw.launcher, mProcessCreatePackcom.ethiomed.ethiomed 
+06-21 03:07:05.522  1924  1951 D OplusKeepAliveManager: TOP_APP is ProcessRecord{ea36674 1634:com.ethiomed.ethiomed/u0a239} uid is 10239
+06-21 03:07:05.525  1634  1634 I Quality : Skipped: false 0 cost 14.067461 refreshRate 16287468 bit true processName com.ethiomed.ethiomed
+06-21 03:07:05.526  1924  5020 D OplusFullScreenDisplayManager: adjustWindowParamsLw com.ethiomed.ethiomed, no change cutoutMode: 0
+06-21 03:07:05.526  1924  5020 V WindowManager: Relayout Window{d6e232f u0 com.ethiomed.ethiomed/com.ethiomed.ethiomed.MainActivity}: viewVisibility=0, oldvis=4, req=1080x2400
+06-21 03:07:05.526  1924  5020 I WindowManager: Window{d6e232f u0 com.ethiomed.ethiomed/com.ethiomed.ethiomed.MainActivity} state from NO_SURFACE to DRAW_PENDING; reason: resetDrawState
+06-21 03:07:05.527  1158  1215 I BufferQueueDebug: [com.ethiomed.ethiomed/com.ethiomed.ethiomed.MainActivity#29611](this:0xb400007d599dc9e8,id:-1,api:0,p:-1,c:-1) BufferQueue core=(1158:/system/bin/surfaceflinger)
+06-21 03:07:05.528  1924  1951 D OplusUIFirst_FB: com.ethiomed.ethiomed toForeOps: []
+06-21 03:07:05.532  1924  5020 V WindowManager: Changing focus from null to Window{d6e232f u0 com.ethiomed.ethiomed/com.ethiomed.ethiomed.MainActivity},diplayid=0
+06-21 03:07:05.537  1158  1215 D [OSIE]  : scltmLayer_name VRI[MainActivity][com.ethiomed.ethiomed/com.ethiomed.ethiomed.MainActivity]
+06-21 03:07:05.540  1158  1650 I BufferQueueDebug: [SurfaceView[com.ethiomed.ethiomed/com.ethiomed.ethiomed.MainActivity](BLAST)#29616](this:0xb400007d2c24d9e8,id:-1,api:0,p:-1,c:-1) BufferQueue core=(1158:/system/bin/surfaceflinger)
+06-21 03:07:05.541  1158  1215 D [OSIE]  : scltmLayer_name SurfaceView[com.ethiomed.ethiomed/com.ethiomed.ethiomed.MainActivity]
+06-21 03:07:05.544  1634  2653 E gralloc4: ERROR: Format allocation info not found for format: 38
+06-21 03:07:05.544  1634  2653 E gralloc4: ERROR: Format allocation info not found for format: 0
+06-21 03:07:05.544  1634  2653 E gralloc4: ERROR: Unrecognized and/or unsupported format 0x38 and usage 0xb00
+06-21 03:07:05.544  1062  3325 E gralloc4: ERROR: Format allocation info not found for format: 38
+06-21 03:07:05.544  1062  3325 E gralloc4: ERROR: Format allocation info not found for format: 0
+06-21 03:07:05.544  1062  3325 E gralloc4: ERROR: Unrecognized and/or unsupported format 0x38 and usage 0xb00
+06-21 03:07:05.544  1634  2653 E gralloc4: ERROR: Format allocation info not found for format: 38
+06-21 03:07:05.544  1634  2653 E gralloc4: ERROR: Format allocation info not found for format: 0
+06-21 03:07:05.544  1634  2653 E gralloc4: ERROR: Unrecognized and/or unsupported format 0x38 and usage 0xb00
+06-21 03:07:05.544  1062  3325 E gralloc4: ERROR: Format allocation info not found for format: 38
+06-21 03:07:05.544  1062  3325 E gralloc4: ERROR: Format allocation info not found for format: 0
+06-21 03:07:05.544  1062  3325 E gralloc4: ERROR: Unrecognized and/or unsupported format 0x38 and usage 0xb00
+06-21 03:07:05.562  1634  1702 D BLASTBufferQueue: [VRI[MainActivity][com.ethiomed.ethiomed/com.ethiomed.ethiomed.MainActivity]#4](f:0,a:1) acquireNextBufferLocked size=1080x2400 mFrameNumber=1 applyTransaction=true mTimestamp=274904788584923(auto) mPendingTransactions.size=0 graphicBufferId=7017976561717 transform=0
+06-21 03:07:05.573  1158  1158 D Layer   : reparent to null sequence=29537, seq[3], name=SurfaceView[com.ethiomed.ethiomed/com.ethiomed.ethiomed.MainActivity](BLAST)#29537
+06-21 03:07:05.573  1158  1158 D Layer   : reparent to null sequence=29536, seq[7], name=SurfaceView[com.ethiomed.ethiomed/com.ethiomed.ethiomed.MainActivity]#29536
+06-21 03:07:05.573  1158  1158 D Layer   : reparent to null sequence=29538, seq[4], name=Background for SurfaceView[com.ethiomed.ethiomed/com.ethiomed.ethiomed.MainActivity]#29538
+06-21 03:07:05.573  1158  1158 D BufferStateLayer: com.ethiomed.ethiomed/com.ethiomed.ethiomed.MainActivity#29611 setBuffer frameId=1, bufferId=7017976561717 fenceId=270, w= 1080, h=2400
+06-21 03:07:05.573  1158  1158 D OplusLayer: (29611,com.ethiomed.ethiomed/com.ethiomed.ethiomed.MainActivity#29611,com.ethiomed.ethiomed) setBuffer
+06-21 03:07:05.589  1158  1158 I BufferQueueDebug: [SurfaceView[com.ethiomed.ethiomed/com.ethiomed.ethiomed.MainActivity](BLAST)#29537](this:0xb400007d01d9c9e8,id:-1,api:0,p:-1,c:1158) onDestructor()
+06-21 03:07:05.595  1634  2653 D BLASTBufferQueue: [SurfaceView[com.ethiomed.ethiomed/com.ethiomed.ethiomed.MainActivity]#5](f:0,a:1) acquireNextBufferLocked size=1080x2352 mFrameNumber=1 applyTransaction=true mTimestamp=274904821312077(auto) mPendingTransactions.size=0 graphicBufferId=7017976561712 transform=0
+06-21 03:07:05.596  1924 17326 I WindowManager: Window{d6e232f u0 com.ethiomed.ethiomed/com.ethiomed.ethiomed.MainActivity} state from DRAW_PENDING to COMMIT_DRAW_PENDING; reason: finishDrawingLocked
+06-21 03:07:05.597  1924  1952 I WindowManager: Window{d6e232f u0 com.ethiomed.ethiomed/com.ethiomed.ethiomed.MainActivity} state from COMMIT_DRAW_PENDING to READY_TO_SHOW; reason: commitFinishDrawingLocked
+06-21 03:07:05.599  1924  1952 D OplusStartingWindowManager: interceptRemoveStartingWindow: packageName=com.ethiomed.ethiomed, isSnapshot=true, startingSurfaceRunnable=null
+06-21 03:07:05.599  1924  1952 D OplusSplitScreenDnDUI: notifyRemoveStartingWindow isSpitScreenDrag = false mDropTargetSurface = null StartingWindowpkgName = com.ethiomed.ethiomed DragPkg = null isLauncherResume = false
+06-21 03:07:05.600  1924  1952 I WindowManager: Window{d6e232f u0 com.ethiomed.ethiomed/com.ethiomed.ethiomed.MainActivity} state from READY_TO_SHOW to HAS_DRAWN; reason: performShowLocked
+06-21 03:07:05.607  1924  5020 I FocusResolver: updateFocusedWindow, d6e232f com.ethiomed.ethiomed/com.ethiomed.ethiomed.MainActivity on display 0, reason: Window became focusable. Previous reason: NOT_VISIBLE, result:   FocusedWindows:
+06-21 03:07:05.607  1924  5020 I FocusResolver:     displayId=0, name='d6e232f com.ethiomed.ethiomed/com.ethiomed.ethiomed.MainActivity'
+06-21 03:07:05.611  1924  5020 D InputMethodManagerService: isSecurity: attribute.packageName=com.ethiomed.ethiomed mCurMethodId=com.amharic.keyboard.for.android/com.example.android.softkeyboard.SoftKeyboard
+06-21 03:07:05.622  1158  1158 D BufferStateLayer: SurfaceView[com.ethiomed.ethiomed/com.ethiomed.ethiomed.MainActivity](BLAST)#29616 setBuffer frameId=1, bufferId=7017976561712 fenceId=157, w= 1080, h=2352
+06-21 03:07:05.622  1158  1158 D OplusLayer: (29616,SurfaceView[com.ethiomed.ethiomed/com.ethiomed.ethiomed.MainActivity](BLAST)#29616,com.ethiomed.ethiomed) setBuffer
+06-21 03:07:05.803  1924  1951 I PowerHalWrapper: amsBoostNotify pid:7202,activity:com.teslacoilsw.launcher.NovaLauncher, package:com.teslacoilsw.launcher, mProcessCreatePackcom.ethiomed.ethiomed 
+06-21 03:07:05.805  1924  1952 V OplusZoomWindowManagerService: onAnimationFinished:  r = ActivityRecord{fc0d080 u0 com.ethiomed.ethiomed/.MainActivity} t320}
+06-21 03:07:05.805  1924  1952 I OplusAppSwitchManagerService:  handleAppVisible , r = ActivityRecord{fc0d080 u0 com.ethiomed.ethiomed/.MainActivity} t320}
+06-21 03:07:05.867  1924  1952 I WindowStateExtImpl: onSurfaceShowChange show = false mPackageName = com.ethiomed.ethiomed parentPkgName = com.ethiomed.ethiomed
+06-21 03:07:06.610  1634  1634 D OplusScrollToTopManager: com.ethiomed.ethiomed/com.ethiomed.ethiomed.MainActivity,This DecorView@1f3f9d5[MainActivity] change focus to true
+06-21 03:07:08.200  2914  3169 D AppStateRecord: getFgAppInStuckList: fgApp com.ethiomed.ethiomed
+06-21 03:07:10.523  5112  5661 D AppSwitchObserverHelper: packageName: com.ethiomed.ethiomed,com.teslacoilsw.launcher
+06-21 03:07:10.590  5112  5661 E Battery : AppStats: Uid = 10026; pkgName = com.ethiomed.ethiomed; CpuFgTime = 0 ms; CpuBgTime = -852 ms.
+06-21 03:07:10.591  5112  5661 E Battery : AppStats: Uid = 10026; pkgName = com.ethiomed.ethiomed; CpuKernelFgTime = 0 ms; CpuKernelBgTime = -306 ms.
+06-21 03:07:10.591  5112  5661 E Battery : AppStats: Uid = 10026; pkgName = com.ethiomed.ethiomed; CpuUserFgTime = 0 ms ; CpuUserBgTime = -546 ms.
+06-21 03:07:10.591  5112  5661 E Battery : AppStats: Uid = 10026; pkgName = com.ethiomed.ethiomed; CpuFgPower = 0.0 mAh.; CpuBgPower = -0.04477650166666667 mAh.
+06-21 03:07:10.591  5112  5661 E Battery : AppStats: Uid = 10026; pkgName = com.ethiomed.ethiomed; AlarmFgWakeupCount = 0; AlarmBgWakeupCount = 0
+06-21 03:07:10.591  5112  5661 E Battery : AppStats: Uid = 10026; pkgName = com.ethiomed.ethiomed; JobFgCount = 0; JobBgCount = 0; JobFgTime = 0; JobBgTime = 0
+06-21 03:07:10.591  5112  5661 E Battery : AppStats: Uid = 10026; pkgName = com.ethiomed.ethiomed; SyncFgCount = 0; SyncBgCount = 0; SyncFgTime = 0; SyncBgTime = 0
+06-21 03:07:10.591  5112  5661 E Battery : AppStats: Uid = 10026; pkgName = com.ethiomed.ethiomed; WakeLockFgTime = 0 ms; WakeLockFgPower = 0.0 mAh.; WakeLockBgTime = 0 ms; WakeLockBgPower = 0.0 mAh.
+06-21 03:07:10.591  5112  5661 E Battery : AppStats: Uid = 10026; pkgName = com.ethiomed.ethiomed; ScreenFgTime = 729266 ms; ScreenFgPower = 18.23165 mAh.
+06-21 03:07:10.592  5112  5661 E Battery : AppStats: Uid = 10026; pkgName = com.ethiomed.ethiomed; FgWifiRxBytes = 0 Bytes; BgWifiRxBytes = -536928 Bytes; FgWifiTxBytes = 0 Bytes; BgWifiTxBytes = -181986 Bytes; FgWifiRxPackets = 0 ; BgWifiRxPackets = -714 ; FgWifiTxPackets = 0 ; BgWifiTxPackets = -831 ; FgWiFiScanTimeMs = 0 ; BgWiFiScanTimeMs = 0 ; FgWiFiBatchScanTimeMs = 0 ; BgWiFiBatchScanTimeMs = 0 
+06-21 03:07:10.592  5112  5661 E Battery : AppStats: Uid = 10026; pkgName = com.ethiomed.ethiomed; FgWifiRxPacketsPower = 0.0 mAh; BgWifiRxPacketsPower = -0.4710416793823242 mAh; FgWifiTxPacketsPower = 0.0 mAh; BgWifiTxPacketsPower = -0.5482292175292969 mAh; FgWifiScanPower = 0.0 mAh; BgWifiScanPower = 0.0 mAh; FgWifiBatchScanPower = 0.0 mAh; BgWifiBatchScanPower = 0.0 mAh; FgWiFiTotalPower = 0.0 mAh; BgWiFiTotalPower = -1.019270896911621 mAh.
+06-21 03:07:10.592  5112  5661 E Battery : AppStats: Uid = 10026; pkgName = com.ethiomed.ethiomed; FgMobileRxBytes = 0 Bytes; BgMobileRxBytes = 0 Bytes; FgMobileTxBytes = 0 Bytes; BgMobileTxBytes = 0 Bytes; FgMobileRxPackets = 0 ; BgMobileRxPackets = 0 ; FgMobileTxPackets = 0 ; BgMobileTxPackets = 0 ; FgMobileActiveCount = 0 ; BgMobileActiveCount = 0 ; FgMobileActiveTime = 0 ; BgMobileActiveTime = 0 
+06-21 03:07:10.592  5112  5661 E Battery : AppStats: Uid = 10026; pkgName = com.ethiomed.ethiomed; FgMobileRxPacketsPower = 0.0 mAh; BgMobileRxPacketsPower = 0.0 mAh; FgMobileTxPacketsPower = 0.0 mAh; BgMobileTxPacketsPower = 0.0 mAh; FgMobileTotalPower = 5.24641975308642E-4 mAh; BgMobileTotalPower = 5.24641975308642E-4 mAh.
+06-21 03:07:10.592  5112  5661 E Battery : AppStats: Uid = 10026; pkgName = com.ethiomed.ethiomed; FgGpsTime = 0 ms; BgGpsTime = 0 ms.
+06-21 03:07:10.592  5112  5661 E Battery : AppStats: Uid = 10026; pkgName = com.ethiomed.ethiomed; FgGpsPower = 0.0 mAh; BgGpsPower = 0.0 mAh.
+06-21 03:07:10.592  5112  5661 E Battery : AppStats: Uid = 10026; pkgName = com.ethiomed.ethiomed; FgSensorTime = 0 ms; BgSensorTime = 0 ms.
+06-21 03:07:10.592  5112  5661 E Battery : AppStats: Uid = 10026; pkgName = com.ethiomed.ethiomed; FgSensorPower = 0.0 mAh; BgSensorPower = 0.0 mAh.
+06-21 03:07:10.592  5112  5661 E Battery : AppStats: Uid = 10026; pkgName = com.ethiomed.ethiomed; FgCameraTime = 0 ms; BgCameraTime = 0 ms
+06-21 03:07:10.592  5112  5661 E Battery : AppStats: Uid = 10026; pkgName = com.ethiomed.ethiomed; FgCameraPower = 0.0 mAh; BgCameraPower = 0.0 mAh
+06-21 03:07:10.592  5112  5661 E Battery : AppStats: Uid = 10026; pkgName = com.ethiomed.ethiomed; FgFlashLightTime = 0 ms; BgFlashLightTime = 0 ms
+06-21 03:07:10.592  5112  5661 E Battery : AppStats: Uid = 10026; pkgName = com.ethiomed.ethiomed; FgFlashLightPower = 0.0 mAh; BgFlashLightPower = 0.0 mAh
+06-21 03:07:11.427  1924  5020 D InputMethodManagerService: isSecurity: attribute.packageName=com.ethiomed.ethiomed mCurMethodId=com.amharic.keyboard.for.android/com.example.android.softkeyboard.SoftKeyboard
+06-21 03:07:11.428  1634  1634 D InputMethodManager: showSoftInput() view=io.flutter.embedding.android.FlutterView{5e96ea8 VFE...... .F....ID 0,0-1080,2352 #1 aid=1073741824 viewInfo = AutoLayoutViewInfo{mIsImageType=false, mIsFlatView=false, mWidthType=1, mHeightType=1, mScaleType=null, mFillBackgroundPattern=1, mNeedStretchItems=false, mMeasureChanged=false, mNewMeasuredHeight=0, mOldMeasuredHeight=0, mExtraInfo=}} flags=0 reason=SHOW_SOFT_INPUT
+06-21 03:07:19.371  1924  2218 D InputMethodManagerService: isSecurity: attribute.packageName=com.ethiomed.ethiomed mCurMethodId=com.amharic.keyboard.for.android/com.example.android.softkeyboard.SoftKeyboard
+06-21 03:07:21.638  1924  5020 D InputMethodManagerService: isSecurity: attribute.packageName=com.ethiomed.ethiomed mCurMethodId=com.amharic.keyboard.for.android/com.example.android.softkeyboard.SoftKeyboard
+06-21 03:07:21.640  1634  1634 D InputMethodManager: showSoftInput() view=io.flutter.embedding.android.FlutterView{5e96ea8 VFE...... .F...... 0,0-1080,2352 #1 aid=1073741824 viewInfo = AutoLayoutViewInfo{mIsImageType=false, mIsFlatView=false, mWidthType=1, mHeightType=1, mScaleType=null, mFillBackgroundPattern=1, mNeedStretchItems=false, mMeasureChanged=false, mNewMeasuredHeight=0, mOldMeasuredHeight=0, mExtraInfo=}} flags=0 reason=SHOW_SOFT_INPUT
+06-21 03:07:22.922  1924 17326 D InputMethodManagerService: isSecurity: attribute.packageName=com.ethiomed.ethiomed mCurMethodId=com.amharic.keyboard.for.android/com.example.android.softkeyboard.SoftKeyboard
+06-21 03:07:26.962  1634  1634 I Quality : Skipped: false 1 cost 22.334057 refreshRate 16289292 bit true processName com.ethiomed.ethiomed
+06-21 03:07:29.377  1924  2288 E OplusArpPeer_euclid_psw: ARP read failure: android.system.ErrnoException: read failed: EAGAIN (Try again)
+06-21 03:07:37.252  1634  1634 I flutter : Another exception was thrown: Instance of 'DiagnosticsProperty<void>'
+06-21 03:07:37.255  1634  1634 I Quality : Skipped: false 1 cost 20.922684 refreshRate 16281360 bit true processName com.ethiomed.ethiomed
+06-21 03:07:37.584  1634  1634 I flutter : Another exception was thrown: Instance of 'DiagnosticsProperty<void>'
+06-21 03:07:37.824  1634  1634 I flutter : Another exception was thrown: Instance of 'DiagnosticsProperty<void>'
+

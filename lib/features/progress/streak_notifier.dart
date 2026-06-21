@@ -20,7 +20,6 @@ class StreakNotifier extends AsyncNotifier<StudyStreakStats> {
   Future<StudyStreakStats> build() async {
     _db = ref.watch(databaseProvider);
     try {
-      await _ensureStudySessionTable();
       return await _loadStats();
     } catch (error) {
       debugPrint('Unable to load study streak stats: $error');
@@ -30,9 +29,9 @@ class StreakNotifier extends AsyncNotifier<StudyStreakStats> {
 
   Future<void> recordArticleRead() async {
     try {
-      await _ensureStudySessionTable();
-      await _db.customStatement(
-        '''
+      _db
+          .customSelect(
+            '''
         INSERT INTO study_sessions (
           session_date,
           articles_read,
@@ -42,8 +41,9 @@ class StreakNotifier extends AsyncNotifier<StudyStreakStats> {
         ON CONFLICT(session_date) DO UPDATE SET
           articles_read = articles_read + 1
         ''',
-        [Variable(_todayKey())],
-      );
+            variables: [Variable(_todayKey())],
+          )
+          .get();
       state = const AsyncLoading<StudyStreakStats>();
       state = AsyncData(await _loadStats());
     } catch (error) {
@@ -55,10 +55,10 @@ class StreakNotifier extends AsyncNotifier<StudyStreakStats> {
 
   Future<void> recordQuizResult(bool correct) async {
     try {
-      await _ensureStudySessionTable();
       final correctIncrement = correct ? 1 : 0;
-      await _db.customStatement(
-        '''
+      _db
+          .customSelect(
+            '''
         INSERT INTO study_sessions (
           session_date,
           articles_read,
@@ -69,12 +69,13 @@ class StreakNotifier extends AsyncNotifier<StudyStreakStats> {
           quizzes_completed = quizzes_completed + 1,
           quiz_correct = quiz_correct + ?
         ''',
-        [
-          Variable(_todayKey()),
-          Variable(correctIncrement),
-          Variable(correctIncrement),
-        ],
-      );
+            variables: [
+              Variable(_todayKey()),
+              Variable(correctIncrement),
+              Variable(correctIncrement),
+            ],
+          )
+          .get();
       state = const AsyncLoading<StudyStreakStats>();
       state = AsyncData(await _loadStats());
     } catch (error) {
@@ -149,33 +150,6 @@ class StreakNotifier extends AsyncNotifier<StudyStreakStats> {
     }
 
     return correctAnswers * 100.0 / totalQuestions;
-  }
-
-  Future<void> _ensureStudySessionTable() async {
-    await _db.customStatement('''
-      CREATE TABLE IF NOT EXISTS study_sessions (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        session_date TEXT NOT NULL UNIQUE,
-        articles_read INTEGER NOT NULL DEFAULT 0,
-        quizzes_completed INTEGER NOT NULL DEFAULT 0,
-        quiz_correct INTEGER NOT NULL DEFAULT 0
-      )
-    ''');
-    await _db.customStatement(
-      'ALTER TABLE study_sessions ADD COLUMN IF NOT EXISTS session_date TEXT',
-    );
-    await _db.customStatement(
-      'ALTER TABLE study_sessions ADD COLUMN IF NOT EXISTS articles_read INTEGER NOT NULL DEFAULT 0',
-    );
-    await _db.customStatement(
-      'ALTER TABLE study_sessions ADD COLUMN IF NOT EXISTS quizzes_completed INTEGER NOT NULL DEFAULT 0',
-    );
-    await _db.customStatement(
-      'ALTER TABLE study_sessions ADD COLUMN IF NOT EXISTS quiz_correct INTEGER NOT NULL DEFAULT 0',
-    );
-    await _db.customStatement(
-      'CREATE UNIQUE INDEX IF NOT EXISTS idx_study_sessions_session_date ON study_sessions(session_date)',
-    );
   }
 
   String _todayKey() => _dateKey(DateTime.now());

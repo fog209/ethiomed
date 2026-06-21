@@ -38,7 +38,6 @@ class SpacedRepetitionService {
 
   Future<List<QuizQuestionEntity>> getDueCards(String category) async {
     try {
-      await _ensureColumns();
       final now = DateTime.now();
       final rows = await _db
           .customSelect(
@@ -66,7 +65,6 @@ class SpacedRepetitionService {
   Future<SpacedRepetitionReviewResult> recordReview(int id, int quality) async {
     try {
       return await _db.transaction(() async {
-        await _ensureColumns();
         final question = await _getQuestion(id);
         if (question == null) {
           throw AppException('Quiz question not found.');
@@ -79,8 +77,9 @@ class SpacedRepetitionService {
           quality: quality,
         );
 
-        await _db.customStatement(
-          '''
+        _db
+            .customSelect(
+              '''
           UPDATE quiz_table
           SET
             ease_factor = ?,
@@ -90,15 +89,16 @@ class SpacedRepetitionService {
             last_quality = ?
           WHERE id = ?
           ''',
-          [
-            schedule.easeFactor,
-            schedule.interval,
-            schedule.repetitions,
-            schedule.dueAt,
-            quality,
-            id,
-          ],
-        );
+              variables: [
+                Variable(schedule.easeFactor),
+                Variable(schedule.interval),
+                Variable(schedule.repetitions),
+                Variable(schedule.dueAt),
+                Variable(quality),
+                Variable(id),
+              ],
+            )
+            .get();
 
         return SpacedRepetitionReviewResult(
           interval: schedule.interval,
@@ -179,24 +179,6 @@ class SpacedRepetitionService {
       interval: adjustedInterval,
       repetitions: adjustedRepetitions,
       dueAt: DateTime.now().add(Duration(days: adjustedInterval)),
-    );
-  }
-
-  Future<void> _ensureColumns() async {
-    await _db.customStatement(
-      'ALTER TABLE quiz_table ADD COLUMN IF NOT EXISTS ease_factor REAL NOT NULL DEFAULT 2.5',
-    );
-    await _db.customStatement(
-      'ALTER TABLE quiz_table ADD COLUMN IF NOT EXISTS sr_interval INTEGER NOT NULL DEFAULT 0',
-    );
-    await _db.customStatement(
-      'ALTER TABLE quiz_table ADD COLUMN IF NOT EXISTS repetitions INTEGER NOT NULL DEFAULT 0',
-    );
-    await _db.customStatement(
-      'ALTER TABLE quiz_table ADD COLUMN IF NOT EXISTS next_due_at DATETIME',
-    );
-    await _db.customStatement(
-      'ALTER TABLE quiz_table ADD COLUMN IF NOT EXISTS last_quality INTEGER',
     );
   }
 }

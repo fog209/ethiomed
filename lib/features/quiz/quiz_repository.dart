@@ -48,7 +48,15 @@ class QuizRepository {
       await _db.transaction(() async {
         for (final question in questions) {
           final entity = _companionFromEntity(question);
-          await _db.into(_db.quizTable).insertOnConflictUpdate(entity);
+          await _db
+              .into(_db.quizTable)
+              .insert(
+                entity,
+                onConflict: DoUpdate(
+                  (_) => entity,
+                  target: [_db.quizTable.remoteId],
+                ),
+              );
         }
       });
     } catch (error) {
