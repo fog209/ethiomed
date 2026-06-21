@@ -45,7 +45,7 @@ class ArticleRepository {
       }
     } on PostgrestException catch (e) {
       debugPrint('Supabase error: ${e.message}');
-      rethrow;
+      return _db.select(_db.articles).get();
     } on SocketException {
       debugPrint('Offline: serving from local cache');
       return _db.select(_db.articles).get();
