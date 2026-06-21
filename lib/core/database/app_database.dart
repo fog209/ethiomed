@@ -88,9 +88,18 @@ class AppDatabase extends _$AppDatabase {
           await m.createTable(quizTable);
         }
         if (from < 5) {
-          await m.addColumn(quizTable, quizTable.srInterval);
-          await m.addColumn(quizTable, quizTable.repetitions);
-          await m.addColumn(quizTable, quizTable.nextDueAt);
+          await m.addColumn(
+            quizTable,
+            quizTable.srInterval as GeneratedColumn<Object>,
+          );
+          await m.addColumn(
+            quizTable,
+            quizTable.repetitions as GeneratedColumn<Object>,
+          );
+          await m.addColumn(
+            quizTable,
+            quizTable.nextDueAt as GeneratedColumn<Object>,
+          );
         }
       },
     );
