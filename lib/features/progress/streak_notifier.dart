@@ -29,7 +29,7 @@ class StreakNotifier extends AsyncNotifier<StudyStreakStats> {
 
   Future<void> recordArticleRead() async {
     try {
-      _db
+      await _db
           .customSelect(
             '''
         INSERT INTO study_sessions (
@@ -56,7 +56,7 @@ class StreakNotifier extends AsyncNotifier<StudyStreakStats> {
   Future<void> recordQuizResult(bool correct) async {
     try {
       final correctIncrement = correct ? 1 : 0;
-      _db
+      await _db
           .customSelect(
             '''
         INSERT INTO study_sessions (

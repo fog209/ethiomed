@@ -1457,6 +1457,39 @@ class $QuizTableTable extends QuizTable
         type: DriftSqlType.dateTime,
         requiredDuringInsert: false,
       );
+  static const VerificationMeta _srIntervalMeta = const VerificationMeta(
+    'srInterval',
+  );
+  @override
+  late final GeneratedColumn<int> srInterval = GeneratedColumn<int>(
+    'sr_interval',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _repetitionsMeta = const VerificationMeta(
+    'repetitions',
+  );
+  @override
+  late final GeneratedColumn<int> repetitions = GeneratedColumn<int>(
+    'repetitions',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _nextDueAtMeta = const VerificationMeta(
+    'nextDueAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> nextDueAt = GeneratedColumn<DateTime>(
+    'next_due_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -1474,6 +1507,9 @@ class $QuizTableTable extends QuizTable
     testedField,
     wrongCount,
     lastAttemptedAt,
+    srInterval,
+    repetitions,
+    nextDueAt,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1606,6 +1642,27 @@ class $QuizTableTable extends QuizTable
         ),
       );
     }
+    if (data.containsKey('sr_interval')) {
+      context.handle(
+        _srIntervalMeta,
+        srInterval.isAcceptableOrUnknown(data['sr_interval']!, _srIntervalMeta),
+      );
+    }
+    if (data.containsKey('repetitions')) {
+      context.handle(
+        _repetitionsMeta,
+        repetitions.isAcceptableOrUnknown(
+          data['repetitions']!,
+          _repetitionsMeta,
+        ),
+      );
+    }
+    if (data.containsKey('next_due_at')) {
+      context.handle(
+        _nextDueAtMeta,
+        nextDueAt.isAcceptableOrUnknown(data['next_due_at']!, _nextDueAtMeta),
+      );
+    }
     return context;
   }
 
@@ -1675,6 +1732,18 @@ class $QuizTableTable extends QuizTable
         DriftSqlType.dateTime,
         data['${effectivePrefix}last_attempted_at'],
       ),
+      srInterval: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}sr_interval'],
+      ),
+      repetitions: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}repetitions'],
+      ),
+      nextDueAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}next_due_at'],
+      ),
     );
   }
 
@@ -1701,6 +1770,9 @@ class QuizQuestionEntity extends DataClass
   final String testedField;
   final int wrongCount;
   final DateTime? lastAttemptedAt;
+  final int? srInterval;
+  final int? repetitions;
+  final DateTime? nextDueAt;
   const QuizQuestionEntity({
     required this.id,
     required this.remoteId,
@@ -1717,6 +1789,9 @@ class QuizQuestionEntity extends DataClass
     required this.testedField,
     required this.wrongCount,
     this.lastAttemptedAt,
+    this.srInterval,
+    this.repetitions,
+    this.nextDueAt,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1737,6 +1812,15 @@ class QuizQuestionEntity extends DataClass
     map['wrong_count'] = Variable<int>(wrongCount);
     if (!nullToAbsent || lastAttemptedAt != null) {
       map['last_attempted_at'] = Variable<DateTime>(lastAttemptedAt);
+    }
+    if (!nullToAbsent || srInterval != null) {
+      map['sr_interval'] = Variable<int>(srInterval);
+    }
+    if (!nullToAbsent || repetitions != null) {
+      map['repetitions'] = Variable<int>(repetitions);
+    }
+    if (!nullToAbsent || nextDueAt != null) {
+      map['next_due_at'] = Variable<DateTime>(nextDueAt);
     }
     return map;
   }
@@ -1760,6 +1844,15 @@ class QuizQuestionEntity extends DataClass
       lastAttemptedAt: lastAttemptedAt == null && nullToAbsent
           ? const Value.absent()
           : Value(lastAttemptedAt),
+      srInterval: srInterval == null && nullToAbsent
+          ? const Value.absent()
+          : Value(srInterval),
+      repetitions: repetitions == null && nullToAbsent
+          ? const Value.absent()
+          : Value(repetitions),
+      nextDueAt: nextDueAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(nextDueAt),
     );
   }
 
@@ -1784,6 +1877,9 @@ class QuizQuestionEntity extends DataClass
       testedField: serializer.fromJson<String>(json['testedField']),
       wrongCount: serializer.fromJson<int>(json['wrongCount']),
       lastAttemptedAt: serializer.fromJson<DateTime?>(json['lastAttemptedAt']),
+      srInterval: serializer.fromJson<int?>(json['srInterval']),
+      repetitions: serializer.fromJson<int?>(json['repetitions']),
+      nextDueAt: serializer.fromJson<DateTime?>(json['nextDueAt']),
     );
   }
   @override
@@ -1805,6 +1901,9 @@ class QuizQuestionEntity extends DataClass
       'testedField': serializer.toJson<String>(testedField),
       'wrongCount': serializer.toJson<int>(wrongCount),
       'lastAttemptedAt': serializer.toJson<DateTime?>(lastAttemptedAt),
+      'srInterval': serializer.toJson<int?>(srInterval),
+      'repetitions': serializer.toJson<int?>(repetitions),
+      'nextDueAt': serializer.toJson<DateTime?>(nextDueAt),
     };
   }
 
@@ -1824,6 +1923,9 @@ class QuizQuestionEntity extends DataClass
     String? testedField,
     int? wrongCount,
     Value<DateTime?> lastAttemptedAt = const Value.absent(),
+    Value<int?> srInterval = const Value.absent(),
+    Value<int?> repetitions = const Value.absent(),
+    Value<DateTime?> nextDueAt = const Value.absent(),
   }) => QuizQuestionEntity(
     id: id ?? this.id,
     remoteId: remoteId ?? this.remoteId,
@@ -1842,6 +1944,9 @@ class QuizQuestionEntity extends DataClass
     lastAttemptedAt: lastAttemptedAt.present
         ? lastAttemptedAt.value
         : this.lastAttemptedAt,
+    srInterval: srInterval.present ? srInterval.value : this.srInterval,
+    repetitions: repetitions.present ? repetitions.value : this.repetitions,
+    nextDueAt: nextDueAt.present ? nextDueAt.value : this.nextDueAt,
   );
   QuizQuestionEntity copyWithCompanion(QuizTableCompanion data) {
     return QuizQuestionEntity(
@@ -1872,6 +1977,13 @@ class QuizQuestionEntity extends DataClass
       lastAttemptedAt: data.lastAttemptedAt.present
           ? data.lastAttemptedAt.value
           : this.lastAttemptedAt,
+      srInterval: data.srInterval.present
+          ? data.srInterval.value
+          : this.srInterval,
+      repetitions: data.repetitions.present
+          ? data.repetitions.value
+          : this.repetitions,
+      nextDueAt: data.nextDueAt.present ? data.nextDueAt.value : this.nextDueAt,
     );
   }
 
@@ -1892,7 +2004,10 @@ class QuizQuestionEntity extends DataClass
           ..write('difficulty: $difficulty, ')
           ..write('testedField: $testedField, ')
           ..write('wrongCount: $wrongCount, ')
-          ..write('lastAttemptedAt: $lastAttemptedAt')
+          ..write('lastAttemptedAt: $lastAttemptedAt, ')
+          ..write('srInterval: $srInterval, ')
+          ..write('repetitions: $repetitions, ')
+          ..write('nextDueAt: $nextDueAt')
           ..write(')'))
         .toString();
   }
@@ -1914,6 +2029,9 @@ class QuizQuestionEntity extends DataClass
     testedField,
     wrongCount,
     lastAttemptedAt,
+    srInterval,
+    repetitions,
+    nextDueAt,
   );
   @override
   bool operator ==(Object other) =>
@@ -1933,7 +2051,10 @@ class QuizQuestionEntity extends DataClass
           other.difficulty == this.difficulty &&
           other.testedField == this.testedField &&
           other.wrongCount == this.wrongCount &&
-          other.lastAttemptedAt == this.lastAttemptedAt);
+          other.lastAttemptedAt == this.lastAttemptedAt &&
+          other.srInterval == this.srInterval &&
+          other.repetitions == this.repetitions &&
+          other.nextDueAt == this.nextDueAt);
 }
 
 class QuizTableCompanion extends UpdateCompanion<QuizQuestionEntity> {
@@ -1952,6 +2073,9 @@ class QuizTableCompanion extends UpdateCompanion<QuizQuestionEntity> {
   final Value<String> testedField;
   final Value<int> wrongCount;
   final Value<DateTime?> lastAttemptedAt;
+  final Value<int?> srInterval;
+  final Value<int?> repetitions;
+  final Value<DateTime?> nextDueAt;
   const QuizTableCompanion({
     this.id = const Value.absent(),
     this.remoteId = const Value.absent(),
@@ -1968,6 +2092,9 @@ class QuizTableCompanion extends UpdateCompanion<QuizQuestionEntity> {
     this.testedField = const Value.absent(),
     this.wrongCount = const Value.absent(),
     this.lastAttemptedAt = const Value.absent(),
+    this.srInterval = const Value.absent(),
+    this.repetitions = const Value.absent(),
+    this.nextDueAt = const Value.absent(),
   });
   QuizTableCompanion.insert({
     this.id = const Value.absent(),
@@ -1985,6 +2112,9 @@ class QuizTableCompanion extends UpdateCompanion<QuizQuestionEntity> {
     this.testedField = const Value.absent(),
     this.wrongCount = const Value.absent(),
     this.lastAttemptedAt = const Value.absent(),
+    this.srInterval = const Value.absent(),
+    this.repetitions = const Value.absent(),
+    this.nextDueAt = const Value.absent(),
   }) : remoteId = Value(remoteId),
        articleId = Value(articleId),
        stem = Value(stem),
@@ -2011,6 +2141,9 @@ class QuizTableCompanion extends UpdateCompanion<QuizQuestionEntity> {
     Expression<String>? testedField,
     Expression<int>? wrongCount,
     Expression<DateTime>? lastAttemptedAt,
+    Expression<int>? srInterval,
+    Expression<int>? repetitions,
+    Expression<DateTime>? nextDueAt,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -2028,6 +2161,9 @@ class QuizTableCompanion extends UpdateCompanion<QuizQuestionEntity> {
       if (testedField != null) 'tested_field': testedField,
       if (wrongCount != null) 'wrong_count': wrongCount,
       if (lastAttemptedAt != null) 'last_attempted_at': lastAttemptedAt,
+      if (srInterval != null) 'sr_interval': srInterval,
+      if (repetitions != null) 'repetitions': repetitions,
+      if (nextDueAt != null) 'next_due_at': nextDueAt,
     });
   }
 
@@ -2047,6 +2183,9 @@ class QuizTableCompanion extends UpdateCompanion<QuizQuestionEntity> {
     Value<String>? testedField,
     Value<int>? wrongCount,
     Value<DateTime?>? lastAttemptedAt,
+    Value<int?>? srInterval,
+    Value<int?>? repetitions,
+    Value<DateTime?>? nextDueAt,
   }) {
     return QuizTableCompanion(
       id: id ?? this.id,
@@ -2064,6 +2203,9 @@ class QuizTableCompanion extends UpdateCompanion<QuizQuestionEntity> {
       testedField: testedField ?? this.testedField,
       wrongCount: wrongCount ?? this.wrongCount,
       lastAttemptedAt: lastAttemptedAt ?? this.lastAttemptedAt,
+      srInterval: srInterval ?? this.srInterval,
+      repetitions: repetitions ?? this.repetitions,
+      nextDueAt: nextDueAt ?? this.nextDueAt,
     );
   }
 
@@ -2115,6 +2257,15 @@ class QuizTableCompanion extends UpdateCompanion<QuizQuestionEntity> {
     if (lastAttemptedAt.present) {
       map['last_attempted_at'] = Variable<DateTime>(lastAttemptedAt.value);
     }
+    if (srInterval.present) {
+      map['sr_interval'] = Variable<int>(srInterval.value);
+    }
+    if (repetitions.present) {
+      map['repetitions'] = Variable<int>(repetitions.value);
+    }
+    if (nextDueAt.present) {
+      map['next_due_at'] = Variable<DateTime>(nextDueAt.value);
+    }
     return map;
   }
 
@@ -2135,7 +2286,10 @@ class QuizTableCompanion extends UpdateCompanion<QuizQuestionEntity> {
           ..write('difficulty: $difficulty, ')
           ..write('testedField: $testedField, ')
           ..write('wrongCount: $wrongCount, ')
-          ..write('lastAttemptedAt: $lastAttemptedAt')
+          ..write('lastAttemptedAt: $lastAttemptedAt, ')
+          ..write('srInterval: $srInterval, ')
+          ..write('repetitions: $repetitions, ')
+          ..write('nextDueAt: $nextDueAt')
           ..write(')'))
         .toString();
   }
@@ -3063,6 +3217,9 @@ typedef $$QuizTableTableCreateCompanionBuilder =
       Value<String> testedField,
       Value<int> wrongCount,
       Value<DateTime?> lastAttemptedAt,
+      Value<int?> srInterval,
+      Value<int?> repetitions,
+      Value<DateTime?> nextDueAt,
     });
 typedef $$QuizTableTableUpdateCompanionBuilder =
     QuizTableCompanion Function({
@@ -3081,6 +3238,9 @@ typedef $$QuizTableTableUpdateCompanionBuilder =
       Value<String> testedField,
       Value<int> wrongCount,
       Value<DateTime?> lastAttemptedAt,
+      Value<int?> srInterval,
+      Value<int?> repetitions,
+      Value<DateTime?> nextDueAt,
     });
 
 class $$QuizTableTableFilterComposer
@@ -3164,6 +3324,21 @@ class $$QuizTableTableFilterComposer
 
   ColumnFilters<DateTime> get lastAttemptedAt => $composableBuilder(
     column: $table.lastAttemptedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get srInterval => $composableBuilder(
+    column: $table.srInterval,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get repetitions => $composableBuilder(
+    column: $table.repetitions,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get nextDueAt => $composableBuilder(
+    column: $table.nextDueAt,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -3251,6 +3426,21 @@ class $$QuizTableTableOrderingComposer
     column: $table.lastAttemptedAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<int> get srInterval => $composableBuilder(
+    column: $table.srInterval,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get repetitions => $composableBuilder(
+    column: $table.repetitions,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get nextDueAt => $composableBuilder(
+    column: $table.nextDueAt,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$QuizTableTableAnnotationComposer
@@ -3318,6 +3508,19 @@ class $$QuizTableTableAnnotationComposer
     column: $table.lastAttemptedAt,
     builder: (column) => column,
   );
+
+  GeneratedColumn<int> get srInterval => $composableBuilder(
+    column: $table.srInterval,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get repetitions => $composableBuilder(
+    column: $table.repetitions,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get nextDueAt =>
+      $composableBuilder(column: $table.nextDueAt, builder: (column) => column);
 }
 
 class $$QuizTableTableTableManager
@@ -3366,6 +3569,9 @@ class $$QuizTableTableTableManager
                 Value<String> testedField = const Value.absent(),
                 Value<int> wrongCount = const Value.absent(),
                 Value<DateTime?> lastAttemptedAt = const Value.absent(),
+                Value<int?> srInterval = const Value.absent(),
+                Value<int?> repetitions = const Value.absent(),
+                Value<DateTime?> nextDueAt = const Value.absent(),
               }) => QuizTableCompanion(
                 id: id,
                 remoteId: remoteId,
@@ -3382,6 +3588,9 @@ class $$QuizTableTableTableManager
                 testedField: testedField,
                 wrongCount: wrongCount,
                 lastAttemptedAt: lastAttemptedAt,
+                srInterval: srInterval,
+                repetitions: repetitions,
+                nextDueAt: nextDueAt,
               ),
           createCompanionCallback:
               ({
@@ -3400,6 +3609,9 @@ class $$QuizTableTableTableManager
                 Value<String> testedField = const Value.absent(),
                 Value<int> wrongCount = const Value.absent(),
                 Value<DateTime?> lastAttemptedAt = const Value.absent(),
+                Value<int?> srInterval = const Value.absent(),
+                Value<int?> repetitions = const Value.absent(),
+                Value<DateTime?> nextDueAt = const Value.absent(),
               }) => QuizTableCompanion.insert(
                 id: id,
                 remoteId: remoteId,
@@ -3416,6 +3628,9 @@ class $$QuizTableTableTableManager
                 testedField: testedField,
                 wrongCount: wrongCount,
                 lastAttemptedAt: lastAttemptedAt,
+                srInterval: srInterval,
+                repetitions: repetitions,
+                nextDueAt: nextDueAt,
               ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))

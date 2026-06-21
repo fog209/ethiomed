@@ -45,11 +45,14 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() {
+    Future.microtask(() async {
       if (!mounted) {
         return;
       }
-      ref.read(streakNotifierProvider.notifier).recordArticleRead();
+      await ref.read(streakNotifierProvider.notifier).recordArticleRead();
+      if (!mounted) {
+        return;
+      }
     });
   }
 

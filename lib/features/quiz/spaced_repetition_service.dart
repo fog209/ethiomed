@@ -77,7 +77,7 @@ class SpacedRepetitionService {
           quality: quality,
         );
 
-        _db
+        await _db
             .customSelect(
               '''
           UPDATE quiz_table
