@@ -81,8 +81,6 @@ class _ArticleListScreenState extends ConsumerState<ArticleListScreen> {
     }
 
     ref.read(articleIsLoadingMoreProvider.notifier).state = true;
-    ref.read(articleOffsetProvider.notifier).state =
-        ref.read(articleOffsetProvider) + _articlesPageSize;
   }
 
   @override
@@ -129,7 +127,19 @@ class _ArticleListScreenState extends ConsumerState<ArticleListScreen> {
 
       if (next.hasError) {
         _runAfterBuild(() {
+          if (!mounted) {
+            return;
+          }
           ref.read(articleIsLoadingMoreProvider.notifier).state = false;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('Unable to load more articles.'),
+              action: SnackBarAction(
+                label: 'Retry',
+                onPressed: _loadMoreArticles,
+              ),
+            ),
+          );
         });
         return;
       }
@@ -149,6 +159,8 @@ class _ArticleListScreenState extends ConsumerState<ArticleListScreen> {
         _runAfterBuild(() {
           ref.read(articleLoadedArticlesProvider.notifier).state =
               <ArticleLocal>[...previousArticles, ...pageArticles];
+          ref.read(articleOffsetProvider.notifier).state =
+              currentOffset + _articlesPageSize;
           ref
               .read(articleHasMoreProvider.notifier)
               .state = totalArticles == null
