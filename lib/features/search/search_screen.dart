@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:ethiomed/features/articles/data/article_repository.dart';
 import 'package:ethiomed/features/articles/presentation/article_detail_screen.dart';
 import 'search_history_service.dart';
@@ -166,13 +167,43 @@ class _ArticleSearchScreenState extends ConsumerState<ArticleSearchScreen> {
                         },
                       );
                     },
-                    loading: () =>
-                        const Center(child: CircularProgressIndicator()),
+                    loading: () => _buildShimmerSearchResults(),
                     error: (error, stack) =>
                         Center(child: Text('Error: $error')),
                   ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildShimmerSearchResults() {
+    return ListView.builder(
+      itemCount: 5,
+      itemBuilder: (context, index) => Shimmer.fromColors(
+        baseColor: Colors.grey[300]!,
+        highlightColor: Colors.grey[100]!,
+        child: ListTile(
+          leading: Container(
+            width: 40,
+            height: 40,
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+            ),
+          ),
+          title: Container(
+            height: 14,
+            width: double.infinity,
+            color: Colors.white,
+          ),
+          subtitle: Container(
+            height: 10,
+            width: 120,
+            margin: const EdgeInsets.only(top: 8),
+            color: Colors.white,
+          ),
+        ),
       ),
     );
   }

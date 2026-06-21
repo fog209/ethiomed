@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shimmer/shimmer.dart';
 
 import '../data/article_search_provider.dart';
 import 'article_detail_screen.dart';
@@ -126,7 +127,7 @@ class _ArticleSearchScreenState extends ConsumerState<ArticleSearchScreen> {
 
   Widget _buildResults(ArticleSearchState searchState) {
     if (searchState.isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return _buildShimmerSearchResults();
     }
 
     if (searchState.hasError) {
@@ -200,5 +201,36 @@ class _ArticleSearchScreenState extends ConsumerState<ArticleSearchScreen> {
     }
 
     return Text.rich(TextSpan(children: spans));
+  }
+
+  Widget _buildShimmerSearchResults() {
+    return ListView.builder(
+      itemCount: 5,
+      itemBuilder: (context, index) => Shimmer.fromColors(
+        baseColor: Colors.grey[300]!,
+        highlightColor: Colors.grey[100]!,
+        child: ListTile(
+          leading: Container(
+            width: 40,
+            height: 40,
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+            ),
+          ),
+          title: Container(
+            height: 14,
+            width: double.infinity,
+            color: Colors.white,
+          ),
+          subtitle: Container(
+            height: 10,
+            width: 120,
+            margin: const EdgeInsets.only(top: 8),
+            color: Colors.white,
+          ),
+        ),
+      ),
+    );
   }
 }

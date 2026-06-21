@@ -102,6 +102,7 @@ class CategoriesScreen extends ConsumerWidget {
             loading: _buildStudyStatsLoadingRow,
             error: (_, _) => _buildStudyStatsErrorRow(ref),
           ),
+          if (streak.isLoading) _buildShimmerCategoryGrid(),
           _buildSectionHeader('Clinical'),
           _buildCategoryGrid(AppConfig.clinicalCategories),
           const SizedBox(height: 24),
@@ -229,6 +230,45 @@ class CategoriesScreen extends ConsumerWidget {
           color: Color(0xFFFFB300),
           fontSize: 18,
           fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildShimmerCategoryGrid() {
+    final categories = AppConfig.clinicalCategories.take(6).toList();
+
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        childAspectRatio: 1.1,
+        crossAxisSpacing: 15,
+        mainAxisSpacing: 15,
+      ),
+      itemCount: categories.length,
+      itemBuilder: (context, index) => Shimmer.fromColors(
+        baseColor: Colors.grey[300]!,
+        highlightColor: Colors.grey[100]!,
+        child: Card(
+          elevation: 4,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Container(height: 12, width: 100, color: Colors.white),
+            ],
+          ),
         ),
       ),
     );

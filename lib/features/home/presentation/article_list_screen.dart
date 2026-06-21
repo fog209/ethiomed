@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shimmer/shimmer.dart';
 import '../../../core/database/app_database.dart';
 import '../../../features/articles/article_providers.dart';
 import '../../articles/data/article_repository.dart';
@@ -216,7 +217,7 @@ class _ArticleListScreenState extends ConsumerState<ArticleListScreen> {
             );
           }
 
-          return const Center(child: CircularProgressIndicator());
+          return _buildShimmerArticleList();
         },
         error: (err, stack) {
           if (loadedArticles.isNotEmpty) {
@@ -271,7 +272,7 @@ class _ArticleListScreenState extends ConsumerState<ArticleListScreen> {
           return Padding(
             padding: const EdgeInsets.symmetric(vertical: 20),
             child: showLoadingMore
-                ? const Center(child: CircularProgressIndicator())
+                ? _buildShimmerArticleTile()
                 : Center(
                     child: Text(
                       errorMessage ?? '',
@@ -310,6 +311,44 @@ class _ArticleListScreenState extends ConsumerState<ArticleListScreen> {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildShimmerArticleList() {
+    return ListView.builder(
+      controller: _scrollController,
+      itemCount: 5,
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      itemBuilder: (context, index) => _buildShimmerArticleTile(),
+    );
+  }
+
+  Widget _buildShimmerArticleTile() {
+    return Shimmer.fromColors(
+      baseColor: Colors.grey[300]!,
+      highlightColor: Colors.grey[100]!,
+      child: Card(
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                height: 16,
+                width: double.infinity,
+                color: Colors.white,
+              ),
+              const SizedBox(height: 10),
+              Container(
+                height: 12,
+                width: 180,
+                color: Colors.white,
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

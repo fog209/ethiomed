@@ -5,6 +5,7 @@ import 'package:drift/drift.dart' show Variable;
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/database/app_database.dart';
@@ -160,12 +161,7 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
                   borderRadius: BorderRadius.circular(12),
                   child: CachedNetworkImage(
                     imageUrl: imageUrl,
-                    placeholder: (context, url) => Container(
-                      height: 200,
-                      width: double.infinity,
-                      color: Colors.grey[200],
-                      child: const Center(child: CircularProgressIndicator()),
-                    ),
+                    placeholder: (context, url) => _buildImagePlaceholder(),
                     errorWidget: (context, url, error) => Container(
                       color: Colors.grey[200],
                       child: const Icon(
@@ -225,6 +221,33 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
             const SizedBox(height: 40),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildImagePlaceholder() {
+    return Shimmer.fromColors(
+      baseColor: Colors.grey[300]!,
+      highlightColor: Colors.grey[100]!,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            height: 200,
+            width: double.infinity,
+            color: Colors.white,
+          ),
+          const SizedBox(height: 20),
+          Container(height: 24, width: double.infinity, color: Colors.white),
+          const SizedBox(height: 12),
+          Container(height: 12, width: 180, color: Colors.white),
+          const SizedBox(height: 16),
+          Container(height: 14, width: double.infinity, color: Colors.white),
+          const SizedBox(height: 8),
+          Container(height: 14, width: double.infinity, color: Colors.white),
+          const SizedBox(height: 8),
+          Container(height: 14, width: double.infinity, color: Colors.white),
+        ],
       ),
     );
   }

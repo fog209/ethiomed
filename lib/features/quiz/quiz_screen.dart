@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shimmer/shimmer.dart';
 
 import '../../../core/config/app_config.dart';
 import '../../../features/progress/streak_notifier.dart';
@@ -42,11 +43,43 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
               data: (questions) => questions.isEmpty
                   ? _buildEmptyState(notifier)
                   : _buildQuiz(context, questions, notifier),
-              loading: () => const Center(child: CircularProgressIndicator()),
+              loading: () => _buildShimmerQuestionCard(),
               error: (error, _) => _buildErrorState(notifier),
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildShimmerQuestionCard() {
+    return Shimmer.fromColors(
+      baseColor: Colors.grey[300]!,
+      highlightColor: Colors.grey[100]!,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Container(height: 18, width: 120, color: Colors.white),
+          const SizedBox(height: 24),
+          Container(height: 22, width: double.infinity, color: Colors.white),
+          const SizedBox(height: 12),
+          Container(height: 22, width: double.infinity, color: Colors.white),
+          const SizedBox(height: 24),
+          ...List.generate(
+            4,
+            (index) => Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Container(
+                height: 48,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
