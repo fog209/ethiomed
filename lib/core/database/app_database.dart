@@ -26,6 +26,15 @@ class Bookmarks extends Table {
   TextColumn get articleId => text().references(Articles, #id)();
 }
 
+class StudySessions extends Table {
+  DateTimeColumn get date => dateTime()();
+  IntColumn get articlesViewedCount =>
+      integer().withDefault(const Constant(0))();
+
+  @override
+  Set<Column> get primaryKey => {date};
+}
+
 @DataClassName('QuizQuestionLocal')
 class QuizQuestions extends Table {
   IntColumn get id => integer().autoIncrement()();
@@ -65,12 +74,14 @@ class QuizTable extends Table {
   DateTimeColumn get nextDueAt => dateTime().nullable()();
 }
 
-@DriftDatabase(tables: [Articles, Bookmarks, QuizQuestions, QuizTable])
+@DriftDatabase(
+  tables: [Articles, Bookmarks, StudySessions, QuizQuestions, QuizTable],
+)
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 7;
+  int get schemaVersion => 8;
 
   @override
   MigrationStrategy get migration {
@@ -95,6 +106,9 @@ class AppDatabase extends _$AppDatabase {
             articles.subcategory as GeneratedColumn<Object>,
           );
         }
+        if (from < 8) {
+          await _ensureStudySessionsTable();
+        }
         if (from < 6) {
           await m.addColumn(
             articles,
@@ -116,6 +130,137 @@ class AppDatabase extends _$AppDatabase {
           );
         }
       },
+    );
+  }
+
+  Future<void> recordArticleView() async {
+    await _ensureStudySessionsTable();
+
+    final today = DateTime.now();
+    final day = DateTime(today.year, today.month, today.day);
+
+    await customSelect(
+      '''
+      INSERT INTO study_sessions (
+        date,
+        articles_viewed_count
+      ) VALUES (?, 1)
+      ON CONFLICT(date) DO UPDATE SET
+        articles_viewed_count = articles_viewed_count + 1
+      ''',
+      variables: [Variable(day)],
+    ).get();
+  }
+
+  Future<int> countCurrentStudyStreak() async {
+    await _ensureStudySessionsTable();
+
+    final rows = await customSelect('''
+      SELECT date
+      FROM study_sessions
+      WHERE date IS NOT NULL
+        AND date != ''
+      ORDER BY date DESC
+      ''').get();
+
+    final activeDays = rows
+        .map((row) => row.read<String>('date'))
+        .where((value) => value.isNotEmpty)
+        .toSet();
+    var streak = 0;
+    var date = DateTime.now();
+
+    while (activeDays.contains(_dateKey(date))) {
+      streak += 1;
+      date = date.subtract(const Duration(days: 1));
+    }
+
+    return streak;
+  }
+
+  Future<int> countTotalArticlesViewed() async {
+    await _ensureStudySessionsTable();
+
+    final rows = await customSelect('''
+      SELECT COALESCE(SUM(articles_viewed_count), 0) AS total_articles
+      FROM study_sessions
+      ''').get();
+
+    if (rows.isEmpty) {
+      return 0;
+    }
+
+    return rows.first.read<int>('total_articles');
+  }
+
+  Future<void> _ensureStudySessionsTable() async {
+    await customStatement('''
+      CREATE TABLE IF NOT EXISTS study_sessions (
+        date TEXT NOT NULL PRIMARY KEY,
+        articles_viewed_count INTEGER NOT NULL DEFAULT 0,
+        session_date TEXT,
+        articles_read INTEGER NOT NULL DEFAULT 0,
+        quizzes_completed INTEGER NOT NULL DEFAULT 0,
+        quiz_correct INTEGER NOT NULL DEFAULT 0
+      )
+      ''');
+
+    final columns = await customSelect(
+      'PRAGMA table_info(study_sessions)',
+    ).get();
+    final columnNames = columns.map((row) => row.read<String>('name')).toSet();
+
+    if (!columnNames.contains('date')) {
+      await customStatement(
+        'ALTER TABLE study_sessions ADD COLUMN date TEXT NOT NULL DEFAULT ""',
+      );
+    }
+    if (!columnNames.contains('articles_viewed_count')) {
+      await customStatement(
+        'ALTER TABLE study_sessions ADD COLUMN articles_viewed_count INTEGER NOT NULL DEFAULT 0',
+      );
+    }
+    if (!columnNames.contains('session_date')) {
+      await customStatement(
+        'ALTER TABLE study_sessions ADD COLUMN session_date TEXT',
+      );
+    }
+    if (!columnNames.contains('articles_read')) {
+      await customStatement(
+        'ALTER TABLE study_sessions ADD COLUMN articles_read INTEGER NOT NULL DEFAULT 0',
+      );
+    }
+    if (!columnNames.contains('quizzes_completed')) {
+      await customStatement(
+        'ALTER TABLE study_sessions ADD COLUMN quizzes_completed INTEGER NOT NULL DEFAULT 0',
+      );
+    }
+    if (!columnNames.contains('quiz_correct')) {
+      await customStatement(
+        'ALTER TABLE study_sessions ADD COLUMN quiz_correct INTEGER NOT NULL DEFAULT 0',
+      );
+    }
+
+    if (columnNames.contains('session_date')) {
+      await customStatement('''
+        UPDATE study_sessions
+        SET date = session_date
+        WHERE (date IS NULL OR date = '')
+          AND session_date IS NOT NULL
+        ''');
+    }
+    if (columnNames.contains('articles_read')) {
+      await customStatement('''
+        UPDATE study_sessions
+        SET articles_viewed_count = CASE
+          WHEN articles_read > articles_viewed_count THEN articles_read
+          ELSE articles_viewed_count
+        END
+        ''');
+    }
+
+    await customStatement(
+      'CREATE UNIQUE INDEX IF NOT EXISTS idx_study_sessions_date ON study_sessions(date)',
     );
   }
 
@@ -156,16 +301,26 @@ class AppDatabase extends _$AppDatabase {
       CREATE TABLE IF NOT EXISTS view_history (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         article_id TEXT NOT NULL,
-        opened_at TEXT NOT NULL DEFAULT ''
+        article_title TEXT,
+        category TEXT,
+        viewed_at TEXT NOT NULL DEFAULT ''
       )
-    ''');
+      ''');
     await customStatement(
-      'ALTER TABLE view_history ADD COLUMN IF NOT EXISTS article_id TEXT',
+      'ALTER TABLE view_history ADD COLUMN IF NOT EXISTS article_title TEXT',
     );
     await customStatement(
-      'ALTER TABLE view_history ADD COLUMN IF NOT EXISTS opened_at TEXT NOT NULL DEFAULT ""',
+      'ALTER TABLE view_history ADD COLUMN IF NOT EXISTS category TEXT',
+    );
+    await customStatement(
+      'ALTER TABLE view_history ADD COLUMN IF NOT EXISTS viewed_at TEXT NOT NULL DEFAULT ""',
     );
   }
+}
+
+String _dateKey(DateTime date) {
+  final day = DateTime(date.year, date.month, date.day);
+  return day.toIso8601String().substring(0, 10);
 }
 
 LazyDatabase _openConnection() {

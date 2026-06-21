@@ -11,6 +11,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/database/app_database.dart';
 import '../../../features/articles/article_providers.dart';
+import '../../../features/progress/category_progress_provider.dart';
 import '../../../features/progress/streak_notifier.dart';
 import '../../../features/quiz/weakness_service.dart';
 
@@ -61,6 +62,10 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
       if (!mounted) {
         return;
       }
+      ref.invalidate(categoryProgressProvider(widget.article.category ?? ''));
+      if (!mounted) {
+        return;
+      }
     });
   }
 
@@ -103,7 +108,8 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
     return Scaffold(
       appBar: AppBar(
         leading: CloseButton(
-          onPressed: () => context.canPop() ? context.pop() : context.go('/home'),
+          onPressed: () =>
+              context.canPop() ? context.pop() : context.go('/home'),
         ),
         title: Text(widget.article.title),
         backgroundColor: const Color(0xFF1A237E),
@@ -206,11 +212,7 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
             ),
           ),
 
-          ..._buildClinicalSections(
-            sections,
-              weakFields,
-            highYieldMode,
-          ),
+          ..._buildClinicalSections(sections, weakFields, highYieldMode),
 
           const SizedBox(height: 20),
 
@@ -247,11 +249,7 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            height: 200,
-            width: double.infinity,
-            color: Colors.white,
-          ),
+          Container(height: 200, width: double.infinity, color: Colors.white),
           const SizedBox(height: 20),
           Container(height: 24, width: double.infinity, color: Colors.white),
           const SizedBox(height: 12),

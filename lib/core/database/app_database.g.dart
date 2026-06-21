@@ -71,6 +71,17 @@ class $ArticlesTable extends Articles
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _subcategoryMeta = const VerificationMeta(
+    'subcategory',
+  );
+  @override
+  late final GeneratedColumn<String> subcategory = GeneratedColumn<String>(
+    'subcategory',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _isHighYieldMeta = const VerificationMeta(
     'isHighYield',
   );
@@ -94,6 +105,7 @@ class $ArticlesTable extends Articles
     content,
     imageUrl,
     videoUrl,
+    subcategory,
     isHighYield,
   ];
   @override
@@ -145,6 +157,15 @@ class $ArticlesTable extends Articles
         videoUrl.isAcceptableOrUnknown(data['video_url']!, _videoUrlMeta),
       );
     }
+    if (data.containsKey('subcategory')) {
+      context.handle(
+        _subcategoryMeta,
+        subcategory.isAcceptableOrUnknown(
+          data['subcategory']!,
+          _subcategoryMeta,
+        ),
+      );
+    }
     if (data.containsKey('is_high_yield')) {
       context.handle(
         _isHighYieldMeta,
@@ -187,6 +208,10 @@ class $ArticlesTable extends Articles
         DriftSqlType.string,
         data['${effectivePrefix}video_url'],
       ),
+      subcategory: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}subcategory'],
+      ),
       isHighYield: attachedDatabase.typeMapping.read(
         DriftSqlType.bool,
         data['${effectivePrefix}is_high_yield'],
@@ -207,6 +232,7 @@ class ArticleLocal extends DataClass implements Insertable<ArticleLocal> {
   final String? content;
   final String? imageUrl;
   final String? videoUrl;
+  final String? subcategory;
   final bool isHighYield;
   const ArticleLocal({
     required this.id,
@@ -215,6 +241,7 @@ class ArticleLocal extends DataClass implements Insertable<ArticleLocal> {
     this.content,
     this.imageUrl,
     this.videoUrl,
+    this.subcategory,
     required this.isHighYield,
   });
   @override
@@ -233,6 +260,9 @@ class ArticleLocal extends DataClass implements Insertable<ArticleLocal> {
     }
     if (!nullToAbsent || videoUrl != null) {
       map['video_url'] = Variable<String>(videoUrl);
+    }
+    if (!nullToAbsent || subcategory != null) {
+      map['subcategory'] = Variable<String>(subcategory);
     }
     map['is_high_yield'] = Variable<bool>(isHighYield);
     return map;
@@ -254,6 +284,9 @@ class ArticleLocal extends DataClass implements Insertable<ArticleLocal> {
       videoUrl: videoUrl == null && nullToAbsent
           ? const Value.absent()
           : Value(videoUrl),
+      subcategory: subcategory == null && nullToAbsent
+          ? const Value.absent()
+          : Value(subcategory),
       isHighYield: Value(isHighYield),
     );
   }
@@ -270,6 +303,7 @@ class ArticleLocal extends DataClass implements Insertable<ArticleLocal> {
       content: serializer.fromJson<String?>(json['content']),
       imageUrl: serializer.fromJson<String?>(json['imageUrl']),
       videoUrl: serializer.fromJson<String?>(json['videoUrl']),
+      subcategory: serializer.fromJson<String?>(json['subcategory']),
       isHighYield: serializer.fromJson<bool>(json['isHighYield']),
     );
   }
@@ -283,6 +317,7 @@ class ArticleLocal extends DataClass implements Insertable<ArticleLocal> {
       'content': serializer.toJson<String?>(content),
       'imageUrl': serializer.toJson<String?>(imageUrl),
       'videoUrl': serializer.toJson<String?>(videoUrl),
+      'subcategory': serializer.toJson<String?>(subcategory),
       'isHighYield': serializer.toJson<bool>(isHighYield),
     };
   }
@@ -294,6 +329,7 @@ class ArticleLocal extends DataClass implements Insertable<ArticleLocal> {
     Value<String?> content = const Value.absent(),
     Value<String?> imageUrl = const Value.absent(),
     Value<String?> videoUrl = const Value.absent(),
+    Value<String?> subcategory = const Value.absent(),
     bool? isHighYield,
   }) => ArticleLocal(
     id: id ?? this.id,
@@ -302,6 +338,7 @@ class ArticleLocal extends DataClass implements Insertable<ArticleLocal> {
     content: content.present ? content.value : this.content,
     imageUrl: imageUrl.present ? imageUrl.value : this.imageUrl,
     videoUrl: videoUrl.present ? videoUrl.value : this.videoUrl,
+    subcategory: subcategory.present ? subcategory.value : this.subcategory,
     isHighYield: isHighYield ?? this.isHighYield,
   );
   ArticleLocal copyWithCompanion(ArticlesCompanion data) {
@@ -312,6 +349,9 @@ class ArticleLocal extends DataClass implements Insertable<ArticleLocal> {
       content: data.content.present ? data.content.value : this.content,
       imageUrl: data.imageUrl.present ? data.imageUrl.value : this.imageUrl,
       videoUrl: data.videoUrl.present ? data.videoUrl.value : this.videoUrl,
+      subcategory: data.subcategory.present
+          ? data.subcategory.value
+          : this.subcategory,
       isHighYield: data.isHighYield.present
           ? data.isHighYield.value
           : this.isHighYield,
@@ -327,6 +367,7 @@ class ArticleLocal extends DataClass implements Insertable<ArticleLocal> {
           ..write('content: $content, ')
           ..write('imageUrl: $imageUrl, ')
           ..write('videoUrl: $videoUrl, ')
+          ..write('subcategory: $subcategory, ')
           ..write('isHighYield: $isHighYield')
           ..write(')'))
         .toString();
@@ -340,6 +381,7 @@ class ArticleLocal extends DataClass implements Insertable<ArticleLocal> {
     content,
     imageUrl,
     videoUrl,
+    subcategory,
     isHighYield,
   );
   @override
@@ -352,6 +394,7 @@ class ArticleLocal extends DataClass implements Insertable<ArticleLocal> {
           other.content == this.content &&
           other.imageUrl == this.imageUrl &&
           other.videoUrl == this.videoUrl &&
+          other.subcategory == this.subcategory &&
           other.isHighYield == this.isHighYield);
 }
 
@@ -362,6 +405,7 @@ class ArticlesCompanion extends UpdateCompanion<ArticleLocal> {
   final Value<String?> content;
   final Value<String?> imageUrl;
   final Value<String?> videoUrl;
+  final Value<String?> subcategory;
   final Value<bool> isHighYield;
   final Value<int> rowid;
   const ArticlesCompanion({
@@ -371,6 +415,7 @@ class ArticlesCompanion extends UpdateCompanion<ArticleLocal> {
     this.content = const Value.absent(),
     this.imageUrl = const Value.absent(),
     this.videoUrl = const Value.absent(),
+    this.subcategory = const Value.absent(),
     this.isHighYield = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -381,6 +426,7 @@ class ArticlesCompanion extends UpdateCompanion<ArticleLocal> {
     this.content = const Value.absent(),
     this.imageUrl = const Value.absent(),
     this.videoUrl = const Value.absent(),
+    this.subcategory = const Value.absent(),
     this.isHighYield = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
@@ -392,6 +438,7 @@ class ArticlesCompanion extends UpdateCompanion<ArticleLocal> {
     Expression<String>? content,
     Expression<String>? imageUrl,
     Expression<String>? videoUrl,
+    Expression<String>? subcategory,
     Expression<bool>? isHighYield,
     Expression<int>? rowid,
   }) {
@@ -402,6 +449,7 @@ class ArticlesCompanion extends UpdateCompanion<ArticleLocal> {
       if (content != null) 'content': content,
       if (imageUrl != null) 'image_url': imageUrl,
       if (videoUrl != null) 'video_url': videoUrl,
+      if (subcategory != null) 'subcategory': subcategory,
       if (isHighYield != null) 'is_high_yield': isHighYield,
       if (rowid != null) 'rowid': rowid,
     });
@@ -414,6 +462,7 @@ class ArticlesCompanion extends UpdateCompanion<ArticleLocal> {
     Value<String?>? content,
     Value<String?>? imageUrl,
     Value<String?>? videoUrl,
+    Value<String?>? subcategory,
     Value<bool>? isHighYield,
     Value<int>? rowid,
   }) {
@@ -424,6 +473,7 @@ class ArticlesCompanion extends UpdateCompanion<ArticleLocal> {
       content: content ?? this.content,
       imageUrl: imageUrl ?? this.imageUrl,
       videoUrl: videoUrl ?? this.videoUrl,
+      subcategory: subcategory ?? this.subcategory,
       isHighYield: isHighYield ?? this.isHighYield,
       rowid: rowid ?? this.rowid,
     );
@@ -450,6 +500,9 @@ class ArticlesCompanion extends UpdateCompanion<ArticleLocal> {
     if (videoUrl.present) {
       map['video_url'] = Variable<String>(videoUrl.value);
     }
+    if (subcategory.present) {
+      map['subcategory'] = Variable<String>(subcategory.value);
+    }
     if (isHighYield.present) {
       map['is_high_yield'] = Variable<bool>(isHighYield.value);
     }
@@ -468,6 +521,7 @@ class ArticlesCompanion extends UpdateCompanion<ArticleLocal> {
           ..write('content: $content, ')
           ..write('imageUrl: $imageUrl, ')
           ..write('videoUrl: $videoUrl, ')
+          ..write('subcategory: $subcategory, ')
           ..write('isHighYield: $isHighYield, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -667,6 +721,227 @@ class BookmarksCompanion extends UpdateCompanion<Bookmark> {
     return (StringBuffer('BookmarksCompanion(')
           ..write('id: $id, ')
           ..write('articleId: $articleId')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $StudySessionsTable extends StudySessions
+    with TableInfo<$StudySessionsTable, StudySession> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $StudySessionsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _dateMeta = const VerificationMeta('date');
+  @override
+  late final GeneratedColumn<DateTime> date = GeneratedColumn<DateTime>(
+    'date',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _articlesViewedCountMeta =
+      const VerificationMeta('articlesViewedCount');
+  @override
+  late final GeneratedColumn<int> articlesViewedCount = GeneratedColumn<int>(
+    'articles_viewed_count',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [date, articlesViewedCount];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'study_sessions';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<StudySession> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('date')) {
+      context.handle(
+        _dateMeta,
+        date.isAcceptableOrUnknown(data['date']!, _dateMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_dateMeta);
+    }
+    if (data.containsKey('articles_viewed_count')) {
+      context.handle(
+        _articlesViewedCountMeta,
+        articlesViewedCount.isAcceptableOrUnknown(
+          data['articles_viewed_count']!,
+          _articlesViewedCountMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {date};
+  @override
+  StudySession map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return StudySession(
+      date: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}date'],
+      )!,
+      articlesViewedCount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}articles_viewed_count'],
+      )!,
+    );
+  }
+
+  @override
+  $StudySessionsTable createAlias(String alias) {
+    return $StudySessionsTable(attachedDatabase, alias);
+  }
+}
+
+class StudySession extends DataClass implements Insertable<StudySession> {
+  final DateTime date;
+  final int articlesViewedCount;
+  const StudySession({required this.date, required this.articlesViewedCount});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['date'] = Variable<DateTime>(date);
+    map['articles_viewed_count'] = Variable<int>(articlesViewedCount);
+    return map;
+  }
+
+  StudySessionsCompanion toCompanion(bool nullToAbsent) {
+    return StudySessionsCompanion(
+      date: Value(date),
+      articlesViewedCount: Value(articlesViewedCount),
+    );
+  }
+
+  factory StudySession.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return StudySession(
+      date: serializer.fromJson<DateTime>(json['date']),
+      articlesViewedCount: serializer.fromJson<int>(
+        json['articlesViewedCount'],
+      ),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'date': serializer.toJson<DateTime>(date),
+      'articlesViewedCount': serializer.toJson<int>(articlesViewedCount),
+    };
+  }
+
+  StudySession copyWith({DateTime? date, int? articlesViewedCount}) =>
+      StudySession(
+        date: date ?? this.date,
+        articlesViewedCount: articlesViewedCount ?? this.articlesViewedCount,
+      );
+  StudySession copyWithCompanion(StudySessionsCompanion data) {
+    return StudySession(
+      date: data.date.present ? data.date.value : this.date,
+      articlesViewedCount: data.articlesViewedCount.present
+          ? data.articlesViewedCount.value
+          : this.articlesViewedCount,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('StudySession(')
+          ..write('date: $date, ')
+          ..write('articlesViewedCount: $articlesViewedCount')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(date, articlesViewedCount);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is StudySession &&
+          other.date == this.date &&
+          other.articlesViewedCount == this.articlesViewedCount);
+}
+
+class StudySessionsCompanion extends UpdateCompanion<StudySession> {
+  final Value<DateTime> date;
+  final Value<int> articlesViewedCount;
+  final Value<int> rowid;
+  const StudySessionsCompanion({
+    this.date = const Value.absent(),
+    this.articlesViewedCount = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  StudySessionsCompanion.insert({
+    required DateTime date,
+    this.articlesViewedCount = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : date = Value(date);
+  static Insertable<StudySession> custom({
+    Expression<DateTime>? date,
+    Expression<int>? articlesViewedCount,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (date != null) 'date': date,
+      if (articlesViewedCount != null)
+        'articles_viewed_count': articlesViewedCount,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  StudySessionsCompanion copyWith({
+    Value<DateTime>? date,
+    Value<int>? articlesViewedCount,
+    Value<int>? rowid,
+  }) {
+    return StudySessionsCompanion(
+      date: date ?? this.date,
+      articlesViewedCount: articlesViewedCount ?? this.articlesViewedCount,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (date.present) {
+      map['date'] = Variable<DateTime>(date.value);
+    }
+    if (articlesViewedCount.present) {
+      map['articles_viewed_count'] = Variable<int>(articlesViewedCount.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('StudySessionsCompanion(')
+          ..write('date: $date, ')
+          ..write('articlesViewedCount: $articlesViewedCount, ')
+          ..write('rowid: $rowid')
           ..write(')'))
         .toString();
   }
@@ -2360,6 +2635,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $ArticlesTable articles = $ArticlesTable(this);
   late final $BookmarksTable bookmarks = $BookmarksTable(this);
+  late final $StudySessionsTable studySessions = $StudySessionsTable(this);
   late final $QuizQuestionsTable quizQuestions = $QuizQuestionsTable(this);
   late final $QuizTableTable quizTable = $QuizTableTable(this);
   late final Index idxQuizTableCategory = Index(
@@ -2373,6 +2649,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   List<DatabaseSchemaEntity> get allSchemaEntities => [
     articles,
     bookmarks,
+    studySessions,
     quizQuestions,
     quizTable,
     idxQuizTableCategory,
@@ -2387,6 +2664,7 @@ typedef $$ArticlesTableCreateCompanionBuilder =
       Value<String?> content,
       Value<String?> imageUrl,
       Value<String?> videoUrl,
+      Value<String?> subcategory,
       Value<bool> isHighYield,
       Value<int> rowid,
     });
@@ -2398,6 +2676,7 @@ typedef $$ArticlesTableUpdateCompanionBuilder =
       Value<String?> content,
       Value<String?> imageUrl,
       Value<String?> videoUrl,
+      Value<String?> subcategory,
       Value<bool> isHighYield,
       Value<int> rowid,
     });
@@ -2461,6 +2740,11 @@ class $$ArticlesTableFilterComposer
 
   ColumnFilters<String> get videoUrl => $composableBuilder(
     column: $table.videoUrl,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get subcategory => $composableBuilder(
+    column: $table.subcategory,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2534,6 +2818,11 @@ class $$ArticlesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get subcategory => $composableBuilder(
+    column: $table.subcategory,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<bool> get isHighYield => $composableBuilder(
     column: $table.isHighYield,
     builder: (column) => ColumnOrderings(column),
@@ -2566,6 +2855,11 @@ class $$ArticlesTableAnnotationComposer
 
   GeneratedColumn<String> get videoUrl =>
       $composableBuilder(column: $table.videoUrl, builder: (column) => column);
+
+  GeneratedColumn<String> get subcategory => $composableBuilder(
+    column: $table.subcategory,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<bool> get isHighYield => $composableBuilder(
     column: $table.isHighYield,
@@ -2632,6 +2926,7 @@ class $$ArticlesTableTableManager
                 Value<String?> content = const Value.absent(),
                 Value<String?> imageUrl = const Value.absent(),
                 Value<String?> videoUrl = const Value.absent(),
+                Value<String?> subcategory = const Value.absent(),
                 Value<bool> isHighYield = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ArticlesCompanion(
@@ -2641,6 +2936,7 @@ class $$ArticlesTableTableManager
                 content: content,
                 imageUrl: imageUrl,
                 videoUrl: videoUrl,
+                subcategory: subcategory,
                 isHighYield: isHighYield,
                 rowid: rowid,
               ),
@@ -2652,6 +2948,7 @@ class $$ArticlesTableTableManager
                 Value<String?> content = const Value.absent(),
                 Value<String?> imageUrl = const Value.absent(),
                 Value<String?> videoUrl = const Value.absent(),
+                Value<String?> subcategory = const Value.absent(),
                 Value<bool> isHighYield = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ArticlesCompanion.insert(
@@ -2661,6 +2958,7 @@ class $$ArticlesTableTableManager
                 content: content,
                 imageUrl: imageUrl,
                 videoUrl: videoUrl,
+                subcategory: subcategory,
                 isHighYield: isHighYield,
                 rowid: rowid,
               ),
@@ -2962,6 +3260,151 @@ typedef $$BookmarksTableProcessedTableManager =
       (Bookmark, $$BookmarksTableReferences),
       Bookmark,
       PrefetchHooks Function({bool articleId})
+    >;
+typedef $$StudySessionsTableCreateCompanionBuilder =
+    StudySessionsCompanion Function({
+      required DateTime date,
+      Value<int> articlesViewedCount,
+      Value<int> rowid,
+    });
+typedef $$StudySessionsTableUpdateCompanionBuilder =
+    StudySessionsCompanion Function({
+      Value<DateTime> date,
+      Value<int> articlesViewedCount,
+      Value<int> rowid,
+    });
+
+class $$StudySessionsTableFilterComposer
+    extends Composer<_$AppDatabase, $StudySessionsTable> {
+  $$StudySessionsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<DateTime> get date => $composableBuilder(
+    column: $table.date,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get articlesViewedCount => $composableBuilder(
+    column: $table.articlesViewedCount,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$StudySessionsTableOrderingComposer
+    extends Composer<_$AppDatabase, $StudySessionsTable> {
+  $$StudySessionsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<DateTime> get date => $composableBuilder(
+    column: $table.date,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get articlesViewedCount => $composableBuilder(
+    column: $table.articlesViewedCount,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$StudySessionsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $StudySessionsTable> {
+  $$StudySessionsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<DateTime> get date =>
+      $composableBuilder(column: $table.date, builder: (column) => column);
+
+  GeneratedColumn<int> get articlesViewedCount => $composableBuilder(
+    column: $table.articlesViewedCount,
+    builder: (column) => column,
+  );
+}
+
+class $$StudySessionsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $StudySessionsTable,
+          StudySession,
+          $$StudySessionsTableFilterComposer,
+          $$StudySessionsTableOrderingComposer,
+          $$StudySessionsTableAnnotationComposer,
+          $$StudySessionsTableCreateCompanionBuilder,
+          $$StudySessionsTableUpdateCompanionBuilder,
+          (
+            StudySession,
+            BaseReferences<_$AppDatabase, $StudySessionsTable, StudySession>,
+          ),
+          StudySession,
+          PrefetchHooks Function()
+        > {
+  $$StudySessionsTableTableManager(_$AppDatabase db, $StudySessionsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$StudySessionsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$StudySessionsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$StudySessionsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<DateTime> date = const Value.absent(),
+                Value<int> articlesViewedCount = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => StudySessionsCompanion(
+                date: date,
+                articlesViewedCount: articlesViewedCount,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required DateTime date,
+                Value<int> articlesViewedCount = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => StudySessionsCompanion.insert(
+                date: date,
+                articlesViewedCount: articlesViewedCount,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$StudySessionsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $StudySessionsTable,
+      StudySession,
+      $$StudySessionsTableFilterComposer,
+      $$StudySessionsTableOrderingComposer,
+      $$StudySessionsTableAnnotationComposer,
+      $$StudySessionsTableCreateCompanionBuilder,
+      $$StudySessionsTableUpdateCompanionBuilder,
+      (
+        StudySession,
+        BaseReferences<_$AppDatabase, $StudySessionsTable, StudySession>,
+      ),
+      StudySession,
+      PrefetchHooks Function()
     >;
 typedef $$QuizQuestionsTableCreateCompanionBuilder =
     QuizQuestionsCompanion Function({
@@ -3746,6 +4189,8 @@ class $AppDatabaseManager {
       $$ArticlesTableTableManager(_db, _db.articles);
   $$BookmarksTableTableManager get bookmarks =>
       $$BookmarksTableTableManager(_db, _db.bookmarks);
+  $$StudySessionsTableTableManager get studySessions =>
+      $$StudySessionsTableTableManager(_db, _db.studySessions);
   $$QuizQuestionsTableTableManager get quizQuestions =>
       $$QuizQuestionsTableTableManager(_db, _db.quizQuestions);
   $$QuizTableTableTableManager get quizTable =>

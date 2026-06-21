@@ -108,7 +108,10 @@ class CategoriesScreen extends ConsumerWidget {
     );
   }
 
-  List<Widget> _buildBodyItems(AsyncValue<StudyStreakStats> streak, WidgetRef ref) {
+  List<Widget> _buildBodyItems(
+    AsyncValue<StudyStreakStats> streak,
+    WidgetRef ref,
+  ) {
     return [
       streak.when(
         data: _buildStudyStatsRow,
@@ -127,32 +130,29 @@ class CategoriesScreen extends ConsumerWidget {
 
   Widget _buildStudyStatsRow(StudyStreakStats stats) {
     return _buildStudyStatsContainer(
-      child: FittedBox(
-        fit: BoxFit.scaleDown,
-        alignment: Alignment.centerLeft,
-        child: RichText(
-          text: TextSpan(
-            style: const TextStyle(color: Colors.white, fontSize: 14),
-            children: [
-              const TextSpan(text: '🔥 Day '),
-              TextSpan(
-                text: stats.currentStreak.toString(),
-                style: _goldNumberStyle,
-              ),
-              const TextSpan(text: ' Streak · '),
-              TextSpan(
-                text: '${stats.totalArticles}/441',
-                style: _goldNumberStyle,
-              ),
-              const TextSpan(text: ' Articles · '),
-              TextSpan(
-                text: '${stats.accuracy.round()}%',
-                style: _goldNumberStyle,
-              ),
-              const TextSpan(text: ' Quiz Accuracy'),
-            ],
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(
+            Icons.local_fire_department,
+            color: Color(0xFFF9A825),
+            size: 24,
           ),
-        ),
+          const SizedBox(width: 8),
+          Text(
+            stats.currentStreak.toString(),
+            style: _goldNumberStyle.copyWith(fontSize: 24),
+          ),
+          const SizedBox(width: 8),
+          const Text(
+            'day streak',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -162,13 +162,18 @@ class CategoriesScreen extends ConsumerWidget {
       baseColor: Colors.white24,
       highlightColor: Colors.white70,
       child: _buildStudyStatsContainer(
-        child: FittedBox(
-          fit: BoxFit.scaleDown,
-          alignment: Alignment.centerLeft,
-          child: const Text(
-            '🔥 Day 0 Streak · 0/441 Articles · 0% Quiz Accuracy',
-            style: TextStyle(color: Colors.white, fontSize: 14),
-          ),
+        child: const Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.local_fire_department, color: Colors.white, size: 24),
+            SizedBox(width: 8),
+            Text('0', style: TextStyle(color: Colors.white, fontSize: 24)),
+            SizedBox(width: 8),
+            Text(
+              'day streak',
+              style: TextStyle(color: Colors.white, fontSize: 16),
+            ),
+          ],
         ),
       ),
     );
@@ -251,7 +256,9 @@ class CategoriesScreen extends ConsumerWidget {
         highlightColor: Colors.grey[100]!,
         child: Card(
           elevation: 4,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [

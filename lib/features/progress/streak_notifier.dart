@@ -1,4 +1,4 @@
-import 'package:drift/drift.dart';
+import 'package:drift/drift.dart' show Variable;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -29,21 +29,7 @@ class StreakNotifier extends AsyncNotifier<StudyStreakStats> {
 
   Future<void> recordArticleRead() async {
     try {
-      await _db
-          .customSelect(
-            '''
-        INSERT INTO study_sessions (
-          session_date,
-          articles_read,
-          quizzes_completed,
-          quiz_correct
-        ) VALUES (?, 1, 0, 0)
-        ON CONFLICT(session_date) DO UPDATE SET
-          articles_read = articles_read + 1
-        ''',
-            variables: [Variable(_todayKey())],
-          )
-          .get();
+      await _db.recordArticleView();
       state = const AsyncLoading<StudyStreakStats>();
       state = AsyncData(await _loadStats());
     } catch (error) {
@@ -60,16 +46,18 @@ class StreakNotifier extends AsyncNotifier<StudyStreakStats> {
           .customSelect(
             '''
         INSERT INTO study_sessions (
+          date,
           session_date,
           articles_read,
           quizzes_completed,
           quiz_correct
-        ) VALUES (?, 0, 1, ?)
-        ON CONFLICT(session_date) DO UPDATE SET
+        ) VALUES (?, ?, 0, 1, ?)
+        ON CONFLICT(date) DO UPDATE SET
           quizzes_completed = quizzes_completed + 1,
           quiz_correct = quiz_correct + ?
         ''',
             variables: [
+              Variable(_todayKey()),
               Variable(_todayKey()),
               Variable(correctIncrement),
               Variable(correctIncrement),
@@ -98,37 +86,11 @@ class StreakNotifier extends AsyncNotifier<StudyStreakStats> {
   }
 
   Future<int> _loadCurrentStreak() async {
-    final rows = await _db.customSelect('''
-          SELECT session_date
-          FROM study_sessions
-          WHERE articles_read > 0
-          ORDER BY session_date DESC
-          ''').get();
-    final activeDays = rows
-        .map((row) => row.read<String>('session_date'))
-        .toSet();
-    var streak = 0;
-    var date = DateTime.now();
-
-    while (activeDays.contains(_dateKey(date))) {
-      streak += 1;
-      date = date.subtract(const Duration(days: 1));
-    }
-
-    return streak;
+    return _db.countCurrentStudyStreak();
   }
 
   Future<int> _loadTotalArticles() async {
-    final rows = await _db.customSelect('''
-          SELECT COALESCE(SUM(articles_read), 0) AS total_articles
-          FROM study_sessions
-          ''').get();
-
-    if (rows.isEmpty) {
-      return 0;
-    }
-
-    return rows.first.read<int>('total_articles');
+    return _db.countTotalArticlesViewed();
   }
 
   Future<double> _loadAccuracy() async {
@@ -154,5 +116,8 @@ class StreakNotifier extends AsyncNotifier<StudyStreakStats> {
 
   String _todayKey() => _dateKey(DateTime.now());
 
-  String _dateKey(DateTime date) => date.toIso8601String().substring(0, 10);
+  String _dateKey(DateTime date) {
+    final day = DateTime(date.year, date.month, date.day);
+    return day.toIso8601String().substring(0, 10);
+  }
 }
