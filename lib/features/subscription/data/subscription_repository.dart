@@ -2,8 +2,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../../../core/errors/app_exception.dart';
-
 class SubscriptionRepository {
   final SupabaseClient _supabase;
   SubscriptionRepository(this._supabase);
@@ -38,12 +36,12 @@ class SubscriptionRepository {
 
       final expiryDate = _parseExpiryDate(sub['expiry_date']);
       return expiryDate == null || expiryDate.isAfter(DateTime.now().toUtc());
-    } on PostgrestException catch (error) {
-      debugPrint('Subscription status database error: ${error.message}');
-      throw AppException(error.message);
-    } catch (error) {
-      debugPrint('Subscription status check failed: $error');
-      throw AppException('Unable to check subscription status.');
+    } on PostgrestException catch (e) {
+      debugPrint('Supabase error: ${e.message}');
+      rethrow;
+    } catch (e) {
+      debugPrint('Error: $e');
+      rethrow;
     }
   }
 

@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../../core/errors/app_exception.dart';
 
 class AdminUser {
   final String userId;
@@ -61,11 +60,11 @@ class AdminRepository {
 
       return response.map((json) => AdminUser.fromSupabase(json)).toList();
     } on PostgrestException catch (e) {
-      debugPrint('DEBUG_ADMIN: Database Error: ${e.message}');
-      throw AppException(e.message);
+      debugPrint('Supabase error: ${e.message}');
+      rethrow;
     } catch (e) {
-      debugPrint('DEBUG_ADMIN: UI/Parsing Error: $e');
-      throw AppException('Unable to load users.');
+      debugPrint('Error: $e');
+      rethrow;
     }
   }
 
@@ -83,11 +82,11 @@ class AdminRepository {
         'activated_at': DateTime.now().toUtc().toIso8601String(),
       });
     } on PostgrestException catch (e) {
-      debugPrint('DEBUG_ADMIN: Activation database error: ${e.message}');
-      throw AppException(e.message);
+      debugPrint('Supabase error: ${e.message}');
+      rethrow;
     } catch (e) {
-      debugPrint('DEBUG_ADMIN: Activation error: $e');
-      throw AppException('Activation failed.');
+      debugPrint('Error: $e');
+      rethrow;
     }
   }
 }
@@ -111,7 +110,11 @@ final currentAdminProfileProvider = FutureProvider<bool>((ref) async {
         .eq('id', user.id)
         .maybeSingle();
     return profile?['is_admin'] == true;
+  } on PostgrestException catch (e) {
+    debugPrint('Supabase error: ${e.message}');
+    rethrow;
   } catch (e) {
-    return false;
+    debugPrint('Error: $e');
+    rethrow;
   }
 });

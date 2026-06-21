@@ -115,6 +115,12 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
               db.bookmarks,
             )..where((t) => t.articleId.equals(widget.article.id))).watch(),
             builder: (context, snapshot) {
+              if (snapshot.hasError) {
+                return const Center(
+                  child: Text('Something went wrong. Pull down to retry.'),
+                );
+              }
+
               final bookmarkList = snapshot.data;
               final isBookmarked =
                   bookmarkList != null && bookmarkList.isNotEmpty;
@@ -160,8 +166,13 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
                       color: Colors.grey[200],
                       child: const Center(child: CircularProgressIndicator()),
                     ),
-                    errorWidget: (context, url, error) =>
-                        const SizedBox.shrink(),
+                    errorWidget: (context, url, error) => Container(
+                      color: Colors.grey[200],
+                      child: const Icon(
+                        Icons.image_not_supported,
+                        color: Colors.grey,
+                      ),
+                    ),
                   ),
                 ),
               ),

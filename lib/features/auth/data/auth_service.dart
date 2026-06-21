@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../../../core/config/app_config.dart';
 import '../../../core/errors/app_exception.dart';
+import '../../../core/config/app_config.dart';
 
 final authServiceProvider = Provider<AuthService>((ref) {
   return AuthService();
@@ -155,18 +155,17 @@ class AuthService {
 
       await _persistSession(session);
       return true;
-    } on PostgrestException catch (error) {
-      debugPrint('Auth restore database error: ${error.message}');
+    } on PostgrestException catch (e) {
+      debugPrint('Supabase error: ${e.message}');
+      rethrow;
+    } on AuthException catch (e) {
+      debugPrint('Auth restore error: ${e.message}');
       await clearStoredTokens();
-      throw AppException(error.message);
-    } on AuthException catch (error) {
-      debugPrint('Auth restore error: ${error.message}');
+      rethrow;
+    } catch (e) {
+      debugPrint('Error: $e');
       await clearStoredTokens();
-      throw AppException(error.message);
-    } catch (error) {
-      debugPrint('Auth restore unexpected error: $error');
-      await clearStoredTokens();
-      throw AppException('Unable to restore authentication session.');
+      rethrow;
     }
   }
 
@@ -183,15 +182,15 @@ class AuthService {
       }
 
       await _persistSession(session);
-    } on PostgrestException catch (error) {
-      debugPrint('Auth sign in database error: ${error.message}');
-      throw AppException(error.message);
-    } on AuthException catch (error) {
-      debugPrint('Auth sign in error: ${error.message}');
-      throw AppException(error.message);
-    } catch (error) {
-      debugPrint('Auth sign in unexpected error: $error');
-      throw AppException('Sign in failed.');
+    } on PostgrestException catch (e) {
+      debugPrint('Supabase error: ${e.message}');
+      rethrow;
+    } on AuthException catch (e) {
+      debugPrint('Auth sign in error: ${e.message}');
+      rethrow;
+    } catch (e) {
+      debugPrint('Error: $e');
+      rethrow;
     }
   }
 
@@ -217,15 +216,15 @@ class AuthService {
       }
 
       await _persistSession(session);
-    } on PostgrestException catch (error) {
-      debugPrint('Auth sign up database error: ${error.message}');
-      throw AppException(error.message);
-    } on AuthException catch (error) {
-      debugPrint('Auth sign up error: ${error.message}');
-      throw AppException(error.message);
-    } catch (error) {
-      debugPrint('Auth sign up unexpected error: $error');
-      throw AppException('Account creation failed.');
+    } on PostgrestException catch (e) {
+      debugPrint('Supabase error: ${e.message}');
+      rethrow;
+    } on AuthException catch (e) {
+      debugPrint('Auth sign up error: ${e.message}');
+      rethrow;
+    } catch (e) {
+      debugPrint('Error: $e');
+      rethrow;
     }
   }
 
@@ -233,15 +232,15 @@ class AuthService {
     try {
       await _supabase.auth.signOut();
       await clearStoredTokens();
-    } on PostgrestException catch (error) {
-      debugPrint('Auth sign out database error: ${error.message}');
-      throw AppException(error.message);
-    } on AuthException catch (error) {
-      debugPrint('Auth sign out error: ${error.message}');
-      throw AppException(error.message);
-    } catch (error) {
-      debugPrint('Auth sign out unexpected error: $error');
-      throw AppException('Sign out failed.');
+    } on PostgrestException catch (e) {
+      debugPrint('Supabase error: ${e.message}');
+      rethrow;
+    } on AuthException catch (e) {
+      debugPrint('Auth sign out error: ${e.message}');
+      rethrow;
+    } catch (e) {
+      debugPrint('Error: $e');
+      rethrow;
     }
   }
 

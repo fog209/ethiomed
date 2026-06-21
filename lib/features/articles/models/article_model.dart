@@ -37,22 +37,22 @@ class ArticleContent {
 
   factory ArticleContent.fromJson(Map<String, dynamic> json) {
     return ArticleContent(
-      definition: json['definition'] as String?,
-      epidemiology: json['epidemiology'] as String?,
-      etiology: json['etiology'] as String?,
-      pathophysiology: json['pathophysiology'] as String?,
-      clinicalFeatures: json['clinicalFeatures'] as String?,
-      diagnosis: json['diagnosis'] as String?,
-      treatment: json['treatment'] as String?,
-      complications: json['complications'] as String?,
-      ethiopianContext: json['ethiopianContext'] as String?,
-      mnemonics: json['mnemonics'] as String?,
-      redFlags: json['redFlags'] as String?,
-      approach: json['approach'] as String?,
-      contraindications: json['contraindications'] as String?,
-      dontMiss: json['dontMiss'] as String?,
-      clinicalPearls: json['clinicalPearls'] as String?,
-      examTraps: json['examTraps'] as String?,
+      definition: json['definition'] as String? ?? '',
+      epidemiology: json['epidemiology'] as String? ?? '',
+      etiology: json['etiology'] as String? ?? '',
+      pathophysiology: json['pathophysiology'] as String? ?? '',
+      clinicalFeatures: json['clinicalFeatures'] as String? ?? '',
+      diagnosis: json['diagnosis'] as String? ?? '',
+      treatment: json['treatment'] as String? ?? '',
+      complications: json['complications'] as String? ?? '',
+      ethiopianContext: json['ethiopianContext'] as String? ?? '',
+      mnemonics: json['mnemonics'] as String? ?? '',
+      redFlags: json['redFlags'] as String? ?? '',
+      approach: json['approach'] as String? ?? '',
+      contraindications: json['contraindications'] as String? ?? '',
+      dontMiss: json['dontMiss'] as String? ?? '',
+      clinicalPearls: json['clinicalPearls'] as String? ?? '',
+      examTraps: json['examTraps'] as String? ?? '',
     );
   }
 

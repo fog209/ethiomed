@@ -18,13 +18,19 @@ class Article {
   });
 
   factory Article.fromJson(Map<String, dynamic> json) {
+    final title = json['title'] as String? ?? '';
+    final category = json['category'] as String? ?? 'General';
+    final content = json['content'] is Map ? json['content'] : null;
+    final imageUrl = json['image_url'] as String?;
+    final videoUrl = json['video_url'] as String?;
+
     return Article(
       id: (json['id'] as String?) ?? '',
-      title: (json['title'] as String?) ?? 'Untitled Article',
-      category: json['category'],
-      content: json['content'] is Map ? json['content'] : null,
-      imageUrl: json['image_url'],
-      videoUrl: json['video_url'],
+      title: title,
+      category: category,
+      content: content is Map<String, dynamic> ? content : null,
+      imageUrl: imageUrl,
+      videoUrl: videoUrl,
       isHighYield: (json['is_high_yield'] as bool?) ?? false,
     );
   }

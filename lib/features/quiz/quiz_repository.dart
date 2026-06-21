@@ -31,15 +31,15 @@ class QuizRepository {
       await upsertQuestions(remoteQuestions);
 
       return remoteQuestions;
-    } on PostgrestException catch (error) {
-      debugPrint('Quiz repository database error: ${error.message}');
-      throw AppException(error.message);
-    } on DioException catch (error) {
-      debugPrint('Quiz repository network error: ${error.message}');
-      throw AppException('Unable to download quiz questions.');
-    } catch (error) {
-      debugPrint('Quiz repository error: $error');
-      throw AppException('Unable to download quiz questions.');
+    } on PostgrestException catch (e) {
+      debugPrint('Supabase error: ${e.message}');
+      rethrow;
+    } on DioException catch (e) {
+      debugPrint('Error: $e');
+      rethrow;
+    } catch (e) {
+      debugPrint('Error: $e');
+      rethrow;
     }
   }
 

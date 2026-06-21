@@ -6,7 +6,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/database/app_database.dart';
-import '../../../core/errors/app_exception.dart';
 import '../article_providers.dart';
 import '../domain/models/article.dart' as model;
 
@@ -42,12 +41,12 @@ class ArticleRepository {
               ),
             );
       }
-    } on PostgrestException catch (error) {
-      debugPrint('Sync database error: ${error.message}');
-      throw AppException(error.message);
-    } catch (error) {
-      debugPrint('Sync Error: $error');
-      throw AppException('Unable to sync articles. Please try again.');
+    } on PostgrestException catch (e) {
+      debugPrint('Supabase error: ${e.message}');
+      rethrow;
+    } catch (e) {
+      debugPrint('Error: $e');
+      rethrow;
     }
   }
 
@@ -55,37 +54,47 @@ class ArticleRepository {
     int limit = 0,
     int offset = 0,
     String? category,
+    String? subcategory,
     bool highYieldOnly = false,
   }) {
-    final hasLimit = limit > 0;
-    final safeLimit = hasLimit ? limit : _articlesPageSize;
-    final safeOffset = offset < 0 ? 0 : offset;
     final query = _db.select(_db.articles)
       ..orderBy([(table) => OrderingTerm.asc(table.title)]);
-
-    if (highYieldOnly) {
-      query.where((table) => table.isHighYield.equals(true));
-    }
 
     if (category != null && category.trim().isNotEmpty) {
       query.where((table) => table.category.equals(category.trim()));
     }
 
-    if (hasLimit) {
-      return (query..limit(safeLimit, offset: safeOffset)).watch();
+    if (subcategory != null && subcategory.trim().isNotEmpty) {
+      query.where((table) => table.subcategory.equals(subcategory.trim()));
     }
 
-    return query.watch();
+    if (highYieldOnly) {
+      query.where((table) => table.isHighYield.equals(true));
+    }
+
+    return (query
+          ..orderBy([(table) => OrderingTerm.asc(table.title)])
+          ..limit(limit > 0 ? limit : _articlesPageSize, offset: offset < 0 ? 0 : offset))
+        .watch();
   }
 
   Stream<List<ArticleLocal>> watchArticlesPaged({
     required String category,
     required int limit,
     required int offset,
+    String? subcategory,
     bool highYieldOnly = false,
   }) {
     final query = _db.select(_db.articles)
-      ..where((table) => table.category.equals(category));
+      ..orderBy([(table) => OrderingTerm.asc(table.title)]);
+
+    if (category.trim().isNotEmpty) {
+      query.where((table) => table.category.equals(category.trim()));
+    }
+
+    if (subcategory != null && subcategory.trim().isNotEmpty) {
+      query.where((table) => table.subcategory.equals(subcategory.trim()));
+    }
 
     if (highYieldOnly) {
       query.where((table) => table.isHighYield.equals(true));
@@ -99,14 +108,27 @@ class ArticleRepository {
 
   Future<int> countArticlesInCategory(
     String category, {
+    String? subcategory,
     bool highYieldOnly = false,
   }) async {
     return await _db.articles
         .count(
-          where: (table) => highYieldOnly
-              ? table.category.equals(category.trim()) &
-                    table.isHighYield.equals(true)
-              : table.category.equals(category.trim()),
+          where: (table) {
+            final categoryFilter = table.category.equals(category.trim());
+            final subcategoryFilter = subcategory == null ||
+                    subcategory.trim().isEmpty
+                ? null
+                : table.subcategory.equals(subcategory.trim());
+            final highYieldFilter = highYieldOnly
+                ? table.isHighYield.equals(true)
+                : null;
+
+            return [
+              categoryFilter,
+              subcategoryFilter,
+              highYieldFilter,
+            ].whereType<Expression<bool>>().reduce((a, b) => a & b);
+          },
         )
         .getSingle();
   }
@@ -114,11 +136,16 @@ class ArticleRepository {
   Future<List<ArticleLocal>> fetchArticlesPage({
     required String category,
     required int page,
+    String? subcategory,
     bool highYieldOnly = false,
   }) async {
     final offset = (page - 1) * _articlesPageSize;
     final query = _db.select(_db.articles)
       ..where((table) => table.category.equals(category));
+
+    if (subcategory != null && subcategory.trim().isNotEmpty) {
+      query.where((table) => table.subcategory.equals(subcategory.trim()));
+    }
 
     if (highYieldOnly) {
       query.where((table) => table.isHighYield.equals(true));

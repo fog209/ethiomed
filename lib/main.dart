@@ -14,10 +14,18 @@ import 'features/subscription/data/subscription_repository.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Supabase.initialize(
-    url: AppConfig.supabaseUrl,
-    publishableKey: AppConfig.supabaseAnonKey,
-  );
+  try {
+    await Supabase.initialize(
+      url: AppConfig.supabaseUrl,
+      publishableKey: AppConfig.supabaseAnonKey,
+    );
+  } on PostgrestException catch (e) {
+    debugPrint('Supabase error: ${e.message}');
+    rethrow;
+  } catch (e) {
+    debugPrint('Error: $e');
+    rethrow;
+  }
 
   runApp(const ProviderScope(child: MyApp()));
 }
@@ -117,15 +125,21 @@ class AppEntrance extends ConsumerWidget {
 
     return StreamBuilder<AuthState>(
       stream: authState,
-      builder: (context, snapshot) {
-        final session = snapshot.data?.session;
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return const Center(
+              child: Text('Something went wrong. Pull down to retry.'),
+            );
+          }
 
-        if (session == null) {
-          return const LoginScreen();
-        }
+          final session = snapshot.data?.session;
 
-        return const SubscriptionGuard();
-      },
+          if (session == null) {
+            return const LoginScreen();
+          }
+
+          return const SubscriptionGuard();
+        },
     );
   }
 }
