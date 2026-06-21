@@ -93,7 +93,8 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
   Widget build(BuildContext context) {
     final ref = this.ref;
     final db = ref.watch(databaseProvider);
-    final weakFields = ref.watch(weakFieldsProvider(widget.article.id));
+    final weakFieldsAsync = ref.watch(weakFieldsProvider(widget.article.id));
+    final weakFields = weakFieldsAsync.value ?? const <String>{};
     final highYieldMode = ref.watch(highYieldModeProvider);
     final sections = _decodeSections(widget.article.content);
     final imageUrl = widget.article.imageUrl;
@@ -158,7 +159,7 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
   }
 
   Widget _buildBody(
-    AsyncValue<Set<String>> weakFields,
+    Set<String> weakFields,
     bool highYieldMode,
     Map<String, Object?> sections,
     String? imageUrl,
@@ -207,7 +208,7 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
 
           ..._buildClinicalSections(
             sections,
-            weakFields.value ?? const <String>{},
+              weakFields,
             highYieldMode,
           ),
 

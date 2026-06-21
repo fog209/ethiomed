@@ -3,7 +3,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/database/app_database.dart';
-import '../../../core/errors/app_exception.dart';
 
 class WeaknessService {
   WeaknessService({required AppDatabase database}) : _db = database;
@@ -32,7 +31,7 @@ class WeaknessService {
           .toSet();
     } catch (error) {
       debugPrint('Weakness service error: $error');
-      throw AppException('Unable to load learning radar weaknesses.');
+      return {};
     }
   }
 
