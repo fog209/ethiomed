@@ -4,20 +4,40 @@ import 'package:dio/dio.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+// ignore: depend_on_referenced_packages
+import 'package:sqlite3/sqlite3.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../core/errors/error_exceptions.dart';
+import '../../../core/providers/connectivity_notifier.dart';
+import '../../../core/providers/sync_state_provider.dart';
+import '../../../core/services/postgrest_status_helper.dart';
 import '../../../core/database/app_database.dart';
 import '../../../core/errors/app_exception.dart';
 
 class QuizRepository {
+  static void _noop() {}
+
   QuizRepository({
     required SupabaseClient supabase,
     required AppDatabase database,
+    VoidCallback? onServerUnreachable,
+    VoidCallback? onRateLimited,
+    VoidCallback? onDiskFull,
+    VoidCallback? onSuccessfulSync,
   }) : _supabase = supabase,
-       _db = database;
+       _db = database,
+       _onServerUnreachable = onServerUnreachable ?? _noop,
+       _onRateLimited = onRateLimited ?? _noop,
+       _onDiskFull = onDiskFull ?? _noop,
+       _onSuccessfulSync = onSuccessfulSync ?? _noop;
 
   final SupabaseClient _supabase;
   final AppDatabase _db;
+  final VoidCallback _onServerUnreachable;
+  final VoidCallback _onRateLimited;
+  final VoidCallback _onDiskFull;
+  final VoidCallback _onSuccessfulSync;
 
   Future<List<QuizQuestionEntity>> fetchQuestions(String category) async {
     try {
@@ -31,21 +51,58 @@ class QuizRepository {
           .toList(growable: false);
 
       await upsertQuestions(remoteQuestions);
+      _onSuccessfulSync();
 
       return remoteQuestions;
     } on PostgrestException catch (e) {
+      final status = postgrestStatus(e);
+      if (status == 401) {
+        throw const SupabaseSessionExpiredException();
+      }
+      if (status == 403) {
+        debugPrint('RLS rejection on questions: ${e.message}');
+        return getLocalQuestions(category);
+      }
+      if (status == 429) {
+        _onRateLimited();
+        return getLocalQuestions(category);
+      }
+      if (status == 503 || status == 504) {
+        _onServerUnreachable();
+        return getLocalQuestions(category);
+      }
+
       debugPrint('Supabase error: ${e.message}');
       rethrow;
     } on SocketException {
+      _onServerUnreachable();
       debugPrint('Offline: serving from local cache');
       return getLocalQuestions(category);
-    } on DioException {
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 503 || e.response?.statusCode == 504) {
+        _onServerUnreachable();
+      } else if (e.response?.statusCode == 429) {
+        _onRateLimited();
+      }
       debugPrint('Offline: serving from local cache');
       return getLocalQuestions(category);
+    } on SqliteException catch (e) {
+      if (_isDiskFull(e)) {
+        _onDiskFull();
+        throw const DiskFullException();
+      }
+      rethrow;
     } catch (e) {
       debugPrint('Error: $e');
       rethrow;
     }
+  }
+
+  bool _isDiskFull(SqliteException e) {
+    final message = e.message.toLowerCase();
+    return message.contains('disk') ||
+        message.contains('full') ||
+        message.contains('sqlite_full');
   }
 
   Future<void> upsertQuestions(List<QuizQuestionEntity> questions) async {
@@ -64,6 +121,13 @@ class QuizRepository {
               );
         }
       });
+    } on SqliteException catch (error) {
+      if (_isDiskFull(error)) {
+        _onDiskFull();
+        throw const DiskFullException();
+      }
+      debugPrint('Quiz repository local write error: $error');
+      throw AppException('Unable to save quiz questions locally.');
     } catch (error) {
       debugPrint('Quiz repository local write error: $error');
       throw AppException('Unable to save quiz questions locally.');
@@ -166,5 +230,13 @@ final quizRepositoryProvider = Provider<QuizRepository>((ref) {
   return QuizRepository(
     supabase: Supabase.instance.client,
     database: ref.watch(databaseProvider),
+    onServerUnreachable: () {
+      ref.read(connectivityProvider.notifier).markOffline();
+      ref.read(syncStateProvider.notifier).setServerUnreachable();
+    },
+    onRateLimited: () => ref.read(syncStateProvider.notifier).setRateLimited(),
+    onDiskFull: () => ref.read(syncStateProvider.notifier).setDiskFull(),
+    onSuccessfulSync: () =>
+        ref.read(syncStateProvider.notifier).setSuccessfulSync(),
   );
 });

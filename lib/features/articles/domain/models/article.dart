@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 class Article {
   final String id;
   final String title;
@@ -19,8 +21,27 @@ class Article {
 
   factory Article.fromJson(Map<String, dynamic> json) {
     final title = json['title'] as String? ?? '';
-    final category = json['category'] as String? ?? 'General';
-    final content = json['content'] is Map ? json['content'] : null;
+    final rawCategory = json['category'] as String?;
+    final category = rawCategory == null || rawCategory.trim().isEmpty
+        ? 'General'
+        : rawCategory;
+    Map<String, dynamic>? content;
+    final rawContent = json['content'];
+    try {
+      if (rawContent is Map<String, dynamic>) {
+        content = rawContent;
+      } else if (rawContent is Map) {
+        content = rawContent.cast<String, dynamic>();
+      } else {
+        debugPrint(
+          'Article ${json['id']}: content wrong type ${rawContent.runtimeType}',
+        );
+        content = const <String, dynamic>{};
+      }
+    } catch (e) {
+      debugPrint('Article content parse failed: $e');
+      content = const <String, dynamic>{};
+    }
     final imageUrl = json['image_url'] as String?;
     final videoUrl = json['video_url'] as String?;
 
@@ -28,7 +49,7 @@ class Article {
       id: (json['id'] as String?) ?? '',
       title: title,
       category: category,
-      content: content is Map<String, dynamic> ? content : null,
+      content: content,
       imageUrl: imageUrl,
       videoUrl: videoUrl,
       isHighYield: (json['is_high_yield'] as bool?) ?? false,

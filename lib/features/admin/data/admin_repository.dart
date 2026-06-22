@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/errors/app_exception.dart';
+import '../../../core/errors/error_exceptions.dart';
+import '../../../core/services/postgrest_status_helper.dart';
 
 class AdminUser {
   final String userId;
@@ -62,6 +64,14 @@ class AdminRepository {
 
       return response.map((json) => AdminUser.fromSupabase(json)).toList();
     } on PostgrestException catch (e) {
+      final status = postgrestStatus(e);
+      if (status == 401) {
+        throw const SupabaseSessionExpiredException();
+      }
+      if (status == 403) {
+        debugPrint('RLS rejection on profiles: ${e.message}');
+        throw AppException('Permission denied. Admin access required.');
+      }
       debugPrint('Supabase error: ${e.message}');
       rethrow;
     } catch (e) {
@@ -84,6 +94,14 @@ class AdminRepository {
         'activated_at': DateTime.now().toUtc().toIso8601String(),
       });
     } on PostgrestException catch (e) {
+      final status = postgrestStatus(e);
+      if (status == 401) {
+        throw const SupabaseSessionExpiredException();
+      }
+      if (status == 403) {
+        debugPrint('RLS rejection on subscriptions: ${e.message}');
+        throw AppException('Permission denied. Admin access required.');
+      }
       debugPrint('Supabase error: ${e.message}');
       rethrow;
     } catch (e) {
@@ -113,6 +131,14 @@ final currentAdminProfileProvider = FutureProvider<bool>((ref) async {
         .maybeSingle();
     return profile?['is_admin'] == true;
     } on PostgrestException catch (e) {
+      final status = postgrestStatus(e);
+      if (status == 401) {
+        throw const SupabaseSessionExpiredException();
+      }
+      if (status == 403) {
+        debugPrint('RLS rejection on profiles: ${e.message}');
+        throw AppException('Permission denied. Admin access required.');
+      }
       debugPrint('Admin activate error: ${e.message}');
       throw AppException(e.message);
     } catch (e) {

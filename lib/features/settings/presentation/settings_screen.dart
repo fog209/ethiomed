@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../../core/database/app_database.dart';
 import '../../../core/services/notification_service.dart';
 import '../../admin/data/admin_repository.dart';
 import '../../auth/data/auth_service.dart';
@@ -26,11 +27,13 @@ class SettingsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final isAdminAsync = ref.watch(currentAdminProfileProvider);
     final dailyRemindersEnabled = ref.watch(dailyStudyRemindersEnabledProvider);
+    final migrationWarning = MigrationErrorStore.value;
     final items = _buildItems(
       context,
       ref,
       isAdminAsync,
       dailyRemindersEnabled,
+      migrationWarning,
     );
 
     return Scaffold(
@@ -47,6 +50,7 @@ class SettingsScreen extends ConsumerWidget {
     WidgetRef ref,
     AsyncValue<bool> isAdminAsync,
     bool dailyRemindersEnabled,
+    String? migrationWarning,
   ) {
     final user = ref.watch(authSessionProvider).value?.user;
 
@@ -70,6 +74,27 @@ class SettingsScreen extends ConsumerWidget {
           }
         },
       ),
+      if (migrationWarning != null)
+        Container(
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.amber.shade100,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            children: [
+              const Icon(Icons.info_outline, color: Color(0xFF1A237E)),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Some features may need a fresh install.',
+                  style: const TextStyle(color: Color(0xFF1A237E)),
+                ),
+              ),
+            ],
+          ),
+        ),
       isAdminAsync.when(
         data: (isAdmin) {
           if (!isAdmin) {

@@ -5,9 +5,15 @@ import 'dart:io';
 import 'package:drift/drift.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+// ignore: depend_on_referenced_packages
+import 'package:sqlite3/sqlite3.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/database/app_database.dart';
+import '../../../core/errors/error_exceptions.dart';
+import '../../../core/providers/connectivity_notifier.dart';
+import '../../../core/providers/sync_state_provider.dart';
+import '../../../core/services/postgrest_status_helper.dart';
 import '../article_providers.dart';
 import '../domain/models/article.dart' as model;
 
@@ -16,8 +22,21 @@ const int _articlesPageSize = 20;
 class ArticleRepository {
   final SupabaseClient _supabase;
   final AppDatabase _db;
+  final VoidCallback _onServerUnreachable;
+  final VoidCallback _onRateLimited;
+  final VoidCallback _onSyncIncomplete;
+  final VoidCallback _onDiskFull;
+  final VoidCallback _onSuccessfulSync;
 
-  ArticleRepository(this._supabase, this._db);
+  ArticleRepository(
+    this._supabase,
+    this._db,
+    this._onServerUnreachable,
+    this._onRateLimited,
+    this._onSyncIncomplete,
+    this._onDiskFull,
+    this._onSuccessfulSync,
+  );
 
   Future<List<ArticleLocal>> fetchAndSyncArticles() async {
     try {
@@ -28,33 +47,72 @@ class ArticleRepository {
           .map((json) => model.Article.fromJson(json))
           .toList(growable: false);
 
-      for (final article in remoteArticles) {
-        await _db
-            .into(_db.articles)
-            .insertOnConflictUpdate(
-              ArticlesCompanion.insert(
-                id: article.id,
-                title: article.title,
-                category: Value(article.category),
-                content: Value(jsonEncode(article.content)),
-                imageUrl: Value(article.imageUrl),
-                videoUrl: Value(article.videoUrl),
-                isHighYield: Value(article.isHighYield),
-              ),
-            );
-      }
+      await _db.transaction(() async {
+        for (final article in remoteArticles) {
+          await _db
+              .into(_db.articles)
+              .insertOnConflictUpdate(
+                ArticlesCompanion.insert(
+                  id: article.id,
+                  title: article.title,
+                  category: Value(article.category),
+                  content: Value(jsonEncode(article.content)),
+                  imageUrl: Value(article.imageUrl),
+                  videoUrl: Value(article.videoUrl),
+                  isHighYield: Value(article.isHighYield),
+                ),
+              );
+        }
+      });
+
+      _onSuccessfulSync();
     } on PostgrestException catch (e) {
+      final status = postgrestStatus(e);
+      if (status == 401) {
+        throw const SupabaseSessionExpiredException();
+      }
+      if (status == 403) {
+        debugPrint('RLS rejection on articles: ${e.message}');
+        return _db.select(_db.articles).get();
+      }
+      if (status == 429) {
+        _onRateLimited();
+        return _db.select(_db.articles).get();
+      }
+      if (status == 503 || status == 504) {
+        _onServerUnreachable();
+        return _db.select(_db.articles).get();
+      }
+
       debugPrint('Supabase error: ${e.message}');
-      return _db.select(_db.articles).get();
+      rethrow;
     } on SocketException {
+      _onServerUnreachable();
       debugPrint('Offline: serving from local cache');
       return _db.select(_db.articles).get();
+    } on SqliteException catch (e) {
+      if (_isDiskFull(e)) {
+        _onDiskFull();
+        throw const DiskFullException();
+      }
+      rethrow;
     } catch (e) {
+      if (e is DiskFullException) {
+        rethrow;
+      }
+      _onSyncIncomplete();
       debugPrint('Error: $e');
       rethrow;
     }
 
     return _db.select(_db.articles).get();
+  }
+
+  bool _isDiskFull(SqliteException e) {
+    final message = e.message.toLowerCase();
+    return message.contains('disk') ||
+        message.contains('full') ||
+        message.contains('sqlite_full');
   }
 
   Future<List<ArticleLocal>> syncInBackground() => fetchAndSyncArticles();
@@ -174,6 +232,14 @@ final articleRepositoryProvider = Provider<ArticleRepository>((ref) {
   return ArticleRepository(
     Supabase.instance.client,
     ref.watch(databaseProvider),
+    () {
+      ref.read(connectivityProvider.notifier).markOffline();
+      ref.read(syncStateProvider.notifier).setServerUnreachable();
+    },
+    () => ref.read(syncStateProvider.notifier).setRateLimited(),
+    () => ref.read(syncStateProvider.notifier).markSyncIncomplete(),
+    () => ref.read(syncStateProvider.notifier).setDiskFull(),
+    () => ref.read(syncStateProvider.notifier).setSuccessfulSync(),
   );
 });
 
@@ -183,6 +249,8 @@ final allArticlesProvider = StreamProvider<List<ArticleLocal>>((ref) {
       .watch(articleRepositoryProvider)
       .watchLocalArticles(highYieldOnly: highYieldOnly);
 });
+
+final articlesProvider = allArticlesProvider;
 
 class ArticlePageQuery {
   const ArticlePageQuery({

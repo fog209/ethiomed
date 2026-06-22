@@ -18,6 +18,10 @@ class ConnectivityNotifier extends StateNotifier<bool> {
 
   Timer? _timer;
 
+  void markOffline() {
+    state = false;
+  }
+
   Future<void> _checkConnectivity() async {
     try {
       await InternetAddress.lookup('example.com');

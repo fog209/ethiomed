@@ -56,3 +56,6 @@ app.*.map.json
 .dart_tool/
 android/.gradle/
 *.pavg
+
+# Supabase backups
+backups/

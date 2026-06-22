@@ -16,7 +16,7 @@ class ArticleContent {
   final String? clinicalPearls;
   final String? examTraps;
 
-  ArticleContent({
+  const ArticleContent({
     this.definition,
     this.epidemiology,
     this.etiology,
@@ -34,6 +34,8 @@ class ArticleContent {
     this.clinicalPearls,
     this.examTraps,
   });
+
+  factory ArticleContent.empty() => const ArticleContent();
 
   factory ArticleContent.fromJson(Map<String, dynamic> json) {
     return ArticleContent(

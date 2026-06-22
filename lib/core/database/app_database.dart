@@ -1,11 +1,23 @@
+import 'dart:io';
+
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:path/path.dart' as p;
-import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
 
 part 'app_database.g.dart';
+
+class MigrationErrorStore {
+  static String? value;
+}
+
+final migrationErrorProvider = StateProvider<String?>((ref) => MigrationErrorStore.value);
+
+void setMigrationError(String value) {
+  MigrationErrorStore.value = value;
+}
 
 @DataClassName('ArticleLocal')
 class Articles extends Table {
@@ -83,51 +95,63 @@ class AppDatabase extends _$AppDatabase {
   @override
   int get schemaVersion => 8;
 
+  Future<void> _runMigrationStep(
+    String name,
+    Future<void> Function() step,
+  ) async {
+    try {
+      await step();
+    } catch (e) {
+      debugPrint('Migration step failed: $name: $e');
+      setMigrationError('Migration step failed: $name');
+    }
+  }
+
   @override
   MigrationStrategy get migration {
     return MigrationStrategy(
       onCreate: (m) async => await m.createAll(),
       onUpgrade: (m, from, to) async {
         if (from < 2) {
-          await m.createTable(bookmarks);
+          await _runMigrationStep('create bookmarks', () => m.createTable(bookmarks));
         }
         if (from < 3) {
-          await m.createTable(quizQuestions);
+          await _runMigrationStep('create quiz questions', () => m.createTable(quizQuestions));
         }
         if (from < 4) {
           if (from >= 3) {
-            await m.drop(quizQuestions);
+            await _runMigrationStep('drop old quiz questions', () => m.drop(quizQuestions));
           }
-          await m.createTable(quizTable);
+          await _runMigrationStep('create quiz table', () => m.createTable(quizTable));
         }
         if (from < 7) {
-          await m.addColumn(
+          await _runMigrationStep('add articles subcategory', () => m.addColumn(
             articles,
             articles.subcategory as GeneratedColumn<Object>,
-          );
+          ));
         }
         if (from < 8) {
-          await _ensureStudySessionsTable();
+          await _runMigrationStep('ensure study sessions', _ensureStudySessionsTable);
         }
         if (from < 6) {
-          await m.addColumn(
+          await _runMigrationStep('add articles isHighYield', () => m.addColumn(
             articles,
             articles.isHighYield as GeneratedColumn<Object>,
-          );
+          ));
         }
         if (from < 5) {
-          await m.addColumn(
+          await _runMigrationStep('add quiz srInterval', () => m.addColumn(
             quizTable,
             quizTable.srInterval as GeneratedColumn<Object>,
-          );
-          await m.addColumn(
+          ));
+          await _runMigrationStep('add quiz repetitions', () => m.addColumn(
             quizTable,
             quizTable.repetitions as GeneratedColumn<Object>,
-          );
-          await m.addColumn(
+          ));
+          await _runMigrationStep('add quiz nextDueAt', () => m.addColumn(
             quizTable,
             quizTable.nextDueAt as GeneratedColumn<Object>,
-          );
+          ));
         }
       },
     );

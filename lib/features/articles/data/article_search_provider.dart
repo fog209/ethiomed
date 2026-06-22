@@ -3,8 +3,11 @@ import 'dart:async';
 import 'package:drift/drift.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+// ignore: depend_on_referenced_packages
+import 'package:sqlite3/sqlite3.dart';
 
 import '../../../core/database/app_database.dart';
+import '../../../core/errors/error_exceptions.dart';
 
 const int _maxSearchResults = 50;
 const Duration _searchDebounceDuration = Duration(milliseconds: 300);
@@ -133,13 +136,18 @@ class ArticleSearchController extends StateNotifier<ArticleSearchState> {
       }
 
       debugPrint('Article search failed: $error');
+      final unavailable = error is SearchUnavailableException ||
+          error.toString().toLowerCase().contains('fts5') ||
+          error.toString().toLowerCase().contains('malformed');
       state = state.copyWith(
         query: query,
         category: category,
         results: const <ArticleLocal>[],
         count: 0,
         status: ArticleSearchStatus.error,
-        message: 'Search failed. Please try again.',
+        message: unavailable
+            ? 'Search temporarily unavailable'
+            : 'Search failed. Please try again.',
       );
     }
   }
@@ -181,6 +189,18 @@ class ArticleSearchRepository {
   }
 
   Future<List<ArticleLocal>> _searchWithMatch(String query) async {
+    try {
+      return await _searchWithMatchOnce(query);
+    } on SqliteException catch (e) {
+      if (_isFts5Corruption(e)) {
+        await _rebuildSearchIndex();
+        return _searchWithMatchOnce(query);
+      }
+      rethrow;
+    }
+  }
+
+  Future<List<ArticleLocal>> _searchWithMatchOnce(String query) async {
     final ftsQuery = _toFtsQuery(query);
     if (ftsQuery.isEmpty) {
       return _searchAllArticles();
@@ -223,6 +243,17 @@ class ArticleSearchRepository {
           ),
         )
         .toList(growable: false);
+  }
+
+  Future<void> _rebuildSearchIndex() async {
+    await _db.customStatement(
+      'INSERT INTO article_search_fts(article_search_fts) VALUES("rebuild")',
+    );
+  }
+
+  bool _isFts5Corruption(SqliteException e) {
+    final message = e.message.toLowerCase();
+    return message.contains('fts5') || message.contains('malformed');
   }
 
   Future<void> _ensureSearchIndex() async {
