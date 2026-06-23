@@ -14,12 +14,19 @@ import 'features/home/presentation/article_list_screen.dart';
 import 'features/auth/presentation/login_screen.dart';
 import 'features/auth/presentation/signup_screen.dart';
 import 'features/legal/disclaimer_screen.dart';
+import 'features/onboarding/onboarding_screen.dart';
 import 'app/main_shell.dart'; // This is your new bottom nav shell
 import 'features/subscription/presentation/paywall_screen.dart';
 import 'features/subscription/data/subscription_repository.dart';
 
+bool _seenOnboarding = false;
+bool _seenDisclaimer = false;
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  final prefs = await SharedPreferences.getInstance();
+  _seenOnboarding = prefs.getBool('hasSeenOnboarding') ?? false;
+  _seenDisclaimer = prefs.getBool('hasSeenDisclaimer') ?? false;
 
   FlutterError.onError = (FlutterErrorDetails details) {
     debugPrint('FlutterError: ${details.exception}');
@@ -112,7 +119,7 @@ final _router = GoRouter(
     ),
   ),
   routes: [
-    GoRoute(path: '/', builder: (context, state) => const AppEntrance()),
+    GoRoute(path: '/', builder: (context, state) => const InitialFlowGate()),
     GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
     GoRoute(path: '/signup', builder: (context, state) => const SignupScreen()),
     GoRoute(path: '/home', builder: (context, state) => const AppEntrance()),
@@ -137,6 +144,38 @@ final _router = GoRouter(
     ),
   ],
 );
+
+class InitialFlowGate extends StatefulWidget {
+  const InitialFlowGate({super.key});
+
+  @override
+  State<InitialFlowGate> createState() => _InitialFlowGateGateState();
+}
+
+class _InitialFlowGateGateState extends State<InitialFlowGate> {
+  @override
+  Widget build(BuildContext context) {
+    if (!_seenOnboarding) {
+      return const OnboardingScreen();
+    }
+
+    if (!_seenDisclaimer) {
+      return DisclaimerScreen(
+        onAccepted: () async {
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setBool('hasSeenDisclaimer', true);
+
+          if (!context.mounted) return;
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (_) => const MainShell()),
+          );
+        },
+      );
+    }
+
+    return const MainShell();
+  }
+}
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
