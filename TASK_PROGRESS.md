@@ -1,0 +1,7 @@
+- [x] Read: lib/app/main_shell.dart, lib/features/progress/streak_notifier.dart, lib/core/database/app_database.dart
+- [x] CHANGE 1: Updated MainShell bottom navigation to add Progress tab (5th tab at index 4) and wired to ProgressScreen()
+- [x] CHANGE 2: Created lib/features/progress/progress_screen.dart (stat cards, heatmap, category progress, quiz accuracy by category UI)
+- [x] CHANGE 3: Created lib/features/progress/progress_notifier.dart (Drift-backed loaders for heatmap/category/quiz accuracy + uses StreakNotifier)
+- [ ] Run: dart run build_runner build --delete-conflicting-outputs
+- [ ] Run: C:\flutter\bin\flutter.bat analyze
+- [ ] Commit: git add . && git commit -m "feat: progress screen and study heatmap live"

@@ -10,7 +10,7 @@ import '../features/home/presentation/categories_screen.dart';
 import '../features/articles/presentation/article_search_screen.dart';
 import '../features/bookmarks/presentation/bookmarks_screen.dart';
 import '../features/settings/presentation/settings_screen.dart';
-import '../features/quiz/quiz_screen.dart';
+import '../features/progress/progress_screen.dart';
 import '../features/subscription/data/subscription_repository.dart';
 import '../features/articles/data/article_repository.dart';
 
@@ -80,7 +80,7 @@ class _MainShellState extends ConsumerState<MainShell> {
       const ArticleSearchScreen(), // 1
       const BookmarksScreen(), // 2
       const SettingsScreen(), // 3
-      const QuizScreen(), // 4 (The new Tab)
+      const ProgressScreen(), // 4
     ];
 
     return Scaffold(
@@ -111,7 +111,10 @@ class _MainShellState extends ConsumerState<MainShell> {
             icon: Icon(Icons.settings),
             label: 'Settings',
           ),
-          BottomNavigationBarItem(icon: Icon(Icons.quiz), label: 'Quiz'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.bar_chart_outlined),
+            label: 'Progress',
+          ),
         ],
       ),
     );
