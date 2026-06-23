@@ -183,18 +183,21 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final dark = ThemeData(
+      useMaterial3: true,
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: const Color(0xFF1A237E),
+        primary: const Color(0xFF1A237E),
+        secondary: const Color(0xFFFFB300),
+      ),
+    );
+
     return MaterialApp.router(
       routerConfig: _router,
       title: AppConfig.appTitle,
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF1A237E),
-          primary: const Color(0xFF1A237E),
-          secondary: const Color(0xFFFFB300),
-        ),
-      ),
+      themeMode: ThemeMode.dark,
+      darkTheme: dark,
     );
   }
 }
