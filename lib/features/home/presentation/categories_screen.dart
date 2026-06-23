@@ -31,43 +31,70 @@ class _CategoryTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final progress = ref.watch(categoryProgressProvider(name));
+    final progressAsyncValue = ref.watch(categoryProgressProvider(name));
 
-    return InkWell(
-      onTap: () => context.push('/article-list/${Uri.encodeComponent(name)}'),
-      child: Card(
+    return progressAsyncValue.when(
+      data: (progress) => InkWell(
+        onTap: () => context.push('/article-list/${Uri.encodeComponent(name)}'),
+        child: Card(
+          elevation: 4,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, size: 40, color: const Color(0xFF1A237E)),
+              const SizedBox(height: 10),
+              Text(
+                name,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF1A237E),
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                '${_categoryProgressRead(progress)}/${_categoryProgressTotal(progress)}',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const Spacer(),
+              LinearProgressIndicator(
+                minHeight: 3,
+                backgroundColor: const Color(0xFF1A237E).withValues(alpha: 0.2),
+                color: const Color(0xFFF9A825),
+                value: _categoryProgressValue(progress),
+              ),
+            ],
+          ),
+        ),
+      ),
+      loading: () => const SizedBox.shrink(),
+      error: (error, stack) => Card(
         elevation: 4,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 40, color: const Color(0xFF1A237E)),
-            const SizedBox(height: 10),
-            Text(
-              name,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF1A237E),
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.sync_problem, color: Colors.amber, size: 48),
+              const SizedBox(height: 8),
+              const Text(
+                'Could not sync. Showing cached data.',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.white70),
               ),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              '${_categoryProgressRead(progress.value)}/${_categoryProgressTotal(progress.value)}',
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
+              TextButton(
+                onPressed: () => ref.invalidate(categoryProgressProvider(name)),
+                child: const Text('Retry'),
               ),
-            ),
-            const Spacer(),
-            LinearProgressIndicator(
-              minHeight: 3,
-              backgroundColor: const Color(0xFF1A237E).withValues(alpha: 0.2),
-              color: const Color(0xFFF9A825),
-              value: _categoryProgressValue(progress.value),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -283,10 +310,7 @@ class CategoriesScreen extends ConsumerWidget {
   Widget _buildFallbackGeneralTile() {
     return Padding(
       padding: const EdgeInsets.only(top: 16),
-      child: _CategoryTile(
-        name: 'General',
-        icon: Icons.folder,
-      ),
+      child: _CategoryTile(name: 'General', icon: Icons.folder),
     );
   }
 

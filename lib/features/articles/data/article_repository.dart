@@ -10,6 +10,7 @@ import 'package:sqlite3/sqlite3.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/database/app_database.dart';
+import '../../../core/errors/app_exception.dart';
 import '../../../core/errors/error_exceptions.dart';
 import '../../../core/providers/connectivity_notifier.dart';
 import '../../../core/providers/sync_state_provider.dart';
@@ -84,12 +85,12 @@ class ArticleRepository {
         return _db.select(_db.articles).get();
       }
 
-      debugPrint('Supabase error: ${e.message}');
-      rethrow;
-    } on SocketException {
+      debugPrint('Sync error: ${e.message}');
+      throw AppException(e.message);
+    } on SocketException catch (e) {
       _onServerUnreachable();
-      debugPrint('Offline: serving from local cache');
-      return _db.select(_db.articles).get();
+      debugPrint('Sync error: $e');
+      throw AppException('Sync failed. Cached data shown.');
     } on SqliteException catch (e) {
       if (_isDiskFull(e)) {
         _onDiskFull();
@@ -101,8 +102,8 @@ class ArticleRepository {
         rethrow;
       }
       _onSyncIncomplete();
-      debugPrint('Error: $e');
-      rethrow;
+      debugPrint('Sync error: $e');
+      throw AppException('Sync failed. Cached data shown.');
     }
 
     return _db.select(_db.articles).get();
