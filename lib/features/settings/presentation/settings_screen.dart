@@ -158,6 +158,30 @@ class SettingsScreen extends ConsumerWidget {
         onTap: _openAdminTelegram,
       ),
       const Divider(),
+      const Padding(
+        padding: EdgeInsets.fromLTRB(16, 24, 16, 8),
+        child: Text(
+          'Legal',
+          style: TextStyle(
+            color: Colors.grey,
+            fontSize: 13,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+      ListTile(
+        leading: const Icon(Icons.description, color: Color(0xFF1A237E)),
+        title: const Text('Terms of Service'),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () => context.push('/terms'),
+      ),
+      ListTile(
+        leading: const Icon(Icons.privacy_tip, color: Color(0xFF1A237E)),
+        title: const Text('Privacy Policy'),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () => context.push('/privacy'),
+      ),
+      const Divider(),
       ListTile(
         leading: const Icon(Icons.logout, color: Colors.red),
         title: const Text('Logout', style: TextStyle(color: Colors.red)),

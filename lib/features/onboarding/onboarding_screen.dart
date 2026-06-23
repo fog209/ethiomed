@@ -32,18 +32,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     final hasSeenDisclaimer = prefs.getBool('hasSeenDisclaimer') ?? false;
     if (!hasSeenDisclaimer) {
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (_) => DisclaimerScreen(
-            onAccepted: () async {
-              final p = await SharedPreferences.getInstance();
-              await p.setBool('hasSeenDisclaimer', true);
-              if (!mounted) return;
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(builder: (_) => const MainShell()),
-              );
-            },
-          ),
-        ),
+        MaterialPageRoute(builder: (_) => const DisclaimerScreen()),
       );
     } else {
       Navigator.of(

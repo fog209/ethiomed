@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class DisclaimerScreen extends StatelessWidget {
   static const String disclaimerText =
-      'WardReady is for educational purposes only. It does not replace clinical judgment, institutional protocols, or licensed clinical supervision. Always verify drug doses with Ethiopian MoH / EFDA guidelines.';
+      'WardReady is for educational purposes only. Does not replace clinical judgment or licensed supervision. Always verify doses with Ethiopian MoH / EFDA guidelines.';
 
-  final VoidCallback onAccepted;
-
-  const DisclaimerScreen({super.key, required this.onAccepted});
+  const DisclaimerScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -19,13 +19,13 @@ class DisclaimerScreen extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const Icon(
-                  Icons.info_outline,
+                  Icons.medical_services,
                   size: 72,
-                  color: Color(0xFF1A237E),
+                  color: Color(0xFFFFB300),
                 ),
                 const SizedBox(height: 24),
                 const Text(
-                  'Medical Disclaimer',
+                  'Important Notice',
                   style: TextStyle(
                     color: Color(0xFF1A237E),
                     fontSize: 28,
@@ -35,7 +35,7 @@ class DisclaimerScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
                 const Text(
-                  disclaimerText,
+                  'WardReady is for educational purposes only. Does not replace clinical judgment or licensed supervision. Always verify doses with Ethiopian MoH / EFDA guidelines.',
                   style: TextStyle(fontSize: 17, height: 1.6),
                   textAlign: TextAlign.center,
                 ),
@@ -48,9 +48,14 @@ class DisclaimerScreen extends StatelessWidget {
                       backgroundColor: const Color(0xFFFFB300),
                       foregroundColor: const Color(0xFF1A237E),
                     ),
-                    onPressed: onAccepted,
+                    onPressed: () async {
+                      final prefs = await SharedPreferences.getInstance();
+                      await prefs.setBool('hasSeenDisclaimer', true);
+                      if (!context.mounted) return;
+                      context.go('/home');
+                    },
                     child: const Text(
-                      'I UNDERSTAND',
+                      'I Understand',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,

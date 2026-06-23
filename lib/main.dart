@@ -14,6 +14,8 @@ import 'features/home/presentation/article_list_screen.dart';
 import 'features/auth/presentation/login_screen.dart';
 import 'features/auth/presentation/signup_screen.dart';
 import 'features/legal/disclaimer_screen.dart';
+import 'features/legal/privacy_screen.dart';
+import 'features/legal/terms_screen.dart';
 import 'features/onboarding/onboarding_screen.dart';
 import 'app/main_shell.dart'; // This is your new bottom nav shell
 import 'features/subscription/presentation/paywall_screen.dart';
@@ -124,6 +126,15 @@ final _router = GoRouter(
     GoRoute(path: '/signup', builder: (context, state) => const SignupScreen()),
     GoRoute(path: '/home', builder: (context, state) => const AppEntrance()),
     GoRoute(
+      path: '/disclaimer',
+      builder: (context, state) => const DisclaimerScreen(),
+    ),
+    GoRoute(path: '/terms', builder: (context, state) => const TermsScreen()),
+    GoRoute(
+      path: '/privacy',
+      builder: (context, state) => const PrivacyScreen(),
+    ),
+    GoRoute(
       path: '/article-list/:category',
       builder: (context, state) =>
           ArticleListScreen(category: state.pathParameters['category'] ?? ''),
@@ -160,17 +171,7 @@ class _InitialFlowGateGateState extends State<InitialFlowGate> {
     }
 
     if (!_seenDisclaimer) {
-      return DisclaimerScreen(
-        onAccepted: () async {
-          final prefs = await SharedPreferences.getInstance();
-          await prefs.setBool('hasSeenDisclaimer', true);
-
-          if (!context.mounted) return;
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (_) => const MainShell()),
-          );
-        },
-      );
+      return const DisclaimerScreen();
     }
 
     return const MainShell();
@@ -227,18 +228,6 @@ class _DisclaimerGateState extends State<DisclaimerGate> {
     });
   }
 
-  Future<void> _acceptDisclaimer() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_hasSeenDisclaimerKey, true);
-    if (!mounted) {
-      return;
-    }
-
-    setState(() {
-      _hasSeenDisclaimer = true;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     if (_hasSeenDisclaimer == null) {
@@ -249,7 +238,7 @@ class _DisclaimerGateState extends State<DisclaimerGate> {
       return const AppEntrance();
     }
 
-    return DisclaimerScreen(onAccepted: _acceptDisclaimer);
+    return const DisclaimerScreen();
   }
 }
 
