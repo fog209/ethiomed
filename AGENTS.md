@@ -214,6 +214,18 @@ lib/
 ```
 dart run build_runner build --delete-conflicting-outputs   # only if app_database.dart touched
 C:\flutter\bin\flutter.bat analyze
+```
+Zero errors required before proceeding.
+
+**UI VERIFICATION (mandatory before commit):**
+flutter_skill is active. After analyze passes:
+1. `hot_reload` the app
+2. `screenshot` the affected screen(s)
+3. Visually verify the UI renders correctly
+4. Fix any visible errors, layout overflows, or missing widgets
+5. Only then commit
+
+```
 git add .
 git commit -m "your message here"
 git push origin master
