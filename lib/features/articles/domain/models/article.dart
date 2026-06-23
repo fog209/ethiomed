@@ -22,6 +22,9 @@ class Article {
   factory Article.fromJson(Map<String, dynamic> json) {
     final title = json['title'] as String? ?? '';
     final rawCategory = json['category'] as String?;
+    if (rawCategory == null || rawCategory.trim().isEmpty) {
+      debugPrint('Article ${json['id']} has no category — assigned to General');
+    }
     final category = rawCategory == null || rawCategory.trim().isEmpty
         ? 'General'
         : rawCategory;

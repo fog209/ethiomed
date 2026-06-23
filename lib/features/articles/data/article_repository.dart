@@ -235,11 +235,15 @@ final articleRepositoryProvider = Provider<ArticleRepository>((ref) {
     () {
       ref.read(connectivityProvider.notifier).markOffline();
       ref.read(syncStateProvider.notifier).setServerUnreachable();
+      ref.read(serverUnreachableProvider.notifier).markUnreachable();
     },
     () => ref.read(syncStateProvider.notifier).setRateLimited(),
     () => ref.read(syncStateProvider.notifier).markSyncIncomplete(),
     () => ref.read(syncStateProvider.notifier).setDiskFull(),
-    () => ref.read(syncStateProvider.notifier).setSuccessfulSync(),
+    () {
+      ref.read(syncStateProvider.notifier).setSuccessfulSync();
+      ref.read(serverUnreachableProvider.notifier).markReachable();
+    },
   );
 });
 

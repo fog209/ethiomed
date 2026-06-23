@@ -34,9 +34,9 @@ class _ClinicalSectionConfig {
 }
 
 class ArticleDetailScreen extends ConsumerStatefulWidget {
-  final ArticleLocal article;
+  final ArticleLocal? article;
 
-  const ArticleDetailScreen({super.key, required this.article});
+  const ArticleDetailScreen({super.key, this.article});
 
   @override
   ConsumerState<ArticleDetailScreen> createState() =>
@@ -49,7 +49,22 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
   @override
   void initState() {
     super.initState();
+    final article = widget.article;
+    if (article == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (context.mounted) {
+          context.go('/home');
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('This article is no longer available.'),
+            ),
+          );
+        }
+      });
+      return;
+    }
     final db = ref.read(databaseProvider);
+    final category = article.category;
     Future.microtask(() async {
       if (!mounted) {
         return;
@@ -62,7 +77,7 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
       if (!mounted) {
         return;
       }
-      ref.invalidate(categoryProgressProvider(widget.article.category ?? ''));
+      ref.invalidate(categoryProgressProvider(category ?? ''));
       if (!mounted) {
         return;
       }
@@ -70,6 +85,8 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
   }
 
   Future<void> _recordViewHistory(AppDatabase db) async {
+    final article = widget.article;
+    if (article == null) return;
     try {
       await db
           .customSelect(
@@ -82,9 +99,9 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
             ) VALUES (?, ?, ?, ?)
             ''',
             variables: [
-              Variable(widget.article.id),
-              Variable(widget.article.title),
-              Variable(widget.article.category ?? ''),
+              Variable(article.id),
+              Variable(article.title),
+              Variable(article.category ?? ''),
               Variable(DateTime.now()),
             ],
           )
@@ -96,14 +113,23 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final article = widget.article;
+    if (article == null) {
+      return const SizedBox.shrink();
+    }
+
     final ref = this.ref;
     final db = ref.watch(databaseProvider);
-    final weakFieldsAsync = ref.watch(weakFieldsProvider(widget.article.id));
+    final weakFieldsAsync = ref.watch(weakFieldsProvider(article.id));
     final weakFields = weakFieldsAsync.value ?? const <String>{};
     final highYieldMode = ref.watch(highYieldModeProvider);
-    final sections = _decodeSections(widget.article.content);
-    final imageUrl = widget.article.imageUrl;
-    final videoUrl = widget.article.videoUrl;
+    final sections = _decodeSections(article.content);
+    final imageUrl = article.imageUrl;
+    final videoUrl = article.videoUrl;
+
+    if (sections.isEmpty) {
+      return _buildEmptyArticleFallback(context);
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -111,7 +137,7 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
           onPressed: () =>
               context.canPop() ? context.pop() : context.go('/home'),
         ),
-        title: Text(widget.article.title),
+        title: Text(article.title),
         backgroundColor: const Color(0xFF1A237E),
         foregroundColor: const Color(0xFFFFB300),
         actions: [
@@ -125,7 +151,7 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
           StreamBuilder<List<Bookmark>>(
             stream: (db.select(
               db.bookmarks,
-            )..where((t) => t.articleId.equals(widget.article.id))).watch(),
+            )..where((t) => t.articleId.equals(article.id))).watch(),
             builder: (context, snapshot) {
               if (snapshot.hasError) {
                 return const Center(
@@ -142,16 +168,14 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
                 ),
                 onPressed: () async {
                   if (isBookmarked) {
-                    await (db.delete(db.bookmarks)
-                          ..where((t) => t.articleId.equals(widget.article.id)))
-                        .go();
+                    await (db.delete(
+                      db.bookmarks,
+                    )..where((t) => t.articleId.equals(article.id))).go();
                   } else {
                     await db
                         .into(db.bookmarks)
                         .insert(
-                          BookmarksCompanion.insert(
-                            articleId: widget.article.id,
-                          ),
+                          BookmarksCompanion.insert(articleId: article.id),
                         );
                   }
                 },
@@ -203,7 +227,7 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
-              widget.article.category?.toUpperCase() ?? 'GENERAL',
+              widget.article!.category?.toUpperCase() ?? 'GENERAL',
               style: const TextStyle(
                 color: Color(0xFF1A237E),
                 fontWeight: FontWeight.bold,
@@ -464,6 +488,46 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
         });
       },
       child: const Text('+ Show low-yield sections'),
+    );
+  }
+
+  Widget _buildEmptyArticleFallback(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        leading: CloseButton(
+          onPressed: () =>
+              context.canPop() ? context.pop() : context.go('/home'),
+        ),
+        backgroundColor: const Color(0xFF1A237E),
+        foregroundColor: const Color(0xFFFFB300),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(
+              Icons.article_outlined,
+              color: Color(0xFFF9A825),
+              size: 64,
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'This article is still being prepared.',
+              style: TextStyle(color: Colors.white, fontSize: 18),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Check back after the next sync.',
+              style: TextStyle(color: Colors.white70),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: () => context.pop(),
+              child: const Text('Go Back'),
+            ),
+          ],
+        ),
+      ),
     );
   }
 

@@ -90,6 +90,27 @@ void main() async {
 
 final _router = GoRouter(
   initialLocation: '/',
+  errorBuilder: (context, state) => Scaffold(
+    backgroundColor: const Color(0xFF1A237E),
+    body: Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.explore_off, color: Color(0xFFF9A825), size: 64),
+          const SizedBox(height: 16),
+          const Text(
+            'Page not found',
+            style: TextStyle(color: Colors.white, fontSize: 20),
+          ),
+          const SizedBox(height: 24),
+          ElevatedButton(
+            onPressed: () => context.go('/home'),
+            child: const Text('Go Home'),
+          ),
+        ],
+      ),
+    ),
+  ),
   routes: [
     GoRoute(path: '/', builder: (context, state) => const AppEntrance()),
     GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
@@ -97,15 +118,18 @@ final _router = GoRouter(
     GoRoute(path: '/home', builder: (context, state) => const AppEntrance()),
     GoRoute(
       path: '/article-list/:category',
-      builder: (context, state) => ArticleListScreen(
-        category: state.pathParameters['category'] ?? '',
-      ),
+      builder: (context, state) =>
+          ArticleListScreen(category: state.pathParameters['category'] ?? ''),
     ),
     GoRoute(
       path: '/article-detail',
-      builder: (context, state) => ArticleDetailScreen(
-        article: state.extra! as ArticleLocal,
-      ),
+      builder: (context, state) {
+        final article = state.extra;
+        if (article is ArticleLocal) {
+          return ArticleDetailScreen(article: article);
+        }
+        return ArticleDetailScreen();
+      },
     ),
     GoRoute(
       path: '/admin',
@@ -199,21 +223,21 @@ class AppEntrance extends ConsumerWidget {
 
     return StreamBuilder<AuthState>(
       stream: authState,
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return const Center(
-              child: Text('Something went wrong. Pull down to retry.'),
-            );
-          }
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return const Center(
+            child: Text('Something went wrong. Pull down to retry.'),
+          );
+        }
 
-          final session = snapshot.data?.session;
+        final session = snapshot.data?.session;
 
-          if (session == null) {
-            return const LoginScreen();
-          }
+        if (session == null) {
+          return const LoginScreen();
+        }
 
-          return const SubscriptionGuard();
-        },
+        return const SubscriptionGuard();
+      },
     );
   }
 }

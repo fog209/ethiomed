@@ -124,6 +124,7 @@ class CategoriesScreen extends ConsumerWidget {
       const SizedBox(height: 24),
       _buildSectionHeader('Preclinical'),
       _buildCategoryGrid(AppConfig.preclinicalCategories),
+      _buildFallbackGeneralTile(),
       const SizedBox(height: 80),
     ];
   }
@@ -275,6 +276,16 @@ class CategoriesScreen extends ConsumerWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildFallbackGeneralTile() {
+    return Padding(
+      padding: const EdgeInsets.only(top: 16),
+      child: _CategoryTile(
+        name: 'General',
+        icon: Icons.folder,
       ),
     );
   }
