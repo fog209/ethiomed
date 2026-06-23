@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../app/env.dart';
 
 class AppConfig {
   static const String chapaPublicKey =
@@ -6,10 +7,9 @@ class AppConfig {
 
   static const String appTitle = 'WardReady';
 
-  static const String supabaseUrl = 'https://kxcdzlyirdonkipcymvc.supabase.co';
+  static const String supabaseUrl = Env.supabaseUrl;
 
-  static const String supabaseAnonKey =
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt4Y2R6bHlpcmRvbmtpcGN5bXZjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwMTgxNzcsImV4cCI6MjA5NjU5NDE3N30.S70lUuSwgQBb05BFdcjRAP8F4x2ydeVppljuS6yKlQY';
+  static const String supabaseAnonKey = Env.supabaseAnonKey;
 
   static const String internalMedicineCategory = 'Internal Medicine';
 

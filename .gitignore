@@ -59,3 +59,6 @@ android/.gradle/
 
 # Supabase backups
 backups/
+
+# Supabase env (ignored)
+lib/app/env.dart
