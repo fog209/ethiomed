@@ -33,9 +33,10 @@ class _ReviewSchedule {
 }
 
 class SpacedRepetitionService {
-  SpacedRepetitionService({required AppDatabase database}) : _db = database;
+  SpacedRepetitionService({required AppDatabase database, required NotificationService notificationService}) : _db = database, _notificationService = notificationService;
 
   final AppDatabase _db;
+  final NotificationService _notificationService;
 
   Future<List<QuizQuestionEntity>> getDueCards(String category) async {
     try {
@@ -103,7 +104,7 @@ class SpacedRepetitionService {
 
         try {
           final dueCount = await _countDueCardsForDate(schedule.dueAt);
-          await NotificationService().scheduleDueReminder(
+          await _notificationService.scheduleDueReminder(
             schedule.dueAt,
             dueCount,
           );
@@ -215,7 +216,10 @@ class SpacedRepetitionService {
 final spacedRepetitionServiceProvider = Provider<SpacedRepetitionService>((
   ref,
 ) {
-  return SpacedRepetitionService(database: ref.watch(databaseProvider));
+  return SpacedRepetitionService(
+    database: ref.watch(databaseProvider),
+    notificationService: NotificationService(ref.watch(databaseProvider)),
+  );
 });
 
 class _QuizQuestionSchedule extends QuizQuestionEntity {

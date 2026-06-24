@@ -356,6 +356,8 @@ LazyDatabase _openConnection() {
 }
 
 final databaseProvider = Provider<AppDatabase>((ref) {
+  final db = AppDatabase();
+  ref.onDispose(db.close);
   ref.keepAlive();
-  return AppDatabase();
+  return db;
 });

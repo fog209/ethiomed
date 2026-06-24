@@ -54,8 +54,8 @@ class NotificationService {
   static const int _reminderHour = 8;
   static const int _reminderMinute = 0;
 
-  factory NotificationService() {
-    return _instance ??= NotificationService._(database: AppDatabase());
+  factory NotificationService(AppDatabase db) {
+    return _instance ??= NotificationService._(database: db);
   }
 
   factory NotificationService.withDatabase(AppDatabase database) {

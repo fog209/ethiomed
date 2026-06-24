@@ -6,8 +6,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'core/config/app_config.dart';
 import 'core/database/app_database.dart';
-import 'core/screens/database_recovery_screen.dart';
-import 'core/services/notification_service.dart';
 import 'features/admin/presentation/admin_dashboard_screen.dart';
 import 'features/articles/presentation/article_detail_screen.dart';
 import 'features/home/presentation/article_list_screen.dart';
@@ -76,22 +74,6 @@ void main() async {
   } catch (e) {
     debugPrint('Error: $e');
     rethrow;
-  }
-
-  try {
-    final db = AppDatabase();
-    await db.customSelect('SELECT 1').get();
-    await db.close();
-  } catch (e) {
-    debugPrint('Database initialization failed: $e');
-    runApp(const DatabaseRecoveryApp());
-    return;
-  }
-
-  try {
-    await NotificationService().initialize();
-  } catch (error) {
-    debugPrint('Notification service initialization skipped: $error');
   }
 
   runApp(const ProviderScope(child: MyApp()));
