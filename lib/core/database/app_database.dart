@@ -124,21 +124,6 @@ class AppDatabase extends _$AppDatabase {
           }
           await _runMigrationStep('create quiz table', () => m.createTable(quizTable));
         }
-        if (from < 7) {
-          await _runMigrationStep('add articles subcategory', () => m.addColumn(
-            articles,
-            articles.subcategory as GeneratedColumn<Object>,
-          ));
-        }
-        if (from < 8) {
-          await _runMigrationStep('ensure study sessions', _ensureStudySessionsTable);
-        }
-        if (from < 6) {
-          await _runMigrationStep('add articles isHighYield', () => m.addColumn(
-            articles,
-            articles.isHighYield as GeneratedColumn<Object>,
-          ));
-        }
         if (from < 5) {
           await _runMigrationStep('add quiz srInterval', () => m.addColumn(
             quizTable,
@@ -152,6 +137,21 @@ class AppDatabase extends _$AppDatabase {
             quizTable,
             quizTable.nextDueAt as GeneratedColumn<Object>,
           ));
+        }
+        if (from < 6) {
+          await _runMigrationStep('add articles isHighYield', () => m.addColumn(
+            articles,
+            articles.isHighYield as GeneratedColumn<Object>,
+          ));
+        }
+        if (from < 7) {
+          await _runMigrationStep('add articles subcategory', () => m.addColumn(
+            articles,
+            articles.subcategory as GeneratedColumn<Object>,
+          ));
+        }
+        if (from < 8) {
+          await _runMigrationStep('ensure study sessions', _ensureStudySessionsTable);
         }
       },
     );
