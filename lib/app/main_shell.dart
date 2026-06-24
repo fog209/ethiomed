@@ -9,8 +9,9 @@ import 'nav_provider.dart';
 import '../features/home/presentation/categories_screen.dart';
 import '../features/articles/presentation/article_search_screen.dart';
 import '../features/bookmarks/presentation/bookmarks_screen.dart';
-import '../features/settings/presentation/settings_screen.dart';
+import '../features/quiz/quiz_screen.dart';
 import '../features/progress/progress_screen.dart';
+import '../features/settings/presentation/settings_screen.dart';
 import '../features/subscription/data/subscription_repository.dart';
 import '../features/articles/data/article_repository.dart';
 
@@ -74,13 +75,14 @@ class _MainShellState extends ConsumerState<MainShell> {
     final isOnline = ref.watch(connectivityProvider);
     final serverUnreachable = ref.watch(serverUnreachableProvider);
 
-    // IndexedStack must have exactly 5 children to match the 5 icons below
+    // IndexedStack must have exactly 6 children to match the 6 icons below
     final List<Widget> screens = [
       const CategoriesScreen(), // 0
       const ArticleSearchScreen(), // 1
       const BookmarksScreen(), // 2
-      const SettingsScreen(), // 3
+      const QuizScreen(), // 3
       const ProgressScreen(), // 4
+      const SettingsScreen(), // 5
     ];
 
     return Scaffold(
@@ -107,13 +109,14 @@ class _MainShellState extends ConsumerState<MainShell> {
           ),
           BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
           BottomNavigationBarItem(icon: Icon(Icons.bookmark), label: 'Saved'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Settings',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.quiz), label: 'Quiz'),
           BottomNavigationBarItem(
             icon: Icon(Icons.bar_chart_outlined),
             label: 'Progress',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings),
+            label: 'Settings',
           ),
         ],
       ),
