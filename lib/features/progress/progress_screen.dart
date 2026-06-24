@@ -15,9 +15,22 @@ class ProgressScreen extends ConsumerWidget {
       body: progressAsync.when(
         loading: () => const _ProgressLoading(),
         error: (error, stack) => Center(
-          child: Text(
-            'Unable to load progress.',
-            style: Theme.of(context).textTheme.bodyLarge,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'Unable to load progress.',
+                style: TextStyle(color: Colors.white70),
+              ),
+              TextButton(
+                onPressed: () {
+                  debugPrint('PROGRESS_ERROR_TYPE: ${error.runtimeType}');
+                  debugPrint('PROGRESS_ERROR_DETAIL: $error');
+                  ref.invalidate(progressNotifierProvider);
+                },
+                child: const Text('Retry'),
+              ),
+            ],
           ),
         ),
         data: (data) {

@@ -75,7 +75,7 @@ class _CategoryTile extends ConsumerWidget {
         ),
       ),
       loading: () => const SizedBox.shrink(),
-      error: (error, stack) => Card(
+error: (error, stack) => Card(
         elevation: 4,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         child: Center(
@@ -90,7 +90,11 @@ class _CategoryTile extends ConsumerWidget {
                 style: TextStyle(color: Colors.white70),
               ),
               TextButton(
-                onPressed: () => ref.invalidate(categoryProgressProvider(name)),
+                onPressed: () {
+                  debugPrint('SYNC_ERROR_TYPE: ${error.runtimeType}');
+                  debugPrint('SYNC_ERROR_DETAIL: $error');
+                  ref.invalidate(categoryProgressProvider(name));
+                },
                 child: const Text('Retry'),
               ),
             ],

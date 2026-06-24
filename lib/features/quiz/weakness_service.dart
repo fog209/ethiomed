@@ -36,9 +36,15 @@ class WeaknessService {
   }
 
   Future<void> _ensureLastQualityColumn() async {
-    await _db.customStatement(
-      'ALTER TABLE quiz_table ADD COLUMN IF NOT EXISTS last_quality INTEGER',
-    );
+    final columns = await _db.customSelect(
+      'PRAGMA table_info(quiz_table)',
+    ).get();
+    final columnNames = columns.map((row) => row.read<String>('name')).toSet();
+    if (!columnNames.contains('last_quality')) {
+      await _db.customStatement(
+        'ALTER TABLE quiz_table ADD COLUMN last_quality INTEGER',
+      );
+    }
   }
 }
 

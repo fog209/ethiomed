@@ -331,13 +331,13 @@ class AppDatabase extends _$AppDatabase {
       )
       ''');
     await customStatement(
-      'ALTER TABLE view_history ADD COLUMN IF NOT EXISTS article_title TEXT',
+      'ALTER TABLE view_history ADD COLUMN article_title TEXT',
     );
     await customStatement(
-      'ALTER TABLE view_history ADD COLUMN IF NOT EXISTS category TEXT',
+      'ALTER TABLE view_history ADD COLUMN category TEXT',
     );
     await customStatement(
-      'ALTER TABLE view_history ADD COLUMN IF NOT EXISTS viewed_at TEXT NOT NULL DEFAULT ""',
+      'ALTER TABLE view_history ADD COLUMN viewed_at TEXT NOT NULL DEFAULT ""',
     );
   }
 }
