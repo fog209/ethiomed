@@ -355,4 +355,7 @@ LazyDatabase _openConnection() {
   });
 }
 
-final databaseProvider = Provider<AppDatabase>((ref) => AppDatabase());
+final databaseProvider = Provider<AppDatabase>((ref) {
+  ref.keepAlive();
+  return AppDatabase();
+});

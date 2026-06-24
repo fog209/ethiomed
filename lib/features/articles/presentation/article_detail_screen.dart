@@ -522,7 +522,7 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
             ),
             const SizedBox(height: 24),
             ElevatedButton(
-              onPressed: () => context.pop(),
+              onPressed: () => context.canPop() ? context.pop() : context.go('/home'),
               child: const Text('Go Back'),
             ),
           ],
