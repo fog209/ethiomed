@@ -1,129 +1,73 @@
-# WardReady — Current State
-_Update this file after every KiloCode session and every Supabase batch_
+# CURRENT_STATE.md
 
----
+## Testing Status (per Task 24)
+flutter analyze: PASS (zero issues).
+Runtime/visual verification: NOT performed — no device access from this environment. Manual on-device verification pending separately.
 
-## 📅 Last Updated
-Date: 2026-06-19
-Updated by: (you — fill in after each session)
+## App Version / Android Config (from Task 22)
+- applicationId: com.wardready.app
+- versionCode: 1
+- versionName: 1.0.0
+- minSdk: 21
+- targetSdk/compileSdk: 34
 
----
+## Initial User Flow (routes / gates)
+- `/` now follows: **onboarding → disclaimer → MainShell**
+  - On onboarding **Skip** / **Get Started**:
+    - sets `SharedPreferences.hasSeenOnboarding = true`
+    - navigates to `DisclaimerScreen` if `hasSeenDisclaimer != true`, else to `MainShell`
+  - `DisclaimerScreen` has an `onAccepted` callback (writes `hasSeenDisclaimer` in onboarding navigation path)
 
-## 📦 Git State
-- Branch: `master`
-- Last commit message: (fill in)
-- Pending commits: YES — `git add . && git commit -m "checkpoint"` before next session
-- Remote: pushed / NOT pushed (circle one)
+## Key Screens & Routes (known from inspection)
+- Onboarding:
+  - `lib/features/onboarding/onboarding_screen.dart`
+- Disclaimer:
+  - `lib/features/legal/disclaimer_screen.dart` (`DisclaimerScreen`)
+  - route: `/disclaimer` (returns `DisclaimerScreen`, but constructor usage elsewhere is `onAccepted`)
+- Main Shell (5 tabs):
+  - `lib/app/main_shell.dart` : `MainShell`
+- Admin:
+  - route: `/admin` → `AdminDashboardScreen`
+- Settings:
+  - inside `MainShell` tab (SettingsScreen)
+- Legal:
+  - route: `/terms` → `TermsScreen`
+  - route: `/privacy` → `PrivacyScreen`
+- Article navigation:
+  - `/home` → `AppEntrance` (guarded/login/subscription logic exists but is bypassed for `/` by initial flow gate)
+  - `/article-list/:category` → `ArticleListScreen(category: ...)`
+  - `/article-detail` → `ArticleDetailScreen` (uses `state.extra` when passed)
 
----
+## Riverpod Providers (known from inspection)
+- `connectivityProvider` (StateNotifierProvider<bool>)
+- `serverUnreachableProvider` (StateNotifierProvider<bool>)
+- Progress:
+  - `progressNotifierProvider` (AsyncNotifierProvider<ProgressNotifier, ProgressData>)
+  - `streakNotifierProvider` (AsyncNotifierProvider<StreakNotifier, StudyStreakStats>)
+- Articles:
+  - `articleSearchControllerProvider` (StateNotifierProvider.autoDispose)
+  - Article list pagination providers:
+    - `articleOffsetProvider`, `articleRequestIdProvider`,
+      `articleLoadedArticlesProvider`, `articleHasMoreProvider`,
+      `articleIsLoadingMoreProvider`, `articleCurrentCategoryProvider`
+- Quiz:
+  - `quizNotifierProvider(...)` referenced by `QuizScreen` (implementation file not inspected in this run)
 
-## 📰 Article Count
-Run this to get real numbers:
-SELECT category, COUNT(*) as count FROM articles GROUP BY category ORDER BY count DESC;
+## Drift DB / Tables (known from inspection)
+From earlier audit context and additional reads:
+- `articles` (read in article search & list)
+- `study_sessions` (used for heatmap and quiz accuracy)
+- `quiz_table` (used for spaced repetition / quiz accuracy query)
+- `view_history` (custom table insert in `ArticleDetailScreen`)
+- `bookmarks` (StreamBuilder in ArticleDetailScreen)
+> Full Drift schema (all tables + columns) requires reading every Dart file in `lib/`; current run documents what has been inspected so far.
 
-| Category | Target | In Supabase |
-|---|---|---|
-| Internal Medicine | 52 | ? |
-| Pulmonology | 20 | ? |
-| Infectious Diseases | 30 | ? |
-| Gastroenterology | 20 | ? |
-| Endocrinology | 17 | ? |
-| Hematology | 10 | ? |
-| OB/GYN | 20 | ? |
-| Pediatrics | 22 | ? |
-| General Surgery | 15 | ? |
-| Psychiatry | 10 | ? |
-| Dermatology | 10 | ? |
-| Ophthalmology | 8 | ? |
-| ENT | 8 | ? |
-| Pharmacology | 25 | ? |
-| Microbiology | 45 | ? |
-| Physiology | 34 | ? |
-| Biochemistry | 25 | ? |
-| Pathology | 40 | ? |
-| Anatomy | 30 | ? |
-| TOTAL | 441 | ? |
+## Content Counts (article/question totals)
+Do NOT treat these as live DB queries (no live DB connection executed in this environment run).
+- Article count: ~45 (estimated from last known state, not a live query — run `SELECT COUNT(*) FROM articles;` in Supabase to confirm).
+- Question count: ~10 (same caveat). Target: 441 articles / 2,205 questions.
 
----
-
-## ✅ Phase Completion
-- [x] Phase 0 — Flutter + Supabase + Auth
-- [x] Phase 1 — Drift, FTS5, Articles, Search, Bookmarks, Dark mode, Subscription gate
-- [x] Phase 2 (core) — WardReady branding, MainShell, Ethiopian Pearl UI, MigrationStrategy, search history, category filters
-- [ ] Phase 2 (remaining) — Pagination (article_list_screen.dart), Admin panel
-- [ ] Phase 3 — Release signing, signed APK, device test
-
----
-
-## 🔨 In Progress Right Now
-_Nothing — idle_
-
----
-
-## 🐛 Known Issues / Broken Things
-- None confirmed at time of writing — update as found
-
----
-
-## 📁 Key File Locations
-lib/
-  app/
-    main.dart
-    main_shell.dart          ← MainShell + BottomNavigationBar (4 tabs)
-    app_config.dart          ← category strings, Supabase URL/key, colours
-  features/
-    articles/
-      article_list_screen.dart    ← needs pagination (Phase 2 remaining)
-      article_viewer_screen.dart  ← Ethiopian Pearl + Mnemonics sections
-      article_model.dart          ← includes ethiopianContext + mnemonics
-    search/
-      search_screen.dart
-      search_history_service.dart
-    bookmarks/
-    settings/
-    admin/                        ← Phase 2 remaining
-    quiz/                         ← Phase 3 new (F1 MCQ)
-    progress/                     ← Phase 3 new
-  core/
-    database/
-      app_database.dart           ← Drift AppDatabase + MigrationStrategy
-    services/
-      auth_service.dart
-      sync_service.dart
-      subscription_gate.dart
-android/
-  app/
-    build.gradle
-  key.properties                  ← DO NOT COMMIT (in .gitignore)
-supabase/
-  schema.sql
-
----
-
-## 🎨 Theme Constants
-- Navy: #1A237E
-- Gold: #F9A825
-- Material 3, dark navy base
-
----
-
-## 📱 Test Device
-- Model: Nex N2 Pro
-- ADB ID: SOAYYD7HEE65QKY5
-- Connect: flutter run -d SOAYYD7HEE65QKY5
-- Install APK: flutter install -d SOAYYD7HEE65QKY5
-- Logcat (filtered): fdb logcat | grep -E "flutter|WardReady|E/"
-
----
-
-## 🗓️ Deadline
-- N2 Pro free window closes: ~June 23, 2026
-- Distribution target: June 27, 2026
-- Priority before deadline: signed release APK on device
-
----
-
-## 🚦 flutter analyze Status
-- Last run: (fill in date)
-- Result: zero errors / HAS ERRORS
-- Errors: (paste here if any)
+## Feature Coverage Notes
+- Onboarding UI + gating logic added.
+- Dark theme forced via `MaterialApp.router` (per Task 22).
+- Remaining provider/schema/route extraction is incomplete for a “full read every .dart in lib/” sweep in this session.

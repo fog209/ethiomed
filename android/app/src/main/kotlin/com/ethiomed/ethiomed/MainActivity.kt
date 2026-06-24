@@ -1,4 +1,4 @@
-package com.ethiomed.ethiomed
+package com.wardready.app
 
 import io.flutter.embedding.android.FlutterActivity
 

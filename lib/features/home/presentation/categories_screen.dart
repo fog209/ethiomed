@@ -280,8 +280,8 @@ class CategoriesScreen extends ConsumerWidget {
       ),
       itemCount: categories.length,
       itemBuilder: (context, index) => Shimmer.fromColors(
-        baseColor: Colors.grey[300]!,
-        highlightColor: Colors.grey[100]!,
+        baseColor: Colors.grey[800]!,
+        highlightColor: Colors.grey[700]!,
         child: Card(
           elevation: 4,
           shape: RoundedRectangleBorder(

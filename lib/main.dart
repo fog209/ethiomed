@@ -187,6 +187,7 @@ class MyApp extends StatelessWidget {
       useMaterial3: true,
       colorScheme: ColorScheme.fromSeed(
         seedColor: const Color(0xFF1A237E),
+        brightness: Brightness.dark,
         primary: const Color(0xFF1A237E),
         secondary: const Color(0xFFFFB300),
       ),
@@ -197,6 +198,7 @@ class MyApp extends StatelessWidget {
       title: AppConfig.appTitle,
       debugShowCheckedModeBanner: false,
       themeMode: ThemeMode.dark,
+      theme: ThemeData.light(),
       darkTheme: dark,
     );
   }

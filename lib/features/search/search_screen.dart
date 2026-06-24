@@ -192,8 +192,8 @@ class _ArticleSearchScreenState extends ConsumerState<ArticleSearchScreen> {
     return ListView.builder(
       itemCount: 5,
       itemBuilder: (context, index) => Shimmer.fromColors(
-        baseColor: Colors.grey[300]!,
-        highlightColor: Colors.grey[100]!,
+        baseColor: Colors.grey[800]!,
+        highlightColor: Colors.grey[700]!,
         child: ListTile(
           leading: Container(
             width: 40,

@@ -224,8 +224,11 @@ class _StatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textColor = Theme.of(context).textTheme.bodyMedium?.color;
+    final valueColor = Theme.of(context).colorScheme.secondary;
+    
     return Card(
-      color: const Color(0xFF1A237E),
+      color: Theme.of(context).colorScheme.surface,
       elevation: 0,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
@@ -235,13 +238,13 @@ class _StatCard extends StatelessWidget {
           children: [
             Text(
               label,
-              style: const TextStyle(color: Colors.white70, fontSize: 12),
+              style: TextStyle(color: textColor?.withValues(alpha: 0.7), fontSize: 12),
             ),
             const SizedBox(height: 8),
             Text(
               value,
-              style: const TextStyle(
-                color: Color(0xFFF9A825),
+              style: TextStyle(
+                color: valueColor,
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
               ),

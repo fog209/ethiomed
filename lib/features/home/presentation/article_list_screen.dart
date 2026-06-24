@@ -403,8 +403,8 @@ class _ArticleListScreenState extends ConsumerState<ArticleListScreen> {
 
   Widget _buildShimmerArticleTile() {
     return Shimmer.fromColors(
-      baseColor: Colors.grey[300]!,
-      highlightColor: Colors.grey[100]!,
+      baseColor: Colors.grey[800]!,
+      highlightColor: Colors.grey[700]!,
       child: Card(
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         child: Padding(
