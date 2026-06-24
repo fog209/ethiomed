@@ -6,6 +6,8 @@ import '../../../core/widgets/empty_state.dart';
 import 'package:ethiomed/features/articles/data/article_repository.dart';
 import 'search_history_service.dart';
 
+final selectedCategoryProvider = StateProvider<String?>((ref) => null);
+
 class ArticleSearchScreen extends ConsumerStatefulWidget {
   const ArticleSearchScreen({super.key});
 
@@ -17,7 +19,6 @@ class ArticleSearchScreen extends ConsumerStatefulWidget {
 class _ArticleSearchScreenState extends ConsumerState<ArticleSearchScreen> {
   final TextEditingController _controller = TextEditingController();
   String _query = '';
-  String? _selectedCategory;
   final List<String> _categories = const <String>[
     'Cardiology',
     'Pulmonology',
@@ -78,50 +79,50 @@ class _ArticleSearchScreenState extends ConsumerState<ArticleSearchScreen> {
           Expanded(
             child: _query.isEmpty
                 ? history.isEmpty
-                      ? const Center(child: Text('Search for diseases...'))
-                      : ListView.builder(
-                          itemCount: history.length + 2,
-                          itemBuilder: (context, index) {
-                            if (index == 0) {
-                              return const ListTile(
-                                title: Text(
-                                  'Recent Searches',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 12,
-                                  ),
+                    ? const Center(child: Text('Search for diseases...'))
+                    : ListView.builder(
+                        itemCount: history.length + 2,
+                        itemBuilder: (context, index) {
+                          if (index == 0) {
+                            return const ListTile(
+                              title: Text(
+                                'Recent Searches',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
                                 ),
-                              );
-                            }
+                              ),
+                            );
+                          }
 
-                            if (index == history.length + 1) {
-                              return TextButton(
-                                onPressed: () {
-                                  _runAfterBuild(() {
-                                    ref
-                                        .read(searchHistoryProvider.notifier)
-                                        .clearHistory();
-                                  });
-                                },
-                                child: const Text('Clear'),
-                              );
-                            }
-
-                            final historyItem = history[index - 1];
-                            return ListTile(
-                              leading: const Icon(Icons.history),
-                              title: Text(historyItem),
-                              onTap: () {
+                          if (index == history.length + 1) {
+                            return TextButton(
+                              onPressed: () {
                                 _runAfterBuild(() {
-                                  setState(() {
-                                    _controller.text = historyItem;
-                                    _query = historyItem.toLowerCase();
-                                  });
+                                  ref
+                                      .read(searchHistoryProvider.notifier)
+                                      .clearHistory();
                                 });
                               },
+                              child: const Text('Clear'),
                             );
-                          },
-                        )
+                          }
+
+                          final historyItem = history[index - 1];
+                          return ListTile(
+                            leading: const Icon(Icons.history),
+                            title: Text(historyItem),
+                            onTap: () {
+                              _runAfterBuild(() {
+                                setState(() {
+                                  _controller.text = historyItem;
+                                  _query = historyItem.toLowerCase();
+                                });
+                              });
+                            },
+                          );
+                        },
+                      )
                 : articlesAsync.when(
                     data: (articles) {
                       final filtered = articles.where((article) {
@@ -129,8 +130,8 @@ class _ArticleSearchScreenState extends ConsumerState<ArticleSearchScreen> {
                             .toLowerCase()
                             .contains(_query);
                         final matchesCategory =
-                            _selectedCategory == null ||
-                            article.category == _selectedCategory;
+                            ref.read(selectedCategoryProvider) == null ||
+                            article.category == ref.read(selectedCategoryProvider);
                         return matchesQuery && matchesCategory;
                       }).toList();
 
@@ -172,17 +173,15 @@ class _ArticleSearchScreenState extends ConsumerState<ArticleSearchScreen> {
   }
 
   Widget _buildCategoryChip(String category) {
+    final selectedCategory = ref.watch(selectedCategoryProvider);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4),
       child: FilterChip(
         label: Text(category),
-        selected: _selectedCategory == category,
+        selected: selectedCategory == category,
         onSelected: (selected) {
-          _runAfterBuild(() {
-            setState(() {
-              _selectedCategory = selected ? category : null;
-            });
-          });
+          ref.read(selectedCategoryProvider.notifier).state =
+              category == ref.read(selectedCategoryProvider)?.trim() ? null : category;
         },
       ),
     );
