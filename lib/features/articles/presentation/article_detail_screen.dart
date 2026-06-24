@@ -481,14 +481,17 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
   }
 
   Widget _buildShowLowYieldButton() {
-    return TextButton(
-      onPressed: () {
-        setState(() {
-          _showLowYieldSections = true;
-        });
-      },
-      child: const Text('+ Show low-yield sections'),
-    );
+return TextButton(
+       onPressed: () {
+         setState(() {
+           _showLowYieldSections = true;
+         });
+       },
+       child: const Text(
+         '+ Show low-yield sections',
+         style: TextStyle(color: Color(0xFFF9A825)),
+       ),
+     );
   }
 
   Widget _buildEmptyArticleFallback(BuildContext context) {
@@ -587,19 +590,27 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
           left: BorderSide(color: borderColor, width: borderWidth),
         ),
       ),
-      child: ExpansionTile(
-        backgroundColor: backgroundColor,
-        collapsedBackgroundColor: backgroundColor,
-        initiallyExpanded: initiallyExpanded,
-        leading: Icon(icon, color: const Color(0xFF1A237E)),
-        title: isWeak ? _buildWeakSectionHeader(title) : Text(title),
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: MarkdownBody(data: content),
-          ),
-        ],
-      ),
+child: ExpansionTile(
+         backgroundColor: backgroundColor,
+         collapsedBackgroundColor: backgroundColor,
+         initiallyExpanded: initiallyExpanded,
+         leading: Icon(icon, color: const Color(0xFF1A237E)),
+         title: isWeak ? _buildWeakSectionHeader(title) : Text(
+           title,
+           style: const TextStyle(color: Colors.white),
+         ),
+         children: [
+           Padding(
+             padding: const EdgeInsets.all(16.0),
+             child: MarkdownBody(
+               data: content,
+               styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
+                 p: const TextStyle(color: Colors.white),
+               ),
+             ),
+           ),
+         ],
+       ),
     );
   }
 
