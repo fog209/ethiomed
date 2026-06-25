@@ -86,7 +86,7 @@ void main() async {
     rethrow;
   }
 
-  final themeIndex = prefs.getInt('themeMode') ?? 0;
+  final themeIndex = prefs.getInt('themeMode') ?? ThemeMode.dark.index;
   runApp(ProviderScope(overrides: [
     themeModeProvider.overrideWith((ref) => ThemeMode.values[themeIndex]),
   ], child: const MyApp()));
