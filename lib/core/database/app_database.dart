@@ -84,6 +84,8 @@ class QuizTable extends Table {
   IntColumn get srInterval => integer().nullable()();
   IntColumn get repetitions => integer().nullable()();
   DateTimeColumn get nextDueAt => dateTime().nullable()();
+  RealColumn get easeFactor => real().withDefault(const Constant(2.5))();
+  IntColumn get lastQuality => integer().nullable()();
 }
 
 @DriftDatabase(

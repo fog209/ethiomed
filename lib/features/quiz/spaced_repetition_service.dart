@@ -72,12 +72,12 @@ class SpacedRepetitionService {
           throw AppException('Quiz question not found.');
         }
 
-        final schedule = _calculateSchedule(
-          easeFactor: question.easeFactor,
-          interval: question.interval,
-          repetitions: question.repetitions ?? 0,
-          quality: quality,
-        );
+final schedule = _calculateSchedule(
+           easeFactor: question.easeFactor,
+           interval: question.srInterval ?? 0,
+           repetitions: question.repetitions ?? 0,
+           quality: quality,
+         );
 
         await _db
             .customSelect(
@@ -175,9 +175,7 @@ class SpacedRepetitionService {
       wrongCount: row.read<int?>('wrong_count') ?? 0,
       lastAttemptedAt: row.read<DateTime?>('last_attempted_at'),
       easeFactor: row.read<double?>('ease_factor') ?? 2.5,
-      interval: row.read<int?>('sr_interval') ?? 0,
       repetitions: row.read<int?>('repetitions') ?? 0,
-      lastQuality: row.read<int?>('last_quality') ?? 0,
     );
   }
 
@@ -240,13 +238,7 @@ class _QuizQuestionSchedule extends QuizQuestionEntity {
     required super.testedField,
     required super.wrongCount,
     super.lastAttemptedAt,
-    required this.easeFactor,
-    required this.interval,
-    super.repetitions,
-    required this.lastQuality,
+    required super.easeFactor,
+    required super.repetitions,
   });
-
-  final double easeFactor;
-  final int interval;
-  final int lastQuality;
 }

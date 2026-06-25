@@ -121,6 +121,7 @@ class ExamSessionNotifier extends StateNotifier<ExamSessionState> {
       srInterval: row.read<int?>('sr_interval'),
       repetitions: row.read<int?>('repetitions'),
       nextDueAt: row.read<DateTime?>('next_due_at'),
+      easeFactor: row.read<double?>('ease_factor') ?? 2.5,
     );
   }
 

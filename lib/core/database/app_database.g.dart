@@ -1825,6 +1825,29 @@ class $QuizTableTable extends QuizTable
     type: DriftSqlType.dateTime,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _easeFactorMeta = const VerificationMeta(
+    'easeFactor',
+  );
+  @override
+  late final GeneratedColumn<double> easeFactor = GeneratedColumn<double>(
+    'ease_factor',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(2.5),
+  );
+  static const VerificationMeta _lastQualityMeta = const VerificationMeta(
+    'lastQuality',
+  );
+  @override
+  late final GeneratedColumn<int> lastQuality = GeneratedColumn<int>(
+    'last_quality',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -1845,6 +1868,8 @@ class $QuizTableTable extends QuizTable
     srInterval,
     repetitions,
     nextDueAt,
+    easeFactor,
+    lastQuality,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1998,6 +2023,21 @@ class $QuizTableTable extends QuizTable
         nextDueAt.isAcceptableOrUnknown(data['next_due_at']!, _nextDueAtMeta),
       );
     }
+    if (data.containsKey('ease_factor')) {
+      context.handle(
+        _easeFactorMeta,
+        easeFactor.isAcceptableOrUnknown(data['ease_factor']!, _easeFactorMeta),
+      );
+    }
+    if (data.containsKey('last_quality')) {
+      context.handle(
+        _lastQualityMeta,
+        lastQuality.isAcceptableOrUnknown(
+          data['last_quality']!,
+          _lastQualityMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -2079,6 +2119,14 @@ class $QuizTableTable extends QuizTable
         DriftSqlType.dateTime,
         data['${effectivePrefix}next_due_at'],
       ),
+      easeFactor: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}ease_factor'],
+      )!,
+      lastQuality: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}last_quality'],
+      ),
     );
   }
 
@@ -2108,6 +2156,8 @@ class QuizQuestionEntity extends DataClass
   final int? srInterval;
   final int? repetitions;
   final DateTime? nextDueAt;
+  final double easeFactor;
+  final int? lastQuality;
   const QuizQuestionEntity({
     required this.id,
     required this.remoteId,
@@ -2127,6 +2177,8 @@ class QuizQuestionEntity extends DataClass
     this.srInterval,
     this.repetitions,
     this.nextDueAt,
+    required this.easeFactor,
+    this.lastQuality,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -2156,6 +2208,10 @@ class QuizQuestionEntity extends DataClass
     }
     if (!nullToAbsent || nextDueAt != null) {
       map['next_due_at'] = Variable<DateTime>(nextDueAt);
+    }
+    map['ease_factor'] = Variable<double>(easeFactor);
+    if (!nullToAbsent || lastQuality != null) {
+      map['last_quality'] = Variable<int>(lastQuality);
     }
     return map;
   }
@@ -2188,6 +2244,10 @@ class QuizQuestionEntity extends DataClass
       nextDueAt: nextDueAt == null && nullToAbsent
           ? const Value.absent()
           : Value(nextDueAt),
+      easeFactor: Value(easeFactor),
+      lastQuality: lastQuality == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastQuality),
     );
   }
 
@@ -2215,6 +2275,8 @@ class QuizQuestionEntity extends DataClass
       srInterval: serializer.fromJson<int?>(json['srInterval']),
       repetitions: serializer.fromJson<int?>(json['repetitions']),
       nextDueAt: serializer.fromJson<DateTime?>(json['nextDueAt']),
+      easeFactor: serializer.fromJson<double>(json['easeFactor']),
+      lastQuality: serializer.fromJson<int?>(json['lastQuality']),
     );
   }
   @override
@@ -2239,6 +2301,8 @@ class QuizQuestionEntity extends DataClass
       'srInterval': serializer.toJson<int?>(srInterval),
       'repetitions': serializer.toJson<int?>(repetitions),
       'nextDueAt': serializer.toJson<DateTime?>(nextDueAt),
+      'easeFactor': serializer.toJson<double>(easeFactor),
+      'lastQuality': serializer.toJson<int?>(lastQuality),
     };
   }
 
@@ -2261,6 +2325,8 @@ class QuizQuestionEntity extends DataClass
     Value<int?> srInterval = const Value.absent(),
     Value<int?> repetitions = const Value.absent(),
     Value<DateTime?> nextDueAt = const Value.absent(),
+    double? easeFactor,
+    Value<int?> lastQuality = const Value.absent(),
   }) => QuizQuestionEntity(
     id: id ?? this.id,
     remoteId: remoteId ?? this.remoteId,
@@ -2282,6 +2348,8 @@ class QuizQuestionEntity extends DataClass
     srInterval: srInterval.present ? srInterval.value : this.srInterval,
     repetitions: repetitions.present ? repetitions.value : this.repetitions,
     nextDueAt: nextDueAt.present ? nextDueAt.value : this.nextDueAt,
+    easeFactor: easeFactor ?? this.easeFactor,
+    lastQuality: lastQuality.present ? lastQuality.value : this.lastQuality,
   );
   QuizQuestionEntity copyWithCompanion(QuizTableCompanion data) {
     return QuizQuestionEntity(
@@ -2319,6 +2387,12 @@ class QuizQuestionEntity extends DataClass
           ? data.repetitions.value
           : this.repetitions,
       nextDueAt: data.nextDueAt.present ? data.nextDueAt.value : this.nextDueAt,
+      easeFactor: data.easeFactor.present
+          ? data.easeFactor.value
+          : this.easeFactor,
+      lastQuality: data.lastQuality.present
+          ? data.lastQuality.value
+          : this.lastQuality,
     );
   }
 
@@ -2342,7 +2416,9 @@ class QuizQuestionEntity extends DataClass
           ..write('lastAttemptedAt: $lastAttemptedAt, ')
           ..write('srInterval: $srInterval, ')
           ..write('repetitions: $repetitions, ')
-          ..write('nextDueAt: $nextDueAt')
+          ..write('nextDueAt: $nextDueAt, ')
+          ..write('easeFactor: $easeFactor, ')
+          ..write('lastQuality: $lastQuality')
           ..write(')'))
         .toString();
   }
@@ -2367,6 +2443,8 @@ class QuizQuestionEntity extends DataClass
     srInterval,
     repetitions,
     nextDueAt,
+    easeFactor,
+    lastQuality,
   );
   @override
   bool operator ==(Object other) =>
@@ -2389,7 +2467,9 @@ class QuizQuestionEntity extends DataClass
           other.lastAttemptedAt == this.lastAttemptedAt &&
           other.srInterval == this.srInterval &&
           other.repetitions == this.repetitions &&
-          other.nextDueAt == this.nextDueAt);
+          other.nextDueAt == this.nextDueAt &&
+          other.easeFactor == this.easeFactor &&
+          other.lastQuality == this.lastQuality);
 }
 
 class QuizTableCompanion extends UpdateCompanion<QuizQuestionEntity> {
@@ -2411,6 +2491,8 @@ class QuizTableCompanion extends UpdateCompanion<QuizQuestionEntity> {
   final Value<int?> srInterval;
   final Value<int?> repetitions;
   final Value<DateTime?> nextDueAt;
+  final Value<double> easeFactor;
+  final Value<int?> lastQuality;
   const QuizTableCompanion({
     this.id = const Value.absent(),
     this.remoteId = const Value.absent(),
@@ -2430,6 +2512,8 @@ class QuizTableCompanion extends UpdateCompanion<QuizQuestionEntity> {
     this.srInterval = const Value.absent(),
     this.repetitions = const Value.absent(),
     this.nextDueAt = const Value.absent(),
+    this.easeFactor = const Value.absent(),
+    this.lastQuality = const Value.absent(),
   });
   QuizTableCompanion.insert({
     this.id = const Value.absent(),
@@ -2450,6 +2534,8 @@ class QuizTableCompanion extends UpdateCompanion<QuizQuestionEntity> {
     this.srInterval = const Value.absent(),
     this.repetitions = const Value.absent(),
     this.nextDueAt = const Value.absent(),
+    this.easeFactor = const Value.absent(),
+    this.lastQuality = const Value.absent(),
   }) : remoteId = Value(remoteId),
        articleId = Value(articleId),
        stem = Value(stem),
@@ -2479,6 +2565,8 @@ class QuizTableCompanion extends UpdateCompanion<QuizQuestionEntity> {
     Expression<int>? srInterval,
     Expression<int>? repetitions,
     Expression<DateTime>? nextDueAt,
+    Expression<double>? easeFactor,
+    Expression<int>? lastQuality,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -2499,6 +2587,8 @@ class QuizTableCompanion extends UpdateCompanion<QuizQuestionEntity> {
       if (srInterval != null) 'sr_interval': srInterval,
       if (repetitions != null) 'repetitions': repetitions,
       if (nextDueAt != null) 'next_due_at': nextDueAt,
+      if (easeFactor != null) 'ease_factor': easeFactor,
+      if (lastQuality != null) 'last_quality': lastQuality,
     });
   }
 
@@ -2521,6 +2611,8 @@ class QuizTableCompanion extends UpdateCompanion<QuizQuestionEntity> {
     Value<int?>? srInterval,
     Value<int?>? repetitions,
     Value<DateTime?>? nextDueAt,
+    Value<double>? easeFactor,
+    Value<int?>? lastQuality,
   }) {
     return QuizTableCompanion(
       id: id ?? this.id,
@@ -2541,6 +2633,8 @@ class QuizTableCompanion extends UpdateCompanion<QuizQuestionEntity> {
       srInterval: srInterval ?? this.srInterval,
       repetitions: repetitions ?? this.repetitions,
       nextDueAt: nextDueAt ?? this.nextDueAt,
+      easeFactor: easeFactor ?? this.easeFactor,
+      lastQuality: lastQuality ?? this.lastQuality,
     );
   }
 
@@ -2601,6 +2695,12 @@ class QuizTableCompanion extends UpdateCompanion<QuizQuestionEntity> {
     if (nextDueAt.present) {
       map['next_due_at'] = Variable<DateTime>(nextDueAt.value);
     }
+    if (easeFactor.present) {
+      map['ease_factor'] = Variable<double>(easeFactor.value);
+    }
+    if (lastQuality.present) {
+      map['last_quality'] = Variable<int>(lastQuality.value);
+    }
     return map;
   }
 
@@ -2624,7 +2724,9 @@ class QuizTableCompanion extends UpdateCompanion<QuizQuestionEntity> {
           ..write('lastAttemptedAt: $lastAttemptedAt, ')
           ..write('srInterval: $srInterval, ')
           ..write('repetitions: $repetitions, ')
-          ..write('nextDueAt: $nextDueAt')
+          ..write('nextDueAt: $nextDueAt, ')
+          ..write('easeFactor: $easeFactor, ')
+          ..write('lastQuality: $lastQuality')
           ..write(')'))
         .toString();
   }
@@ -3744,6 +3846,8 @@ typedef $$QuizTableTableCreateCompanionBuilder =
       Value<int?> srInterval,
       Value<int?> repetitions,
       Value<DateTime?> nextDueAt,
+      Value<double> easeFactor,
+      Value<int?> lastQuality,
     });
 typedef $$QuizTableTableUpdateCompanionBuilder =
     QuizTableCompanion Function({
@@ -3765,6 +3869,8 @@ typedef $$QuizTableTableUpdateCompanionBuilder =
       Value<int?> srInterval,
       Value<int?> repetitions,
       Value<DateTime?> nextDueAt,
+      Value<double> easeFactor,
+      Value<int?> lastQuality,
     });
 
 class $$QuizTableTableFilterComposer
@@ -3863,6 +3969,16 @@ class $$QuizTableTableFilterComposer
 
   ColumnFilters<DateTime> get nextDueAt => $composableBuilder(
     column: $table.nextDueAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get easeFactor => $composableBuilder(
+    column: $table.easeFactor,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get lastQuality => $composableBuilder(
+    column: $table.lastQuality,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -3965,6 +4081,16 @@ class $$QuizTableTableOrderingComposer
     column: $table.nextDueAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<double> get easeFactor => $composableBuilder(
+    column: $table.easeFactor,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get lastQuality => $composableBuilder(
+    column: $table.lastQuality,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$QuizTableTableAnnotationComposer
@@ -4045,6 +4171,16 @@ class $$QuizTableTableAnnotationComposer
 
   GeneratedColumn<DateTime> get nextDueAt =>
       $composableBuilder(column: $table.nextDueAt, builder: (column) => column);
+
+  GeneratedColumn<double> get easeFactor => $composableBuilder(
+    column: $table.easeFactor,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get lastQuality => $composableBuilder(
+    column: $table.lastQuality,
+    builder: (column) => column,
+  );
 }
 
 class $$QuizTableTableTableManager
@@ -4096,6 +4232,8 @@ class $$QuizTableTableTableManager
                 Value<int?> srInterval = const Value.absent(),
                 Value<int?> repetitions = const Value.absent(),
                 Value<DateTime?> nextDueAt = const Value.absent(),
+                Value<double> easeFactor = const Value.absent(),
+                Value<int?> lastQuality = const Value.absent(),
               }) => QuizTableCompanion(
                 id: id,
                 remoteId: remoteId,
@@ -4115,6 +4253,8 @@ class $$QuizTableTableTableManager
                 srInterval: srInterval,
                 repetitions: repetitions,
                 nextDueAt: nextDueAt,
+                easeFactor: easeFactor,
+                lastQuality: lastQuality,
               ),
           createCompanionCallback:
               ({
@@ -4136,6 +4276,8 @@ class $$QuizTableTableTableManager
                 Value<int?> srInterval = const Value.absent(),
                 Value<int?> repetitions = const Value.absent(),
                 Value<DateTime?> nextDueAt = const Value.absent(),
+                Value<double> easeFactor = const Value.absent(),
+                Value<int?> lastQuality = const Value.absent(),
               }) => QuizTableCompanion.insert(
                 id: id,
                 remoteId: remoteId,
@@ -4155,6 +4297,8 @@ class $$QuizTableTableTableManager
                 srInterval: srInterval,
                 repetitions: repetitions,
                 nextDueAt: nextDueAt,
+                easeFactor: easeFactor,
+                lastQuality: lastQuality,
               ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))

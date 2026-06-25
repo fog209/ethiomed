@@ -201,6 +201,7 @@ class QuizRepository {
           'clinicalFeatures',
       wrongCount: 0,
       lastAttemptedAt: null,
+      easeFactor: 2.5,
     );
   }
 
