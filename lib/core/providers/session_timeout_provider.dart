@@ -27,7 +27,9 @@ class SessionTimeoutNotifier extends StateNotifier<bool> {
   }
 
   void consumeLogout() {
-    state = false;
+    if (state == true) {
+      state = false;
+    }
   }
 
   void _cleanup() {
