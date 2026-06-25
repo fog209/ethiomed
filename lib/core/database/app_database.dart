@@ -330,15 +330,27 @@ class AppDatabase extends _$AppDatabase {
         viewed_at TEXT NOT NULL DEFAULT ''
       )
       ''');
-    await customStatement(
-      'ALTER TABLE view_history ADD COLUMN article_title TEXT',
-    );
-    await customStatement(
-      'ALTER TABLE view_history ADD COLUMN category TEXT',
-    );
-    await customStatement(
-      'ALTER TABLE view_history ADD COLUMN viewed_at TEXT NOT NULL DEFAULT ""',
-    );
+
+    final columns = await customSelect(
+      'PRAGMA table_info(view_history)',
+    ).get();
+    final columnNames = columns.map((row) => row.read<String>('name')).toSet();
+
+    if (!columnNames.contains('article_title')) {
+      await customStatement(
+        'ALTER TABLE view_history ADD COLUMN article_title TEXT',
+      );
+    }
+    if (!columnNames.contains('category')) {
+      await customStatement(
+        'ALTER TABLE view_history ADD COLUMN category TEXT',
+      );
+    }
+    if (!columnNames.contains('viewed_at')) {
+      await customStatement(
+        'ALTER TABLE view_history ADD COLUMN viewed_at TEXT NOT NULL DEFAULT ""',
+      );
+    }
   }
 }
 
