@@ -7,6 +7,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'core/config/app_config.dart';
 import 'core/database/app_database.dart';
 import 'core/providers/session_timeout_provider.dart';
+import 'core/theme/app_theme.dart';
 import 'features/admin/presentation/admin_dashboard_screen.dart';
 import 'features/admin/data/admin_repository.dart';
 import 'features/articles/presentation/article_detail_screen.dart';
@@ -184,15 +185,6 @@ class MyApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final ThemeMode themeMode = ref.watch(themeModeProvider);
-    final dark = ThemeData(
-      useMaterial3: true,
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: const Color(0xFF1A237E),
-        brightness: Brightness.dark,
-        primary: const Color(0xFF1A237E),
-        secondary: const Color(0xFFFFB300),
-      ),
-    );
 
     return MaterialApp.router(
       routerConfig: _router,
@@ -200,7 +192,7 @@ class MyApp extends ConsumerWidget {
       debugShowCheckedModeBanner: false,
       themeMode: themeMode,
       theme: ThemeData.light(),
-      darkTheme: dark,
+      darkTheme: darkTheme,
     );
   }
 }
