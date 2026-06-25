@@ -65,7 +65,11 @@ class _ArticleListScreenState extends ConsumerState<ArticleListScreen> {
   void _resetPagination({bool resetSubcategory = true}) {
     ref.read(articleCurrentCategoryProvider.notifier).state = widget.category;
     if (resetSubcategory) {
-      ref.read(subcategoryFilterProvider.notifier).state = null;
+      Future.microtask(() {
+        if (mounted) {
+          ref.read(subcategoryFilterProvider.notifier).state = null;
+        }
+      });
     }
     ref.read(articleRequestIdProvider.notifier).state =
         ref.read(articleRequestIdProvider) + 1;
