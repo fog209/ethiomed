@@ -4,12 +4,10 @@ final ThemeData darkTheme = ThemeData(
   useMaterial3: true,
   scaffoldBackgroundColor: const Color(0xFF0D0F1A),
   colorScheme: const ColorScheme.dark(
-    background: Color(0xFF0D0F1A),
     surface: Color(0xFF151829),
-    surfaceVariant: Color(0xFF1C2038),
+    surfaceContainerHighest: Color(0xFF1C2038),
     primary: Color(0xFFF9A825),
     onPrimary: Color(0xFF0D0F1A),
-    onBackground: Color(0xFFE8EAF6),
     onSurface: Color(0xFFE8EAF6),
     onSurfaceVariant: Color(0xFF9FA8DA),
     outline: Color(0xFF252A45),
