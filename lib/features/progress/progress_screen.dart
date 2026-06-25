@@ -79,28 +79,28 @@ class ProgressScreen extends ConsumerWidget {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
+                  Flexible(fit: FlexFit.loose,
                     child: _StatCard(
                       label: 'Day Streak',
                       value: '🔥 ${streak.currentStreak}',
                     ),
                   ),
                   const SizedBox(width: 10),
-                  Expanded(
+                  Flexible(fit: FlexFit.loose,
                     child: _StatCard(
                       label: 'Articles',
                       value: '${streak.totalArticles}',
                     ),
                   ),
                   const SizedBox(width: 10),
-                  Expanded(
+                  Flexible(fit: FlexFit.loose,
                     child: _StatCard(
                       label: 'Quiz Score',
                       value: '${streak.accuracy.toStringAsFixed(0)}%',
                     ),
                   ),
                   const SizedBox(width: 10),
-                  Expanded(
+                  Flexible(fit: FlexFit.loose,
                     child: _StatCard(
                       label: 'Days Active',
                       value: '${_estimateDaysActive(heatmapByDate)}',
