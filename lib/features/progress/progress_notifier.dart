@@ -33,10 +33,14 @@ final progressNotifierProvider =
 
 class ProgressNotifier extends AsyncNotifier<ProgressData> {
   late final AppDatabase _db;
+  bool _dbInitialized = false;
 
   @override
   Future<ProgressData> build() async {
-    _db = ref.watch(databaseProvider);
+    if (!_dbInitialized) {
+      _db = ref.watch(databaseProvider);
+      _dbInitialized = true;
+    }
 
     // Load streak stats (current streak, total articles, quiz accuracy percent)
     final streak = await ref.watch(streakNotifierProvider.future);

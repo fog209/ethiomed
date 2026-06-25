@@ -93,7 +93,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 8;
+  int get schemaVersion => 9;
 
   Future<void> _runMigrationStep(
     String name,
@@ -150,8 +150,11 @@ class AppDatabase extends _$AppDatabase {
             articles.subcategory as GeneratedColumn<Object>,
           ));
         }
-        if (from < 8) {
+if (from < 8) {
           await _runMigrationStep('ensure study sessions', _ensureStudySessionsTable);
+        }
+        if (from < 9) {
+          await _runMigrationStep('ensure quiz table sm2 columns', _ensureQuizTableSm2Columns);
         }
       },
     );
@@ -352,11 +355,74 @@ class AppDatabase extends _$AppDatabase {
       );
     }
   }
-}
 
-String _dateKey(DateTime date) {
-  final day = DateTime(date.year, date.month, date.day);
-  return day.toIso8601String().substring(0, 10);
+  Future<void> _ensureQuizTableSm2Columns() async {
+    await customStatement(
+      '''
+      CREATE TABLE IF NOT EXISTS quiz_table (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        remote_id TEXT NOT NULL UNIQUE,
+        article_id TEXT NOT NULL,
+        stem TEXT NOT NULL,
+        option_a TEXT NOT NULL,
+        option_b TEXT NOT NULL,
+        option_c TEXT NOT NULL,
+        option_d TEXT NOT NULL,
+        correct_option TEXT NOT NULL,
+        explanation TEXT NOT NULL,
+        category TEXT NOT NULL,
+        difficulty TEXT NOT NULL DEFAULT 'medium',
+        tested_field TEXT NOT NULL DEFAULT 'clinicalFeatures',
+        wrong_count INTEGER NOT NULL DEFAULT 0,
+        last_attempted_at INTEGER,
+        sr_interval INTEGER,
+        repetitions INTEGER,
+        next_due_at INTEGER
+      )
+      ''',
+    );
+
+    final columns = await customSelect(
+      'PRAGMA table_info(quiz_table)',
+    ).get();
+    final columnNames = columns.map((row) => row.read<String>('name')).toSet();
+
+    if (!columnNames.contains('ease_factor')) {
+      await customStatement(
+        'ALTER TABLE quiz_table ADD COLUMN ease_factor REAL',
+      );
+    }
+    if (!columnNames.contains('sr_interval')) {
+      await customStatement(
+        'ALTER TABLE quiz_table ADD COLUMN sr_interval INTEGER',
+      );
+    }
+    if (!columnNames.contains('repetitions')) {
+      await customStatement(
+        'ALTER TABLE quiz_table ADD COLUMN repetitions INTEGER',
+      );
+    }
+    if (!columnNames.contains('next_due_at')) {
+      await customStatement(
+        'ALTER TABLE quiz_table ADD COLUMN next_due_at INTEGER',
+      );
+    }
+    if (!columnNames.contains('last_quality')) {
+      await customStatement(
+        'ALTER TABLE quiz_table ADD COLUMN last_quality INTEGER',
+      );
+    }
+    if (!columnNames.contains('tested_field')) {
+      await customStatement(
+        "ALTER TABLE quiz_table ADD COLUMN tested_field TEXT NOT NULL DEFAULT 'clinicalFeatures'",
+      );
+    }
+  }
+
+  String _dateKey(DateTime date) {
+    final day = DateTime(date.year, date.month, date.day);
+    return day.toIso8601String().substring(0, 10);
+  }
 }
 
 LazyDatabase _openConnection() {

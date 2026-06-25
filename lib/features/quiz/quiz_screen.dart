@@ -224,7 +224,8 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
       children: [
         Row(
           children: [
-            Expanded(
+            Flexible(
+              fit: FlexFit.loose,
               child: _buildSm2Button(
                 label: 'Again',
                 quality: 0,
@@ -235,7 +236,8 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
               ),
             ),
             const SizedBox(width: 8),
-            Expanded(
+            Flexible(
+              fit: FlexFit.loose,
               child: _buildSm2Button(
                 label: 'Hard',
                 quality: 2,
@@ -246,7 +248,8 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
               ),
             ),
             const SizedBox(width: 8),
-            Expanded(
+            Flexible(
+              fit: FlexFit.loose,
               child: _buildSm2Button(
                 label: 'Good',
                 quality: 4,
@@ -257,7 +260,8 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
               ),
             ),
             const SizedBox(width: 8),
-            Expanded(
+            Flexible(
+              fit: FlexFit.loose,
               child: _buildSm2Button(
                 label: 'Easy',
                 quality: 5,
@@ -391,7 +395,8 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
       children: [
         Row(
           children: [
-            Expanded(
+            Flexible(
+              fit: FlexFit.loose,
               child: Text(
                 question.category.isEmpty ? 'Practice' : question.category,
                 style: const TextStyle(
@@ -435,7 +440,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
         ? const Color(0xFFD32F2F)
         : Colors.grey.shade300;
 
-    return Padding(
+return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: InkWell(
         onTap: onTap,
@@ -455,7 +460,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                 child: Text(label),
               ),
               const SizedBox(width: 12),
-              Expanded(child: Text(text)),
+              Flexible(fit: FlexFit.loose, child: Text(text)),
             ],
           ),
         ),
