@@ -377,7 +377,9 @@ if (from < 8) {
         last_attempted_at INTEGER,
         sr_interval INTEGER,
         repetitions INTEGER,
-        next_due_at INTEGER
+        next_due_at INTEGER,
+        ease_factor REAL,
+        last_quality INTEGER
       )
       ''',
     );

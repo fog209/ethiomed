@@ -17,12 +17,19 @@ import 'features/legal/disclaimer_screen.dart';
 import 'features/legal/privacy_screen.dart';
 import 'features/legal/terms_screen.dart';
 import 'features/onboarding/onboarding_screen.dart';
-import 'app/main_shell.dart'; // This is your new bottom nav shell
+import 'app/main_shell.dart';
 import 'features/subscription/presentation/paywall_screen.dart';
 import 'features/subscription/data/subscription_repository.dart';
 
 bool _seenOnboarding = false;
 bool _seenDisclaimer = false;
+
+final themeModeProvider = StateProvider<ThemeMode>((ref) => ThemeMode.dark);
+
+Future<void> saveThemeMode(ThemeMode mode) async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.setInt('themeMode', mode.index);
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -78,7 +85,10 @@ void main() async {
     rethrow;
   }
 
-  runApp(const ProviderScope(child: MyApp()));
+  final themeIndex = prefs.getInt('themeMode') ?? 0;
+  runApp(ProviderScope(overrides: [
+    themeModeProvider.overrideWith((ref) => ThemeMode.values[themeIndex]),
+  ], child: const MyApp()));
 }
 
 final _router = GoRouter(
@@ -168,11 +178,12 @@ class _InitialFlowGateGateState extends State<InitialFlowGate> {
   }
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final ThemeMode themeMode = ref.watch(themeModeProvider);
     final dark = ThemeData(
       useMaterial3: true,
       colorScheme: ColorScheme.fromSeed(
@@ -187,7 +198,7 @@ class MyApp extends StatelessWidget {
       routerConfig: _router,
       title: AppConfig.appTitle,
       debugShowCheckedModeBanner: false,
-      themeMode: ThemeMode.dark,
+      themeMode: themeMode,
       theme: ThemeData.light(),
       darkTheme: dark,
     );

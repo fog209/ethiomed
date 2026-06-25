@@ -125,14 +125,25 @@ class CategoriesScreen extends ConsumerWidget {
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: const Color(0xFFFFB300),
-        onPressed: () {
+        onPressed: () async {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Syncing with WardReady Cloud...'),
               duration: Duration(seconds: 1),
             ),
           );
-          unawaited(ref.read(articleRepositoryProvider).syncInBackground());
+          unawaited(
+            ref.read(articleRepositoryProvider).syncInBackground().then((_) {
+              // Invalidate all category progress providers after sync
+              for (final cat in AppConfig.clinicalCategories) {
+                ref.invalidate(categoryProgressProvider(cat['name'] as String));
+              }
+              for (final cat in AppConfig.preclinicalCategories) {
+                ref.invalidate(categoryProgressProvider(cat['name'] as String));
+              }
+              ref.invalidate(categoryProgressProvider('General'));
+            }),
+          );
         },
         child: const Icon(Icons.sync, color: Color(0xFF1A237E)),
       ),

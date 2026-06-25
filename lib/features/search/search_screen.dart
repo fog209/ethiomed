@@ -181,7 +181,7 @@ class _ArticleSearchScreenState extends ConsumerState<ArticleSearchScreen> {
         selected: selectedCategory == category,
         onSelected: (selected) {
           ref.read(selectedCategoryProvider.notifier).state =
-              category == ref.read(selectedCategoryProvider)?.trim() ? null : category;
+              selected ? category : null;
         },
       ),
     );

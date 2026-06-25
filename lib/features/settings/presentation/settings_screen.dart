@@ -7,6 +7,7 @@ import '../../../core/database/app_database.dart';
 import '../../../core/services/notification_service.dart';
 import '../../admin/data/admin_repository.dart';
 import '../../auth/data/auth_service.dart';
+import '../../../../../main.dart';
 
 class SettingsScreen extends ConsumerWidget {
   static const String _adminTelegramUrl = 'https://t.me/WardReadyAdmin';
@@ -27,12 +28,14 @@ class SettingsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final isAdminAsync = ref.watch(currentAdminProfileProvider);
     final dailyRemindersEnabled = ref.watch(dailyStudyRemindersEnabledProvider);
+    final themeMode = ref.watch(themeModeProvider);
     final migrationWarning = MigrationErrorStore.value;
     final items = _buildItems(
       context,
       ref,
       isAdminAsync,
       dailyRemindersEnabled,
+      themeMode,
       migrationWarning,
     );
 
@@ -50,6 +53,7 @@ class SettingsScreen extends ConsumerWidget {
     WidgetRef ref,
     AsyncValue<bool> isAdminAsync,
     bool dailyRemindersEnabled,
+    ThemeMode themeMode,
     String? migrationWarning,
   ) {
     final user = ref.watch(authSessionProvider).value?.user;
@@ -69,6 +73,20 @@ class SettingsScreen extends ConsumerWidget {
           await ref
               .read(dailyStudyRemindersEnabledProvider.notifier)
               .setEnabled(enabled);
+          if (!context.mounted) {
+            return;
+          }
+        },
+      ),
+      SwitchListTile(
+        value: themeMode == ThemeMode.dark,
+        title: const Text('Dark Mode'),
+        subtitle: const Text('Use dark theme throughout the app'),
+        secondary: const Icon(Icons.dark_mode, color: Color(0xFF1A237E)),
+        onChanged: (enabled) async {
+          final newMode = enabled ? ThemeMode.dark : ThemeMode.light;
+          ref.read(themeModeProvider.notifier).state = newMode;
+          await saveThemeMode(newMode);
           if (!context.mounted) {
             return;
           }

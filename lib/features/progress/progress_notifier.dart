@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/database/app_database.dart';
@@ -42,22 +43,28 @@ class ProgressNotifier extends AsyncNotifier<ProgressData> {
       _dbInitialized = true;
     }
 
-    // Load streak stats (current streak, total articles, quiz accuracy percent)
-    final streak = await ref.watch(streakNotifierProvider.future);
+    try {
+      // Load streak stats (current streak, total articles, quiz accuracy percent)
+      final streak = await ref.watch(streakNotifierProvider.future);
 
-    // Pre-load heatmap map once.
-    final heatmapByDate = await _loadHeatmap();
+      // Pre-load heatmap map once.
+      final heatmapByDate = await _loadHeatmap();
 
-    // Category progress + quiz accuracy
-    final categoryProgress = await _loadCategoryProgress();
-    final quizAccuracyByCategory = await _loadQuizAccuracyByCategory();
+      // Category progress + quiz accuracy
+      final categoryProgress = await _loadCategoryProgress();
+      final quizAccuracyByCategory = await _loadQuizAccuracyByCategory();
 
-    return ProgressData(
-      streak: streak,
-      heatmapByDate: heatmapByDate,
-      categoryProgress: categoryProgress,
-      quizAccuracyByCategory: quizAccuracyByCategory,
-    );
+      return ProgressData(
+        streak: streak,
+        heatmapByDate: heatmapByDate,
+        categoryProgress: categoryProgress,
+        quizAccuracyByCategory: quizAccuracyByCategory,
+      );
+    } catch (error) {
+      debugPrint('PROGRESS_BUILD_ERROR_TYPE: ${error.runtimeType}');
+      debugPrint('PROGRESS_BUILD_ERROR_DETAIL: $error');
+      rethrow;
+    }
   }
 
   Future<Map<String, int>> _loadHeatmap() async {
