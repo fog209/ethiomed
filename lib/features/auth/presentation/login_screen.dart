@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/providers/session_timeout_provider.dart';
 import '../data/auth_service.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -44,6 +45,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     final state = ref.read(authControllerProvider);
     if (state.status == AuthUiStatus.success) {
+      ref.read(sessionTimeoutProvider.notifier).resetTimer();
       context.go('/home');
     }
   }

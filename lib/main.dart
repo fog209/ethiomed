@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'core/config/app_config.dart';
 import 'core/database/app_database.dart';
+import 'core/providers/session_timeout_provider.dart';
 import 'features/admin/presentation/admin_dashboard_screen.dart';
 import 'features/admin/data/admin_repository.dart';
 import 'features/articles/presentation/article_detail_screen.dart';
@@ -253,6 +254,11 @@ class AppEntrance extends ConsumerWidget {
         }
 
         final session = snapshot.data?.session;
+
+        // Reset session timeout when session becomes active
+        if (session != null) {
+          ref.read(sessionTimeoutProvider.notifier).resetTimer();
+        }
 
         if (session == null) {
           return const LoginScreen();

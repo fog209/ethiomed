@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../core/providers/connectivity_notifier.dart';
+import '../core/providers/session_timeout_provider.dart';
 import '../core/widgets/offline_banner.dart';
 import 'nav_provider.dart';
 import '../features/home/presentation/categories_screen.dart';
@@ -24,10 +25,14 @@ class MainShell extends ConsumerStatefulWidget {
 
 class _MainShellState extends ConsumerState<MainShell> {
   Timer? _subscriptionTimer;
+  bool _isListeningForLogout = false;
 
   @override
   void initState() {
     super.initState();
+    // Initialize session timeout
+    ref.read(sessionTimeoutProvider.notifier).resetTimer();
+
     // Periodic subscription check every 30 minutes (Part 4-A)
     _subscriptionTimer = Timer.periodic(const Duration(minutes: 30), (_) async {
       if (!mounted) return;
@@ -71,6 +76,15 @@ class _MainShellState extends ConsumerState<MainShell> {
 
   @override
   Widget build(BuildContext context) {
+    if (!_isListeningForLogout) {
+      _isListeningForLogout = true;
+      ref.listen<bool>(sessionTimeoutProvider, (_, shouldLogout) {
+        if (shouldLogout && context.mounted) {
+          context.go('/login');
+        }
+      });
+    }
+
     final selectedIndex = ref.watch(bottomNavIndexProvider);
     final isOnline = ref.watch(connectivityProvider);
     final serverUnreachable = ref.watch(serverUnreachableProvider);
@@ -86,19 +100,30 @@ class _MainShellState extends ConsumerState<MainShell> {
     ];
 
     return Scaffold(
-      body: Column(
-        children: [
-          Expanded(
-            child: IndexedStack(index: selectedIndex, children: screens),
-          ),
-          if (serverUnreachable) _buildServerUnreachableBanner(),
-          if (!isOnline) const OfflineBanner(),
-        ],
+      body: GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onTap: () {
+          ref.read(sessionTimeoutProvider.notifier).resetTimer();
+        },
+        onPanDown: (_) {
+          ref.read(sessionTimeoutProvider.notifier).resetTimer();
+        },
+        child: Column(
+          children: [
+            Expanded(
+              child: IndexedStack(index: selectedIndex, children: screens),
+            ),
+            if (serverUnreachable) _buildServerUnreachableBanner(),
+            if (!isOnline) const OfflineBanner(),
+          ],
+        ),
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: selectedIndex,
-        onTap: (index) =>
-            ref.read(bottomNavIndexProvider.notifier).state = index,
+        onTap: (index) {
+          ref.read(bottomNavIndexProvider.notifier).state = index;
+          ref.read(sessionTimeoutProvider.notifier).resetTimer();
+        },
         type: BottomNavigationBarType.fixed, // Required for 5+ items
         selectedItemColor: const Color(0xFF1A237E),
         unselectedItemColor: Colors.grey,
