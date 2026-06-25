@@ -110,36 +110,38 @@ class ProgressScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 20),
 
-              // SECTION 2 — Study Heatmap
-              const Text(
-                'Study Activity — Past Year',
-                style: TextStyle(fontWeight: FontWeight.w600),
-              ),
-              const SizedBox(height: 10),
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: List.generate(cols, (colIndex) {
-                    return Column(
-                      children: List.generate(rows, (rowIndex) {
-                        final articlesRead = grid[rowIndex][colIndex];
-                        final color = _heatmapColor(articlesRead);
+// SECTION 2 — Study Heatmap
+               const Text(
+                 'Study Activity — Past Year',
+                 style: TextStyle(fontWeight: FontWeight.w600),
+               ),
+               const SizedBox(height: 10),
+               RepaintBoundary(
+                 child: SingleChildScrollView(
+                   scrollDirection: Axis.horizontal,
+                   child: Row(
+                     crossAxisAlignment: CrossAxisAlignment.start,
+                     children: List.generate(cols, (colIndex) {
+                       return Column(
+                         children: List.generate(rows, (rowIndex) {
+                           final articlesRead = grid[rowIndex][colIndex];
+                           final color = _heatmapColor(articlesRead);
 
-                        return Container(
-                          width: 10,
-                          height: 10,
-                          margin: const EdgeInsets.all(1.5),
-                          decoration: BoxDecoration(
-                            color: color,
-                            borderRadius: BorderRadius.circular(2),
-                          ),
-                        );
-                      }),
-                    );
-                  }),
-                ),
-              ),
+                           return Container(
+                             width: 10,
+                             height: 10,
+                             margin: const EdgeInsets.all(1.5),
+                             decoration: BoxDecoration(
+                               color: color,
+                               borderRadius: BorderRadius.circular(2),
+                             ),
+                           );
+                         }),
+                       );
+                     }),
+                   ),
+                 ),
+               ),
 
               const SizedBox(height: 20),
 

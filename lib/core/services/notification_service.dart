@@ -211,6 +211,7 @@ class NotificationService {
           )
           .get();
 
+      if (rows.isEmpty) return 0;
       return rows.single.read<int>('count');
     } catch (error) {
       debugPrint('Unable to count due cards: $error');

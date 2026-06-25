@@ -138,6 +138,7 @@ class SpacedRepetitionService {
         )
         .get();
 
+    if (rows.isEmpty) return 0;
     return rows.single.read<int>('count');
   }
 
