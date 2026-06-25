@@ -81,6 +81,7 @@ class _MainShellState extends ConsumerState<MainShell> {
       ref.listen<bool>(sessionTimeoutProvider, (_, shouldLogout) {
         if (shouldLogout && context.mounted) {
           context.go('/login');
+          ref.read(sessionTimeoutProvider.notifier).consumeLogout();
         }
       });
     }

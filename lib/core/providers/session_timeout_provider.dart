@@ -3,11 +3,6 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-final sessionTimeoutProvider =
-    StateNotifierProvider<SessionTimeoutNotifier, bool>((ref) {
-  return SessionTimeoutNotifier(ref);
-});
-
 class SessionTimeoutNotifier extends StateNotifier<bool> {
   SessionTimeoutNotifier(this._ref) : super(false);
 
@@ -22,16 +17,25 @@ class SessionTimeoutNotifier extends StateNotifier<bool> {
       _ref.onDispose(_cleanup);
     }
     _timer?.cancel();
-    _timer = Timer(_timeoutDuration, () {
-      Supabase.instance.client.auth.signOut();
-      // Only set state to true if not already logged out
-      if (Supabase.instance.client.auth.currentSession != null) {
+    _timer = Timer(_timeoutDuration, () async {
+      final hasSession = Supabase.instance.client.auth.currentSession != null;
+      if (hasSession) {
+        await Supabase.instance.client.auth.signOut();
         state = true;
       }
     });
+  }
+
+  void consumeLogout() {
+    state = false;
   }
 
   void _cleanup() {
     _timer?.cancel();
   }
 }
+
+final sessionTimeoutProvider =
+    StateNotifierProvider<SessionTimeoutNotifier, bool>((ref) {
+  return SessionTimeoutNotifier(ref);
+});
