@@ -7,6 +7,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'core/config/app_config.dart';
 import 'core/database/app_database.dart';
 import 'features/admin/presentation/admin_dashboard_screen.dart';
+import 'features/admin/data/admin_repository.dart';
 import 'features/articles/presentation/article_detail_screen.dart';
 import 'features/home/presentation/article_list_screen.dart';
 import 'features/auth/presentation/login_screen.dart';
@@ -133,6 +134,12 @@ final _router = GoRouter(
     ),
     GoRoute(
       path: '/admin',
+      redirect: (context, state) async {
+        final container = ProviderScope.containerOf(context, listen: false);
+        final isAdmin = await container.read(currentAdminProfileProvider.future);
+        if (!isAdmin) return '/home';
+        return null;
+      },
       builder: (context, state) => const AdminDashboardScreen(),
     ),
   ],

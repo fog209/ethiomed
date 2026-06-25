@@ -63,7 +63,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               children: <Widget>[
                 const SizedBox(height: 48),
                 const Text(
-                  'EthioMed',
+                  'WardReady',
                   style: TextStyle(
                     color: Color(0xFF1A237E),
                     fontSize: 36,
@@ -150,7 +150,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     Text(
-                      'New to EthioMed?',
+                      'New to WardReady?',
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
                     TextButton(
