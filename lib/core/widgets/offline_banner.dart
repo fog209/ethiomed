@@ -11,7 +11,12 @@ class OfflineBanner extends StatelessWidget {
         "You're offline — showing saved content",
         style: TextStyle(color: Colors.black87),
       ),
-      actions: const <Widget>[],
+      actions: [
+        TextButton(
+          onPressed: () => ScaffoldMessenger.of(context).hideCurrentMaterialBanner(),
+          child: const Text('DISMISS'),
+        ),
+      ],
     );
   }
 }
