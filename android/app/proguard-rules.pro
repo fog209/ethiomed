@@ -1,0 +1,5 @@
+-keep class io.requery.** { *; }
+-keep class androidx.sqlite.** { *; }
+-keep @androidx.room.Database class * { *; }
+-keepclassmembers class * extends drift.** { *; }
+-dontwarn drift.**
