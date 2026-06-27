@@ -85,8 +85,8 @@ class SettingsScreen extends ConsumerWidget {
         secondary: const Icon(Icons.dark_mode, color: Color(0xFF1A237E)),
         onChanged: (enabled) async {
           final newMode = enabled ? ThemeMode.dark : ThemeMode.light;
-          ref.read(themeModeProvider.notifier).state = newMode;
           await saveThemeMode(newMode);
+          ref.read(themeModeProvider.notifier).state = newMode;
           if (!context.mounted) {
             return;
           }
