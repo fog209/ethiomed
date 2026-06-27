@@ -26,6 +26,7 @@ class QuizNotifier extends FamilyAsyncNotifier<List<QuizTableData>, String> {
   int _totalThisSession = 0;
   int? _lastReviewInterval;
   bool _isRecordingReview = false;
+  final List<int> _wrongQuestionIds = [];
 
   @override
   Future<List<QuizTableData>> build(String category) async {
@@ -60,6 +61,10 @@ class QuizNotifier extends FamilyAsyncNotifier<List<QuizTableData>, String> {
 
   int get questionIndex => _currentIndex + 1;
 
+  int get wrongAnswerCount => _wrongQuestionIds.length;
+
+  List<int> get wrongQuestionIds => List.unmodifiable(_wrongQuestionIds);
+
   String get scoreText => '$_correctCount / $_answeredCount correct';
 
   int? get lastReviewInterval => _lastReviewInterval;
@@ -88,6 +93,7 @@ class QuizNotifier extends FamilyAsyncNotifier<List<QuizTableData>, String> {
     _totalThisSession = 0;
     _lastReviewInterval = null;
     _isRecordingReview = false;
+    _wrongQuestionIds.clear();
 
     final questions = state.value;
     if (questions != null) {
@@ -95,7 +101,7 @@ class QuizNotifier extends FamilyAsyncNotifier<List<QuizTableData>, String> {
     }
   }
 
-  void selectOption(QuizOption option) {
+  Future<void> selectOption(QuizOption option) async {
     final questions = state.value;
     final question = currentQuestion;
     if (questions == null || question == null || _showExplanation) {
@@ -107,9 +113,12 @@ class QuizNotifier extends FamilyAsyncNotifier<List<QuizTableData>, String> {
     _isRecordingReview = false;
     _answeredCount += 1;
     _totalThisSession += 1;
-    if (_isCorrectOption(question, option)) {
+    final isCorrect = _isCorrectOption(question, option);
+    if (isCorrect) {
       _correctCount += 1;
       _correctThisSession += 1;
+    } else {
+      _wrongQuestionIds.add(question.id);
     }
     state = AsyncData(questions);
   }
@@ -155,6 +164,27 @@ class QuizNotifier extends FamilyAsyncNotifier<List<QuizTableData>, String> {
     try {
       await _syncService.syncQuestions(arg);
       await _loadLocalQuestions();
+    } catch (error, stackTrace) {
+      state = AsyncError(error, stackTrace);
+      rethrow;
+    }
+  }
+
+  Future<List<QuizTableData>> loadQuestionsByIds(List<int> ids) async {
+    if (ids.isEmpty) {
+      return [];
+    }
+    state = const AsyncLoading<List<QuizTableData>>();
+    try {
+      final questions = await _repository.getLocalQuestionsByIds(ids);
+      if (questions.isEmpty) {
+        state = const AsyncData([]);
+        return [];
+      }
+      _currentIndex = 0;
+      _resetCurrentQuestionState();
+      state = AsyncData(questions);
+      return questions;
     } catch (error, stackTrace) {
       state = AsyncError(error, stackTrace);
       rethrow;

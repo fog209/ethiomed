@@ -309,31 +309,35 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
     );
   }
 
-  Future<void> _recordReviewAndAdvance(
-    QuizTableData question,
-    int quality,
-    QuizNotifier notifier,
-  ) async {
-    final selectedOption = notifier.selectedOption;
-    final isCorrect =
-        selectedOption != null &&
-        question.correctOption == selectedOption.name.toUpperCase();
+Future<void> _recordReviewAndAdvance(
+     QuizTableData question,
+     int quality,
+     QuizNotifier notifier,
+   ) async {
+     final selectedOption = notifier.selectedOption;
+     final isCorrect =
+         selectedOption != null &&
+         question.correctOption == selectedOption.name.toUpperCase();
 
-    await notifier.recordReview(question.id, quality);
-    await ref.read(streakNotifierProvider.notifier).recordQuizResult(isCorrect);
-    if (!mounted) {
-      return;
-    }
+     await notifier.recordReview(question.id, quality);
+     await ref.read(streakNotifierProvider.notifier).recordQuizResult(isCorrect);
+     if (!mounted) {
+       return;
+     }
 
-    if (notifier.isLastQuestion) {
-      _resetQuizAndPop(context);
-      return;
-    }
+     if (notifier.isLastQuestion) {
+       if (notifier.wrongAnswerCount > 0) {
+         _showRetryScreen(context, notifier.wrongQuestionIds);
+       } else {
+         _resetQuizAndPop(context);
+       }
+       return;
+     }
 
-    await notifier.nextQuestion();
-  }
+     await notifier.nextQuestion();
+   }
 
-  Future<void> _resetQuizAndPop(BuildContext context) async {
+Future<void> _resetQuizAndPop(BuildContext context) async {
     final notifier = ref.read(quizNotifierProvider(_defaultQuizCategory).notifier);
     await notifier.saveCurrentStateToDrift();
     if (!context.mounted) {
@@ -346,6 +350,38 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
     } else {
       context.go('/home');
     }
+  }
+
+  void _showRetryScreen(BuildContext context, List<int> wrongQuestionIds) {
+    final count = wrongQuestionIds.length;
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Review Wrong Answers?'),
+        content: Text('$count question${count > 1 ? 's' : ''} answered incorrectly.'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(dialogContext).pop();
+              _resetQuizAndPop(context);
+            },
+            child: const Text('Skip'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: _gold,
+              foregroundColor: _navy,
+            ),
+            onPressed: () async {
+              Navigator.of(dialogContext).pop();
+              final notifier = ref.read(quizNotifierProvider(_defaultQuizCategory).notifier);
+              await notifier.loadQuestionsByIds(wrongQuestionIds);
+            },
+            child: Text('Retry $count wrong answer${count > 1 ? 's' : ''}'),
+          ),
+        ],
+      ),
+    );
   }
 
   String _formatNextReview(int? interval) {

@@ -142,6 +142,40 @@ class QuizRepository {
     )..where((table) => table.category.equals(normalizedCategory))).get();
   }
 
+  Future<List<QuizQuestionEntity>> getLocalQuestionsByIds(List<int> ids) async {
+    if (ids.isEmpty) {
+      return [];
+    }
+    final whereClauses = ids.asMap().entries.map((e) => 'id = ?${e.key}').join(' OR ');
+    final query = 'SELECT * FROM quiz_table WHERE $whereClauses';
+
+    return _db.customSelect(
+      query,
+      variables: [for (final id in ids) Variable(id)],
+    ).get().then((rows) => rows.map(_questionFromRowSimple).toList(growable: false));
+  }
+
+  QuizQuestionEntity _questionFromRowSimple(QueryRow row) {
+    return QuizQuestionEntity(
+      id: row.read<int>('id'),
+      remoteId: row.read<String>('remote_id'),
+      articleId: row.read<String>('article_id'),
+      stem: row.read<String>('stem'),
+      optionA: row.read<String>('option_a'),
+      optionB: row.read<String>('option_b'),
+      optionC: row.read<String>('option_c'),
+      optionD: row.read<String>('option_d'),
+      correctOption: row.read<String>('correct_option'),
+      explanation: row.read<String?>('explanation') ?? '',
+      category: row.read<String?>('category') ?? '',
+      difficulty: row.read<String?>('difficulty') ?? 'medium',
+      testedField: row.read<String?>('tested_field') ?? 'clinicalFeatures',
+      wrongCount: row.read<int?>('wrong_count') ?? 0,
+      lastAttemptedAt: row.read<DateTime?>('last_attempted_at'),
+      easeFactor: row.read<double?>('ease_factor') ?? 2.5,
+    );
+  }
+
   QuizTableCompanion _companionFromEntity(QuizQuestionEntity question) {
     return QuizTableCompanion.insert(
       id: const Value.absent(),
