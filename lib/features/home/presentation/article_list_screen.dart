@@ -394,6 +394,13 @@ ChoiceChip(
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),
+                Text(
+                  '~${article.estimatedReadMinutes} min',
+                  style: const TextStyle(
+                    color: Colors.grey,
+                    fontSize: 12,
+                  ),
+                ),
               ],
             ),
             trailing: const Icon(Icons.chevron_right),

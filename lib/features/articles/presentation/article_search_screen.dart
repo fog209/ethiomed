@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shimmer/shimmer.dart';
 
+import '../../../core/database/app_database.dart';
 import '../data/article_search_provider.dart';
 import '../../../core/widgets/empty_state.dart';
 
@@ -155,6 +156,10 @@ class _ArticleSearchScreenState extends ConsumerState<ArticleSearchScreen> {
         return ListTile(
           leading: Icon(Icons.search, color: primary),
           title: _buildHighlightedTitle(article.title, searchState.query),
+          trailing: Text(
+            '~${article.estimatedReadMinutes} min',
+            style: const TextStyle(color: Colors.grey, fontSize: 12),
+          ),
           subtitle: Text(article.category ?? ''),
           onTap: () => context.push('/article-detail', extra: article),
         );

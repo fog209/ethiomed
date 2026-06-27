@@ -33,6 +33,31 @@ class Articles extends Table {
   Set<Column> get primaryKey => {id};
 }
 
+extension ArticleLocalExtensions on ArticleLocal {
+  int get estimatedReadMinutes {
+    final content = this.content;
+    if (content == null) return 1;
+    int totalWords = 0;
+    try {
+      if (content.startsWith('{')) {
+        final contentMap = Map<String, dynamic>.from(
+          (this.content as Map<String, dynamic>?) ?? <String, dynamic>{},
+        );
+        for (final value in contentMap.values) {
+          if (value is String) {
+            totalWords += value.split(RegExp(r'\s+')).length;
+          }
+        }
+      } else {
+        totalWords = content.split(RegExp(r'\s+')).length;
+      }
+    } catch (_) {
+      totalWords = content.split(RegExp(r'\s+')).length;
+    }
+    return (totalWords / 200).round().clamp(1, 999);
+  }
+}
+
 class Bookmarks extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get articleId => text().references(Articles, #id)();

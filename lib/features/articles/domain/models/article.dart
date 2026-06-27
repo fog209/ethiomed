@@ -19,6 +19,18 @@ class Article {
     this.isHighYield = false,
   });
 
+  int get estimatedReadMinutes {
+    final content = this.content;
+    if (content == null) return 1;
+    int totalWords = 0;
+    for (final value in content.values) {
+      if (value is String) {
+        totalWords += value.split(RegExp(r'\s+')).length;
+      }
+    }
+    return (totalWords / 200).round().clamp(1, 999);
+  }
+
   factory Article.fromJson(Map<String, dynamic> json) {
     final title = json['title'] as String? ?? '';
     final rawCategory = json['category'] as String?;
