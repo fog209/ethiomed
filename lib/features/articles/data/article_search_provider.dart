@@ -164,11 +164,14 @@ class ArticleSearchRepository {
 
   final AppDatabase _db;
 
-  Future<List<ArticleLocal>> searchArticles({
+Future<List<ArticleLocal>> searchArticles({
     required String query,
     required String? category,
   }) async {
     await _ensureSearchIndex();
+
+    final indexedCount = await _getIndexedCount();
+    debugPrint('FTS article count = $indexedCount');
 
     final trimmedQuery = query.trim();
     final List<ArticleLocal> matches = trimmedQuery.isEmpty
@@ -178,9 +181,10 @@ class ArticleSearchRepository {
     final filtered = category == null
         ? matches
         : matches
-              .where((article) => article.category == category)
-              .toList(growable: false);
+            .where((article) => article.category == category)
+            .toList(growable: false);
 
+    debugPrint('Search results = ${filtered.length}');
     return filtered.take(_maxSearchResults).toList(growable: false);
   }
 

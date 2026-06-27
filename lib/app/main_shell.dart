@@ -38,19 +38,20 @@ class _MainShellState extends ConsumerState<MainShell> {
       if (!mounted) return;
       final isValid = await ref.read(isSubscribedProvider.future);
       if (!isValid && mounted) {
+        final theme = Theme.of(context);
         ScaffoldMessenger.of(context).showMaterialBanner(
           MaterialBanner(
             content: const Text(
               'Your subscription has expired. Renew to keep learning.',
             ),
-            backgroundColor: const Color(0xFF1A237E),
-            leading: const Icon(Icons.lock_clock, color: Color(0xFFF9A825)),
+            backgroundColor: theme.colorScheme.surface,
+            leading: Icon(Icons.lock_clock, color: theme.colorScheme.primary),
             actions: [
               TextButton(
                 onPressed: () => context.go('/subscription'),
-                child: const Text(
+                child: Text(
                   'RENEW',
-                  style: TextStyle(color: Color(0xFFF9A825)),
+                  style: TextStyle(color: theme.colorScheme.primary),
                 ),
               ),
               TextButton(
@@ -126,7 +127,7 @@ class _MainShellState extends ConsumerState<MainShell> {
           ref.read(sessionTimeoutProvider.notifier).resetTimer();
         },
         type: BottomNavigationBarType.fixed, // Required for 5+ items
-        selectedItemColor: const Color(0xFF1A237E),
+        selectedItemColor: Theme.of(context).colorScheme.primary,
         unselectedItemColor: Colors.grey,
         items: const [
           BottomNavigationBarItem(

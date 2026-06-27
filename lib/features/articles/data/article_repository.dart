@@ -48,6 +48,10 @@ class ArticleRepository {
           .map((json) => model.Article.fromJson(json))
           .toList(growable: false);
 
+      debugPrint('Remote article count = ${remoteArticles.length}');
+
+      final int insertedCount = remoteArticles.length;
+
       await _db.transaction(() async {
         for (final article in remoteArticles) {
           await _db
@@ -65,6 +69,11 @@ class ArticleRepository {
               );
         }
       });
+
+      debugPrint('Inserted or updated = $insertedCount');
+
+      final localCount = await _db.select(_db.articles).get();
+      debugPrint('Local database article count = ${localCount.length}');
 
       _onSuccessfulSync();
     } on PostgrestException catch (e) {
@@ -210,6 +219,9 @@ class ArticleRepository {
     String? subcategory,
     bool highYieldOnly = false,
   }) async {
+    debugPrint('Category requested = $category');
+    debugPrint('Subcategory = ${subcategory ?? 'null'}');
+
     final offset = (page - 1) * _articlesPageSize;
     final query = _db.select(_db.articles)
       ..where((table) => table.category.equals(category));
@@ -222,10 +234,13 @@ class ArticleRepository {
       query.where((table) => table.isHighYield.equals(true));
     }
 
-    return (query
+    final result = (query
           ..orderBy([(table) => OrderingTerm.asc(table.title)])
           ..limit(_articlesPageSize, offset: offset))
         .get();
+
+    debugPrint('Articles returned = ${(await result).length}');
+    return result;
   }
 }
 

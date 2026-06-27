@@ -172,12 +172,14 @@ class _ArticleListScreenState extends ConsumerState<ArticleListScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.category),
-        backgroundColor: const Color(0xFF1A237E),
-        foregroundColor: const Color(0xFFFFB300),
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        foregroundColor: Theme.of(context).colorScheme.onSurface,
         actions: [
           IconButton(
             tooltip: 'High-Yield Mode',
-            color: highYieldMode ? const Color(0xFFF9A825) : Colors.grey,
+            color: highYieldMode
+                ? Theme.of(context).colorScheme.primary
+                : Colors.grey,
             onPressed: () {
               ref.read(highYieldModeProvider.notifier).state = !highYieldMode;
             },
@@ -198,34 +200,35 @@ class _ArticleListScreenState extends ConsumerState<ArticleListScreen> {
                   ),
                   child: Row(
                     children: [
-                      ChoiceChip(
-                        label: const Text('All'),
-                        selected: selectedSubcategory == null,
-                        selectedColor: const Color(0xFFF9A825),
-                        backgroundColor: const Color(0xFF1A237E),
-                        labelStyle: TextStyle(
-                          color: selectedSubcategory == null
-                              ? const Color(0xFF1A237E)
-                              : Colors.white,
+ChoiceChip(
+                          label: const Text('All'),
+                          selected: selectedSubcategory == null,
+                          selectedColor: Theme.of(context).colorScheme.primary,
+                          backgroundColor: Theme.of(context).colorScheme.surface,
+                          labelStyle: TextStyle(
+                            color: selectedSubcategory == null
+                                ? Theme.of(context).colorScheme.onPrimary
+                                : Colors.white,
+                          ),
+                          onSelected: (_) {
+                            ref.read(subcategoryFilterProvider.notifier).state =
+                                null;
+                          },
                         ),
-                        onSelected: (_) {
-                          ref.read(subcategoryFilterProvider.notifier).state =
-                              null;
-                        },
-                      ),
                       const SizedBox(width: 8),
                       ...subcategories.map((subcategory) {
                         final isSelected = selectedSubcategory == subcategory;
+                        final theme = Theme.of(context);
                         return Padding(
                           padding: const EdgeInsets.only(right: 8),
                           child: ChoiceChip(
                             label: Text(subcategory),
                             selected: isSelected,
-                            selectedColor: const Color(0xFFF9A825),
-                            backgroundColor: const Color(0xFF1A237E),
+                            selectedColor: theme.colorScheme.primary,
+                            backgroundColor: theme.colorScheme.surface,
                             labelStyle: TextStyle(
                               color: isSelected
-                                  ? const Color(0xFF1A237E)
+                                  ? theme.colorScheme.onPrimary
                                   : Colors.white,
                             ),
                             onSelected: (_) {
@@ -240,7 +243,10 @@ class _ArticleListScreenState extends ConsumerState<ArticleListScreen> {
                     ],
                   ),
                 ),
-                Expanded(child: articleListWidget),
+                Flexible(
+                  fit: FlexFit.loose,
+                  child: articleListWidget,
+                ),
               ],
             ),
     );
@@ -374,9 +380,13 @@ class _ArticleListScreenState extends ConsumerState<ArticleListScreen> {
             title: Row(
               children: [
                 if (article.isHighYield)
-                  const Padding(
-                    padding: EdgeInsets.only(right: 6),
-                    child: Icon(Icons.star, size: 14, color: Color(0xFFF9A825)),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 6),
+                    child: Icon(
+                      Icons.star,
+                      size: 14,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
                   ),
                 Expanded(
                   child: Text(

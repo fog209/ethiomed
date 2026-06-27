@@ -32,6 +32,7 @@ class _CategoryTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final progressAsyncValue = ref.watch(categoryProgressProvider(name));
+    final theme = Theme.of(context);
 
     return progressAsyncValue.when(
       data: (progress) => InkWell(
@@ -44,14 +45,14 @@ class _CategoryTile extends ConsumerWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, size: 40, color: const Color(0xFF1A237E)),
+              Icon(icon, size: 40, color: theme.colorScheme.surface),
               const SizedBox(height: 10),
               Text(
                 name,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF1A237E),
+                  color: theme.colorScheme.surface,
                 ),
               ),
               const SizedBox(height: 6),
@@ -66,8 +67,8 @@ class _CategoryTile extends ConsumerWidget {
               const Spacer(),
               LinearProgressIndicator(
                 minHeight: 3,
-                backgroundColor: const Color(0xFF1A237E).withValues(alpha: 0.2),
-                color: const Color(0xFFF9A825),
+                backgroundColor: theme.colorScheme.surface.withValues(alpha: 0.2),
+                color: theme.colorScheme.primary,
                 value: _categoryProgressValue(progress),
               ),
             ],
@@ -105,18 +106,53 @@ error: (error, stack) => Card(
   }
 }
 
-class CategoriesScreen extends ConsumerWidget {
+class CategoriesScreen extends ConsumerStatefulWidget {
   const CategoriesScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<CategoriesScreen> createState() => _CategoriesScreenState();
+}
+
+class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
+  bool _didAutoSync = false;
+
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(_performAutoSyncIfNeeded);
+  }
+
+  Future<void> _performAutoSyncIfNeeded() async {
+    if (_didAutoSync || !mounted) return;
+
+    final repo = ref.read(articleRepositoryProvider);
+    final localArticles = await ref.read(allArticlesProvider.future);
+
+    if (localArticles.isEmpty) {
+      _didAutoSync = true;
+      unawaited(repo.syncInBackground().then((_) {
+        if (!mounted) return;
+        for (final cat in AppConfig.clinicalCategories) {
+          ref.invalidate(categoryProgressProvider(cat['name'] as String));
+        }
+        for (final cat in AppConfig.preclinicalCategories) {
+          ref.invalidate(categoryProgressProvider(cat['name'] as String));
+        }
+        ref.invalidate(categoryProgressProvider('General'));
+      }));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final streak = ref.watch(streakNotifierProvider);
+    final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('WardReady Specialties'),
-        backgroundColor: const Color(0xFF1A237E),
-        foregroundColor: const Color(0xFFFFB300),
+        backgroundColor: theme.colorScheme.surface,
+        foregroundColor: theme.colorScheme.onSurface,
       ),
       body: ListView.builder(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -124,7 +160,7 @@ class CategoriesScreen extends ConsumerWidget {
         itemBuilder: (context, index) => _buildBodyItems(streak, ref)[index],
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: const Color(0xFFFFB300),
+        backgroundColor: theme.colorScheme.primary,
         onPressed: () async {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -134,6 +170,7 @@ class CategoriesScreen extends ConsumerWidget {
           );
           unawaited(
             ref.read(articleRepositoryProvider).syncInBackground().then((_) {
+              if (!mounted) return;
               // Invalidate all category progress providers after sync
               for (final cat in AppConfig.clinicalCategories) {
                 ref.invalidate(categoryProgressProvider(cat['name'] as String));
@@ -145,7 +182,7 @@ class CategoriesScreen extends ConsumerWidget {
             }),
           );
         },
-        child: const Icon(Icons.sync, color: Color(0xFF1A237E)),
+        child: Icon(Icons.sync, color: theme.colorScheme.onPrimary),
       ),
     );
   }
@@ -172,19 +209,24 @@ class CategoriesScreen extends ConsumerWidget {
   }
 
   Widget _buildStudyStatsRow(StudyStreakStats stats) {
+    final theme = Theme.of(context);
     return _buildStudyStatsContainer(
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(
+          Icon(
             Icons.local_fire_department,
-            color: Color(0xFFF9A825),
+            color: theme.colorScheme.primary,
             size: 24,
           ),
           const SizedBox(width: 8),
           Text(
             stats.currentStreak.toString(),
-            style: _goldNumberStyle.copyWith(fontSize: 24),
+            style: TextStyle(
+              color: theme.colorScheme.primary,
+              fontWeight: FontWeight.bold,
+              fontSize: 24,
+            ),
           ),
           const SizedBox(width: 8),
           const Text(
@@ -223,6 +265,7 @@ class CategoriesScreen extends ConsumerWidget {
   }
 
   Widget _buildStudyStatsErrorRow(WidgetRef ref) {
+    final theme = Theme.of(context);
     return _buildStudyStatsContainer(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -239,9 +282,9 @@ class CategoriesScreen extends ConsumerWidget {
           const SizedBox(height: 8),
           TextButton(
             onPressed: () => ref.invalidate(streakNotifierProvider),
-            child: const Text(
+            child: Text(
               'Retry',
-              style: TextStyle(color: Color(0xFFF9A825)),
+              style: TextStyle(color: theme.colorScheme.primary),
             ),
           ),
         ],
@@ -250,30 +293,27 @@ class CategoriesScreen extends ConsumerWidget {
   }
 
   Widget _buildStudyStatsContainer({required Widget child}) {
+    final theme = Theme.of(context);
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      decoration: const BoxDecoration(
-        color: Color(0xFF1A237E),
-        borderRadius: BorderRadius.all(Radius.circular(16)),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: const BorderRadius.all(Radius.circular(16)),
       ),
       child: child,
     );
   }
 
-  static const TextStyle _goldNumberStyle = TextStyle(
-    color: Color(0xFFF9A825),
-    fontWeight: FontWeight.bold,
-  );
-
   Widget _buildSectionHeader(String title) {
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Text(
         title,
-        style: const TextStyle(
-          color: Color(0xFFFFB300),
+        style: TextStyle(
+          color: theme.colorScheme.onSurfaceVariant,
           fontSize: 18,
           fontWeight: FontWeight.bold,
         ),

@@ -8,6 +8,11 @@ class AppConfig {
 
   static const String supabaseAnonKey = Env.supabaseAnonKey;
 
+  static void debugConfig() {
+    debugPrint('SUPABASE_URL configured = ${supabaseUrl.isNotEmpty}');
+    debugPrint('SUPABASE_KEY configured = ${supabaseAnonKey.isNotEmpty}');
+  }
+
   static const String internalMedicineCategory = 'Internal Medicine';
 
   static const List<Map<String, Object?>> clinicalCategories =
