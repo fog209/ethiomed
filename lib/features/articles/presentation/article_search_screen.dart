@@ -85,7 +85,9 @@ class _ArticleSearchScreenState extends ConsumerState<ArticleSearchScreen> {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
             child: Text(
-              '${searchState.count} results found',
+              searchState.totalCount > searchState.count
+                  ? 'Showing ${searchState.count} of ${searchState.totalCount} matches'
+                  : '${searchState.count} results found',
               style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
             ),
           ),

@@ -19,6 +19,15 @@ final articleSearchRepositoryProvider = Provider<ArticleSearchRepository>((
   return ArticleSearchRepository(ref.watch(databaseProvider));
 });
 
+class SearchResult {
+  const SearchResult({
+    required this.results,
+    required this.totalCount,
+  });
+  final List<ArticleLocal> results;
+  final int totalCount;
+}
+
 final articleSearchControllerProvider =
     StateNotifierProvider.autoDispose<
       ArticleSearchController,
@@ -37,6 +46,7 @@ class ArticleSearchState {
     this.category,
     this.results = const <ArticleLocal>[],
     this.count = 0,
+    this.totalCount = 0,
     this.status = ArticleSearchStatus.initial,
     this.message,
   });
@@ -45,6 +55,7 @@ class ArticleSearchState {
   final String? category;
   final List<ArticleLocal> results;
   final int count;
+  final int totalCount;
   final ArticleSearchStatus status;
   final String? message;
 
@@ -61,6 +72,7 @@ class ArticleSearchState {
     String? category,
     List<ArticleLocal>? results,
     int? count,
+    int? totalCount,
     ArticleSearchStatus? status,
     Object? message = _unsetMessage,
   }) {
@@ -69,6 +81,7 @@ class ArticleSearchState {
       category: category ?? this.category,
       results: results ?? this.results,
       count: count ?? this.count,
+      totalCount: totalCount ?? this.totalCount,
       status: status ?? this.status,
       message: identical(message, _unsetMessage)
           ? this.message
@@ -113,7 +126,7 @@ class ArticleSearchController extends StateNotifier<ArticleSearchState> {
 
   Future<void> _runSearch(String query, String? category) async {
     try {
-      final results = await _repository.searchArticles(
+      final searchResult = await _repository.searchArticles(
         query: query,
         category: category,
       );
@@ -125,8 +138,9 @@ class ArticleSearchController extends StateNotifier<ArticleSearchState> {
       state = state.copyWith(
         query: query,
         category: category,
-        results: results,
-        count: results.length,
+        results: searchResult.results,
+        count: searchResult.results.length,
+        totalCount: searchResult.totalCount,
         status: ArticleSearchStatus.ready,
         message: null,
       );
@@ -144,6 +158,7 @@ class ArticleSearchController extends StateNotifier<ArticleSearchState> {
         category: category,
         results: const <ArticleLocal>[],
         count: 0,
+        totalCount: 0,
         status: ArticleSearchStatus.error,
         message: unavailable
             ? 'Search temporarily unavailable'
@@ -164,16 +179,25 @@ class ArticleSearchRepository {
 
   final AppDatabase _db;
 
-Future<List<ArticleLocal>> searchArticles({
+Future<SearchResult> searchArticles({
     required String query,
     required String? category,
   }) async {
     await _ensureSearchIndex();
 
     final trimmedQuery = query.trim();
-    final List<ArticleLocal> matches = trimmedQuery.isEmpty
-        ? await _searchAllArticles()
-        : await _searchWithMatch(trimmedQuery);
+    late List<ArticleLocal> matches;
+    late int totalCount;
+
+    if (trimmedQuery.isEmpty) {
+      final searchResult = await _searchAllArticles();
+      matches = searchResult.results;
+      totalCount = searchResult.totalCount;
+    } else {
+      final searchResult = await _searchWithMatch(trimmedQuery);
+      matches = searchResult.results;
+      totalCount = searchResult.totalCount;
+    }
 
     final filtered = category == null
         ? matches
@@ -181,14 +205,35 @@ Future<List<ArticleLocal>> searchArticles({
             .where((article) => article.category == category)
             .toList(growable: false);
 
-    return filtered.take(_maxSearchResults).toList(growable: false);
+    return SearchResult(
+      results: filtered.take(_maxSearchResults).toList(growable: false),
+      totalCount: totalCount,
+    );
   }
 
-  Future<List<ArticleLocal>> _searchAllArticles() async {
-    return _db.select(_db.articles).get();
+  Future<SearchResult> _searchAllArticles() async {
+    final countRows = await _db.customSelect('SELECT COUNT(*) AS count FROM articles').get();
+    final totalCount = countRows.isNotEmpty ? countRows.first.read<int>('count') : 0;
+
+    final rows = await _db.customSelect(
+      'SELECT * FROM articles LIMIT ?',
+      variables: [Variable(_maxSearchResults)],
+    ).get();
+
+    final results = rows.map((row) => ArticleLocal(
+      id: row.read<String>('id'),
+      title: row.read<String>('title'),
+      category: row.read<String?>('category'),
+      content: row.read<String?>('content'),
+      imageUrl: row.read<String?>('image_url'),
+      videoUrl: row.read<String?>('video_url'),
+      isHighYield: row.read<bool?>('is_high_yield') ?? false,
+    )).toList(growable: false);
+
+    return SearchResult(results: results, totalCount: totalCount);
   }
 
-  Future<List<ArticleLocal>> _searchWithMatch(String query) async {
+  Future<SearchResult> _searchWithMatch(String query) async {
     try {
       return await _searchWithMatchOnce(query);
     } on SqliteException catch (e) {
@@ -200,11 +245,21 @@ Future<List<ArticleLocal>> searchArticles({
     }
   }
 
-  Future<List<ArticleLocal>> _searchWithMatchOnce(String query) async {
+  Future<SearchResult> _searchWithMatchOnce(String query) async {
     final ftsQuery = _toFtsQuery(query);
     if (ftsQuery.isEmpty) {
       return _searchAllArticles();
     }
+
+    final countRows = await _db.customSelect(
+      '''
+      SELECT COUNT(*) AS count
+      FROM article_search_fts
+      WHERE article_search_fts MATCH ?
+      ''',
+      variables: [Variable(ftsQuery)],
+    ).get();
+    final totalCount = countRows.isNotEmpty ? countRows.first.read<int>('count') : 0;
 
     final rows = await _db
         .customSelect(
@@ -230,7 +285,7 @@ Future<List<ArticleLocal>> searchArticles({
         )
         .get();
 
-    return rows
+    final results = rows
         .map(
           (row) => ArticleLocal(
             id: row.read<String>('id'),
@@ -243,6 +298,8 @@ Future<List<ArticleLocal>> searchArticles({
           ),
         )
         .toList(growable: false);
+
+    return SearchResult(results: results, totalCount: totalCount);
   }
 
   Future<void> _rebuildSearchIndex() async {
