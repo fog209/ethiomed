@@ -48,23 +48,26 @@ class _ArticleSearchScreenState extends ConsumerState<ArticleSearchScreen> {
     Future.microtask(callback);
   }
 
-  @override
+@override
   Widget build(BuildContext context) {
     final searchState = ref.watch(articleSearchControllerProvider);
+    final theme = Theme.of(context);
+    final primary = theme.colorScheme.primary;
+    final onSurface = theme.colorScheme.onSurface;
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color(0xFF1A237E),
-        foregroundColor: const Color(0xFFFFB300),
-        iconTheme: const IconThemeData(color: Color(0xFFFFB300)),
+        backgroundColor: theme.colorScheme.surface,
+        foregroundColor: primary,
+        iconTheme: IconThemeData(color: primary),
         title: TextField(
           controller: _controller,
           autofocus: true,
-          style: const TextStyle(color: Colors.white, fontSize: 18),
-          cursorColor: const Color(0xFFFFB300),
-          decoration: const InputDecoration(
+          style: TextStyle(color: onSurface, fontSize: 18),
+          cursorColor: primary,
+          decoration: InputDecoration(
             hintText: 'Search diseases...',
-            hintStyle: TextStyle(color: Colors.white60),
+            hintStyle: TextStyle(color: onSurface.withValues(alpha: 0.6)),
             border: InputBorder.none,
           ),
           onChanged: (value) {
@@ -82,9 +85,7 @@ class _ArticleSearchScreenState extends ConsumerState<ArticleSearchScreen> {
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
             child: Text(
               '${searchState.count} results found',
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(color: Colors.grey),
+              style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
             ),
           ),
           _buildCategoryChips(searchState.category),
@@ -95,6 +96,7 @@ class _ArticleSearchScreenState extends ConsumerState<ArticleSearchScreen> {
   }
 
   Widget _buildCategoryChips(String? selectedCategory) {
+    final primary = Theme.of(context).colorScheme.primary;
     return Container(
       height: 60,
       padding: const EdgeInsets.symmetric(vertical: 10),
@@ -111,7 +113,7 @@ class _ArticleSearchScreenState extends ConsumerState<ArticleSearchScreen> {
             child: FilterChip(
               label: Text(category),
               selected: isSelected,
-              selectedColor: const Color(0xFFFFB300),
+              selectedColor: primary,
               onSelected: (selected) {
                 _runAfterBuild(() {
                   ref
@@ -127,6 +129,8 @@ class _ArticleSearchScreenState extends ConsumerState<ArticleSearchScreen> {
   }
 
   Widget _buildResults(ArticleSearchState searchState) {
+    final primary = Theme.of(context).colorScheme.primary;
+    
     if (searchState.isLoading) {
       return _buildShimmerSearchResults();
     }
@@ -149,16 +153,17 @@ class _ArticleSearchScreenState extends ConsumerState<ArticleSearchScreen> {
         final article = searchState.results[index];
 
         return ListTile(
-          leading: const Icon(Icons.search, color: Color(0xFF1A237E)),
+          leading: Icon(Icons.search, color: primary),
           title: _buildHighlightedTitle(article.title, searchState.query),
           subtitle: Text(article.category ?? ''),
-            onTap: () => context.push('/article-detail', extra: article),
+          onTap: () => context.push('/article-detail', extra: article),
         );
       },
     );
   }
 
   Widget _buildHighlightedTitle(String title, String query) {
+    final primary = Theme.of(context).colorScheme.primary;
     final trimmedQuery = query.trim();
     if (trimmedQuery.isEmpty) {
       return Text(title);
@@ -184,8 +189,8 @@ class _ArticleSearchScreenState extends ConsumerState<ArticleSearchScreen> {
       spans.add(
         TextSpan(
           text: title.substring(match.start, match.end),
-          style: const TextStyle(
-            color: Color(0xFFF9A825),
+          style: TextStyle(
+            color: primary,
             fontWeight: FontWeight.bold,
           ),
         ),

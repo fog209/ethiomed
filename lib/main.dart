@@ -52,18 +52,22 @@ void main() async {
   if (kReleaseMode) {
     ErrorWidget.builder = (FlutterErrorDetails details) {
       return Scaffold(
+        backgroundColor: const Color(0xFF1A237E),
         body: Center(
           child: Padding(
             padding: EdgeInsets.all(24),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.error_outline, size: 48, color: Color(0xFF1A237E)),
+                const Icon(Icons.error_outline, size: 48, color: Color(0xFFF9A825)),
                 SizedBox(height: 16),
-                Text(
+                const Text(
                   'Something went wrong.\nPlease restart the app.',
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 16),
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.white,
+                  ),
                 ),
               ],
             ),
@@ -95,16 +99,16 @@ void main() async {
 final _router = GoRouter(
   initialLocation: '/',
   errorBuilder: (context, state) => Scaffold(
-    backgroundColor: const Color(0xFF1A237E),
+    backgroundColor: Theme.of(context).colorScheme.surface,
     body: Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.explore_off, color: Color(0xFFF9A825), size: 64),
+          Icon(Icons.explore_off, color: Theme.of(context).colorScheme.primary, size: 64),
           const SizedBox(height: 16),
-          const Text(
+          Text(
             'Page not found',
-            style: TextStyle(color: Colors.white, fontSize: 20),
+            style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 20),
           ),
           const SizedBox(height: 24),
           ElevatedButton(

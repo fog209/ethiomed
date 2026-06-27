@@ -5,11 +5,14 @@ class OfflineBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    final onPrimary = Theme.of(context).colorScheme.onPrimary;
+
     return MaterialBanner(
-      backgroundColor: const Color(0xFFF9A825),
-      content: const Text(
+      backgroundColor: primary,
+      content: Text(
         "You're offline — showing saved content",
-        style: TextStyle(color: Colors.black87),
+        style: TextStyle(color: onPrimary),
       ),
       actions: [
         TextButton(

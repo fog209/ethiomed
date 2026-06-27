@@ -18,6 +18,9 @@ class EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    final onSurfaceVariant = Theme.of(context).colorScheme.onSurfaceVariant;
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -25,13 +28,13 @@ class EmptyState extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 64, color: const Color(0xFF1A237E)),
+            Icon(icon, size: 64, color: primary),
             const SizedBox(height: 16),
             Text(
               title,
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: Color(0xFF1A237E),
+              style: TextStyle(
+                color: primary,
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
@@ -40,13 +43,14 @@ class EmptyState extends StatelessWidget {
             Text(
               subtitle,
               textAlign: TextAlign.center,
-              style: const TextStyle(color: Colors.grey, fontSize: 14),
+              style: TextStyle(color: onSurfaceVariant, fontSize: 14),
             ),
             if (onAction != null && actionLabel != null) ...[
               const SizedBox(height: 16),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFF9A825),
+                  backgroundColor: primary,
+                  foregroundColor: Theme.of(context).colorScheme.onPrimary,
                 ),
                 onPressed: onAction,
                 child: Text(actionLabel!),

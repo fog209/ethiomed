@@ -60,8 +60,6 @@ class AdminRepository {
           )
           .order('created_at', ascending: false);
 
-      debugPrint('DEBUG_ADMIN: Fetched ${response.length} users');
-
       return response.map((json) => AdminUser.fromSupabase(json)).toList();
     } on PostgrestException catch (e) {
       final status = postgrestStatus(e);

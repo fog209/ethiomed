@@ -192,7 +192,7 @@ class ProgressScreen extends ConsumerWidget {
     const navy = Color(0xFF1A237E);
     const gold = Color(0xFFF9A825);
 
-    // Avoid deprecated Color.withOpacity.
+    // Semantic colors for heatmap activity levels.
     if (articlesRead == 0) {
       return navy.withAlpha((0.15 * 255).round());
     }
@@ -296,17 +296,17 @@ class _CategoryProgressRow extends StatelessWidget {
             style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
           ),
           const SizedBox(height: 6),
-          LinearProgressIndicator(
+LinearProgressIndicator(
             value: pct,
             minHeight: 6,
             backgroundColor: Colors.grey.shade300,
-            color: const Color(0xFFF9A825),
+            color: Theme.of(context).colorScheme.primary,
           ),
-        ],
-      ),
-    );
-  }
-}
+         ],
+       ),
+     );
+   }
+ }
 
 class _QuizAccuracyRow extends StatelessWidget {
   const _QuizAccuracyRow({
@@ -333,14 +333,14 @@ class _QuizAccuracyRow extends StatelessWidget {
             style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
           ),
           const SizedBox(height: 6),
-          LinearProgressIndicator(
+LinearProgressIndicator(
             value: pct,
             minHeight: 6,
             backgroundColor: Colors.grey.shade300,
-            color: const Color(0xFFF9A825),
+            color: Theme.of(context).colorScheme.primary,
           ),
-        ],
-      ),
-    );
-  }
-}
+         ],
+       ),
+     );
+   }
+ }

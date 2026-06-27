@@ -54,7 +54,7 @@ class BookmarksScreen extends ConsumerWidget {
               final article = row.readTable(db.articles);
 
               return ListTile(
-                leading: const Icon(Icons.bookmark, color: Color(0xFF1A237E)),
+                leading: Icon(Icons.bookmark, color: Theme.of(context).colorScheme.primary),
                 title: Text(article.title),
                 onTap: () => context.push('/article-detail', extra: article),
               );

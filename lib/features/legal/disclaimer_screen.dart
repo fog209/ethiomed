@@ -10,6 +10,9 @@ class DisclaimerScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    final onPrimary = Theme.of(context).colorScheme.onPrimary;
+
     return Scaffold(
       body: SafeArea(
         child: Padding(
@@ -24,10 +27,10 @@ class DisclaimerScreen extends StatelessWidget {
                   color: Color(0xFFFFB300),
                 ),
                 const SizedBox(height: 24),
-                const Text(
+                Text(
                   'Important Notice',
                   style: TextStyle(
-                    color: Color(0xFF1A237E),
+                    color: primary,
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
                   ),
@@ -46,7 +49,7 @@ class DisclaimerScreen extends StatelessWidget {
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFFFFB300),
-                      foregroundColor: const Color(0xFF1A237E),
+                      foregroundColor: onPrimary,
                     ),
                     onPressed: () async {
                       final prefs = await SharedPreferences.getInstance();

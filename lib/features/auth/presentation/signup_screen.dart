@@ -69,13 +69,13 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
                 const SizedBox(height: 16),
-                Text(
-                  'Join EthioMed',
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    color: const Color(0xFF1A237E),
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
+Text(
+                      'Join EthioMed',
+                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        color: Theme.of(context).colorScheme.primary,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
                 const SizedBox(height: 8),
                 Text(
                   'Create your account to access offline medical learning content after admin activation.',

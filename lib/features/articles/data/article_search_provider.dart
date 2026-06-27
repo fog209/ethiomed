@@ -170,9 +170,6 @@ Future<List<ArticleLocal>> searchArticles({
   }) async {
     await _ensureSearchIndex();
 
-    final indexedCount = await _getIndexedCount();
-    debugPrint('FTS article count = $indexedCount');
-
     final trimmedQuery = query.trim();
     final List<ArticleLocal> matches = trimmedQuery.isEmpty
         ? await _searchAllArticles()
@@ -184,7 +181,6 @@ Future<List<ArticleLocal>> searchArticles({
             .where((article) => article.category == category)
             .toList(growable: false);
 
-    debugPrint('Search results = ${filtered.length}');
     return filtered.take(_maxSearchResults).toList(growable: false);
   }
 

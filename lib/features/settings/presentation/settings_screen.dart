@@ -58,164 +58,168 @@ class SettingsScreen extends ConsumerWidget {
   ) {
     final user = ref.watch(authSessionProvider).value?.user;
 
-    return [
-      ListTile(
-        leading: const Icon(Icons.person, color: Color(0xFF1A237E)),
-        title: const Text('Account'),
-        subtitle: Text(user?.email ?? 'Not logged in'),
-      ),
-      SwitchListTile(
-        value: dailyRemindersEnabled,
-        title: const Text('Daily study reminders'),
-        subtitle: const Text('Remind me at 8:00 AM when SM-2 cards are due'),
-        secondary: const Icon(Icons.notifications, color: Color(0xFF1A237E)),
-        onChanged: (enabled) async {
-          await ref
-              .read(dailyStudyRemindersEnabledProvider.notifier)
-              .setEnabled(enabled);
-          if (!context.mounted) {
-            return;
-          }
-        },
-      ),
-      SwitchListTile(
-        value: themeMode == ThemeMode.dark,
-        title: const Text('Dark Mode'),
-        subtitle: const Text('Use dark theme throughout the app'),
-        secondary: const Icon(Icons.dark_mode, color: Color(0xFF1A237E)),
-        onChanged: (enabled) async {
-          final newMode = enabled ? ThemeMode.dark : ThemeMode.light;
-          await saveThemeMode(newMode);
-          ref.read(themeModeProvider.notifier).state = newMode;
-          if (!context.mounted) {
-            return;
-          }
-        },
-      ),
-      if (migrationWarning != null)
-        Container(
-          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: Colors.amber.shade100,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Row(
-            children: [
-              const Icon(Icons.info_outline, color: Color(0xFF1A237E)),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  'Some features may need a fresh install.',
-                  style: const TextStyle(color: Color(0xFF1A237E)),
-                ),
-              ),
-            ],
-          ),
-        ),
-      isAdminAsync.when(
-        data: (isAdmin) {
-          if (!isAdmin) {
-            return const SizedBox.shrink();
-          }
+    final theme = Theme.of(context);
+    final primaryColor = theme.colorScheme.primary;
+    final onSurfaceVariant = theme.colorScheme.onSurfaceVariant;
 
-          return Column(
-            children: [
-              const Divider(),
-              ListTile(
-                leading: const Icon(
-                  Icons.admin_panel_settings,
-                  color: Color(0xFF1A237E),
+    return [
+       ListTile(
+         leading: Icon(Icons.person, color: primaryColor),
+         title: const Text('Account'),
+         subtitle: Text(user?.email ?? 'Not logged in'),
+       ),
+       SwitchListTile(
+         value: dailyRemindersEnabled,
+         title: const Text('Daily study reminders'),
+         subtitle: const Text('Remind me at 8:00 AM when SM-2 cards are due'),
+         secondary: Icon(Icons.notifications, color: primaryColor),
+         onChanged: (enabled) async {
+           await ref
+               .read(dailyStudyRemindersEnabledProvider.notifier)
+               .setEnabled(enabled);
+           if (!context.mounted) {
+             return;
+           }
+         },
+       ),
+       SwitchListTile(
+         value: themeMode == ThemeMode.dark,
+         title: const Text('Dark Mode'),
+         subtitle: const Text('Use dark theme throughout the app'),
+         secondary: Icon(Icons.dark_mode, color: primaryColor),
+         onChanged: (enabled) async {
+           final newMode = enabled ? ThemeMode.dark : ThemeMode.light;
+           await saveThemeMode(newMode);
+           ref.read(themeModeProvider.notifier).state = newMode;
+           if (!context.mounted) {
+             return;
+           }
+         },
+       ),
+if (migrationWarning != null)
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.info_outline, color: primaryColor),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Some features may need a fresh install.',
+                    style: TextStyle(color: primaryColor),
+                  ),
                 ),
-                title: const Text('Admin Dashboard'),
-                subtitle: const Text('Manage user subscriptions'),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => context.push('/admin'),
-              ),
-            ],
-          );
-        },
-        loading: () => const SizedBox.shrink(),
-        error: (_, _) => const SizedBox.shrink(),
-      ),
-      const Padding(
-        padding: EdgeInsets.fromLTRB(16, 24, 16, 8),
-        child: Text(
-          'Social & Support',
-          style: TextStyle(
-            color: Colors.grey,
-            fontSize: 13,
-            fontWeight: FontWeight.bold,
+              ],
+            ),
           ),
-        ),
-      ),
-      ListTile(
-        leading: const Icon(Icons.share, color: Color(0xFF1A237E)),
-        title: const Text('Share WardReady'),
-        onTap: () async {
-          final box = context.findRenderObject() as RenderBox?;
-          if (box != null) {
-            await Share.share(
-              _shareMessage,
-              sharePositionOrigin: box.localToGlobal(Offset.zero) & box.size,
-            );
-            if (!context.mounted) {
-              return;
-            }
-          }
-        },
-      ),
-      ListTile(
-        leading: const Icon(Icons.bug_report, color: Color(0xFF1A237E)),
-        title: const Text('Report Medical Error'),
-        onTap: _openAdminTelegram,
-      ),
-      ListTile(
-        leading: const Icon(Icons.help_outline, color: Color(0xFF1A237E)),
-        title: const Text('Technical Support'),
-        onTap: _openAdminTelegram,
-      ),
-      const Divider(),
-      const Padding(
-        padding: EdgeInsets.fromLTRB(16, 24, 16, 8),
-        child: Text(
-          'Legal',
-          style: TextStyle(
-            color: Colors.grey,
-            fontSize: 13,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ),
-      ListTile(
-        leading: const Icon(Icons.description, color: Color(0xFF1A237E)),
-        title: const Text('Terms of Service'),
-        trailing: const Icon(Icons.chevron_right),
-        onTap: () => context.push('/terms'),
-      ),
-      ListTile(
-        leading: const Icon(Icons.privacy_tip, color: Color(0xFF1A237E)),
-        title: const Text('Privacy Policy'),
-        trailing: const Icon(Icons.chevron_right),
-        onTap: () => context.push('/privacy'),
-      ),
-      const Divider(),
-      ListTile(
-        leading: const Icon(Icons.logout, color: Colors.red),
-        title: const Text('Logout', style: TextStyle(color: Colors.red)),
-        onTap: () async {
-          await ref.read(authServiceProvider).signOut();
-          if (context.mounted) context.go('/login');
-        },
-      ),
-      Padding(
-        padding: const EdgeInsets.symmetric(vertical: 20),
-        child: Text(
-          _appVersion,
-          textAlign: TextAlign.center,
-          style: const TextStyle(color: Colors.grey, fontSize: 13),
-        ),
-      ),
+       isAdminAsync.when(
+         data: (isAdmin) {
+           if (!isAdmin) {
+             return const SizedBox.shrink();
+           }
+
+           return Column(
+             children: [
+               const Divider(),
+               ListTile(
+                 leading: Icon(
+                   Icons.admin_panel_settings,
+                   color: primaryColor,
+                 ),
+                 title: const Text('Admin Dashboard'),
+                 subtitle: const Text('Manage user subscriptions'),
+                 trailing: const Icon(Icons.chevron_right),
+                 onTap: () => context.push('/admin'),
+               ),
+             ],
+           );
+         },
+         loading: () => const SizedBox.shrink(),
+         error: (_, _) => const SizedBox.shrink(),
+       ),
+       Padding(
+         padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
+         child: Text(
+           'Social & Support',
+           style: TextStyle(
+             color: onSurfaceVariant,
+             fontSize: 13,
+             fontWeight: FontWeight.bold,
+           ),
+         ),
+       ),
+       ListTile(
+         leading: Icon(Icons.share, color: primaryColor),
+         title: const Text('Share WardReady'),
+         onTap: () async {
+           final box = context.findRenderObject() as RenderBox?;
+           if (box != null) {
+             await Share.share(
+               _shareMessage,
+               sharePositionOrigin: box.localToGlobal(Offset.zero) & box.size,
+             );
+             if (!context.mounted) {
+               return;
+             }
+           }
+         },
+       ),
+       ListTile(
+         leading: Icon(Icons.bug_report, color: primaryColor),
+         title: const Text('Report Medical Error'),
+         onTap: _openAdminTelegram,
+       ),
+       ListTile(
+         leading: Icon(Icons.help_outline, color: primaryColor),
+         title: const Text('Technical Support'),
+         onTap: _openAdminTelegram,
+       ),
+       const Divider(),
+       Padding(
+         padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
+         child: Text(
+           'Legal',
+           style: TextStyle(
+             color: onSurfaceVariant,
+             fontSize: 13,
+             fontWeight: FontWeight.bold,
+           ),
+         ),
+       ),
+       ListTile(
+         leading: Icon(Icons.description, color: primaryColor),
+         title: const Text('Terms of Service'),
+         trailing: const Icon(Icons.chevron_right),
+         onTap: () => context.push('/terms'),
+       ),
+       ListTile(
+         leading: Icon(Icons.privacy_tip, color: primaryColor),
+         title: const Text('Privacy Policy'),
+         trailing: const Icon(Icons.chevron_right),
+         onTap: () => context.push('/privacy'),
+       ),
+       const Divider(),
+       ListTile(
+         leading: const Icon(Icons.logout, color: Colors.red),
+         title: const Text('Logout', style: TextStyle(color: Colors.red)),
+         onTap: () async {
+           await ref.read(authServiceProvider).signOut();
+           if (context.mounted) context.go('/login');
+         },
+       ),
+       Padding(
+         padding: const EdgeInsets.symmetric(vertical: 20),
+         child: Text(
+           _appVersion,
+           textAlign: TextAlign.center,
+           style: TextStyle(color: onSurfaceVariant, fontSize: 13),
+         ),
+       ),
     ];
   }
 }

@@ -53,6 +53,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authControllerProvider);
+    final primaryColor = Theme.of(context).colorScheme.primary;
 
     return Scaffold(
       body: SafeArea(
@@ -64,10 +65,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
                 const SizedBox(height: 48),
-                const Text(
+                Text(
                   'WardReady',
                   style: TextStyle(
-                    color: Color(0xFF1A237E),
+                    color: primaryColor,
                     fontSize: 36,
                     fontWeight: FontWeight.w900,
                     letterSpacing: -1.2,

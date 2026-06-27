@@ -41,16 +41,17 @@ class _ArticleSearchScreenState extends ConsumerState<ArticleSearchScreen> {
   Widget build(BuildContext context) {
     final articlesAsync = ref.watch(allArticlesProvider);
     final history = ref.watch(searchHistoryProvider);
+    final theme = Theme.of(context);
+    final onSurface = theme.colorScheme.onSurface;
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color(0xFF1A237E),
         title: TextField(
           controller: _controller,
-          style: const TextStyle(color: Colors.white),
-          decoration: const InputDecoration(
+          style: TextStyle(color: onSurface),
+          decoration: InputDecoration(
             hintText: 'Search WardReady...',
-            hintStyle: TextStyle(color: Colors.white60),
+            hintStyle: TextStyle(color: onSurface.withValues(alpha: 0.6)),
             border: InputBorder.none,
           ),
           onChanged: (value) {
