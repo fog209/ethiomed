@@ -1,13 +1,56 @@
 import 'dart:async';
 
+import 'package:drift/drift.dart' hide Column;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../../core/config/app_config.dart';
+import '../../../core/database/app_database.dart';
 import '../../../features/progress/category_progress_provider.dart';
 import '../../../features/progress/streak_notifier.dart';
 import '../../articles/data/article_repository.dart';
+
+final todayPlanProvider = FutureProvider<TodayPlanData>((ref) async {
+  final db = ref.watch(databaseProvider);
+  final now = DateTime.now();
+
+  final dueRows = await db.customSelect(
+    '''
+    SELECT COUNT(*) AS count, category
+    FROM quiz_table
+    WHERE next_due_at IS NULL OR next_due_at <= ?
+    GROUP BY category
+    ORDER BY count DESC
+    LIMIT 1
+    ''',
+    variables: [Variable(now)],
+  ).get();
+
+  int dueCount = 0;
+  String category = '';
+
+  if (dueRows.isNotEmpty) {
+    dueCount = dueRows.first.read<int>('count');
+    category = dueRows.first.read<String>('category');
+  }
+
+  final weakFieldRows = await db.customSelect(
+    '''
+    SELECT COUNT(DISTINCT tested_field) AS field_count
+    FROM quiz_table
+    WHERE last_quality IS NOT NULL AND last_quality < 3
+    ''',
+  ).get();
+
+  final weakFieldCount = weakFieldRows.isNotEmpty
+      ? weakFieldRows.first.read<int>('field_count')
+      : 0;
+
+  return (dueCount: dueCount, weakFieldCount: weakFieldCount, category: category);
+});
+
+typedef TodayPlanData = ({int dueCount, int weakFieldCount, String category});
 
 int _categoryProgressRead(CategoryProgress? progress) => progress?.read ?? 0;
 
@@ -76,7 +119,7 @@ class _CategoryTile extends ConsumerWidget {
         ),
       ),
       loading: () => const SizedBox.shrink(),
-error: (error, stack) => Card(
+      error: (error, stack) => Card(
         elevation: 4,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         child: Center(
@@ -191,11 +234,18 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
     AsyncValue<StudyStreakStats> streak,
     WidgetRef ref,
   ) {
+    final todayPlanAsync = ref.watch(todayPlanProvider);
+
     return [
       streak.when(
         data: _buildStudyStatsRow,
         loading: _buildStudyStatsLoadingRow,
         error: (_, _) => _buildStudyStatsErrorRow(ref),
+      ),
+      todayPlanAsync.when(
+        data: (plan) => _buildTodaysPlanCard(plan),
+        loading: () => const SizedBox.shrink(),
+        error: (_, _) => const SizedBox.shrink(),
       ),
       if (streak.isLoading) _buildShimmerCategoryGrid(),
       _buildSectionHeader('Clinical'),
@@ -206,6 +256,43 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
       _buildFallbackGeneralTile(),
       const SizedBox(height: 80),
     ];
+  }
+
+  Widget _buildTodaysPlanCard(TodayPlanData plan) {
+    final theme = Theme.of(context);
+    final hasContent = plan.dueCount > 0 || plan.weakFieldCount > 0;
+    if (!hasContent) {
+      return const SizedBox.shrink();
+    }
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: 16),
+      color: theme.colorScheme.secondaryContainer,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Today's Plan",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: theme.colorScheme.onSecondaryContainer,
+                fontSize: 16,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'You have ${plan.dueCount} card${plan.dueCount != 1 ? 's' : ''} due. '
+              '${plan.weakFieldCount} weak section${plan.weakFieldCount != 1 ? 's' : ''} in ${plan.category}.',
+              style: TextStyle(
+                color: theme.colorScheme.onSecondaryContainer,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _buildStudyStatsRow(StudyStreakStats stats) {
@@ -365,7 +452,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
   Widget _buildFallbackGeneralTile() {
     return Padding(
       padding: const EdgeInsets.only(top: 16),
-      child: _CategoryTile(name: 'General', icon: Icons.folder),
+      child: const _CategoryTile(name: 'General', icon: Icons.folder),
     );
   }
 
