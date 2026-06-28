@@ -43,28 +43,47 @@ class ProgressNotifier extends AsyncNotifier<ProgressData> {
       _dbInitialized = true;
     }
 
+    // Load streak stats (current streak, total articles, quiz accuracy percent)
+    StudyStreakStats streak;
     try {
-      // Load streak stats (current streak, total articles, quiz accuracy percent)
-      final streak = await ref.watch(streakNotifierProvider.future);
-
-      // Pre-load heatmap map once.
-      final heatmapByDate = await _loadHeatmap();
-
-      // Category progress + quiz accuracy
-      final categoryProgress = await _loadCategoryProgress();
-      final quizAccuracyByCategory = await _loadQuizAccuracyByCategory();
-
-      return ProgressData(
-        streak: streak,
-        heatmapByDate: heatmapByDate,
-        categoryProgress: categoryProgress,
-        quizAccuracyByCategory: quizAccuracyByCategory,
-      );
+      streak = await ref.watch(streakNotifierProvider.future);
     } catch (error) {
-      debugPrint('PROGRESS_BUILD_ERROR_TYPE: ${error.runtimeType}');
-      debugPrint('PROGRESS_BUILD_ERROR_DETAIL: $error');
-      rethrow;
+      debugPrint('ProgressNotifier: streak load failed: $error');
+      streak = const (currentStreak: 0, totalArticles: 0, accuracy: 0.0);
     }
+
+    // Pre-load heatmap map once.
+    Map<String, int> heatmapByDate;
+    try {
+      heatmapByDate = await _loadHeatmap();
+    } catch (error) {
+      debugPrint('ProgressNotifier: heatmap load failed: $error');
+      heatmapByDate = const <String, int>{};
+    }
+
+    // Category progress + quiz accuracy - each can fail independently
+    List<CategoryProgressRow> categoryProgress;
+    try {
+      categoryProgress = await _loadCategoryProgress();
+    } catch (error) {
+      debugPrint('ProgressNotifier: category progress load failed: $error');
+      categoryProgress = const <CategoryProgressRow>[];
+    }
+
+    List<QuizAccuracyByCategoryRow> quizAccuracyByCategory;
+    try {
+      quizAccuracyByCategory = await _loadQuizAccuracyByCategory();
+    } catch (error) {
+      debugPrint('ProgressNotifier: quiz accuracy load failed: $error');
+      quizAccuracyByCategory = const <QuizAccuracyByCategoryRow>[];
+    }
+
+    return ProgressData(
+      streak: streak,
+      heatmapByDate: heatmapByDate,
+      categoryProgress: categoryProgress,
+      quizAccuracyByCategory: quizAccuracyByCategory,
+    );
   }
 
   Future<Map<String, int>> _loadHeatmap() async {
