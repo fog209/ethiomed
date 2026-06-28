@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -34,6 +35,16 @@ Future<void> saveThemeMode(ThemeMode mode) async {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Edge-to-edge: draw app content under the transparent status & nav bars so
+  // content flows behind the system bars (Android 15/16 enforces this). Icon
+  // brightness is resolved reactively per active theme in MyApp via
+  // AnnotatedRegion<SystemUiOverlayStyle>.
+  await SystemChrome.setEnabledSystemUIMode(
+    SystemUiMode.edgeToEdge,
+    overlays: const [SystemUiOverlay.top, SystemUiOverlay.bottom],
+  );
+
   final prefs = await SharedPreferences.getInstance();
   _seenOnboarding = prefs.getBool('hasSeenOnboarding') ?? false;
   _seenDisclaimer = prefs.getBool('hasSeenDisclaimer') ?? false;
@@ -158,6 +169,10 @@ final _router = GoRouter(
       },
       builder: (context, state) => const AdminDashboardScreen(),
     ),
+    GoRoute(
+      path: '/subscription',
+      builder: (context, state) => const PaywallScreen(),
+    ),
   ],
 );
 
@@ -190,13 +205,35 @@ class MyApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final ThemeMode themeMode = ref.watch(themeModeProvider);
 
-    return MaterialApp.router(
-      routerConfig: _router,
-      title: AppConfig.appTitle,
-      debugShowCheckedModeBanner: false,
-      themeMode: themeMode,
-      theme: ThemeData.light(),
-      darkTheme: darkTheme,
+    // Resolve system bar icon brightness from the active theme so the icons
+    // stay legible against transparent edge-to-edge bars in both modes.
+    final isDark = themeMode == ThemeMode.dark ||
+        (themeMode == ThemeMode.system &&
+            View.of(context).platformDispatcher.platformBrightness ==
+                Brightness.dark);
+
+    final systemUiOverlayStyle = SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness:
+          isDark ? Brightness.light : Brightness.dark,
+      statusBarBrightness:
+          isDark ? Brightness.dark : Brightness.light,
+      systemNavigationBarColor: Colors.transparent,
+      systemNavigationBarIconBrightness:
+          isDark ? Brightness.light : Brightness.dark,
+      systemNavigationBarContrastEnforced: false,
+    );
+
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: systemUiOverlayStyle,
+      child: MaterialApp.router(
+        routerConfig: _router,
+        title: AppConfig.appTitle,
+        debugShowCheckedModeBanner: false,
+        themeMode: themeMode,
+        theme: ThemeData.light(),
+        darkTheme: darkTheme,
+      ),
     );
   }
 }
