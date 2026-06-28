@@ -13,6 +13,7 @@ final ThemeData darkTheme = ThemeData(
     onSurfaceVariant: Color(0xFF9FA8DA),
     outline: Color(0xFF252A45),
     secondary: Color(0xFF7986CB),
+    secondaryContainer: Color(0xFF2C325A),
     onSecondary: Color(0xFF0D0F1A),
     brightness: Brightness.dark,
   ),
