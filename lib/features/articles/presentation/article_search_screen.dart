@@ -109,7 +109,9 @@ class _ArticleSearchScreenState extends ConsumerState<ArticleSearchScreen> {
   }
 
   Widget _buildCategoryChips(String? selectedCategory) {
-    final primary = Theme.of(context).colorScheme.primary;
+    final theme = Theme.of(context);
+    final primary = theme.colorScheme.primary;
+    final outline = theme.colorScheme.outline;
     return Container(
       height: 60,
       padding: const EdgeInsets.symmetric(vertical: 10),
@@ -127,6 +129,9 @@ class _ArticleSearchScreenState extends ConsumerState<ArticleSearchScreen> {
               label: Text(category),
               selected: isSelected,
               selectedColor: primary,
+              side: isSelected
+                  ? BorderSide(color: primary)
+                  : BorderSide(color: outline),
               onSelected: (selected) {
                 _runAfterBuild(() {
                   ref
@@ -142,7 +147,8 @@ class _ArticleSearchScreenState extends ConsumerState<ArticleSearchScreen> {
   }
 
   Widget _buildResults(ArticleSearchState searchState) {
-    final primary = Theme.of(context).colorScheme.primary;
+    final theme = Theme.of(context);
+    final primary = theme.colorScheme.primary;
     
     if (searchState.isLoading) {
       return _buildShimmerSearchResults();
@@ -168,10 +174,10 @@ class _ArticleSearchScreenState extends ConsumerState<ArticleSearchScreen> {
         return ListTile(
           leading: Icon(Icons.search, color: primary),
           title: _buildHighlightedTitle(article.title, searchState.query),
-          trailing: Text(
-            '~${article.estimatedReadMinutes} min',
-            style: const TextStyle(color: Colors.grey, fontSize: 12),
-          ),
+trailing: Text(
+             '~${article.estimatedReadMinutes} min',
+             style: TextStyle(color: theme.colorScheme.onSurfaceVariant, fontSize: 12),
+           ),
           subtitle: Text(article.category ?? ''),
           onTap: () => context.push('/article-detail', extra: article),
         );

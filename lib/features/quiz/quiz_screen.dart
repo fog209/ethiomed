@@ -29,13 +29,14 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
     final notifier = ref.read(
       quizNotifierProvider(_defaultQuizCategory).notifier,
     );
+    final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(
         leading: CloseButton(onPressed: () => _resetQuizAndPop(context)),
         title: Text('${notifier.correctThisSession} / ${notifier.totalThisSession}'),
-        backgroundColor: _navy,
-        foregroundColor: _gold,
+        backgroundColor: theme.colorScheme.surface,
+        foregroundColor: theme.colorScheme.onSurface,
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -87,6 +88,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
   }
 
   Widget _buildEmptyState(QuizNotifier notifier) {
+    final theme = Theme.of(context);
     return Column(
       children: [
         const EmptyState(
@@ -101,8 +103,8 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
             height: 52,
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: _gold,
-                foregroundColor: _navy,
+                backgroundColor: theme.colorScheme.secondary,
+                foregroundColor: theme.colorScheme.onSecondary,
               ),
               onPressed: () => unawaited(notifier.syncQuestions()),
               child: const Text('Download Questions'),
@@ -114,16 +116,17 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
   }
 
   Widget _buildErrorState(QuizNotifier notifier) {
+    final theme = Theme.of(context);
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.error_outline, size: 72, color: _navy),
+          Icon(Icons.error_outline, size: 72, color: theme.colorScheme.secondary),
           const SizedBox(height: 16),
-          const Text(
+          Text(
             'Unable to load quiz questions.',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: theme.colorScheme.onSurface),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 24),
@@ -132,8 +135,8 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
             height: 52,
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: _gold,
-                foregroundColor: _navy,
+                backgroundColor: theme.colorScheme.secondary,
+                foregroundColor: theme.colorScheme.onSecondary,
               ),
               onPressed: () => unawaited(notifier.syncQuestions()),
               child: const Text('Try Again'),
@@ -149,6 +152,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
     List<QuizTableData> questions,
     QuizNotifier notifier,
   ) {
+    final theme = Theme.of(context);
     final question = notifier.currentQuestion;
     if (question == null) {
       return const SizedBox.shrink();
@@ -196,20 +200,20 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
           isAnswerRevealed: notifier.isAnswerRevealed,
           onTap: () => notifier.selectOption(QuizOption.d),
         ),
-        if (notifier.isAnswerRevealed) ...[
-          const SizedBox(height: 16),
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: const Color(0xFFFFF8E1),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: _gold),
+if (notifier.isAnswerRevealed) ...[
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: theme.colorScheme.secondary),
+              ),
+              child: Text(
+                'Explanation: ${question.explanation}',
+                style: TextStyle(height: 1.5, color: theme.colorScheme.onSurface),
+              ),
             ),
-            child: Text(
-              'Explanation: ${question.explanation}',
-              style: TextStyle(height: 1.5, color: Colors.black87),
-            ),
-          ),
           const SizedBox(height: 16),
           _buildSm2Buttons(question, notifier),
         ],
@@ -302,10 +306,11 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
   }
 
   Widget _buildNextReviewLabel(int? interval) {
+    final theme = Theme.of(context);
     return Text(
       'Next review: ${_formatNextReview(interval)}',
       textAlign: TextAlign.center,
-      style: const TextStyle(color: _navy, fontWeight: FontWeight.w600),
+      style: TextStyle(color: theme.colorScheme.onSurface, fontWeight: FontWeight.w600),
     );
   }
 
@@ -357,6 +362,7 @@ Future<void> _resetQuizAndPop(BuildContext context) async {
 
   void _showRetryScreen(BuildContext context, List<int> wrongQuestionIds) {
     final count = wrongQuestionIds.length;
+    final theme = Theme.of(context);
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
@@ -372,8 +378,8 @@ Future<void> _resetQuizAndPop(BuildContext context) async {
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: _gold,
-              foregroundColor: _navy,
+              backgroundColor: theme.colorScheme.secondary,
+              foregroundColor: theme.colorScheme.onSecondary,
             ),
             onPressed: () async {
               Navigator.of(dialogContext).pop();
@@ -472,15 +478,16 @@ Future<void> _resetQuizAndPop(BuildContext context) async {
     required bool isAnswerRevealed,
     required VoidCallback onTap,
   }) {
+    final theme = Theme.of(context);
     final isCorrectRevealed = isCorrectOption && isAnswerRevealed;
     final isIncorrectSelection = isSelectedOption && !isCorrectOption;
     final borderColor = isCorrectRevealed
-        ? _gold
+        ? theme.colorScheme.secondary
         : isIncorrectSelection
-        ? const Color(0xFFD32F2F)
-        : Colors.grey.shade300;
+            ? theme.colorScheme.error
+            : theme.colorScheme.outline;
 
-return Padding(
+    return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: InkWell(
         onTap: onTap,
@@ -488,19 +495,19 @@ return Padding(
         child: Container(
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: theme.colorScheme.surfaceContainerHighest,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: borderColor, width: 2),
           ),
           child: Row(
             children: [
               CircleAvatar(
-                backgroundColor: _navy,
-                foregroundColor: Colors.white,
+                backgroundColor: theme.colorScheme.secondary,
+                foregroundColor: theme.colorScheme.onSecondary,
                 child: Text(label),
               ),
               const SizedBox(width: 12),
-              Flexible(fit: FlexFit.loose, child: Text(text)),
+              Flexible(fit: FlexFit.loose, child: Text(text, style: TextStyle(color: theme.colorScheme.onSurface))),
             ],
           ),
         ),

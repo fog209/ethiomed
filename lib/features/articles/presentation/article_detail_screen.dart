@@ -90,15 +90,11 @@ class _ClinicalSectionConfig {
   const _ClinicalSectionConfig({
     required this.title,
     required this.icon,
-    required this.backgroundColor,
-    required this.borderColor,
     this.initiallyExpanded = false,
   });
 
   final String title;
   final IconData icon;
-  final Color backgroundColor;
-  final Color borderColor;
   final bool initiallyExpanded;
 }
 
@@ -393,105 +389,73 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
 
   static const _lowYieldFields = <String>{'definition', 'epidemiology'};
 
-  static const _clinicalSections = <String, _ClinicalSectionConfig>{
+static const _clinicalSections = <String, _ClinicalSectionConfig>{
     'definition': _ClinicalSectionConfig(
       title: '📝 Definition',
       icon: Icons.info_outline,
-      backgroundColor: Color(0xFFE8EAF6),
-      borderColor: Color(0xFF1A237E),
     ),
     'epidemiology': _ClinicalSectionConfig(
       title: '🌍 Epidemiology',
       icon: Icons.public,
-      backgroundColor: Color(0xFFE3F2FD),
-      borderColor: Color(0xFF1976D2),
     ),
     'etiology': _ClinicalSectionConfig(
       title: '🧬 Etiology',
       icon: Icons.biotech,
-      backgroundColor: Color(0xFFE8F5E9),
-      borderColor: Color(0xFF4CAF50),
     ),
     'pathophysiology': _ClinicalSectionConfig(
       title: '🔬 Pathophysiology',
       icon: Icons.psychology_outlined,
-      backgroundColor: Color(0xFFE3F2FD),
-      borderColor: Color(0xFF1976D2),
     ),
     'clinicalFeatures': _ClinicalSectionConfig(
       title: '🩺 Clinical Features',
       icon: Icons.list_alt,
-      backgroundColor: Color(0xFFE8F5E9),
-      borderColor: Color(0xFF4CAF50),
     ),
     'redFlags': _ClinicalSectionConfig(
       title: '🚩 Red Flags',
       icon: Icons.warning_rounded,
-      backgroundColor: Color(0xFFFFEBEE),
-      borderColor: Color(0xFFD32F2F),
       initiallyExpanded: true,
     ),
     'approach': _ClinicalSectionConfig(
       title: '🧭 Approach',
       icon: Icons.format_list_numbered,
-      backgroundColor: Color(0xFFE3F2FD),
-      borderColor: Color(0xFF1976D2),
       initiallyExpanded: true,
     ),
     'diagnosis': _ClinicalSectionConfig(
       title: '🔎 Diagnosis',
       icon: Icons.search,
-      backgroundColor: Color(0xFFE8EAF6),
-      borderColor: Color(0xFF1A237E),
     ),
     'treatment': _ClinicalSectionConfig(
       title: '💊 Treatment',
       icon: Icons.medication,
-      backgroundColor: Color(0xFFE8F5E9),
-      borderColor: Color(0xFF4CAF50),
     ),
     'contraindications': _ClinicalSectionConfig(
       title: '🛑 Contraindications',
       icon: Icons.report_problem_outlined,
-      backgroundColor: Color(0xFFFFF3E0),
-      borderColor: Color(0xFFF57C00),
     ),
     'dontMiss': _ClinicalSectionConfig(
       title: "🚨 Don't Miss",
       icon: Icons.priority_high,
-      backgroundColor: Color(0xFFFFF8E1),
-      borderColor: Color(0xFFF9A825),
     ),
     'complications': _ClinicalSectionConfig(
       title: '⚠️ Complications',
       icon: Icons.warning_amber_rounded,
-      backgroundColor: Color(0xFFFFF3E0),
-      borderColor: Color(0xFFF57C00),
     ),
     'clinicalPearls': _ClinicalSectionConfig(
       title: '💡 Clinical Pearls',
       icon: Icons.lightbulb_outline,
-      backgroundColor: Color(0xFFFFF8E1),
-      borderColor: Color(0xFFF9A825),
     ),
     'ethiopianContext': _ClinicalSectionConfig(
       title: '🇪🇹 Ethiopian Clinical Pearl',
       icon: Icons.local_hospital_outlined,
-      backgroundColor: Color(0xFFFFF8E1),
-      borderColor: Color(0xFFF9A825),
       initiallyExpanded: true,
     ),
     'mnemonics': _ClinicalSectionConfig(
       title: '🧠 Mnemonics',
       icon: Icons.auto_awesome_mosaic_outlined,
-      backgroundColor: Color(0xFFE8F5E9),
-      borderColor: Color(0xFF4CAF50),
     ),
     'examTraps': _ClinicalSectionConfig(
-      title: '🪤 Exam Traps',
-      icon: Icons.quiz_outlined,
-      backgroundColor: Color(0xFFEDE7F6),
-      borderColor: Color(0xFF673AB7),
+      title: '📋 Exam Traps',
+      icon: Icons.help_outline,
     ),
   };
 
@@ -520,7 +484,7 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
             return null;
           }
 
-          final isWeak =
+final isWeak =
               weakFields.contains(key) &&
               !_nonHighlightableWeakFields.contains(key);
           final isHighYield = highYieldMode && _highYieldFields.contains(key);
@@ -529,17 +493,19 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
           final initiallyExpanded = highYieldMode && isHighYield
               ? true
               : isMediumYield
-              ? false
-              : config.initiallyExpanded;
-          final borderColor = isHighYield ? _wardReadyGold : config.borderColor;
+                  ? false
+                  : config.initiallyExpanded;
+          final theme = Theme.of(context);
+          final borderColor = isHighYield ? _wardReadyGold : theme.colorScheme.outline;
           final borderWidth = isHighYield ? 3.0 : 4.0;
+          final backgroundColor = theme.colorScheme.surfaceContainerHighest;
 
           return _buildMarkdownExpansionTile(
             title: config.title,
             content: content,
             icon: config.icon,
             initiallyExpanded: initiallyExpanded,
-            backgroundColor: config.backgroundColor,
+            backgroundColor: backgroundColor,
             borderColor: borderColor,
             borderWidth: borderWidth,
             isWeak: isWeak,
@@ -549,21 +515,23 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
         .toList(growable: false);
   }
 
-  Widget _buildShowLowYieldButton() {
-return TextButton(
-       onPressed: () {
-         setState(() {
-           _showLowYieldSections = true;
-         });
-       },
-       child: const Text(
-         '+ Show low-yield sections',
-         style: TextStyle(color: Color(0xFFF9A825)),
-       ),
-     );
+Widget _buildShowLowYieldButton() {
+    final theme = Theme.of(context);
+    return TextButton(
+      onPressed: () {
+        setState(() {
+          _showLowYieldSections = true;
+        });
+      },
+      child: Text(
+        '+ Show low-yield sections',
+        style: TextStyle(color: theme.colorScheme.secondary),
+      ),
+    );
   }
 
   Widget _buildEmptyArticleFallback(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
         leading: CloseButton(
@@ -577,20 +545,20 @@ return TextButton(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(
+            Icon(
               Icons.article_outlined,
-              color: Color(0xFFF9A825),
+              color: theme.colorScheme.secondary,
               size: 64,
             ),
             const SizedBox(height: 16),
-            const Text(
+            Text(
               'This article is still being prepared.',
-              style: TextStyle(color: Colors.white, fontSize: 18),
+              style: TextStyle(color: theme.colorScheme.onSurface, fontSize: 18),
             ),
             const SizedBox(height: 8),
-            const Text(
+            Text(
               'Check back after the next sync.',
-              style: TextStyle(color: Colors.white70),
+              style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
             ),
             const SizedBox(height: 24),
             ElevatedButton(
@@ -604,25 +572,26 @@ return TextButton(
   }
 
   Widget _buildWeakSectionHeader(String title) {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFF8E1),
+        color: theme.colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(6),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(
+          Icon(
             Icons.warning_amber_rounded,
-            color: Colors.amber,
+            color: theme.colorScheme.secondary,
             size: 16,
           ),
           const SizedBox(width: 4),
-          const Text(
+          Text(
             ' Review this section',
             style: TextStyle(
-              color: Colors.amber,
+              color: theme.colorScheme.secondary,
               fontSize: 12,
               fontWeight: FontWeight.w600,
             ),
@@ -630,9 +599,9 @@ return TextButton(
           const SizedBox(width: 4),
           Text(
             title,
-            style: const TextStyle(
+            style: TextStyle(
               fontWeight: FontWeight.bold,
-              color: Color(0xFF1A237E),
+              color: theme.colorScheme.onSurface,
             ),
           ),
         ],
@@ -666,10 +635,10 @@ Widget _buildMarkdownExpansionTile({
         backgroundColor: backgroundColor,
         collapsedBackgroundColor: backgroundColor,
         initiallyExpanded: initiallyExpanded,
-        leading: Icon(icon, color: const Color(0xFF1A237E)),
+        leading: Icon(icon, color: theme.colorScheme.onSurface),
         title: isWeak ? _buildWeakSectionHeader(title) : Text(
           title,
-          style: const TextStyle(color: Colors.white),
+          style: TextStyle(color: theme.colorScheme.onSurface),
         ),
         children: [
           Padding(
@@ -677,7 +646,7 @@ Widget _buildMarkdownExpansionTile({
             child: MarkdownBody(
               data: linkedContent,
               styleSheet: MarkdownStyleSheet.fromTheme(theme).copyWith(
-                p: const TextStyle(color: Colors.white),
+                p: TextStyle(color: theme.colorScheme.onSurface),
                 a: TextStyle(
                   color: theme.colorScheme.primary,
                   decoration: TextDecoration.none,

@@ -129,9 +129,9 @@ class _CategoryTile extends ConsumerWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.sync_problem, color: Colors.amber, size: 48),
+              const Icon(Icons.sync_problem, color: Color(0xFFF9A825), size: 48),
               const SizedBox(height: 8),
-              const Text(
+              Text(
                 'Could not sync. Showing cached data.',
                 textAlign: TextAlign.center,
                 style: TextStyle(color: Colors.white70),
@@ -249,6 +249,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
         error: (_, _) => const SizedBox.shrink(),
       ),
       _buildCalculatorsCard(),
+      _buildCasesCard(),
       streak.when(
         data: _buildStudyStatsRow,
         loading: _buildStudyStatsLoadingRow,
@@ -498,6 +499,59 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
     );
   }
 
+  Widget _buildCasesCard() {
+    final theme = Theme.of(context);
+    return Card(
+      margin: const EdgeInsets.only(bottom: 16),
+      color: theme.colorScheme.secondaryContainer,
+      child: InkWell(
+        onTap: () => context.push('/cases'),
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Icon(
+                Icons.medical_services,
+                color: theme.colorScheme.secondary,
+                size: 32,
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Clinical Cases',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: theme.colorScheme.onSecondaryContainer,
+                        fontSize: 16,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Case-based learning scenarios',
+                      style: TextStyle(
+                        color: theme.colorScheme.onSecondaryContainer,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.arrow_forward_ios,
+                color: theme.colorScheme.onSecondaryContainer,
+                size: 16,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildTodaysPlanCard(TodayPlanData plan) {
     final theme = Theme.of(context);
     final hasContent = plan.dueCount > 0 || plan.weakFieldCount > 0;
@@ -559,7 +613,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
           const Text(
             'day streak',
             style: TextStyle(
-              color: Colors.white,
+              color: Color(0xFFE8EAF6),
               fontSize: 16,
               fontWeight: FontWeight.w600,
             ),
@@ -570,9 +624,10 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
   }
 
   Widget _buildStudyStatsLoadingRow() {
+    final theme = Theme.of(context);
     return Shimmer.fromColors(
-      baseColor: Colors.white24,
-      highlightColor: Colors.white70,
+      baseColor: theme.colorScheme.surface.withValues(alpha: 0.2),
+      highlightColor: theme.colorScheme.onSurface.withValues(alpha: 0.2),
       child: _buildStudyStatsContainer(
         child: const Row(
           mainAxisSize: MainAxisSize.min,
@@ -598,10 +653,10 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Text(
+          Text(
             'Unable to load study progress.',
             style: TextStyle(
-              color: Colors.white,
+              color: theme.colorScheme.onSurface,
               fontSize: 14,
               fontWeight: FontWeight.bold,
             ),
