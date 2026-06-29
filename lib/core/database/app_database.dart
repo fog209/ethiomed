@@ -113,14 +113,73 @@ class QuizTable extends Table {
   IntColumn get lastQuality => integer().nullable()();
 }
 
+class ClinicalCases extends Table {
+  TextColumn get id => text()();
+  TextColumn get title => text()();
+  TextColumn get specialty => text()();
+  TextColumn get difficulty => text().withDefault(const Constant('medium'))();
+  IntColumn get estimatedTimeMinutes => integer().withDefault(const Constant(15))();
+  TextColumn get learningObjectives => text().nullable()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+class CaseStages extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get caseId => text().references(ClinicalCases, #id)();
+  IntColumn get stageNumber => integer()();
+  TextColumn get stageType => text().withDefault(const Constant('presentation'))();
+  TextColumn get content => text()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+class CaseOptions extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get stageId => integer().references(CaseStages, #id)();
+  TextColumn get optionText => text()();
+  BoolColumn get isCorrect => boolean().withDefault(const Constant(false))();
+  TextColumn get feedback => text()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+class CaseProgress extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get caseId => text()();
+  DateTimeColumn get startedAt => dateTime()();
+  DateTimeColumn get completedAt => dateTime().nullable()();
+  IntColumn get currentStage => integer().withDefault(const Constant(1))();
+  IntColumn get correctDecisions => integer().withDefault(const Constant(0))();
+  IntColumn get totalDecisions => integer().withDefault(const Constant(0))();
+  IntColumn get hintsUsed => integer().withDefault(const Constant(0))();
+  BoolColumn get examMode => boolean().withDefault(const Constant(false))();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
 @DriftDatabase(
-  tables: [Articles, Bookmarks, StudySessions, QuizQuestions, QuizTable],
+  tables: [
+    Articles,
+    Bookmarks,
+    StudySessions,
+    QuizQuestions,
+    QuizTable,
+    ClinicalCases,
+    CaseStages,
+    CaseOptions,
+    CaseProgress,
+  ],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 9;
+  int get schemaVersion => 10;
 
   Future<void> _runMigrationStep(
     String name,
@@ -177,11 +236,17 @@ class AppDatabase extends _$AppDatabase {
             articles.subcategory as GeneratedColumn<Object>,
           ));
         }
-if (from < 8) {
+        if (from < 8) {
           await _runMigrationStep('ensure study sessions', _ensureStudySessionsTable);
         }
         if (from < 9) {
           await _runMigrationStep('ensure quiz table sm2 columns', _ensureQuizTableSm2Columns);
+        }
+        if (from < 10) {
+          await _runMigrationStep('create clinical cases', () => m.createTable(clinicalCases));
+          await _runMigrationStep('create case stages', () => m.createTable(caseStages));
+          await _runMigrationStep('create case options', () => m.createTable(caseOptions));
+          await _runMigrationStep('create case progress', () => m.createTable(caseProgress));
         }
       },
     );

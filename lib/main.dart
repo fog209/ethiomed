@@ -14,6 +14,7 @@ import 'features/admin/presentation/admin_dashboard_screen.dart';
 import 'features/admin/data/admin_repository.dart';
 import 'features/articles/presentation/article_detail_screen.dart';
 import 'features/articles/presentation/article_search_screen.dart';
+import 'features/cases/presentation/case_screen.dart';
 import 'features/calculators/calculators_screen.dart';
 import 'features/home/presentation/article_list_screen.dart';
 import 'features/auth/presentation/login_screen.dart';
@@ -66,7 +67,7 @@ void main() async {
         body: Center(
           child: Padding(
             padding: EdgeInsets.all(24),
-child: Column(
+            child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const Icon(Icons.error_outline, size: 48, color: Color(0xFFF9A825)),
@@ -188,6 +189,17 @@ final _router = GoRouter(
       builder: (context, state) {
         final query = state.extra as String? ?? '';
         return ArticleSearchScreen(initialQuery: query);
+      },
+    ),
+    GoRoute(
+      path: '/cases',
+      builder: (context, state) => const ClinicalCasesScreen(),
+    ),
+    GoRoute(
+      path: '/case-detail',
+      builder: (context, state) {
+        final caseId = state.extra as String? ?? '';
+        return CaseDetailScreen(caseId: caseId);
       },
     ),
   ],
