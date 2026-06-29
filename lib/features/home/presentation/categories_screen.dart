@@ -5,8 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shimmer/shimmer.dart';
+
 import '../../../core/config/app_config.dart';
 import '../../../core/database/app_database.dart';
+import '../../../core/providers/sync_state_provider.dart';
 import '../../../features/progress/category_progress_provider.dart';
 import '../../../features/progress/streak_notifier.dart';
 import '../../articles/data/article_repository.dart';
@@ -235,8 +237,10 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
     WidgetRef ref,
   ) {
     final todayPlanAsync = ref.watch(todayPlanProvider);
+    final syncState = ref.watch(syncStateProvider);
 
     return [
+      _buildSyncStatusRow(syncState),
       streak.when(
         data: _buildStudyStatsRow,
         loading: _buildStudyStatsLoadingRow,
@@ -256,6 +260,83 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
       _buildFallbackGeneralTile(),
       const SizedBox(height: 80),
     ];
+  }
+
+  Widget _buildSyncStatusRow(SyncState syncState) {
+    final theme = Theme.of(context);
+    final lastSync = syncState.lastSuccessfulSyncAt;
+
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: const BorderRadius.all(Radius.circular(16)),
+      ),
+      child: Row(
+        children: [
+          if (syncState.serverUnreachable) ...[
+            Icon(
+              Icons.wifi_off,
+              color: theme.colorScheme.error,
+              size: 18,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              'Offline',
+              style: TextStyle(
+                color: theme.colorScheme.error,
+                fontWeight: FontWeight.w600,
+                fontSize: 14,
+              ),
+            ),
+          ] else
+            Icon(
+              Icons.wifi,
+              color: theme.colorScheme.primary,
+              size: 18,
+            ),
+          const SizedBox(width: 8),
+          Text(
+            'Last synced ',
+            style: TextStyle(
+              color: theme.colorScheme.onSurfaceVariant,
+              fontSize: 14,
+            ),
+          ),
+          Text(
+            _formatLastSync(lastSync),
+            style: TextStyle(
+              color: theme.colorScheme.onSurface,
+              fontWeight: FontWeight.w600,
+              fontSize: 14,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _formatLastSync(DateTime? lastSync) {
+    if (lastSync == null) {
+      return 'Never synced';
+    }
+
+    final now = DateTime.now();
+    final difference = now.difference(lastSync);
+
+    if (difference.inSeconds < 60) {
+      return 'Just now';
+    } else if (difference.inMinutes < 60) {
+      return '${difference.inMinutes} minute${difference.inMinutes != 1 ? 's' : ''} ago';
+    } else if (difference.inHours < 24) {
+      return '${difference.inHours} hour${difference.inHours != 1 ? 's' : ''} ago';
+    } else if (difference.inDays == 1) {
+      return 'Yesterday';
+    } else {
+      return '${difference.inDays} days ago';
+    }
   }
 
   Widget _buildTodaysPlanCard(TodayPlanData plan) {
