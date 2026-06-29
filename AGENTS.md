@@ -1,239 +1,134 @@
-# AGENTS.md — WardReady
-# Read this fully before touching any file. No greeting. Start with the task.
+# WardReady — Agent Instructions
 
----
+This file is read automatically by ZCode at the start of every task in
+this workspace. It is the operational summary of the full project
+context (GMPlan.txt / master context doc). If something here seems to
+conflict with a specific task instruction given in chat, the chat
+instruction for THAT task wins — but these rules apply by default.
 
-## PROJECT IDENTITY
+## Identity
+- App name: WardReady. NEVER "EthioMed" (old name, retired — if you see
+  it anywhere, flag it, don't silently rename in scope-creep).
+- applicationId: com.wardready.app
+- Offline-first Flutter Android APK. Medical education for Ethiopian
+  health science students (EHPLE exam prep).
+- Builder is a non-developer. Be explicit and conservative — do not
+  assume context that isn't written down here or in the task.
 
-- **App name:** WardReady (NEVER use old name EthioMed)
-- **Type:** Offline-first Flutter Android APK
-- **Purpose:** Medical education for Ethiopian health science students
-- **Project path:** `C:\Users\TestUser\ethiomed\`
-- **Flutter command:** `C:\flutter\bin\flutter.bat` — ALWAYS use this exact path
-- **Test device ADB:** `SOAYYD7HEE65QKY5`
-- **Colors:** Navy `#1A237E` | Gold `#F9A825`
-- **Design:** Material 3, dark mode
+## Locked Tech Stack — DO NOT ADD OR REMOVE PACKAGES
+Flutter + Dart, Supabase (Auth + Postgres + Storage), Drift (ALL local
+DB), Riverpod (ALL state), dio (ALL HTTP), flutter_secure_storage (ALL
+secrets), GoRouter (ALL navigation), Material 3, manual Telebirr only
+payment (no Chapa/Stripe/Play Billing, ever).
 
----
+Exact pubspec.yaml packages — do not add, remove, or suggest alternatives:
+supabase_flutter, drift, sqlite3_flutter_libs, path_provider,
+flutter_secure_storage, flutter_riverpod, riverpod_annotation, dio,
+cached_network_image, shimmer, flutter_markdown, google_fonts,
+url_launcher, shared_preferences, package_info_plus, go_router,
+flutter_local_notifications, build_runner (dev), drift_dev (dev),
+riverpod_generator (dev)
 
-## MANDATORY RULES — THESE OVERRIDE EVERYTHING
+If a task seems to need a new package: STOP and ask instead of adding
+it. This is the single most important rule in this file.
 
-1. **ANTI-CYCLE RULE:** If `flutter analyze` shows errors after a task, STOP.
-   Do not start the next task. Fix errors first with:
-   `"Fix these flutter analyze errors ONLY. No logic changes. No other files. Zero errors required. [paste output]"`
+## Absolute prohibitions
+- Never touch any `*.g.dart` file.
+- Never edit `pubspec.yaml` without the human explicitly approving it
+  in that specific task's instructions.
+- Never modify `lib/features/quiz/spaced_repetition_service.dart`
+  (SM-2 algorithm) under any circumstance, for any task, even if the
+  task seems related to it. If a fix seems to require touching it,
+  stop and say so instead.
+- Never use `Navigator.push` / `Navigator.pop` / `Navigator.pushReplacement`.
+  GoRouter only: `context.push()` for drill-down screens that need back-
+  stack behavior (article detail, admin, terms, privacy, etc.),
+  `context.go()` for top-level/tab navigation, `context.pop()` to
+  return. Always guard pop with
+  `context.canPop() ? context.pop() : context.go('/home')`.
+- Never use `print()`. `debugPrint()` only.
+- Never use `setState()` for business logic. Riverpod only.
+  `setState()` is allowed only for purely local widget animation state.
+- Never add Firebase. Never add Sentry or any crash-reporting package
+  without an explicit go-ahead (it's a known gap, but the package
+  decision is the human's to make, not yours).
+- Never use `!` unless the value is provably non-null. Use `?.` / `??`.
 
-2. **DRIFT RULE:** ANY task touching `app_database.dart` MUST run this FIRST:
-   `dart run build_runner build --delete-conflicting-outputs`
-   THEN run `flutter analyze`. Order is mandatory.
-
-3. **ANALYZE BEFORE COMMIT:** Always run analyze before every commit. Zero errors required.
-
-4. **DO NOT ADD PACKAGES** — pubspec.yaml stack is locked. No new dependencies.
-
-5. **DO NOT WRITE CODE** unless you are the designated coder for this task.
-
----
-
-## MUST NOT CHANGE — EVER
-
-- `lib/core/database/app_database.g.dart` — generated, never edit manually
-- `lib/features/quiz/spaced_repetition_service.dart` — SM-2 algorithm, locked
-- `pubspec.yaml` — stack is locked, no additions or removals
-- Any `*.g.dart` file — all are generated files
-
----
-
-## ACTUAL FILE TREE (verified June 23, 2026)
-
+## Database (Drift)
+All local DB access goes through Drift. Never raw SQLite.
+**DRIFT RULE — order is non-negotiable**: any task that touches
+`lib/core/database/app_database.dart` (schema, tables, columns) MUST
+run this BEFORE `flutter analyze`:
 ```
-lib/
-│   main.dart
-│
-├── app/
-│       main_shell.dart          ← NAVIGATION LIVES HERE (no router.dart)
-│       nav_provider.dart
-│
-├── core/
-│   ├── config/
-│   │       app_config.dart      ← Supabase keys live here (Task 21 moves to env.dart)
-│   ├── database/
-│   │       app_database.dart    ← Drift DB — run build_runner after any change
-│   │       app_database.g.dart  ← GENERATED — never edit
-│   ├── errors/
-│   │       app_exception.dart
-│   │       error_exceptions.dart
-│   ├── providers/
-│   │       connectivity_notifier.dart
-│   │       sync_state_provider.dart
-│   ├── screens/
-│   │       database_recovery_screen.dart
-│   ├── services/
-│   │       notification_service.dart
-│   │       postgrest_status_helper.dart
-│   │       supabase_error_handler.dart
-│   └── widgets/
-│           empty_state.dart
-│           error_banners.dart
-│           offline_banner.dart
-│
-└── features/
-    ├── admin/
-    │   ├── data/
-    │   │       admin_repository.dart
-    │   └── presentation/
-    │           admin_dashboard_screen.dart
-    │
-    ├── articles/
-    │   │   article_providers.dart
-    │   ├── data/
-    │   │       article_repository.dart
-    │   │       article_search_provider.dart
-    │   ├── domain/models/
-    │   │       article.dart
-    │   ├── models/
-    │   │       article_model.dart
-    │   └── presentation/
-    │           article_detail_screen.dart
-    │           article_search_screen.dart
-    │
-    ├── auth/
-    │   ├── data/
-    │   │       auth_service.dart
-    │   └── presentation/
-    │           login_screen.dart
-    │           signup_screen.dart
-    │
-    ├── bookmarks/
-    │   └── presentation/
-    │           bookmarks_screen.dart
-    │
-    ├── home/
-    │   └── presentation/
-    │           article_list_screen.dart
-    │           categories_screen.dart
-    │
-    ├── legal/
-    │       disclaimer_screen.dart    ← exists; terms + privacy missing (Task 20)
-    │
-    ├── progress/
-    │       category_progress_provider.dart
-    │       streak_notifier.dart
-    │
-    ├── quiz/
-    │   │   quiz_notifier.dart
-    │   │   quiz_option.dart
-    │   │   quiz_repository.dart
-    │   │   quiz_screen.dart
-    │   │   quiz_sync_service.dart
-    │   │   spaced_repetition_service.dart  ← LOCKED, never modify SM-2 math
-    │   │   weakness_service.dart
-    │   └── data/
-    │           quiz_sync_service.dart
-    │
-    ├── search/
-    │       search_history_service.dart
-    │       search_screen.dart
-    │
-    ├── settings/
-    │   └── presentation/
-    │           settings_screen.dart
-    │
-    └── subscription/
-        ├── data/
-        │       subscription_repository.dart
-        └── presentation/
-                paywall_screen.dart
+dart run build_runner build --delete-conflicting-outputs
 ```
 
----
+## HTTP
+dio for all HTTP. Never the raw `http` package.
+Supabase calls: catch `PostgrestException` first, then `catch (e)`.
 
-## NAVIGATION
+## Async safety
+Always check `context.mounted` after every `await` inside a Widget.
+Always check `if (!mounted) return;` in StatefulWidget async callbacks.
+`dispose()` must ONLY call `.dispose()`, `.cancel()`, or
+`focusNode.dispose()` — never `ref.read()` / `ref.watch()` inside it.
 
-- **There is no `router.dart` or `app_router.dart`.**
-- All navigation and shell logic is in `lib/app/main_shell.dart`.
-- Routing uses **GoRouter**. All navigation calls use `context.push()` / `context.go()` / `context.pop()`.
-- Back/close buttons: `context.canPop() ? context.pop() : context.go('/home')`
+## Theming
+Use `Theme.of(context).colorScheme.*` everywhere except the explicit
+exceptions below. Mapping in use throughout the project:
+- Navy backgrounds → `colorScheme.surface` / `surfaceContainerHighest`
+- Navy primary icon → `colorScheme.primary`
+- Navy border/divider → `colorScheme.outline`
+- Gold accent/CTA → `colorScheme.secondary`
+- White text on Navy → `colorScheme.onSurface`
+- White text on Gold → `colorScheme.onSecondary`
 
----
+**Never migrate these (intentional exceptions):**
+- `Colors.white` on MarkdownBody (explicit Phase 3 fix)
+- `Colors.amber` on Learning Radar weak sections (semantic data color)
+- SM-2 buttons: red=Again, orange=Hard, green=Good, blue=Easy
+- `ErrorWidget.builder` colors (no BuildContext available, static)
+- Heatmap intensity colors (semantic data visualization)
 
-## TECH STACK (locked — do not add or change)
+## Validation & Git workflow (apply to every task)
+1. After any code change, run: `C:\flutter\bin\flutter.bat analyze`
+2. Zero errors required. If errors appear:
+   - Do not start or continue any other task.
+   - Fix ONLY the errors shown. No unrelated logic changes. No other files.
+   - Re-run analyze. Repeat until clean.
+   - If the SAME file fails twice in this loop: STOP completely. Report
+     the file and error instead of attempting a third fix.
+3. Once clean: `git add .` → `git commit -m "<message>"` → `git push origin master`.
+4. Use `--debug` APK builds for all diagnosis. Never `--release` while debugging.
+5. Prefer `const` constructors where possible.
 
-| Concern | Package |
-|---|---|
-| Local DB | Drift + SQLite (FTS5) |
-| Remote DB | Supabase (Auth + PostgreSQL + Storage) |
-| State | Riverpod (`flutter_riverpod`, `riverpod_annotation`) |
-| HTTP | dio |
-| Navigation | GoRouter |
-| Secrets | flutter_secure_storage |
-| UI | Material 3, shimmer, flutter_markdown, google_fonts |
-| Images | cached_network_image |
-| Notifications | flutter_local_notifications |
+## Things that are already done — do not re-implement or re-litigate
+Auth, category navigation (19 categories), article sync (auto + manual),
+offline article cache, article viewer, FTS5 search with debounce, SM-2
+quiz engine, Learning Radar, High-Yield mode, EHPLE exam mode, progress
+screen + heatmap, streaks, bookmarks, onboarding, legal screens,
+settings, theme toggle, session timeout, local notifications, admin
+dashboard, retry-wrong-answers, today's-plan card, read-time estimate,
+android:label fix, POST_NOTIFICATIONS permission, allowBackup=false,
+Proguard rules for Drift R8, edge-to-edge inset handling,
+secondaryContainer in darkTheme.
 
----
+## Things explicitly NOT to start without a human go-ahead in that task
+Certificate pinning, accessibility audit, light theme customization,
+GitHub Actions CI, Play Store assets, privacy policy public hosting,
+crash reporting/Sentry, drug reference lookup, clinical calculators,
+Amharic UI, weekly performance summary, outbox/sync queue, Impeller
+renderer + shader precompilation, SM-2 isolate offloading (blocked
+anyway by the "never modify spaced_repetition_service.dart" rule),
+token key rename ("ethiomed_" prefix in auth_service.dart).
 
-## COMPLETED TASKS — NEVER RERUN
+## Things that will never be built — don't propose these
+A profession selector (Medicine only, by design). Firebase. Chapa,
+Stripe, or Play Billing (Telebirr only, manual activation).
 
-- Task 1  — Defensive hardening codebase-wide
-- Task 2  — Global error safety net (main.dart)
-- Task 3  — Offline resilience + connectivity banner
-- Task 4  — Shimmer loading states
-- Task 5  — Empty state widgets
-- Task 6  — Performance pass (const, ListView.builder)
-- Task 7  — Categories blank screen fix
-- Task 8  — X button + back navigation (GoRouter)
-- Task 9  — SKIPPED (GoRouter already configured)
-- Task 10 — SM-2 quiz wiring (Again/Hard/Good/Easy)
-- Task 11 — Learning Radar (WeaknessService, amber highlights)
-- Task 12 — Streak stat row + category progress bars
-- Task 13 — Five small audit fixes
-- Task 14 — SKIPPED (FilterChip fix already in codebase)
-- Task 15 — SKIPPED (High-Yield bugs already fixed)
-- Task 16 — Release APK build ✅
-- Task 25 — Unit tests (all passing)
-- BONUS   — Local notifications for SM-2 due cards
-- BONUS   — Subcategory filter system (provider + chip UI + Drift query)
-
----
-
-## REMAINING TASKS (in order)
-
-- **Task 17** — EHPLE Exam Mode (ExamScreen, ExamResultsScreen, ExamSessionNotifier)
-- **Task 18** — Progress Screen + Study Heatmap (5th tab)
-- **Task 19** — Onboarding Screen (3-slide, shown once)
-- **Task 20** — Legal Screens (terms_screen.dart + privacy_screen.dart; disclaimer exists)
-- **Task 21** — Supabase keys → git-ignored `lib/app/env.dart`
-- **Task 22** — Version numbers + SDK targets for Play Store
-- **Task 23** — Architecture Audit → ARCHITECTURE_VIOLATIONS.md
-- **Task 24** — Auto-generate documentation (3 markdown files)
-
----
-
-## STANDARD TASK CLOSER (run after every task)
-
-```
-dart run build_runner build --delete-conflicting-outputs   # only if app_database.dart touched
-C:\flutter\bin\flutter.bat analyze
-```
-Zero errors required before proceeding.
-
-**UI VERIFICATION (mandatory before commit):**
-flutter_skill is active. After analyze passes:
-1. `hot_reload` the app
-2. `screenshot` the affected screen(s)
-3. Visually verify the UI renders correctly
-4. Fix any visible errors, layout overflows, or missing widgets
-5. Only then commit
-
-```
-git add .
-git commit -m "your message here"
-git push origin master
-```
-
----
-
-## IF YOU ARE UNSURE ABOUT A FILE PATH
-
-Run `dir C:\Users\TestUser\ethiomed\lib\<folder>\` and use the actual output.
-Do not assume file names from the task prompt — verify against this document first.
+## Working style
+- One task at a time. Don't bundle unrelated fixes into one commit.
+- Don't summarize a plan as if it's done — actually make the change,
+  run analyze, then report what happened.
+- If a task description and this file conflict, point out the conflict
+  before proceeding rather than silently picking one.

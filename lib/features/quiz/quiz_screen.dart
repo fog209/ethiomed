@@ -340,15 +340,18 @@ Future<void> _recordReviewAndAdvance(
 Future<void> _resetQuizAndPop(BuildContext context) async {
     final notifier = ref.read(quizNotifierProvider(_defaultQuizCategory).notifier);
     await notifier.saveCurrentStateToDrift();
-    if (!context.mounted) {
+    if (!mounted) {
       return;
     }
 
     notifier.reset();
-    if (context.canPop()) {
-      context.pop();
-    } else {
-      context.go('/home');
+    if (context.mounted) {
+      final canPop = context.canPop();
+      if (canPop) {
+        context.pop();
+      } else {
+        context.go('/home');
+      }
     }
   }
 
