@@ -18,6 +18,7 @@ import 'features/auth/presentation/signup_screen.dart';
 import 'features/legal/disclaimer_screen.dart';
 import 'features/legal/privacy_screen.dart';
 import 'features/legal/terms_screen.dart';
+import 'features/calculators/calculators_screen.dart';
 import 'features/onboarding/onboarding_screen.dart';
 import 'app/main_shell.dart';
 import 'features/subscription/presentation/paywall_screen.dart';
@@ -172,6 +173,17 @@ final _router = GoRouter(
     GoRoute(
       path: '/subscription',
       builder: (context, state) => const PaywallScreen(),
+    ),
+    GoRoute(
+      path: '/calculators',
+      builder: (context, state) => const CalculatorsScreen(),
+    ),
+    GoRoute(
+      path: '/calculator-detail',
+      builder: (context, state) {
+        final name = state.extra as String? ?? '';
+        return CalculatorDetailScreen(name: name);
+      },
     ),
   ],
 );
