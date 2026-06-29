@@ -110,38 +110,43 @@ class _ArticleSearchScreenState extends ConsumerState<ArticleSearchScreen> {
 
   Widget _buildCategoryChips(String? selectedCategory) {
     final theme = Theme.of(context);
-    final primary = theme.colorScheme.primary;
+    final secondary = theme.colorScheme.secondary;
     final outline = theme.colorScheme.outline;
     return Container(
       height: 60,
       padding: const EdgeInsets.symmetric(vertical: 10),
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: _categories.length,
-        padding: const EdgeInsets.symmetric(horizontal: 10),
-        itemBuilder: (context, index) {
-          final category = _categories[index];
-          final isSelected = selectedCategory == category;
+      child: ChipTheme(
+        data: ChipTheme.of(context).copyWith(
+          backgroundColor: theme.colorScheme.surfaceContainerHighest,
+        ),
+        child: ListView.builder(
+          scrollDirection: Axis.horizontal,
+          itemCount: _categories.length,
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          itemBuilder: (context, index) {
+            final category = _categories[index];
+            final isSelected = selectedCategory == category;
 
-          return Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: FilterChip(
-              label: Text(category),
-              selected: isSelected,
-              selectedColor: primary,
-              side: isSelected
-                  ? BorderSide(color: primary)
-                  : BorderSide(color: outline),
-              onSelected: (selected) {
-                _runAfterBuild(() {
-                  ref
+            return Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: FilterChip(
+                label: Text(category, style: TextStyle(color: theme.colorScheme.onSurface)),
+                selected: isSelected,
+                selectedColor: secondary,
+                side: isSelected
+                    ? BorderSide(color: secondary)
+                    : BorderSide(color: outline),
+onSelected: (selected) {
+                  _runAfterBuild(() {
+                    ref
                       .read(articleSearchControllerProvider.notifier)
                       .updateCategory(selected ? category : null);
-                });
-              },
-            ),
-          );
-        },
+                  });
+                },
+              ),
+            );
+          },
+        ),
       ),
     );
   }
@@ -186,7 +191,7 @@ trailing: Text(
   }
 
   Widget _buildHighlightedTitle(String title, String query) {
-    final primary = Theme.of(context).colorScheme.primary;
+    final secondary = Theme.of(context).colorScheme.secondary;
     final trimmedQuery = query.trim();
     if (trimmedQuery.isEmpty) {
       return Text(title);
@@ -213,7 +218,7 @@ trailing: Text(
         TextSpan(
           text: title.substring(match.start, match.end),
           style: TextStyle(
-            color: primary,
+            color: secondary,
             fontWeight: FontWeight.bold,
           ),
         ),

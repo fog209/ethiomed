@@ -89,28 +89,33 @@ class _CategoryTile extends ConsumerWidget {
             borderRadius: BorderRadius.circular(15),
           ),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, size: 40, color: theme.colorScheme.secondary),
-              const SizedBox(height: 10),
-              Text(
-                name,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: theme.colorScheme.onSurface,
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(icon, size: 40, color: theme.colorScheme.secondary),
+                    const SizedBox(height: 10),
+                    Text(
+                      name,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: theme.colorScheme.onSurface,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      '${_categoryProgressRead(progress)}/${_categoryProgressTotal(progress)}',
+                      style: TextStyle(
+                        color: theme.colorScheme.onSurface,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 6),
-              Text(
-                '${_categoryProgressRead(progress)}/${_categoryProgressTotal(progress)}',
-                style: TextStyle(
-                  color: theme.colorScheme.onSurface,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const Spacer(),
               LinearProgressIndicator(
                 minHeight: 3,
                 backgroundColor: theme.colorScheme.surface.withValues(alpha: 0.2),
@@ -193,6 +198,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
   Widget build(BuildContext context) {
     final streak = ref.watch(streakNotifierProvider);
     final theme = Theme.of(context);
+    final bodyItems = _buildBodyItems(streak, ref);
 
     return Scaffold(
       appBar: AppBar(
@@ -202,8 +208,8 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
       ),
       body: ListView.builder(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        itemCount: _buildBodyItems(streak, ref).length,
-        itemBuilder: (context, index) => _buildBodyItems(streak, ref)[index],
+        itemCount: bodyItems.length,
+        itemBuilder: (context, index) => bodyItems[index],
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: theme.colorScheme.primary,

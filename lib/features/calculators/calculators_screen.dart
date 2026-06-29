@@ -59,7 +59,7 @@ class CalculatorsScreen extends ConsumerWidget {
         borderRadius: BorderRadius.circular(12),
       ),
       child: ListTile(
-        leading: Icon(icon, color: theme.colorScheme.primary),
+        leading: Icon(icon, color: theme.colorScheme.secondary),
         title: Text(
           name,
           style: TextStyle(
@@ -100,7 +100,7 @@ class CalculatorDetailScreen extends StatelessWidget {
             Icon(
               Icons.construction_outlined,
               size: 72,
-              color: theme.colorScheme.primary,
+              color: theme.colorScheme.secondary,
             ),
             const SizedBox(height: 24),
             Text(
