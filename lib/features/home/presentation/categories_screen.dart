@@ -104,8 +104,8 @@ class _CategoryTile extends ConsumerWidget {
               const SizedBox(height: 6),
               Text(
                 '${_categoryProgressRead(progress)}/${_categoryProgressTotal(progress)}',
-                style: const TextStyle(
-                  color: Colors.white,
+                style: TextStyle(
+                  color: theme.colorScheme.onSurface,
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
                 ),
@@ -129,12 +129,12 @@ class _CategoryTile extends ConsumerWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.sync_problem, color: Color(0xFFF9A825), size: 48),
+              Icon(Icons.sync_problem, color: theme.colorScheme.secondary, size: 48),
               const SizedBox(height: 8),
               Text(
                 'Could not sync. Showing cached data.',
                 textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.white70),
+                style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
               ),
               TextButton(
                 onPressed: () {
@@ -609,15 +609,15 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
               fontSize: 24,
             ),
           ),
-          const SizedBox(width: 8),
-          const Text(
-            'day streak',
-            style: TextStyle(
-              color: Color(0xFFE8EAF6),
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
+const SizedBox(width: 8),
+           Text(
+             'day streak',
+             style: TextStyle(
+               color: theme.colorScheme.onSurface,
+               fontSize: 16,
+               fontWeight: FontWeight.w600,
+             ),
+           ),
         ],
       ),
     );
@@ -629,16 +629,16 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
       baseColor: theme.colorScheme.surface.withValues(alpha: 0.2),
       highlightColor: theme.colorScheme.onSurface.withValues(alpha: 0.2),
       child: _buildStudyStatsContainer(
-        child: const Row(
+        child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.local_fire_department, color: Colors.white, size: 24),
-            SizedBox(width: 8),
-            Text('0', style: TextStyle(color: Colors.white, fontSize: 24)),
-            SizedBox(width: 8),
+            Icon(Icons.local_fire_department, color: theme.colorScheme.onSurface, size: 24),
+            const SizedBox(width: 8),
+            Text('0', style: TextStyle(color: theme.colorScheme.onSurface, fontSize: 24)),
+            const SizedBox(width: 8),
             Text(
               'day streak',
-              style: TextStyle(color: Colors.white, fontSize: 16),
+              style: TextStyle(color: theme.colorScheme.onSurface, fontSize: 16),
             ),
           ],
         ),

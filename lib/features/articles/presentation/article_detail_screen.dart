@@ -15,8 +15,6 @@ import '../../../features/progress/category_progress_provider.dart';
 import '../../../features/progress/streak_notifier.dart';
 import '../../../features/quiz/weakness_service.dart';
 
-const _wardReadyGold = Color(0xFFF9A825);
-
 final _medicalTerms = <String>{
   'acute',
   'chronic',
@@ -192,6 +190,7 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
     final imageUrl = article.imageUrl;
     final videoUrl = article.videoUrl;
 
+    final theme = Theme.of(context);
     if (sections.isEmpty) {
       return _buildEmptyArticleFallback(context);
     }
@@ -203,12 +202,12 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
               context.canPop() ? context.pop() : context.go('/home'),
         ),
         title: Text(article.title),
-        backgroundColor: const Color(0xFF1A237E),
-        foregroundColor: const Color(0xFFFFB300),
+        backgroundColor: theme.colorScheme.primary,
+        foregroundColor: theme.colorScheme.onPrimary,
         actions: [
           IconButton(
             tooltip: 'High-Yield Mode',
-            color: highYieldMode ? _wardReadyGold : null,
+            color: highYieldMode ? theme.colorScheme.secondary : null,
             onPressed: () =>
                 ref.read(highYieldModeProvider.notifier).state = !highYieldMode,
             icon: Icon(highYieldMode ? Icons.bolt : Icons.bolt_outlined),
@@ -260,6 +259,7 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
     String? imageUrl,
     String? videoUrl,
   ) {
+    final theme = Theme.of(context);
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -274,10 +274,10 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
                   imageUrl: imageUrl,
                   placeholder: (context, url) => _buildImagePlaceholder(),
                   errorWidget: (context, url, error) => Container(
-                    color: Colors.grey[200],
-                    child: const Icon(
+                    color: theme.colorScheme.surfaceContainerHighest,
+                    child: Icon(
                       Icons.image_not_supported,
-                      color: Colors.grey,
+                      color: theme.colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ),
@@ -288,13 +288,13 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             margin: const EdgeInsets.only(bottom: 20),
             decoration: BoxDecoration(
-              color: const Color(0xFFFFB300).withValues(alpha: 0.2),
+              color: theme.colorScheme.secondary.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
               widget.article!.category?.toUpperCase() ?? 'GENERAL',
-              style: const TextStyle(
-                color: Color(0xFF1A237E),
+              style: TextStyle(
+                color: theme.colorScheme.onSecondary,
                 fontWeight: FontWeight.bold,
                 fontSize: 12,
               ),
@@ -308,8 +308,8 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
           if (videoUrl != null && videoUrl.isNotEmpty)
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFFFB300),
-                foregroundColor: const Color(0xFF1A237E),
+                backgroundColor: theme.colorScheme.secondary,
+                foregroundColor: theme.colorScheme.onSecondary,
                 minimumSize: const Size(double.infinity, 50),
               ),
               icon: const Icon(Icons.play_circle_fill),
@@ -495,8 +495,8 @@ final isWeak =
               : isMediumYield
                   ? false
                   : config.initiallyExpanded;
-          final theme = Theme.of(context);
-          final borderColor = isHighYield ? _wardReadyGold : theme.colorScheme.outline;
+final theme = Theme.of(context);
+           final borderColor = isHighYield ? theme.colorScheme.secondary : theme.colorScheme.outline;
           final borderWidth = isHighYield ? 3.0 : 4.0;
           final backgroundColor = theme.colorScheme.surfaceContainerHighest;
 
@@ -538,8 +538,8 @@ Widget _buildShowLowYieldButton() {
           onPressed: () =>
               context.canPop() ? context.pop() : context.go('/home'),
         ),
-        backgroundColor: const Color(0xFF1A237E),
-        foregroundColor: const Color(0xFFFFB300),
+        backgroundColor: theme.colorScheme.primary,
+        foregroundColor: theme.colorScheme.onPrimary,
       ),
       body: Center(
         child: Column(
