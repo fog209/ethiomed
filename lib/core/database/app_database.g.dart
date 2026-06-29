@@ -2732,6 +2732,1712 @@ class QuizTableCompanion extends UpdateCompanion<QuizQuestionEntity> {
   }
 }
 
+class $ClinicalCasesTable extends ClinicalCases
+    with TableInfo<$ClinicalCasesTable, ClinicalCase> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ClinicalCasesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _titleMeta = const VerificationMeta('title');
+  @override
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+    'title',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _specialtyMeta = const VerificationMeta(
+    'specialty',
+  );
+  @override
+  late final GeneratedColumn<String> specialty = GeneratedColumn<String>(
+    'specialty',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _difficultyMeta = const VerificationMeta(
+    'difficulty',
+  );
+  @override
+  late final GeneratedColumn<String> difficulty = GeneratedColumn<String>(
+    'difficulty',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('medium'),
+  );
+  static const VerificationMeta _estimatedTimeMinutesMeta =
+      const VerificationMeta('estimatedTimeMinutes');
+  @override
+  late final GeneratedColumn<int> estimatedTimeMinutes = GeneratedColumn<int>(
+    'estimated_time_minutes',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(15),
+  );
+  static const VerificationMeta _learningObjectivesMeta =
+      const VerificationMeta('learningObjectives');
+  @override
+  late final GeneratedColumn<String> learningObjectives =
+      GeneratedColumn<String>(
+        'learning_objectives',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    title,
+    specialty,
+    difficulty,
+    estimatedTimeMinutes,
+    learningObjectives,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'clinical_cases';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ClinicalCase> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('title')) {
+      context.handle(
+        _titleMeta,
+        title.isAcceptableOrUnknown(data['title']!, _titleMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_titleMeta);
+    }
+    if (data.containsKey('specialty')) {
+      context.handle(
+        _specialtyMeta,
+        specialty.isAcceptableOrUnknown(data['specialty']!, _specialtyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_specialtyMeta);
+    }
+    if (data.containsKey('difficulty')) {
+      context.handle(
+        _difficultyMeta,
+        difficulty.isAcceptableOrUnknown(data['difficulty']!, _difficultyMeta),
+      );
+    }
+    if (data.containsKey('estimated_time_minutes')) {
+      context.handle(
+        _estimatedTimeMinutesMeta,
+        estimatedTimeMinutes.isAcceptableOrUnknown(
+          data['estimated_time_minutes']!,
+          _estimatedTimeMinutesMeta,
+        ),
+      );
+    }
+    if (data.containsKey('learning_objectives')) {
+      context.handle(
+        _learningObjectivesMeta,
+        learningObjectives.isAcceptableOrUnknown(
+          data['learning_objectives']!,
+          _learningObjectivesMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ClinicalCase map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ClinicalCase(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      title: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}title'],
+      )!,
+      specialty: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}specialty'],
+      )!,
+      difficulty: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}difficulty'],
+      )!,
+      estimatedTimeMinutes: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}estimated_time_minutes'],
+      )!,
+      learningObjectives: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}learning_objectives'],
+      ),
+    );
+  }
+
+  @override
+  $ClinicalCasesTable createAlias(String alias) {
+    return $ClinicalCasesTable(attachedDatabase, alias);
+  }
+}
+
+class ClinicalCase extends DataClass implements Insertable<ClinicalCase> {
+  final String id;
+  final String title;
+  final String specialty;
+  final String difficulty;
+  final int estimatedTimeMinutes;
+  final String? learningObjectives;
+  const ClinicalCase({
+    required this.id,
+    required this.title,
+    required this.specialty,
+    required this.difficulty,
+    required this.estimatedTimeMinutes,
+    this.learningObjectives,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['title'] = Variable<String>(title);
+    map['specialty'] = Variable<String>(specialty);
+    map['difficulty'] = Variable<String>(difficulty);
+    map['estimated_time_minutes'] = Variable<int>(estimatedTimeMinutes);
+    if (!nullToAbsent || learningObjectives != null) {
+      map['learning_objectives'] = Variable<String>(learningObjectives);
+    }
+    return map;
+  }
+
+  ClinicalCasesCompanion toCompanion(bool nullToAbsent) {
+    return ClinicalCasesCompanion(
+      id: Value(id),
+      title: Value(title),
+      specialty: Value(specialty),
+      difficulty: Value(difficulty),
+      estimatedTimeMinutes: Value(estimatedTimeMinutes),
+      learningObjectives: learningObjectives == null && nullToAbsent
+          ? const Value.absent()
+          : Value(learningObjectives),
+    );
+  }
+
+  factory ClinicalCase.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ClinicalCase(
+      id: serializer.fromJson<String>(json['id']),
+      title: serializer.fromJson<String>(json['title']),
+      specialty: serializer.fromJson<String>(json['specialty']),
+      difficulty: serializer.fromJson<String>(json['difficulty']),
+      estimatedTimeMinutes: serializer.fromJson<int>(
+        json['estimatedTimeMinutes'],
+      ),
+      learningObjectives: serializer.fromJson<String?>(
+        json['learningObjectives'],
+      ),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'title': serializer.toJson<String>(title),
+      'specialty': serializer.toJson<String>(specialty),
+      'difficulty': serializer.toJson<String>(difficulty),
+      'estimatedTimeMinutes': serializer.toJson<int>(estimatedTimeMinutes),
+      'learningObjectives': serializer.toJson<String?>(learningObjectives),
+    };
+  }
+
+  ClinicalCase copyWith({
+    String? id,
+    String? title,
+    String? specialty,
+    String? difficulty,
+    int? estimatedTimeMinutes,
+    Value<String?> learningObjectives = const Value.absent(),
+  }) => ClinicalCase(
+    id: id ?? this.id,
+    title: title ?? this.title,
+    specialty: specialty ?? this.specialty,
+    difficulty: difficulty ?? this.difficulty,
+    estimatedTimeMinutes: estimatedTimeMinutes ?? this.estimatedTimeMinutes,
+    learningObjectives: learningObjectives.present
+        ? learningObjectives.value
+        : this.learningObjectives,
+  );
+  ClinicalCase copyWithCompanion(ClinicalCasesCompanion data) {
+    return ClinicalCase(
+      id: data.id.present ? data.id.value : this.id,
+      title: data.title.present ? data.title.value : this.title,
+      specialty: data.specialty.present ? data.specialty.value : this.specialty,
+      difficulty: data.difficulty.present
+          ? data.difficulty.value
+          : this.difficulty,
+      estimatedTimeMinutes: data.estimatedTimeMinutes.present
+          ? data.estimatedTimeMinutes.value
+          : this.estimatedTimeMinutes,
+      learningObjectives: data.learningObjectives.present
+          ? data.learningObjectives.value
+          : this.learningObjectives,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ClinicalCase(')
+          ..write('id: $id, ')
+          ..write('title: $title, ')
+          ..write('specialty: $specialty, ')
+          ..write('difficulty: $difficulty, ')
+          ..write('estimatedTimeMinutes: $estimatedTimeMinutes, ')
+          ..write('learningObjectives: $learningObjectives')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    title,
+    specialty,
+    difficulty,
+    estimatedTimeMinutes,
+    learningObjectives,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ClinicalCase &&
+          other.id == this.id &&
+          other.title == this.title &&
+          other.specialty == this.specialty &&
+          other.difficulty == this.difficulty &&
+          other.estimatedTimeMinutes == this.estimatedTimeMinutes &&
+          other.learningObjectives == this.learningObjectives);
+}
+
+class ClinicalCasesCompanion extends UpdateCompanion<ClinicalCase> {
+  final Value<String> id;
+  final Value<String> title;
+  final Value<String> specialty;
+  final Value<String> difficulty;
+  final Value<int> estimatedTimeMinutes;
+  final Value<String?> learningObjectives;
+  final Value<int> rowid;
+  const ClinicalCasesCompanion({
+    this.id = const Value.absent(),
+    this.title = const Value.absent(),
+    this.specialty = const Value.absent(),
+    this.difficulty = const Value.absent(),
+    this.estimatedTimeMinutes = const Value.absent(),
+    this.learningObjectives = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ClinicalCasesCompanion.insert({
+    required String id,
+    required String title,
+    required String specialty,
+    this.difficulty = const Value.absent(),
+    this.estimatedTimeMinutes = const Value.absent(),
+    this.learningObjectives = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       title = Value(title),
+       specialty = Value(specialty);
+  static Insertable<ClinicalCase> custom({
+    Expression<String>? id,
+    Expression<String>? title,
+    Expression<String>? specialty,
+    Expression<String>? difficulty,
+    Expression<int>? estimatedTimeMinutes,
+    Expression<String>? learningObjectives,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (title != null) 'title': title,
+      if (specialty != null) 'specialty': specialty,
+      if (difficulty != null) 'difficulty': difficulty,
+      if (estimatedTimeMinutes != null)
+        'estimated_time_minutes': estimatedTimeMinutes,
+      if (learningObjectives != null) 'learning_objectives': learningObjectives,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ClinicalCasesCompanion copyWith({
+    Value<String>? id,
+    Value<String>? title,
+    Value<String>? specialty,
+    Value<String>? difficulty,
+    Value<int>? estimatedTimeMinutes,
+    Value<String?>? learningObjectives,
+    Value<int>? rowid,
+  }) {
+    return ClinicalCasesCompanion(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      specialty: specialty ?? this.specialty,
+      difficulty: difficulty ?? this.difficulty,
+      estimatedTimeMinutes: estimatedTimeMinutes ?? this.estimatedTimeMinutes,
+      learningObjectives: learningObjectives ?? this.learningObjectives,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (title.present) {
+      map['title'] = Variable<String>(title.value);
+    }
+    if (specialty.present) {
+      map['specialty'] = Variable<String>(specialty.value);
+    }
+    if (difficulty.present) {
+      map['difficulty'] = Variable<String>(difficulty.value);
+    }
+    if (estimatedTimeMinutes.present) {
+      map['estimated_time_minutes'] = Variable<int>(estimatedTimeMinutes.value);
+    }
+    if (learningObjectives.present) {
+      map['learning_objectives'] = Variable<String>(learningObjectives.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ClinicalCasesCompanion(')
+          ..write('id: $id, ')
+          ..write('title: $title, ')
+          ..write('specialty: $specialty, ')
+          ..write('difficulty: $difficulty, ')
+          ..write('estimatedTimeMinutes: $estimatedTimeMinutes, ')
+          ..write('learningObjectives: $learningObjectives, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $CaseStagesTable extends CaseStages
+    with TableInfo<$CaseStagesTable, CaseStage> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $CaseStagesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _caseIdMeta = const VerificationMeta('caseId');
+  @override
+  late final GeneratedColumn<String> caseId = GeneratedColumn<String>(
+    'case_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES clinical_cases (id)',
+    ),
+  );
+  static const VerificationMeta _stageNumberMeta = const VerificationMeta(
+    'stageNumber',
+  );
+  @override
+  late final GeneratedColumn<int> stageNumber = GeneratedColumn<int>(
+    'stage_number',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _stageTypeMeta = const VerificationMeta(
+    'stageType',
+  );
+  @override
+  late final GeneratedColumn<String> stageType = GeneratedColumn<String>(
+    'stage_type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('presentation'),
+  );
+  static const VerificationMeta _contentMeta = const VerificationMeta(
+    'content',
+  );
+  @override
+  late final GeneratedColumn<String> content = GeneratedColumn<String>(
+    'content',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    caseId,
+    stageNumber,
+    stageType,
+    content,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'case_stages';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<CaseStage> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('case_id')) {
+      context.handle(
+        _caseIdMeta,
+        caseId.isAcceptableOrUnknown(data['case_id']!, _caseIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_caseIdMeta);
+    }
+    if (data.containsKey('stage_number')) {
+      context.handle(
+        _stageNumberMeta,
+        stageNumber.isAcceptableOrUnknown(
+          data['stage_number']!,
+          _stageNumberMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_stageNumberMeta);
+    }
+    if (data.containsKey('stage_type')) {
+      context.handle(
+        _stageTypeMeta,
+        stageType.isAcceptableOrUnknown(data['stage_type']!, _stageTypeMeta),
+      );
+    }
+    if (data.containsKey('content')) {
+      context.handle(
+        _contentMeta,
+        content.isAcceptableOrUnknown(data['content']!, _contentMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_contentMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  CaseStage map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return CaseStage(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      caseId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}case_id'],
+      )!,
+      stageNumber: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}stage_number'],
+      )!,
+      stageType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}stage_type'],
+      )!,
+      content: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}content'],
+      )!,
+    );
+  }
+
+  @override
+  $CaseStagesTable createAlias(String alias) {
+    return $CaseStagesTable(attachedDatabase, alias);
+  }
+}
+
+class CaseStage extends DataClass implements Insertable<CaseStage> {
+  final int id;
+  final String caseId;
+  final int stageNumber;
+  final String stageType;
+  final String content;
+  const CaseStage({
+    required this.id,
+    required this.caseId,
+    required this.stageNumber,
+    required this.stageType,
+    required this.content,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['case_id'] = Variable<String>(caseId);
+    map['stage_number'] = Variable<int>(stageNumber);
+    map['stage_type'] = Variable<String>(stageType);
+    map['content'] = Variable<String>(content);
+    return map;
+  }
+
+  CaseStagesCompanion toCompanion(bool nullToAbsent) {
+    return CaseStagesCompanion(
+      id: Value(id),
+      caseId: Value(caseId),
+      stageNumber: Value(stageNumber),
+      stageType: Value(stageType),
+      content: Value(content),
+    );
+  }
+
+  factory CaseStage.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return CaseStage(
+      id: serializer.fromJson<int>(json['id']),
+      caseId: serializer.fromJson<String>(json['caseId']),
+      stageNumber: serializer.fromJson<int>(json['stageNumber']),
+      stageType: serializer.fromJson<String>(json['stageType']),
+      content: serializer.fromJson<String>(json['content']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'caseId': serializer.toJson<String>(caseId),
+      'stageNumber': serializer.toJson<int>(stageNumber),
+      'stageType': serializer.toJson<String>(stageType),
+      'content': serializer.toJson<String>(content),
+    };
+  }
+
+  CaseStage copyWith({
+    int? id,
+    String? caseId,
+    int? stageNumber,
+    String? stageType,
+    String? content,
+  }) => CaseStage(
+    id: id ?? this.id,
+    caseId: caseId ?? this.caseId,
+    stageNumber: stageNumber ?? this.stageNumber,
+    stageType: stageType ?? this.stageType,
+    content: content ?? this.content,
+  );
+  CaseStage copyWithCompanion(CaseStagesCompanion data) {
+    return CaseStage(
+      id: data.id.present ? data.id.value : this.id,
+      caseId: data.caseId.present ? data.caseId.value : this.caseId,
+      stageNumber: data.stageNumber.present
+          ? data.stageNumber.value
+          : this.stageNumber,
+      stageType: data.stageType.present ? data.stageType.value : this.stageType,
+      content: data.content.present ? data.content.value : this.content,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CaseStage(')
+          ..write('id: $id, ')
+          ..write('caseId: $caseId, ')
+          ..write('stageNumber: $stageNumber, ')
+          ..write('stageType: $stageType, ')
+          ..write('content: $content')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, caseId, stageNumber, stageType, content);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is CaseStage &&
+          other.id == this.id &&
+          other.caseId == this.caseId &&
+          other.stageNumber == this.stageNumber &&
+          other.stageType == this.stageType &&
+          other.content == this.content);
+}
+
+class CaseStagesCompanion extends UpdateCompanion<CaseStage> {
+  final Value<int> id;
+  final Value<String> caseId;
+  final Value<int> stageNumber;
+  final Value<String> stageType;
+  final Value<String> content;
+  const CaseStagesCompanion({
+    this.id = const Value.absent(),
+    this.caseId = const Value.absent(),
+    this.stageNumber = const Value.absent(),
+    this.stageType = const Value.absent(),
+    this.content = const Value.absent(),
+  });
+  CaseStagesCompanion.insert({
+    this.id = const Value.absent(),
+    required String caseId,
+    required int stageNumber,
+    this.stageType = const Value.absent(),
+    required String content,
+  }) : caseId = Value(caseId),
+       stageNumber = Value(stageNumber),
+       content = Value(content);
+  static Insertable<CaseStage> custom({
+    Expression<int>? id,
+    Expression<String>? caseId,
+    Expression<int>? stageNumber,
+    Expression<String>? stageType,
+    Expression<String>? content,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (caseId != null) 'case_id': caseId,
+      if (stageNumber != null) 'stage_number': stageNumber,
+      if (stageType != null) 'stage_type': stageType,
+      if (content != null) 'content': content,
+    });
+  }
+
+  CaseStagesCompanion copyWith({
+    Value<int>? id,
+    Value<String>? caseId,
+    Value<int>? stageNumber,
+    Value<String>? stageType,
+    Value<String>? content,
+  }) {
+    return CaseStagesCompanion(
+      id: id ?? this.id,
+      caseId: caseId ?? this.caseId,
+      stageNumber: stageNumber ?? this.stageNumber,
+      stageType: stageType ?? this.stageType,
+      content: content ?? this.content,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (caseId.present) {
+      map['case_id'] = Variable<String>(caseId.value);
+    }
+    if (stageNumber.present) {
+      map['stage_number'] = Variable<int>(stageNumber.value);
+    }
+    if (stageType.present) {
+      map['stage_type'] = Variable<String>(stageType.value);
+    }
+    if (content.present) {
+      map['content'] = Variable<String>(content.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CaseStagesCompanion(')
+          ..write('id: $id, ')
+          ..write('caseId: $caseId, ')
+          ..write('stageNumber: $stageNumber, ')
+          ..write('stageType: $stageType, ')
+          ..write('content: $content')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $CaseOptionsTable extends CaseOptions
+    with TableInfo<$CaseOptionsTable, CaseOption> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $CaseOptionsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _stageIdMeta = const VerificationMeta(
+    'stageId',
+  );
+  @override
+  late final GeneratedColumn<int> stageId = GeneratedColumn<int>(
+    'stage_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES case_stages (id)',
+    ),
+  );
+  static const VerificationMeta _optionTextMeta = const VerificationMeta(
+    'optionText',
+  );
+  @override
+  late final GeneratedColumn<String> optionText = GeneratedColumn<String>(
+    'option_text',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _isCorrectMeta = const VerificationMeta(
+    'isCorrect',
+  );
+  @override
+  late final GeneratedColumn<bool> isCorrect = GeneratedColumn<bool>(
+    'is_correct',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_correct" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _feedbackMeta = const VerificationMeta(
+    'feedback',
+  );
+  @override
+  late final GeneratedColumn<String> feedback = GeneratedColumn<String>(
+    'feedback',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    stageId,
+    optionText,
+    isCorrect,
+    feedback,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'case_options';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<CaseOption> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('stage_id')) {
+      context.handle(
+        _stageIdMeta,
+        stageId.isAcceptableOrUnknown(data['stage_id']!, _stageIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_stageIdMeta);
+    }
+    if (data.containsKey('option_text')) {
+      context.handle(
+        _optionTextMeta,
+        optionText.isAcceptableOrUnknown(data['option_text']!, _optionTextMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_optionTextMeta);
+    }
+    if (data.containsKey('is_correct')) {
+      context.handle(
+        _isCorrectMeta,
+        isCorrect.isAcceptableOrUnknown(data['is_correct']!, _isCorrectMeta),
+      );
+    }
+    if (data.containsKey('feedback')) {
+      context.handle(
+        _feedbackMeta,
+        feedback.isAcceptableOrUnknown(data['feedback']!, _feedbackMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_feedbackMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  CaseOption map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return CaseOption(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      stageId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}stage_id'],
+      )!,
+      optionText: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}option_text'],
+      )!,
+      isCorrect: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_correct'],
+      )!,
+      feedback: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}feedback'],
+      )!,
+    );
+  }
+
+  @override
+  $CaseOptionsTable createAlias(String alias) {
+    return $CaseOptionsTable(attachedDatabase, alias);
+  }
+}
+
+class CaseOption extends DataClass implements Insertable<CaseOption> {
+  final int id;
+  final int stageId;
+  final String optionText;
+  final bool isCorrect;
+  final String feedback;
+  const CaseOption({
+    required this.id,
+    required this.stageId,
+    required this.optionText,
+    required this.isCorrect,
+    required this.feedback,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['stage_id'] = Variable<int>(stageId);
+    map['option_text'] = Variable<String>(optionText);
+    map['is_correct'] = Variable<bool>(isCorrect);
+    map['feedback'] = Variable<String>(feedback);
+    return map;
+  }
+
+  CaseOptionsCompanion toCompanion(bool nullToAbsent) {
+    return CaseOptionsCompanion(
+      id: Value(id),
+      stageId: Value(stageId),
+      optionText: Value(optionText),
+      isCorrect: Value(isCorrect),
+      feedback: Value(feedback),
+    );
+  }
+
+  factory CaseOption.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return CaseOption(
+      id: serializer.fromJson<int>(json['id']),
+      stageId: serializer.fromJson<int>(json['stageId']),
+      optionText: serializer.fromJson<String>(json['optionText']),
+      isCorrect: serializer.fromJson<bool>(json['isCorrect']),
+      feedback: serializer.fromJson<String>(json['feedback']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'stageId': serializer.toJson<int>(stageId),
+      'optionText': serializer.toJson<String>(optionText),
+      'isCorrect': serializer.toJson<bool>(isCorrect),
+      'feedback': serializer.toJson<String>(feedback),
+    };
+  }
+
+  CaseOption copyWith({
+    int? id,
+    int? stageId,
+    String? optionText,
+    bool? isCorrect,
+    String? feedback,
+  }) => CaseOption(
+    id: id ?? this.id,
+    stageId: stageId ?? this.stageId,
+    optionText: optionText ?? this.optionText,
+    isCorrect: isCorrect ?? this.isCorrect,
+    feedback: feedback ?? this.feedback,
+  );
+  CaseOption copyWithCompanion(CaseOptionsCompanion data) {
+    return CaseOption(
+      id: data.id.present ? data.id.value : this.id,
+      stageId: data.stageId.present ? data.stageId.value : this.stageId,
+      optionText: data.optionText.present
+          ? data.optionText.value
+          : this.optionText,
+      isCorrect: data.isCorrect.present ? data.isCorrect.value : this.isCorrect,
+      feedback: data.feedback.present ? data.feedback.value : this.feedback,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CaseOption(')
+          ..write('id: $id, ')
+          ..write('stageId: $stageId, ')
+          ..write('optionText: $optionText, ')
+          ..write('isCorrect: $isCorrect, ')
+          ..write('feedback: $feedback')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, stageId, optionText, isCorrect, feedback);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is CaseOption &&
+          other.id == this.id &&
+          other.stageId == this.stageId &&
+          other.optionText == this.optionText &&
+          other.isCorrect == this.isCorrect &&
+          other.feedback == this.feedback);
+}
+
+class CaseOptionsCompanion extends UpdateCompanion<CaseOption> {
+  final Value<int> id;
+  final Value<int> stageId;
+  final Value<String> optionText;
+  final Value<bool> isCorrect;
+  final Value<String> feedback;
+  const CaseOptionsCompanion({
+    this.id = const Value.absent(),
+    this.stageId = const Value.absent(),
+    this.optionText = const Value.absent(),
+    this.isCorrect = const Value.absent(),
+    this.feedback = const Value.absent(),
+  });
+  CaseOptionsCompanion.insert({
+    this.id = const Value.absent(),
+    required int stageId,
+    required String optionText,
+    this.isCorrect = const Value.absent(),
+    required String feedback,
+  }) : stageId = Value(stageId),
+       optionText = Value(optionText),
+       feedback = Value(feedback);
+  static Insertable<CaseOption> custom({
+    Expression<int>? id,
+    Expression<int>? stageId,
+    Expression<String>? optionText,
+    Expression<bool>? isCorrect,
+    Expression<String>? feedback,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (stageId != null) 'stage_id': stageId,
+      if (optionText != null) 'option_text': optionText,
+      if (isCorrect != null) 'is_correct': isCorrect,
+      if (feedback != null) 'feedback': feedback,
+    });
+  }
+
+  CaseOptionsCompanion copyWith({
+    Value<int>? id,
+    Value<int>? stageId,
+    Value<String>? optionText,
+    Value<bool>? isCorrect,
+    Value<String>? feedback,
+  }) {
+    return CaseOptionsCompanion(
+      id: id ?? this.id,
+      stageId: stageId ?? this.stageId,
+      optionText: optionText ?? this.optionText,
+      isCorrect: isCorrect ?? this.isCorrect,
+      feedback: feedback ?? this.feedback,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (stageId.present) {
+      map['stage_id'] = Variable<int>(stageId.value);
+    }
+    if (optionText.present) {
+      map['option_text'] = Variable<String>(optionText.value);
+    }
+    if (isCorrect.present) {
+      map['is_correct'] = Variable<bool>(isCorrect.value);
+    }
+    if (feedback.present) {
+      map['feedback'] = Variable<String>(feedback.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CaseOptionsCompanion(')
+          ..write('id: $id, ')
+          ..write('stageId: $stageId, ')
+          ..write('optionText: $optionText, ')
+          ..write('isCorrect: $isCorrect, ')
+          ..write('feedback: $feedback')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $CaseProgressTable extends CaseProgress
+    with TableInfo<$CaseProgressTable, CaseProgressData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $CaseProgressTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _caseIdMeta = const VerificationMeta('caseId');
+  @override
+  late final GeneratedColumn<String> caseId = GeneratedColumn<String>(
+    'case_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _startedAtMeta = const VerificationMeta(
+    'startedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> startedAt = GeneratedColumn<DateTime>(
+    'started_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _completedAtMeta = const VerificationMeta(
+    'completedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> completedAt = GeneratedColumn<DateTime>(
+    'completed_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _currentStageMeta = const VerificationMeta(
+    'currentStage',
+  );
+  @override
+  late final GeneratedColumn<int> currentStage = GeneratedColumn<int>(
+    'current_stage',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  static const VerificationMeta _correctDecisionsMeta = const VerificationMeta(
+    'correctDecisions',
+  );
+  @override
+  late final GeneratedColumn<int> correctDecisions = GeneratedColumn<int>(
+    'correct_decisions',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _totalDecisionsMeta = const VerificationMeta(
+    'totalDecisions',
+  );
+  @override
+  late final GeneratedColumn<int> totalDecisions = GeneratedColumn<int>(
+    'total_decisions',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _hintsUsedMeta = const VerificationMeta(
+    'hintsUsed',
+  );
+  @override
+  late final GeneratedColumn<int> hintsUsed = GeneratedColumn<int>(
+    'hints_used',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _examModeMeta = const VerificationMeta(
+    'examMode',
+  );
+  @override
+  late final GeneratedColumn<bool> examMode = GeneratedColumn<bool>(
+    'exam_mode',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("exam_mode" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    caseId,
+    startedAt,
+    completedAt,
+    currentStage,
+    correctDecisions,
+    totalDecisions,
+    hintsUsed,
+    examMode,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'case_progress';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<CaseProgressData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('case_id')) {
+      context.handle(
+        _caseIdMeta,
+        caseId.isAcceptableOrUnknown(data['case_id']!, _caseIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_caseIdMeta);
+    }
+    if (data.containsKey('started_at')) {
+      context.handle(
+        _startedAtMeta,
+        startedAt.isAcceptableOrUnknown(data['started_at']!, _startedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_startedAtMeta);
+    }
+    if (data.containsKey('completed_at')) {
+      context.handle(
+        _completedAtMeta,
+        completedAt.isAcceptableOrUnknown(
+          data['completed_at']!,
+          _completedAtMeta,
+        ),
+      );
+    }
+    if (data.containsKey('current_stage')) {
+      context.handle(
+        _currentStageMeta,
+        currentStage.isAcceptableOrUnknown(
+          data['current_stage']!,
+          _currentStageMeta,
+        ),
+      );
+    }
+    if (data.containsKey('correct_decisions')) {
+      context.handle(
+        _correctDecisionsMeta,
+        correctDecisions.isAcceptableOrUnknown(
+          data['correct_decisions']!,
+          _correctDecisionsMeta,
+        ),
+      );
+    }
+    if (data.containsKey('total_decisions')) {
+      context.handle(
+        _totalDecisionsMeta,
+        totalDecisions.isAcceptableOrUnknown(
+          data['total_decisions']!,
+          _totalDecisionsMeta,
+        ),
+      );
+    }
+    if (data.containsKey('hints_used')) {
+      context.handle(
+        _hintsUsedMeta,
+        hintsUsed.isAcceptableOrUnknown(data['hints_used']!, _hintsUsedMeta),
+      );
+    }
+    if (data.containsKey('exam_mode')) {
+      context.handle(
+        _examModeMeta,
+        examMode.isAcceptableOrUnknown(data['exam_mode']!, _examModeMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  CaseProgressData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return CaseProgressData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      caseId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}case_id'],
+      )!,
+      startedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}started_at'],
+      )!,
+      completedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}completed_at'],
+      ),
+      currentStage: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}current_stage'],
+      )!,
+      correctDecisions: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}correct_decisions'],
+      )!,
+      totalDecisions: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}total_decisions'],
+      )!,
+      hintsUsed: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}hints_used'],
+      )!,
+      examMode: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}exam_mode'],
+      )!,
+    );
+  }
+
+  @override
+  $CaseProgressTable createAlias(String alias) {
+    return $CaseProgressTable(attachedDatabase, alias);
+  }
+}
+
+class CaseProgressData extends DataClass
+    implements Insertable<CaseProgressData> {
+  final int id;
+  final String caseId;
+  final DateTime startedAt;
+  final DateTime? completedAt;
+  final int currentStage;
+  final int correctDecisions;
+  final int totalDecisions;
+  final int hintsUsed;
+  final bool examMode;
+  const CaseProgressData({
+    required this.id,
+    required this.caseId,
+    required this.startedAt,
+    this.completedAt,
+    required this.currentStage,
+    required this.correctDecisions,
+    required this.totalDecisions,
+    required this.hintsUsed,
+    required this.examMode,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['case_id'] = Variable<String>(caseId);
+    map['started_at'] = Variable<DateTime>(startedAt);
+    if (!nullToAbsent || completedAt != null) {
+      map['completed_at'] = Variable<DateTime>(completedAt);
+    }
+    map['current_stage'] = Variable<int>(currentStage);
+    map['correct_decisions'] = Variable<int>(correctDecisions);
+    map['total_decisions'] = Variable<int>(totalDecisions);
+    map['hints_used'] = Variable<int>(hintsUsed);
+    map['exam_mode'] = Variable<bool>(examMode);
+    return map;
+  }
+
+  CaseProgressCompanion toCompanion(bool nullToAbsent) {
+    return CaseProgressCompanion(
+      id: Value(id),
+      caseId: Value(caseId),
+      startedAt: Value(startedAt),
+      completedAt: completedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(completedAt),
+      currentStage: Value(currentStage),
+      correctDecisions: Value(correctDecisions),
+      totalDecisions: Value(totalDecisions),
+      hintsUsed: Value(hintsUsed),
+      examMode: Value(examMode),
+    );
+  }
+
+  factory CaseProgressData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return CaseProgressData(
+      id: serializer.fromJson<int>(json['id']),
+      caseId: serializer.fromJson<String>(json['caseId']),
+      startedAt: serializer.fromJson<DateTime>(json['startedAt']),
+      completedAt: serializer.fromJson<DateTime?>(json['completedAt']),
+      currentStage: serializer.fromJson<int>(json['currentStage']),
+      correctDecisions: serializer.fromJson<int>(json['correctDecisions']),
+      totalDecisions: serializer.fromJson<int>(json['totalDecisions']),
+      hintsUsed: serializer.fromJson<int>(json['hintsUsed']),
+      examMode: serializer.fromJson<bool>(json['examMode']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'caseId': serializer.toJson<String>(caseId),
+      'startedAt': serializer.toJson<DateTime>(startedAt),
+      'completedAt': serializer.toJson<DateTime?>(completedAt),
+      'currentStage': serializer.toJson<int>(currentStage),
+      'correctDecisions': serializer.toJson<int>(correctDecisions),
+      'totalDecisions': serializer.toJson<int>(totalDecisions),
+      'hintsUsed': serializer.toJson<int>(hintsUsed),
+      'examMode': serializer.toJson<bool>(examMode),
+    };
+  }
+
+  CaseProgressData copyWith({
+    int? id,
+    String? caseId,
+    DateTime? startedAt,
+    Value<DateTime?> completedAt = const Value.absent(),
+    int? currentStage,
+    int? correctDecisions,
+    int? totalDecisions,
+    int? hintsUsed,
+    bool? examMode,
+  }) => CaseProgressData(
+    id: id ?? this.id,
+    caseId: caseId ?? this.caseId,
+    startedAt: startedAt ?? this.startedAt,
+    completedAt: completedAt.present ? completedAt.value : this.completedAt,
+    currentStage: currentStage ?? this.currentStage,
+    correctDecisions: correctDecisions ?? this.correctDecisions,
+    totalDecisions: totalDecisions ?? this.totalDecisions,
+    hintsUsed: hintsUsed ?? this.hintsUsed,
+    examMode: examMode ?? this.examMode,
+  );
+  CaseProgressData copyWithCompanion(CaseProgressCompanion data) {
+    return CaseProgressData(
+      id: data.id.present ? data.id.value : this.id,
+      caseId: data.caseId.present ? data.caseId.value : this.caseId,
+      startedAt: data.startedAt.present ? data.startedAt.value : this.startedAt,
+      completedAt: data.completedAt.present
+          ? data.completedAt.value
+          : this.completedAt,
+      currentStage: data.currentStage.present
+          ? data.currentStage.value
+          : this.currentStage,
+      correctDecisions: data.correctDecisions.present
+          ? data.correctDecisions.value
+          : this.correctDecisions,
+      totalDecisions: data.totalDecisions.present
+          ? data.totalDecisions.value
+          : this.totalDecisions,
+      hintsUsed: data.hintsUsed.present ? data.hintsUsed.value : this.hintsUsed,
+      examMode: data.examMode.present ? data.examMode.value : this.examMode,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CaseProgressData(')
+          ..write('id: $id, ')
+          ..write('caseId: $caseId, ')
+          ..write('startedAt: $startedAt, ')
+          ..write('completedAt: $completedAt, ')
+          ..write('currentStage: $currentStage, ')
+          ..write('correctDecisions: $correctDecisions, ')
+          ..write('totalDecisions: $totalDecisions, ')
+          ..write('hintsUsed: $hintsUsed, ')
+          ..write('examMode: $examMode')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    caseId,
+    startedAt,
+    completedAt,
+    currentStage,
+    correctDecisions,
+    totalDecisions,
+    hintsUsed,
+    examMode,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is CaseProgressData &&
+          other.id == this.id &&
+          other.caseId == this.caseId &&
+          other.startedAt == this.startedAt &&
+          other.completedAt == this.completedAt &&
+          other.currentStage == this.currentStage &&
+          other.correctDecisions == this.correctDecisions &&
+          other.totalDecisions == this.totalDecisions &&
+          other.hintsUsed == this.hintsUsed &&
+          other.examMode == this.examMode);
+}
+
+class CaseProgressCompanion extends UpdateCompanion<CaseProgressData> {
+  final Value<int> id;
+  final Value<String> caseId;
+  final Value<DateTime> startedAt;
+  final Value<DateTime?> completedAt;
+  final Value<int> currentStage;
+  final Value<int> correctDecisions;
+  final Value<int> totalDecisions;
+  final Value<int> hintsUsed;
+  final Value<bool> examMode;
+  const CaseProgressCompanion({
+    this.id = const Value.absent(),
+    this.caseId = const Value.absent(),
+    this.startedAt = const Value.absent(),
+    this.completedAt = const Value.absent(),
+    this.currentStage = const Value.absent(),
+    this.correctDecisions = const Value.absent(),
+    this.totalDecisions = const Value.absent(),
+    this.hintsUsed = const Value.absent(),
+    this.examMode = const Value.absent(),
+  });
+  CaseProgressCompanion.insert({
+    this.id = const Value.absent(),
+    required String caseId,
+    required DateTime startedAt,
+    this.completedAt = const Value.absent(),
+    this.currentStage = const Value.absent(),
+    this.correctDecisions = const Value.absent(),
+    this.totalDecisions = const Value.absent(),
+    this.hintsUsed = const Value.absent(),
+    this.examMode = const Value.absent(),
+  }) : caseId = Value(caseId),
+       startedAt = Value(startedAt);
+  static Insertable<CaseProgressData> custom({
+    Expression<int>? id,
+    Expression<String>? caseId,
+    Expression<DateTime>? startedAt,
+    Expression<DateTime>? completedAt,
+    Expression<int>? currentStage,
+    Expression<int>? correctDecisions,
+    Expression<int>? totalDecisions,
+    Expression<int>? hintsUsed,
+    Expression<bool>? examMode,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (caseId != null) 'case_id': caseId,
+      if (startedAt != null) 'started_at': startedAt,
+      if (completedAt != null) 'completed_at': completedAt,
+      if (currentStage != null) 'current_stage': currentStage,
+      if (correctDecisions != null) 'correct_decisions': correctDecisions,
+      if (totalDecisions != null) 'total_decisions': totalDecisions,
+      if (hintsUsed != null) 'hints_used': hintsUsed,
+      if (examMode != null) 'exam_mode': examMode,
+    });
+  }
+
+  CaseProgressCompanion copyWith({
+    Value<int>? id,
+    Value<String>? caseId,
+    Value<DateTime>? startedAt,
+    Value<DateTime?>? completedAt,
+    Value<int>? currentStage,
+    Value<int>? correctDecisions,
+    Value<int>? totalDecisions,
+    Value<int>? hintsUsed,
+    Value<bool>? examMode,
+  }) {
+    return CaseProgressCompanion(
+      id: id ?? this.id,
+      caseId: caseId ?? this.caseId,
+      startedAt: startedAt ?? this.startedAt,
+      completedAt: completedAt ?? this.completedAt,
+      currentStage: currentStage ?? this.currentStage,
+      correctDecisions: correctDecisions ?? this.correctDecisions,
+      totalDecisions: totalDecisions ?? this.totalDecisions,
+      hintsUsed: hintsUsed ?? this.hintsUsed,
+      examMode: examMode ?? this.examMode,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (caseId.present) {
+      map['case_id'] = Variable<String>(caseId.value);
+    }
+    if (startedAt.present) {
+      map['started_at'] = Variable<DateTime>(startedAt.value);
+    }
+    if (completedAt.present) {
+      map['completed_at'] = Variable<DateTime>(completedAt.value);
+    }
+    if (currentStage.present) {
+      map['current_stage'] = Variable<int>(currentStage.value);
+    }
+    if (correctDecisions.present) {
+      map['correct_decisions'] = Variable<int>(correctDecisions.value);
+    }
+    if (totalDecisions.present) {
+      map['total_decisions'] = Variable<int>(totalDecisions.value);
+    }
+    if (hintsUsed.present) {
+      map['hints_used'] = Variable<int>(hintsUsed.value);
+    }
+    if (examMode.present) {
+      map['exam_mode'] = Variable<bool>(examMode.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CaseProgressCompanion(')
+          ..write('id: $id, ')
+          ..write('caseId: $caseId, ')
+          ..write('startedAt: $startedAt, ')
+          ..write('completedAt: $completedAt, ')
+          ..write('currentStage: $currentStage, ')
+          ..write('correctDecisions: $correctDecisions, ')
+          ..write('totalDecisions: $totalDecisions, ')
+          ..write('hintsUsed: $hintsUsed, ')
+          ..write('examMode: $examMode')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -2740,6 +4446,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $StudySessionsTable studySessions = $StudySessionsTable(this);
   late final $QuizQuestionsTable quizQuestions = $QuizQuestionsTable(this);
   late final $QuizTableTable quizTable = $QuizTableTable(this);
+  late final $ClinicalCasesTable clinicalCases = $ClinicalCasesTable(this);
+  late final $CaseStagesTable caseStages = $CaseStagesTable(this);
+  late final $CaseOptionsTable caseOptions = $CaseOptionsTable(this);
+  late final $CaseProgressTable caseProgress = $CaseProgressTable(this);
   late final Index idxQuizTableCategory = Index(
     'idx_quiz_table_category',
     'CREATE INDEX idx_quiz_table_category ON quiz_table (category)',
@@ -2754,6 +4464,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     studySessions,
     quizQuestions,
     quizTable,
+    clinicalCases,
+    caseStages,
+    caseOptions,
+    caseProgress,
     idxQuizTableCategory,
   ];
 }
@@ -4325,6 +6039,1332 @@ typedef $$QuizTableTableProcessedTableManager =
       QuizQuestionEntity,
       PrefetchHooks Function()
     >;
+typedef $$ClinicalCasesTableCreateCompanionBuilder =
+    ClinicalCasesCompanion Function({
+      required String id,
+      required String title,
+      required String specialty,
+      Value<String> difficulty,
+      Value<int> estimatedTimeMinutes,
+      Value<String?> learningObjectives,
+      Value<int> rowid,
+    });
+typedef $$ClinicalCasesTableUpdateCompanionBuilder =
+    ClinicalCasesCompanion Function({
+      Value<String> id,
+      Value<String> title,
+      Value<String> specialty,
+      Value<String> difficulty,
+      Value<int> estimatedTimeMinutes,
+      Value<String?> learningObjectives,
+      Value<int> rowid,
+    });
+
+final class $$ClinicalCasesTableReferences
+    extends BaseReferences<_$AppDatabase, $ClinicalCasesTable, ClinicalCase> {
+  $$ClinicalCasesTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static MultiTypedResultKey<$CaseStagesTable, List<CaseStage>>
+  _caseStagesRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.caseStages,
+    aliasName: $_aliasNameGenerator(db.clinicalCases.id, db.caseStages.caseId),
+  );
+
+  $$CaseStagesTableProcessedTableManager get caseStagesRefs {
+    final manager = $$CaseStagesTableTableManager(
+      $_db,
+      $_db.caseStages,
+    ).filter((f) => f.caseId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_caseStagesRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$ClinicalCasesTableFilterComposer
+    extends Composer<_$AppDatabase, $ClinicalCasesTable> {
+  $$ClinicalCasesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get specialty => $composableBuilder(
+    column: $table.specialty,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get difficulty => $composableBuilder(
+    column: $table.difficulty,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get estimatedTimeMinutes => $composableBuilder(
+    column: $table.estimatedTimeMinutes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get learningObjectives => $composableBuilder(
+    column: $table.learningObjectives,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  Expression<bool> caseStagesRefs(
+    Expression<bool> Function($$CaseStagesTableFilterComposer f) f,
+  ) {
+    final $$CaseStagesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.caseStages,
+      getReferencedColumn: (t) => t.caseId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CaseStagesTableFilterComposer(
+            $db: $db,
+            $table: $db.caseStages,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$ClinicalCasesTableOrderingComposer
+    extends Composer<_$AppDatabase, $ClinicalCasesTable> {
+  $$ClinicalCasesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get specialty => $composableBuilder(
+    column: $table.specialty,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get difficulty => $composableBuilder(
+    column: $table.difficulty,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get estimatedTimeMinutes => $composableBuilder(
+    column: $table.estimatedTimeMinutes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get learningObjectives => $composableBuilder(
+    column: $table.learningObjectives,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ClinicalCasesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ClinicalCasesTable> {
+  $$ClinicalCasesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get title =>
+      $composableBuilder(column: $table.title, builder: (column) => column);
+
+  GeneratedColumn<String> get specialty =>
+      $composableBuilder(column: $table.specialty, builder: (column) => column);
+
+  GeneratedColumn<String> get difficulty => $composableBuilder(
+    column: $table.difficulty,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get estimatedTimeMinutes => $composableBuilder(
+    column: $table.estimatedTimeMinutes,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get learningObjectives => $composableBuilder(
+    column: $table.learningObjectives,
+    builder: (column) => column,
+  );
+
+  Expression<T> caseStagesRefs<T extends Object>(
+    Expression<T> Function($$CaseStagesTableAnnotationComposer a) f,
+  ) {
+    final $$CaseStagesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.caseStages,
+      getReferencedColumn: (t) => t.caseId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CaseStagesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.caseStages,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$ClinicalCasesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ClinicalCasesTable,
+          ClinicalCase,
+          $$ClinicalCasesTableFilterComposer,
+          $$ClinicalCasesTableOrderingComposer,
+          $$ClinicalCasesTableAnnotationComposer,
+          $$ClinicalCasesTableCreateCompanionBuilder,
+          $$ClinicalCasesTableUpdateCompanionBuilder,
+          (ClinicalCase, $$ClinicalCasesTableReferences),
+          ClinicalCase,
+          PrefetchHooks Function({bool caseStagesRefs})
+        > {
+  $$ClinicalCasesTableTableManager(_$AppDatabase db, $ClinicalCasesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ClinicalCasesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ClinicalCasesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ClinicalCasesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> title = const Value.absent(),
+                Value<String> specialty = const Value.absent(),
+                Value<String> difficulty = const Value.absent(),
+                Value<int> estimatedTimeMinutes = const Value.absent(),
+                Value<String?> learningObjectives = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ClinicalCasesCompanion(
+                id: id,
+                title: title,
+                specialty: specialty,
+                difficulty: difficulty,
+                estimatedTimeMinutes: estimatedTimeMinutes,
+                learningObjectives: learningObjectives,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String title,
+                required String specialty,
+                Value<String> difficulty = const Value.absent(),
+                Value<int> estimatedTimeMinutes = const Value.absent(),
+                Value<String?> learningObjectives = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ClinicalCasesCompanion.insert(
+                id: id,
+                title: title,
+                specialty: specialty,
+                difficulty: difficulty,
+                estimatedTimeMinutes: estimatedTimeMinutes,
+                learningObjectives: learningObjectives,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$ClinicalCasesTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({caseStagesRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [if (caseStagesRefs) db.caseStages],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (caseStagesRefs)
+                    await $_getPrefetchedData<
+                      ClinicalCase,
+                      $ClinicalCasesTable,
+                      CaseStage
+                    >(
+                      currentTable: table,
+                      referencedTable: $$ClinicalCasesTableReferences
+                          ._caseStagesRefsTable(db),
+                      managerFromTypedResult: (p0) =>
+                          $$ClinicalCasesTableReferences(
+                            db,
+                            table,
+                            p0,
+                          ).caseStagesRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) =>
+                          referencedItems.where((e) => e.caseId == item.id),
+                      typedResults: items,
+                    ),
+                ];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$ClinicalCasesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ClinicalCasesTable,
+      ClinicalCase,
+      $$ClinicalCasesTableFilterComposer,
+      $$ClinicalCasesTableOrderingComposer,
+      $$ClinicalCasesTableAnnotationComposer,
+      $$ClinicalCasesTableCreateCompanionBuilder,
+      $$ClinicalCasesTableUpdateCompanionBuilder,
+      (ClinicalCase, $$ClinicalCasesTableReferences),
+      ClinicalCase,
+      PrefetchHooks Function({bool caseStagesRefs})
+    >;
+typedef $$CaseStagesTableCreateCompanionBuilder =
+    CaseStagesCompanion Function({
+      Value<int> id,
+      required String caseId,
+      required int stageNumber,
+      Value<String> stageType,
+      required String content,
+    });
+typedef $$CaseStagesTableUpdateCompanionBuilder =
+    CaseStagesCompanion Function({
+      Value<int> id,
+      Value<String> caseId,
+      Value<int> stageNumber,
+      Value<String> stageType,
+      Value<String> content,
+    });
+
+final class $$CaseStagesTableReferences
+    extends BaseReferences<_$AppDatabase, $CaseStagesTable, CaseStage> {
+  $$CaseStagesTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $ClinicalCasesTable _caseIdTable(_$AppDatabase db) =>
+      db.clinicalCases.createAlias(
+        $_aliasNameGenerator(db.caseStages.caseId, db.clinicalCases.id),
+      );
+
+  $$ClinicalCasesTableProcessedTableManager get caseId {
+    final $_column = $_itemColumn<String>('case_id')!;
+
+    final manager = $$ClinicalCasesTableTableManager(
+      $_db,
+      $_db.clinicalCases,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_caseIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static MultiTypedResultKey<$CaseOptionsTable, List<CaseOption>>
+  _caseOptionsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.caseOptions,
+    aliasName: $_aliasNameGenerator(db.caseStages.id, db.caseOptions.stageId),
+  );
+
+  $$CaseOptionsTableProcessedTableManager get caseOptionsRefs {
+    final manager = $$CaseOptionsTableTableManager(
+      $_db,
+      $_db.caseOptions,
+    ).filter((f) => f.stageId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_caseOptionsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$CaseStagesTableFilterComposer
+    extends Composer<_$AppDatabase, $CaseStagesTable> {
+  $$CaseStagesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get stageNumber => $composableBuilder(
+    column: $table.stageNumber,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get stageType => $composableBuilder(
+    column: $table.stageType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get content => $composableBuilder(
+    column: $table.content,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$ClinicalCasesTableFilterComposer get caseId {
+    final $$ClinicalCasesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.caseId,
+      referencedTable: $db.clinicalCases,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ClinicalCasesTableFilterComposer(
+            $db: $db,
+            $table: $db.clinicalCases,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  Expression<bool> caseOptionsRefs(
+    Expression<bool> Function($$CaseOptionsTableFilterComposer f) f,
+  ) {
+    final $$CaseOptionsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.caseOptions,
+      getReferencedColumn: (t) => t.stageId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CaseOptionsTableFilterComposer(
+            $db: $db,
+            $table: $db.caseOptions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$CaseStagesTableOrderingComposer
+    extends Composer<_$AppDatabase, $CaseStagesTable> {
+  $$CaseStagesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get stageNumber => $composableBuilder(
+    column: $table.stageNumber,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get stageType => $composableBuilder(
+    column: $table.stageType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get content => $composableBuilder(
+    column: $table.content,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$ClinicalCasesTableOrderingComposer get caseId {
+    final $$ClinicalCasesTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.caseId,
+      referencedTable: $db.clinicalCases,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ClinicalCasesTableOrderingComposer(
+            $db: $db,
+            $table: $db.clinicalCases,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$CaseStagesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $CaseStagesTable> {
+  $$CaseStagesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get stageNumber => $composableBuilder(
+    column: $table.stageNumber,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get stageType =>
+      $composableBuilder(column: $table.stageType, builder: (column) => column);
+
+  GeneratedColumn<String> get content =>
+      $composableBuilder(column: $table.content, builder: (column) => column);
+
+  $$ClinicalCasesTableAnnotationComposer get caseId {
+    final $$ClinicalCasesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.caseId,
+      referencedTable: $db.clinicalCases,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ClinicalCasesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.clinicalCases,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  Expression<T> caseOptionsRefs<T extends Object>(
+    Expression<T> Function($$CaseOptionsTableAnnotationComposer a) f,
+  ) {
+    final $$CaseOptionsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.caseOptions,
+      getReferencedColumn: (t) => t.stageId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CaseOptionsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.caseOptions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$CaseStagesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $CaseStagesTable,
+          CaseStage,
+          $$CaseStagesTableFilterComposer,
+          $$CaseStagesTableOrderingComposer,
+          $$CaseStagesTableAnnotationComposer,
+          $$CaseStagesTableCreateCompanionBuilder,
+          $$CaseStagesTableUpdateCompanionBuilder,
+          (CaseStage, $$CaseStagesTableReferences),
+          CaseStage,
+          PrefetchHooks Function({bool caseId, bool caseOptionsRefs})
+        > {
+  $$CaseStagesTableTableManager(_$AppDatabase db, $CaseStagesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$CaseStagesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$CaseStagesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$CaseStagesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> caseId = const Value.absent(),
+                Value<int> stageNumber = const Value.absent(),
+                Value<String> stageType = const Value.absent(),
+                Value<String> content = const Value.absent(),
+              }) => CaseStagesCompanion(
+                id: id,
+                caseId: caseId,
+                stageNumber: stageNumber,
+                stageType: stageType,
+                content: content,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String caseId,
+                required int stageNumber,
+                Value<String> stageType = const Value.absent(),
+                required String content,
+              }) => CaseStagesCompanion.insert(
+                id: id,
+                caseId: caseId,
+                stageNumber: stageNumber,
+                stageType: stageType,
+                content: content,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$CaseStagesTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({caseId = false, caseOptionsRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [if (caseOptionsRefs) db.caseOptions],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (caseId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.caseId,
+                                referencedTable: $$CaseStagesTableReferences
+                                    ._caseIdTable(db),
+                                referencedColumn: $$CaseStagesTableReferences
+                                    ._caseIdTable(db)
+                                    .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (caseOptionsRefs)
+                    await $_getPrefetchedData<
+                      CaseStage,
+                      $CaseStagesTable,
+                      CaseOption
+                    >(
+                      currentTable: table,
+                      referencedTable: $$CaseStagesTableReferences
+                          ._caseOptionsRefsTable(db),
+                      managerFromTypedResult: (p0) =>
+                          $$CaseStagesTableReferences(
+                            db,
+                            table,
+                            p0,
+                          ).caseOptionsRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) =>
+                          referencedItems.where((e) => e.stageId == item.id),
+                      typedResults: items,
+                    ),
+                ];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$CaseStagesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $CaseStagesTable,
+      CaseStage,
+      $$CaseStagesTableFilterComposer,
+      $$CaseStagesTableOrderingComposer,
+      $$CaseStagesTableAnnotationComposer,
+      $$CaseStagesTableCreateCompanionBuilder,
+      $$CaseStagesTableUpdateCompanionBuilder,
+      (CaseStage, $$CaseStagesTableReferences),
+      CaseStage,
+      PrefetchHooks Function({bool caseId, bool caseOptionsRefs})
+    >;
+typedef $$CaseOptionsTableCreateCompanionBuilder =
+    CaseOptionsCompanion Function({
+      Value<int> id,
+      required int stageId,
+      required String optionText,
+      Value<bool> isCorrect,
+      required String feedback,
+    });
+typedef $$CaseOptionsTableUpdateCompanionBuilder =
+    CaseOptionsCompanion Function({
+      Value<int> id,
+      Value<int> stageId,
+      Value<String> optionText,
+      Value<bool> isCorrect,
+      Value<String> feedback,
+    });
+
+final class $$CaseOptionsTableReferences
+    extends BaseReferences<_$AppDatabase, $CaseOptionsTable, CaseOption> {
+  $$CaseOptionsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $CaseStagesTable _stageIdTable(_$AppDatabase db) =>
+      db.caseStages.createAlias(
+        $_aliasNameGenerator(db.caseOptions.stageId, db.caseStages.id),
+      );
+
+  $$CaseStagesTableProcessedTableManager get stageId {
+    final $_column = $_itemColumn<int>('stage_id')!;
+
+    final manager = $$CaseStagesTableTableManager(
+      $_db,
+      $_db.caseStages,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_stageIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$CaseOptionsTableFilterComposer
+    extends Composer<_$AppDatabase, $CaseOptionsTable> {
+  $$CaseOptionsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get optionText => $composableBuilder(
+    column: $table.optionText,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isCorrect => $composableBuilder(
+    column: $table.isCorrect,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get feedback => $composableBuilder(
+    column: $table.feedback,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$CaseStagesTableFilterComposer get stageId {
+    final $$CaseStagesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.stageId,
+      referencedTable: $db.caseStages,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CaseStagesTableFilterComposer(
+            $db: $db,
+            $table: $db.caseStages,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$CaseOptionsTableOrderingComposer
+    extends Composer<_$AppDatabase, $CaseOptionsTable> {
+  $$CaseOptionsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get optionText => $composableBuilder(
+    column: $table.optionText,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isCorrect => $composableBuilder(
+    column: $table.isCorrect,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get feedback => $composableBuilder(
+    column: $table.feedback,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$CaseStagesTableOrderingComposer get stageId {
+    final $$CaseStagesTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.stageId,
+      referencedTable: $db.caseStages,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CaseStagesTableOrderingComposer(
+            $db: $db,
+            $table: $db.caseStages,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$CaseOptionsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $CaseOptionsTable> {
+  $$CaseOptionsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get optionText => $composableBuilder(
+    column: $table.optionText,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get isCorrect =>
+      $composableBuilder(column: $table.isCorrect, builder: (column) => column);
+
+  GeneratedColumn<String> get feedback =>
+      $composableBuilder(column: $table.feedback, builder: (column) => column);
+
+  $$CaseStagesTableAnnotationComposer get stageId {
+    final $$CaseStagesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.stageId,
+      referencedTable: $db.caseStages,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CaseStagesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.caseStages,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$CaseOptionsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $CaseOptionsTable,
+          CaseOption,
+          $$CaseOptionsTableFilterComposer,
+          $$CaseOptionsTableOrderingComposer,
+          $$CaseOptionsTableAnnotationComposer,
+          $$CaseOptionsTableCreateCompanionBuilder,
+          $$CaseOptionsTableUpdateCompanionBuilder,
+          (CaseOption, $$CaseOptionsTableReferences),
+          CaseOption,
+          PrefetchHooks Function({bool stageId})
+        > {
+  $$CaseOptionsTableTableManager(_$AppDatabase db, $CaseOptionsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$CaseOptionsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$CaseOptionsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$CaseOptionsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> stageId = const Value.absent(),
+                Value<String> optionText = const Value.absent(),
+                Value<bool> isCorrect = const Value.absent(),
+                Value<String> feedback = const Value.absent(),
+              }) => CaseOptionsCompanion(
+                id: id,
+                stageId: stageId,
+                optionText: optionText,
+                isCorrect: isCorrect,
+                feedback: feedback,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required int stageId,
+                required String optionText,
+                Value<bool> isCorrect = const Value.absent(),
+                required String feedback,
+              }) => CaseOptionsCompanion.insert(
+                id: id,
+                stageId: stageId,
+                optionText: optionText,
+                isCorrect: isCorrect,
+                feedback: feedback,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$CaseOptionsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({stageId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (stageId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.stageId,
+                                referencedTable: $$CaseOptionsTableReferences
+                                    ._stageIdTable(db),
+                                referencedColumn: $$CaseOptionsTableReferences
+                                    ._stageIdTable(db)
+                                    .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$CaseOptionsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $CaseOptionsTable,
+      CaseOption,
+      $$CaseOptionsTableFilterComposer,
+      $$CaseOptionsTableOrderingComposer,
+      $$CaseOptionsTableAnnotationComposer,
+      $$CaseOptionsTableCreateCompanionBuilder,
+      $$CaseOptionsTableUpdateCompanionBuilder,
+      (CaseOption, $$CaseOptionsTableReferences),
+      CaseOption,
+      PrefetchHooks Function({bool stageId})
+    >;
+typedef $$CaseProgressTableCreateCompanionBuilder =
+    CaseProgressCompanion Function({
+      Value<int> id,
+      required String caseId,
+      required DateTime startedAt,
+      Value<DateTime?> completedAt,
+      Value<int> currentStage,
+      Value<int> correctDecisions,
+      Value<int> totalDecisions,
+      Value<int> hintsUsed,
+      Value<bool> examMode,
+    });
+typedef $$CaseProgressTableUpdateCompanionBuilder =
+    CaseProgressCompanion Function({
+      Value<int> id,
+      Value<String> caseId,
+      Value<DateTime> startedAt,
+      Value<DateTime?> completedAt,
+      Value<int> currentStage,
+      Value<int> correctDecisions,
+      Value<int> totalDecisions,
+      Value<int> hintsUsed,
+      Value<bool> examMode,
+    });
+
+class $$CaseProgressTableFilterComposer
+    extends Composer<_$AppDatabase, $CaseProgressTable> {
+  $$CaseProgressTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get caseId => $composableBuilder(
+    column: $table.caseId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get startedAt => $composableBuilder(
+    column: $table.startedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get completedAt => $composableBuilder(
+    column: $table.completedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get currentStage => $composableBuilder(
+    column: $table.currentStage,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get correctDecisions => $composableBuilder(
+    column: $table.correctDecisions,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get totalDecisions => $composableBuilder(
+    column: $table.totalDecisions,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get hintsUsed => $composableBuilder(
+    column: $table.hintsUsed,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get examMode => $composableBuilder(
+    column: $table.examMode,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$CaseProgressTableOrderingComposer
+    extends Composer<_$AppDatabase, $CaseProgressTable> {
+  $$CaseProgressTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get caseId => $composableBuilder(
+    column: $table.caseId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get startedAt => $composableBuilder(
+    column: $table.startedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get completedAt => $composableBuilder(
+    column: $table.completedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get currentStage => $composableBuilder(
+    column: $table.currentStage,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get correctDecisions => $composableBuilder(
+    column: $table.correctDecisions,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get totalDecisions => $composableBuilder(
+    column: $table.totalDecisions,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get hintsUsed => $composableBuilder(
+    column: $table.hintsUsed,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get examMode => $composableBuilder(
+    column: $table.examMode,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$CaseProgressTableAnnotationComposer
+    extends Composer<_$AppDatabase, $CaseProgressTable> {
+  $$CaseProgressTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get caseId =>
+      $composableBuilder(column: $table.caseId, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get startedAt =>
+      $composableBuilder(column: $table.startedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get completedAt => $composableBuilder(
+    column: $table.completedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get currentStage => $composableBuilder(
+    column: $table.currentStage,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get correctDecisions => $composableBuilder(
+    column: $table.correctDecisions,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get totalDecisions => $composableBuilder(
+    column: $table.totalDecisions,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get hintsUsed =>
+      $composableBuilder(column: $table.hintsUsed, builder: (column) => column);
+
+  GeneratedColumn<bool> get examMode =>
+      $composableBuilder(column: $table.examMode, builder: (column) => column);
+}
+
+class $$CaseProgressTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $CaseProgressTable,
+          CaseProgressData,
+          $$CaseProgressTableFilterComposer,
+          $$CaseProgressTableOrderingComposer,
+          $$CaseProgressTableAnnotationComposer,
+          $$CaseProgressTableCreateCompanionBuilder,
+          $$CaseProgressTableUpdateCompanionBuilder,
+          (
+            CaseProgressData,
+            BaseReferences<_$AppDatabase, $CaseProgressTable, CaseProgressData>,
+          ),
+          CaseProgressData,
+          PrefetchHooks Function()
+        > {
+  $$CaseProgressTableTableManager(_$AppDatabase db, $CaseProgressTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$CaseProgressTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$CaseProgressTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$CaseProgressTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> caseId = const Value.absent(),
+                Value<DateTime> startedAt = const Value.absent(),
+                Value<DateTime?> completedAt = const Value.absent(),
+                Value<int> currentStage = const Value.absent(),
+                Value<int> correctDecisions = const Value.absent(),
+                Value<int> totalDecisions = const Value.absent(),
+                Value<int> hintsUsed = const Value.absent(),
+                Value<bool> examMode = const Value.absent(),
+              }) => CaseProgressCompanion(
+                id: id,
+                caseId: caseId,
+                startedAt: startedAt,
+                completedAt: completedAt,
+                currentStage: currentStage,
+                correctDecisions: correctDecisions,
+                totalDecisions: totalDecisions,
+                hintsUsed: hintsUsed,
+                examMode: examMode,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String caseId,
+                required DateTime startedAt,
+                Value<DateTime?> completedAt = const Value.absent(),
+                Value<int> currentStage = const Value.absent(),
+                Value<int> correctDecisions = const Value.absent(),
+                Value<int> totalDecisions = const Value.absent(),
+                Value<int> hintsUsed = const Value.absent(),
+                Value<bool> examMode = const Value.absent(),
+              }) => CaseProgressCompanion.insert(
+                id: id,
+                caseId: caseId,
+                startedAt: startedAt,
+                completedAt: completedAt,
+                currentStage: currentStage,
+                correctDecisions: correctDecisions,
+                totalDecisions: totalDecisions,
+                hintsUsed: hintsUsed,
+                examMode: examMode,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$CaseProgressTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $CaseProgressTable,
+      CaseProgressData,
+      $$CaseProgressTableFilterComposer,
+      $$CaseProgressTableOrderingComposer,
+      $$CaseProgressTableAnnotationComposer,
+      $$CaseProgressTableCreateCompanionBuilder,
+      $$CaseProgressTableUpdateCompanionBuilder,
+      (
+        CaseProgressData,
+        BaseReferences<_$AppDatabase, $CaseProgressTable, CaseProgressData>,
+      ),
+      CaseProgressData,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -4339,4 +7379,12 @@ class $AppDatabaseManager {
       $$QuizQuestionsTableTableManager(_db, _db.quizQuestions);
   $$QuizTableTableTableManager get quizTable =>
       $$QuizTableTableTableManager(_db, _db.quizTable);
+  $$ClinicalCasesTableTableManager get clinicalCases =>
+      $$ClinicalCasesTableTableManager(_db, _db.clinicalCases);
+  $$CaseStagesTableTableManager get caseStages =>
+      $$CaseStagesTableTableManager(_db, _db.caseStages);
+  $$CaseOptionsTableTableManager get caseOptions =>
+      $$CaseOptionsTableTableManager(_db, _db.caseOptions);
+  $$CaseProgressTableTableManager get caseProgress =>
+      $$CaseProgressTableTableManager(_db, _db.caseProgress);
 }
