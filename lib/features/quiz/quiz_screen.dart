@@ -207,7 +207,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
             ),
             child: Text(
               'Explanation: ${question.explanation}',
-              style: const TextStyle(height: 1.5),
+              style: TextStyle(height: 1.5, color: Colors.black87),
             ),
           ),
           const SizedBox(height: 16),
@@ -428,6 +428,7 @@ Future<void> _resetQuizAndPop(BuildContext context) async {
   }
 
   Widget _buildQuestionHeader(QuizTableData question) {
+    final theme = Theme.of(context);
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -438,25 +439,25 @@ Future<void> _resetQuizAndPop(BuildContext context) async {
               fit: FlexFit.loose,
               child: Text(
                 question.category.isEmpty ? 'Practice' : question.category,
-                style: const TextStyle(
-                  color: _gold,
+                style: TextStyle(
+                  color: theme.colorScheme.secondary,
                   fontWeight: FontWeight.bold,
                 ),
               ),
             ),
             Text(
               question.difficulty,
-              style: const TextStyle(color: Colors.grey),
+              style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
             ),
           ],
         ),
         const SizedBox(height: 12),
         Text(
           question.stem,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: _navy,
+            color: theme.colorScheme.onSurface,
           ),
         ),
       ],

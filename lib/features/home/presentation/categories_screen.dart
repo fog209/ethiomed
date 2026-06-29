@@ -91,14 +91,14 @@ class _CategoryTile extends ConsumerWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, size: 40, color: theme.colorScheme.surface),
+              Icon(icon, size: 40, color: theme.colorScheme.secondary),
               const SizedBox(height: 10),
               Text(
                 name,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  color: theme.colorScheme.surface,
+                  color: theme.colorScheme.onSurface,
                 ),
               ),
               const SizedBox(height: 6),
@@ -248,6 +248,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
         loading: () => const SizedBox.shrink(),
         error: (_, _) => const SizedBox.shrink(),
       ),
+      _buildCalculatorsCard(),
       streak.when(
         data: _buildStudyStatsRow,
         loading: _buildStudyStatsLoadingRow,
@@ -442,6 +443,59 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
     } else {
       return '${difference.inDays} days ago';
     }
+  }
+
+  Widget _buildCalculatorsCard() {
+    final theme = Theme.of(context);
+    return Card(
+      margin: const EdgeInsets.only(bottom: 16),
+      color: theme.colorScheme.secondaryContainer,
+      child: InkWell(
+        onTap: () => context.push('/calculators'),
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Icon(
+                Icons.calculate,
+                color: theme.colorScheme.secondary,
+                size: 32,
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Clinical Calculators',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: theme.colorScheme.onSecondaryContainer,
+                        fontSize: 16,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Quick medical calculations',
+                      style: TextStyle(
+                        color: theme.colorScheme.onSecondaryContainer,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.arrow_forward_ios,
+                color: theme.colorScheme.onSecondaryContainer,
+                size: 16,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   Widget _buildTodaysPlanCard(TodayPlanData plan) {
