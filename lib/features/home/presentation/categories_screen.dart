@@ -11,6 +11,7 @@ import '../../../core/database/app_database.dart';
 import '../../../core/providers/sync_state_provider.dart';
 import '../../../features/progress/category_progress_provider.dart';
 import '../../../features/progress/streak_notifier.dart';
+import '../../../features/progress/weekly_stats_provider.dart';
 import '../../articles/data/article_repository.dart';
 
 final todayPlanProvider = FutureProvider<TodayPlanData>((ref) async {
@@ -238,9 +239,15 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
   ) {
     final todayPlanAsync = ref.watch(todayPlanProvider);
     final syncState = ref.watch(syncStateProvider);
+    final weeklyStatsAsync = ref.watch(weeklyStatsProvider);
 
     return [
       _buildSyncStatusRow(syncState),
+      weeklyStatsAsync.when(
+        data: (stats) => _buildWeeklySummaryCard(stats),
+        loading: () => const SizedBox.shrink(),
+        error: (_, _) => const SizedBox.shrink(),
+      ),
       streak.when(
         data: _buildStudyStatsRow,
         loading: _buildStudyStatsLoadingRow,
@@ -260,6 +267,104 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
       _buildFallbackGeneralTile(),
       const SizedBox(height: 80),
     ];
+  }
+
+  Widget _buildWeeklySummaryCard(WeeklyStats stats) {
+    final theme = Theme.of(context);
+    final accuracy = stats.quizzesAnswered > 0
+        ? (stats.quizzesCorrect / stats.quizzesAnswered * 100).round()
+        : 0;
+
+    if (stats.articlesRead == 0 && stats.quizzesAnswered == 0) {
+      return Card(
+        margin: const EdgeInsets.only(bottom: 16),
+        color: theme.colorScheme.secondaryContainer,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "This Week's Progress",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: theme.colorScheme.onSecondaryContainer,
+                  fontSize: 16,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Complete a few quizzes to generate your first weekly report.',
+                style: TextStyle(
+                  color: theme.colorScheme.onSecondaryContainer,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    final summaryLines = <String>[];
+
+    if (accuracy >= 80) {
+      summaryLines.add('Excellent week! $accuracy% accuracy.');
+    } else if (accuracy >= 60) {
+      summaryLines.add('Good progress this week. $accuracy% accuracy.');
+    } else {
+      summaryLines.add('$accuracy% quiz accuracy this week.');
+    }
+
+    if (stats.streak > 0) {
+      summaryLines.add('You maintained a ${stats.streak}-day study streak.');
+    }
+
+    if (stats.strongestCategory.isNotEmpty) {
+      summaryLines.add('${stats.strongestCategory} remains your strongest topic.');
+    }
+
+    if (stats.weakestCategory.isNotEmpty) {
+      summaryLines.add('Focus on ${stats.weakestCategory} next week.');
+    }
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: 16),
+      color: theme.colorScheme.secondaryContainer,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "This Week's Progress",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: theme.colorScheme.onSecondaryContainer,
+                fontSize: 16,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Articles read: ${stats.articlesRead}',
+              style: TextStyle(color: theme.colorScheme.onSecondaryContainer),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Quiz accuracy: $accuracy%',
+              style: TextStyle(color: theme.colorScheme.onSecondaryContainer),
+            ),
+            const SizedBox(height: 12),
+            ...summaryLines.map((line) => Padding(
+              padding: const EdgeInsets.only(bottom: 4),
+              child: Text(
+                line,
+                style: TextStyle(color: theme.colorScheme.onSecondaryContainer),
+              ),
+            )),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _buildSyncStatusRow(SyncState syncState) {
