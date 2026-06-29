@@ -8,7 +8,9 @@ import '../data/article_search_provider.dart';
 import '../../../core/widgets/empty_state.dart';
 
 class ArticleSearchScreen extends ConsumerStatefulWidget {
-  const ArticleSearchScreen({super.key});
+  const ArticleSearchScreen({super.key, this.initialQuery});
+
+  final String? initialQuery;
 
   @override
   ConsumerState<ArticleSearchScreen> createState() {
@@ -34,9 +36,17 @@ class _ArticleSearchScreenState extends ConsumerState<ArticleSearchScreen> {
   @override
   void initState() {
     super.initState();
-    _runAfterBuild(() {
-      ref.read(articleSearchControllerProvider.notifier).updateCategory(null);
-    });
+    final initialQuery = widget.initialQuery;
+    if (initialQuery != null && initialQuery.isNotEmpty) {
+      _controller.text = initialQuery;
+      _runAfterBuild(() {
+        ref.read(articleSearchControllerProvider.notifier).updateQuery(initialQuery);
+      });
+    } else {
+      _runAfterBuild(() {
+        ref.read(articleSearchControllerProvider.notifier).updateCategory(null);
+      });
+    }
   }
 
   @override
@@ -49,7 +59,7 @@ class _ArticleSearchScreenState extends ConsumerState<ArticleSearchScreen> {
     Future.microtask(callback);
   }
 
-@override
+  @override
   Widget build(BuildContext context) {
     final searchState = ref.watch(articleSearchControllerProvider);
     final theme = Theme.of(context);

@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
 import 'core/config/app_config.dart';
 import 'core/database/app_database.dart';
 import 'core/providers/session_timeout_provider.dart';
@@ -12,13 +13,14 @@ import 'core/theme/app_theme.dart';
 import 'features/admin/presentation/admin_dashboard_screen.dart';
 import 'features/admin/data/admin_repository.dart';
 import 'features/articles/presentation/article_detail_screen.dart';
+import 'features/articles/presentation/article_search_screen.dart';
+import 'features/calculators/calculators_screen.dart';
 import 'features/home/presentation/article_list_screen.dart';
 import 'features/auth/presentation/login_screen.dart';
 import 'features/auth/presentation/signup_screen.dart';
 import 'features/legal/disclaimer_screen.dart';
 import 'features/legal/privacy_screen.dart';
 import 'features/legal/terms_screen.dart';
-import 'features/calculators/calculators_screen.dart';
 import 'features/onboarding/onboarding_screen.dart';
 import 'app/main_shell.dart';
 import 'features/subscription/presentation/paywall_screen.dart';
@@ -37,10 +39,6 @@ Future<void> saveThemeMode(ThemeMode mode) async {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Edge-to-edge: draw app content under the transparent status & nav bars so
-  // content flows behind the system bars (Android 15/16 enforces this). Icon
-  // brightness is resolved reactively per active theme in MyApp via
-  // AnnotatedRegion<SystemUiOverlayStyle>.
   await SystemChrome.setEnabledSystemUIMode(
     SystemUiMode.edgeToEdge,
     overlays: const [SystemUiOverlay.top, SystemUiOverlay.bottom],
@@ -68,7 +66,7 @@ void main() async {
         body: Center(
           child: Padding(
             padding: EdgeInsets.all(24),
-            child: Column(
+child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const Icon(Icons.error_outline, size: 48, color: Color(0xFFF9A825)),
@@ -185,6 +183,13 @@ final _router = GoRouter(
         return CalculatorDetailScreen(name: name);
       },
     ),
+    GoRoute(
+      path: '/search',
+      builder: (context, state) {
+        final query = state.extra as String? ?? '';
+        return ArticleSearchScreen(initialQuery: query);
+      },
+    ),
   ],
 );
 
@@ -217,8 +222,6 @@ class MyApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final ThemeMode themeMode = ref.watch(themeModeProvider);
 
-    // Resolve system bar icon brightness from the active theme so the icons
-    // stay legible against transparent edge-to-edge bars in both modes.
     final isDark = themeMode == ThemeMode.dark ||
         (themeMode == ThemeMode.system &&
             View.of(context).platformDispatcher.platformBrightness ==
@@ -311,7 +314,6 @@ class AppEntrance extends ConsumerWidget {
 
         final session = snapshot.data?.session;
 
-        // Reset session timeout when session becomes active
         if (session != null) {
           ref.read(sessionTimeoutProvider.notifier).resetTimer();
         }
@@ -326,7 +328,6 @@ class AppEntrance extends ConsumerWidget {
   }
 }
 
-// THE GATEKEEPER: This decides if the user sees the Library or the Paywall
 class SubscriptionGuard extends ConsumerWidget {
   const SubscriptionGuard({super.key});
 
@@ -337,9 +338,9 @@ class SubscriptionGuard extends ConsumerWidget {
     return isSubscribed.when(
       data: (active) {
         if (active) {
-          return const MainShell(); // SUCCESS: Show the 4-tab app
+          return const MainShell();
         } else {
-          return const PaywallScreen(); // LOCKED: Show the payment instructions
+          return const PaywallScreen();
         }
       },
       loading: () =>

@@ -17,6 +17,75 @@ import '../../../features/quiz/weakness_service.dart';
 
 const _wardReadyGold = Color(0xFFF9A825);
 
+final _medicalTerms = <String>{
+  'acute',
+  'chronic',
+  'heart failure',
+  'myocardial infarction',
+  'coronary artery disease',
+  'heart attack',
+  'stroke',
+  'cerebrovascular accident',
+  'diabetes mellitus',
+  'hypertension',
+  'renal failure',
+  'kidney failure',
+  'pneumonia',
+  'sepsis',
+  'shock',
+  'anemia',
+  'thrombocytopenia',
+  'leukocytosis',
+  'leukopenia',
+  'dyspnea',
+  'dyspepsia',
+  'bradycardia',
+  'tachycardia',
+  'hypotension',
+  'orthopnea',
+  'edema',
+  'rales',
+  'wheezes',
+  'hemoptysis',
+  'hematemesis',
+  'melena',
+  'arrhythmia',
+  'atrial fibrillation',
+  'ventricular fibrillation',
+  'pulmonary embolism',
+  'deep vein thrombosis',
+  'peptic ulcer',
+  'osteoarthritis',
+  'rheumatoid arthritis',
+  'copd',
+  'asthma',
+  'bronchitis',
+  'gastroenteritis',
+  'hepatitis',
+  'nephrotic syndrome',
+  'nephritis',
+  'hyperkalemia',
+  'hypokalemia',
+  'hyponatremia',
+  'hypernatremia',
+  'acidosis',
+  'alkalosis',
+  'cardiac arrest',
+  'angina',
+  'atherosclerosis',
+  'valvular disease',
+  'pulmonary hypertension',
+  'venous thromboembolism',
+  'vte',
+  'acute respiratory distress syndrome',
+  'ards',
+  'chronic obstructive pulmonary disease',
+  'chronic kidney disease',
+  'ckd',
+  'end-stage renal disease',
+  'esrd',
+};
+
 class _ClinicalSectionConfig {
   const _ClinicalSectionConfig({
     required this.title,
@@ -571,7 +640,7 @@ return TextButton(
     );
   }
 
-  Widget _buildMarkdownExpansionTile({
+Widget _buildMarkdownExpansionTile({
     required String title,
     required String content,
     required IconData icon,
@@ -581,6 +650,9 @@ return TextButton(
     double borderWidth = 4.0,
     bool isWeak = false,
   }) {
+    final theme = Theme.of(context);
+    final linkedContent = _addMedicalTermLinks(content);
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
@@ -590,28 +662,53 @@ return TextButton(
           left: BorderSide(color: borderColor, width: borderWidth),
         ),
       ),
-child: ExpansionTile(
-         backgroundColor: backgroundColor,
-         collapsedBackgroundColor: backgroundColor,
-         initiallyExpanded: initiallyExpanded,
-         leading: Icon(icon, color: const Color(0xFF1A237E)),
-         title: isWeak ? _buildWeakSectionHeader(title) : Text(
-           title,
-           style: const TextStyle(color: Colors.white),
-         ),
-         children: [
-           Padding(
-             padding: const EdgeInsets.all(16.0),
-             child: MarkdownBody(
-               data: content,
-               styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
-                 p: const TextStyle(color: Colors.white),
-               ),
-             ),
-           ),
-         ],
-       ),
+      child: ExpansionTile(
+        backgroundColor: backgroundColor,
+        collapsedBackgroundColor: backgroundColor,
+        initiallyExpanded: initiallyExpanded,
+        leading: Icon(icon, color: const Color(0xFF1A237E)),
+        title: isWeak ? _buildWeakSectionHeader(title) : Text(
+          title,
+          style: const TextStyle(color: Colors.white),
+        ),
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: MarkdownBody(
+              data: linkedContent,
+              styleSheet: MarkdownStyleSheet.fromTheme(theme).copyWith(
+                p: const TextStyle(color: Colors.white),
+                a: TextStyle(
+                  color: theme.colorScheme.primary,
+                  decoration: TextDecoration.none,
+                ),
+              ),
+              onTapLink: _handleLinkTap,
+            ),
+          ),
+        ],
+      ),
     );
+  }
+
+  String _addMedicalTermLinks(String content) {
+    var result = content;
+    for (final term in _medicalTerms) {
+      final escapedTerm = RegExp.escape(term);
+      final pattern = RegExp(
+        r'\b' + escapedTerm + r'\b',
+        caseSensitive: false,
+      );
+      result = result.replaceAll(pattern, '[$term](search:$term)');
+    }
+    return result;
+  }
+
+  void _handleLinkTap(String text, String? href, String title) {
+    if (href != null && href.startsWith('search:')) {
+      final query = href.substring(7);
+      context.push('/search', extra: query);
+    }
   }
 
   Map<String, Object?> _decodeSections(String? encodedContent) {
