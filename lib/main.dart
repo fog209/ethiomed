@@ -275,49 +275,6 @@ class MyApp extends ConsumerWidget {
   }
 }
 
-class DisclaimerGate extends StatefulWidget {
-  const DisclaimerGate({super.key});
-
-  @override
-  State<DisclaimerGate> createState() => _DisclaimerGateState();
-}
-
-class _DisclaimerGateState extends State<DisclaimerGate> {
-  static const String _hasSeenDisclaimerKey = 'hasSeenDisclaimer';
-
-  bool? _hasSeenDisclaimer;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadDisclaimerState();
-  }
-
-  Future<void> _loadDisclaimerState() async {
-    final prefs = await SharedPreferences.getInstance();
-    if (!mounted) {
-      return;
-    }
-
-    setState(() {
-      _hasSeenDisclaimer = prefs.getBool(_hasSeenDisclaimerKey) ?? false;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (_hasSeenDisclaimer == null) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
-    }
-
-    if (_hasSeenDisclaimer == true) {
-      return const AppEntrance();
-    }
-
-    return const DisclaimerScreen();
-  }
-}
-
 class AppEntrance extends ConsumerWidget {
   const AppEntrance({super.key});
 

@@ -13,25 +13,26 @@ class PaywallScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: const Color(0xFF1A237E), // Navy
+      backgroundColor: theme.colorScheme.surface,
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(30.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.stars_rounded, size: 100, color: Color(0xFFFFB300)),
+              Icon(Icons.stars_rounded, size: 100, color: theme.colorScheme.secondary),
               const SizedBox(height: 20),
-              const Text(
+              Text(
                 "WardReady Premium",
-                style: TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold),
+                style: TextStyle(color: theme.colorScheme.onSurface, fontSize: 28, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 10),
-              const Text(
+              Text(
                 "Unlock 267+ clinical articles, diagrams, and offline access.",
                 textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.white70, fontSize: 16),
+                style: TextStyle(color: theme.colorScheme.onSurfaceVariant, fontSize: 16),
               ),
               const SizedBox(height: 30),
               
@@ -42,13 +43,15 @@ class PaywallScreen extends ConsumerWidget {
                   padding: const EdgeInsets.all(20.0),
                   child: Column(
                     children: [
-                      const Text("HOW TO ACTIVATE", style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF1A237E))),
+Text("HOW TO ACTIVATE",
+                          style: TextStyle(fontWeight: FontWeight.bold, color: theme.colorScheme.primary)),
                       const SizedBox(height: 15),
-                      const Text("1. Pay 500 ETB via Telebirr to:", textAlign: TextAlign.center),
+                      Text("1. Pay 500 ETB via Telebirr to:", textAlign: TextAlign.center,
+                          style: TextStyle(color: theme.colorScheme.onSurface)),
                       const SizedBox(height: 5),
                       SelectableText(
                         telebirrNumber,
-                        style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF1A237E)),
+                        style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: theme.colorScheme.primary),
                       ),
                       const SizedBox(height: 15),
                       ElevatedButton.icon(
@@ -69,8 +72,8 @@ class PaywallScreen extends ConsumerWidget {
               // TELEGRAM BUTTON
               OutlinedButton.icon(
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: const Color(0xFFFFB300),
-                  side: const BorderSide(color: Color(0xFFFFB300)),
+                  foregroundColor: theme.colorScheme.secondary,
+                  side: BorderSide(color: theme.colorScheme.secondary),
                   minimumSize: const Size(double.infinity, 50),
                 ),
                 icon: const Icon(Icons.send),
@@ -88,8 +91,8 @@ class PaywallScreen extends ConsumerWidget {
               // REFRESH BUTTON
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFFFB300),
-                  foregroundColor: const Color(0xFF1A237E),
+                  backgroundColor: theme.colorScheme.secondary,
+                  foregroundColor: theme.colorScheme.onSecondary,
                   minimumSize: const Size(double.infinity, 55),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),

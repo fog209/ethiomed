@@ -65,8 +65,9 @@ class _DatabaseRecoveryScreenState extends State<DatabaseRecoveryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: const Color(0xFF1A237E),
+      backgroundColor: theme.colorScheme.surface,
       body: SafeArea(
         child: Center(
           child: Padding(
@@ -74,21 +75,21 @@ class _DatabaseRecoveryScreenState extends State<DatabaseRecoveryScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.storage, color: Colors.amber, size: 64),
+                Icon(Icons.storage, color: theme.colorScheme.secondary, size: 64),
                 const SizedBox(height: 24),
-                const Text(
+                Text(
                   'App data could not be loaded',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: theme.colorScheme.onSurface,
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
                   ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 16),
-                const Text(
+                Text(
                   'Your downloaded content needs to be refreshed.',
-                  style: TextStyle(color: Colors.white70, fontSize: 16),
+                  style: TextStyle(color: theme.colorScheme.onSurfaceVariant, fontSize: 16),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 32),
@@ -102,9 +103,9 @@ class _DatabaseRecoveryScreenState extends State<DatabaseRecoveryScreen> {
                   ),
                 ),
                 const SizedBox(height: 12),
-                const Text(
+                Text(
                   'Your account and subscription are not affected',
-                  style: TextStyle(color: Colors.white54, fontSize: 12),
+                  style: TextStyle(color: theme.colorScheme.onSurfaceVariant, fontSize: 12),
                   textAlign: TextAlign.center,
                 ),
               ],

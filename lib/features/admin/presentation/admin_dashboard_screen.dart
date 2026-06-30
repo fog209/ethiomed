@@ -11,12 +11,13 @@ class AdminDashboardScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final usersAsync = ref.watch(adminUsersProvider);
+    final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Admin Dashboard'),
-        backgroundColor: const Color(0xFF1A237E),
-        foregroundColor: const Color(0xFFFFB300),
+        backgroundColor: theme.colorScheme.surface,
+        foregroundColor: theme.colorScheme.onSurface,
       ),
       body: usersAsync.when(
         data: (users) {
@@ -34,12 +35,12 @@ class AdminDashboardScreen extends ConsumerWidget {
                 child: ListTile(
                   isThreeLine: true,
                   leading: CircleAvatar(
-                    backgroundColor: const Color(0xFFFFB300),
-                    foregroundColor: const Color(0xFF1A237E),
+                    backgroundColor: theme.colorScheme.secondary,
+                    foregroundColor: theme.colorScheme.onSecondary,
                     child: Text(
                       _initials(user.fullName ?? user.email ?? user.userId),
-                      style: const TextStyle(
-                        color: Color(0xFF1A237E),
+                      style: TextStyle(
+                        color: theme.colorScheme.onSecondary,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -64,8 +65,8 @@ class AdminDashboardScreen extends ConsumerWidget {
                   ),
                   trailing: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFFFB300),
-                      foregroundColor: const Color(0xFF1A237E),
+                      backgroundColor: theme.colorScheme.secondary,
+                      foregroundColor: theme.colorScheme.onSecondary,
                     ),
                     onPressed: user.isSubscribed
                         ? null
@@ -78,10 +79,10 @@ class AdminDashboardScreen extends ConsumerWidget {
                                 return;
                               }
                               ref.invalidate(adminUsersProvider);
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('User activated successfully.'),
-                                  backgroundColor: Color(0xFF2E7D32),
+ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: const Text('User activated successfully.'),
+                                  backgroundColor: theme.colorScheme.secondary,
                                 ),
                               );
                             } catch (error) {

@@ -41,8 +41,9 @@ class _MainShellState extends ConsumerState<MainShell> {
         final theme = Theme.of(context);
         ScaffoldMessenger.of(context).showMaterialBanner(
           MaterialBanner(
-            content: const Text(
+            content: Text(
               'Your subscription has expired. Renew to keep learning.',
+              style: TextStyle(color: theme.colorScheme.onSurface),
             ),
             backgroundColor: theme.colorScheme.surface,
             leading: Icon(Icons.lock_clock, color: theme.colorScheme.primary),
@@ -57,9 +58,9 @@ class _MainShellState extends ConsumerState<MainShell> {
               TextButton(
                 onPressed: () =>
                     ScaffoldMessenger.of(context).hideCurrentMaterialBanner(),
-                child: const Text(
+                child: Text(
                   'LATER',
-                  style: TextStyle(color: Colors.white54),
+                  style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
                 ),
               ),
             ],
@@ -128,7 +129,7 @@ class _MainShellState extends ConsumerState<MainShell> {
         },
         type: BottomNavigationBarType.fixed, // Required for 5+ items
         selectedItemColor: Theme.of(context).colorScheme.primary,
-        unselectedItemColor: Colors.grey,
+        unselectedItemColor: Theme.of(context).colorScheme.onSurfaceVariant,
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.grid_view),
@@ -151,18 +152,19 @@ class _MainShellState extends ConsumerState<MainShell> {
   }
 
   Widget _buildServerUnreachableBanner() {
+    final theme = Theme.of(context);
     return MaterialBanner(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      content: const Text(
+      content: Text(
         'Server unreachable — showing saved content',
-        style: TextStyle(color: Colors.white),
+        style: TextStyle(color: theme.colorScheme.onErrorContainer),
       ),
-      backgroundColor: Colors.orange.shade800,
-      leading: const Icon(Icons.cloud_off, color: Colors.white),
+      backgroundColor: theme.colorScheme.errorContainer,
+      leading: Icon(Icons.cloud_off, color: theme.colorScheme.onErrorContainer),
       actions: [
         TextButton(
           onPressed: () => ref.invalidate(allArticlesProvider),
-          child: const Text('RETRY', style: TextStyle(color: Colors.white)),
+          child: Text('RETRY', style: TextStyle(color: theme.colorScheme.onErrorContainer)),
         ),
       ],
     );

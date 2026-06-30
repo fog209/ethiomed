@@ -4,14 +4,16 @@ void showDiskFullBanner(BuildContext context) {
   if (!context.mounted) {
     return;
   }
+  final theme = Theme.of(context);
 
   ScaffoldMessenger.of(context).showMaterialBanner(
     MaterialBanner(
-      content: const Text(
+      content: Text(
         'Storage full — some content may not save. Free up space and restart the app.',
+        style: TextStyle(color: theme.colorScheme.onError),
       ),
-      backgroundColor: Colors.red.shade700,
-      leading: const Icon(Icons.storage, color: Colors.white),
+      backgroundColor: theme.colorScheme.error,
+      leading: Icon(Icons.storage, color: theme.colorScheme.onError),
       actions: const <Widget>[],
     ),
   );
