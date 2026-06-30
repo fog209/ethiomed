@@ -92,7 +92,7 @@ return progressAsyncValue.when(
              mainAxisSize: MainAxisSize.min,
              children: [
                SizedBox(
-                 height: 80,
+                 height: 95,
                  child: Column(
                    mainAxisAlignment: MainAxisAlignment.center,
                    children: [
