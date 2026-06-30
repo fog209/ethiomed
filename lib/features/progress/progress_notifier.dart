@@ -105,27 +105,15 @@ class ProgressNotifier extends AsyncNotifier<ProgressData> {
   }
 
   Future<List<CategoryProgressRow>> _loadCategoryProgress() async {
-    // Categories are stored in articles.category, nullable.
-    // We'll return per distinct non-null category.
-    final categories = await _db.customSelect('''
-      SELECT COALESCE(category, '') AS category
-      FROM articles
-      WHERE category IS NOT NULL AND category != ''
-      GROUP BY category
-      ORDER BY category ASC
-    ''').get();
-
-    final List<CategoryProgressRow> rows = [];
-    for (final c in categories) {
-      final category = c.read<String>('category');
-      if (category.isEmpty) continue;
-
-      final total = await _db.countArticlesByCategory(category);
-      final read = await _db.countReadArticlesByCategory(category);
-
-      rows.add((category: category, read: read, total: total));
-    }
-    return rows;
+    // Single GROUP BY query replaces the previous 1 + 2N pattern (list
+    // categories, then countArticlesByCategory + countReadArticlesByCategory
+    // per category). At 19 categories that was ~39 round-trips; now 2 (the
+    // batch query plus the view_history ensure inside it).
+    final rows = await _db.loadCategoryProgressBatch();
+    return [
+      for (final r in rows)
+        (category: r.category, read: r.read, total: r.total),
+    ];
   }
 
   Future<List<QuizAccuracyByCategoryRow>> _loadQuizAccuracyByCategory() async {

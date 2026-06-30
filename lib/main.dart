@@ -14,8 +14,10 @@ import 'features/admin/presentation/admin_dashboard_screen.dart';
 import 'features/admin/data/admin_repository.dart';
 import 'features/articles/presentation/article_detail_screen.dart';
 import 'features/articles/presentation/article_search_screen.dart';
-import 'features/cases/presentation/case_screen.dart';
+import 'features/quiz/presentation/exam_screen.dart';
+import 'features/quiz/presentation/exam_results_screen.dart';
 import 'features/calculators/calculators_screen.dart';
+import 'features/cases/presentation/case_screen.dart';
 import 'features/home/presentation/article_list_screen.dart';
 import 'features/auth/presentation/login_screen.dart';
 import 'features/auth/presentation/signup_screen.dart';
@@ -195,12 +197,20 @@ final _router = GoRouter(
       path: '/cases',
       builder: (context, state) => const ClinicalCasesScreen(),
     ),
-    GoRoute(
+GoRoute(
       path: '/case-detail',
       builder: (context, state) {
         final caseId = state.extra as String? ?? '';
         return CaseDetailScreen(caseId: caseId);
       },
+    ),
+    GoRoute(
+      path: '/exam',
+      builder: (context, state) => const ExamScreen(),
+    ),
+    GoRoute(
+      path: '/exam-results',
+      builder: (context, state) => const ExamResultsScreen(),
     ),
   ],
 );

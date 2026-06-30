@@ -130,17 +130,24 @@ class _ArticleSearchScreenState extends ConsumerState<ArticleSearchScreen> {
             return Padding(
               padding: const EdgeInsets.only(right: 8),
               child: FilterChip(
-                label: Text(category, style: TextStyle(color: theme.colorScheme.onSurface)),
+                label: Text(
+                  category,
+                  style: TextStyle(
+                    color: isSelected
+                        ? theme.colorScheme.onSecondary
+                        : theme.colorScheme.onSurface,
+                  ),
+                ),
                 selected: isSelected,
                 selectedColor: secondary,
                 side: isSelected
                     ? BorderSide(color: secondary)
                     : BorderSide(color: outline),
-onSelected: (selected) {
+                onSelected: (selected) {
                   _runAfterBuild(() {
                     ref
-                      .read(articleSearchControllerProvider.notifier)
-                      .updateCategory(selected ? category : null);
+                        .read(articleSearchControllerProvider.notifier)
+                        .updateCategory(selected ? category : null);
                   });
                 },
               ),

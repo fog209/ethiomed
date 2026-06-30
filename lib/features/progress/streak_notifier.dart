@@ -1,4 +1,3 @@
-import 'package:drift/drift.dart' show Variable;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -39,31 +38,9 @@ class StreakNotifier extends AsyncNotifier<StudyStreakStats> {
     }
   }
 
-  Future<void> recordQuizResult(bool correct) async {
+Future<void> recordQuizResult(bool correct) async {
     try {
-      final correctIncrement = correct ? 1 : 0;
-      await _db
-          .customSelect(
-            '''
-        INSERT INTO study_sessions (
-          date,
-          session_date,
-          articles_read,
-          quizzes_completed,
-          quiz_correct
-        ) VALUES (?, ?, 0, 1, ?)
-        ON CONFLICT(date) DO UPDATE SET
-          quizzes_completed = quizzes_completed + 1,
-          quiz_correct = quiz_correct + ?
-        ''',
-            variables: [
-              Variable(_todayKey()),
-              Variable(_todayKey()),
-              Variable(correctIncrement),
-              Variable(correctIncrement),
-            ],
-          )
-          .get();
+      await _db.recordQuizResult(correct);
       state = const AsyncLoading<StudyStreakStats>();
       state = AsyncData(await _loadStats());
     } catch (error) {
@@ -112,12 +89,5 @@ class StreakNotifier extends AsyncNotifier<StudyStreakStats> {
     }
 
     return correctAnswers * 100.0 / totalQuestions;
-  }
-
-  String _todayKey() => _dateKey(DateTime.now());
-
-  String _dateKey(DateTime date) {
-    final day = DateTime(date.year, date.month, date.day);
-    return day.toIso8601String().substring(0, 10);
   }
 }

@@ -267,7 +267,37 @@ class AppDatabase extends _$AppDatabase {
       ON CONFLICT(date) DO UPDATE SET
         articles_viewed_count = articles_viewed_count + 1
       ''',
-      variables: [Variable(day)],
+      variables: [Variable(_dateKey(day))],
+    ).get();
+  }
+
+  Future<void> recordQuizResult(bool correct) async {
+    await _ensureStudySessionsTable();
+
+    final correctIncrement = correct ? 1 : 0;
+    final today = DateTime.now();
+    final day = DateTime(today.year, today.month, today.day);
+    final dayKey = _dateKey(day);
+
+    await customSelect(
+      '''
+      INSERT INTO study_sessions (
+        date,
+        session_date,
+        articles_read,
+        quizzes_completed,
+        quiz_correct
+      ) VALUES (?, ?, 0, 1, ?)
+      ON CONFLICT(date) DO UPDATE SET
+        quizzes_completed = quizzes_completed + 1,
+        quiz_correct = quiz_correct + ?
+      ''',
+      variables: [
+        Variable(dayKey),
+        Variable(dayKey),
+        Variable(correctIncrement),
+        Variable(correctIncrement),
+      ],
     ).get();
   }
 
@@ -415,6 +445,46 @@ class AppDatabase extends _$AppDatabase {
     return rows.first.read<int>('count');
   }
 
+  /// Loads per-category read progress in a single round-trip.
+  ///
+  /// Replaces the previous 1 + 2N pattern (one query to list categories, then
+  /// [countArticlesByCategory] + [countReadArticlesByCategory] per category)
+  /// with one GROUP BY query. At 19 categories this collapses ~39 round-trips
+  /// into 2 (this query plus the [view_history] ensure).
+  ///
+  /// Semantics match the per-category methods exactly:
+  /// - [CategoryProgressResult.total] = COUNT(DISTINCT a.id). The LEFT JOIN to
+  ///   view_history fans out rows per article view, so DISTINCT on the article
+  ///   id is required to reproduce COUNT(*) over the articles table.
+  /// - [CategoryProgressResult.read] = COUNT(DISTINCT vh.article_id). Articles
+  ///   with no view record contribute NULL article_ids, which COUNT DISTINCT
+  ///   ignores — identical to countReadArticlesByCategory.
+  /// - LEFT JOIN preserves categories with zero reads (every category holding
+  ///   at least one article still yields a row), matching the old behavior.
+  Future<List<CategoryProgressResult>> loadCategoryProgressBatch() async {
+    await _ensureViewHistoryTable();
+    final rows = await customSelect('''
+      SELECT
+        a.category AS category,
+        COUNT(DISTINCT a.id) AS total,
+        COUNT(DISTINCT vh.article_id) AS read_count
+      FROM articles a
+      LEFT JOIN view_history vh ON vh.article_id = a.id
+      WHERE a.category IS NOT NULL AND a.category != ''
+      GROUP BY a.category
+      ORDER BY a.category ASC
+    ''').get();
+
+    return [
+      for (final r in rows)
+        (
+          category: r.read<String>('category'),
+          total: r.read<int>('total'),
+          read: r.read<int>('read_count'),
+        ),
+    ];
+  }
+
   Future<void> _ensureViewHistoryTable() async {
     await customStatement('''
       CREATE TABLE IF NOT EXISTS view_history (
@@ -518,6 +588,10 @@ class AppDatabase extends _$AppDatabase {
     return day.toIso8601String().substring(0, 10);
   }
 }
+
+/// Per-category read progress, returned by
+/// [AppDatabase.loadCategoryProgressBatch].
+typedef CategoryProgressResult = ({String category, int total, int read});
 
 LazyDatabase _openConnection() {
   return LazyDatabase(() async {

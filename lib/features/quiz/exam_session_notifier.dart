@@ -21,7 +21,7 @@ class ExamSessionState {
   final int currentIndex; // 0–199
   final Map<int, String> answers; // index → 'a'|'b'|'c'|'d'
   final DateTime startTime;
-  final Duration timeRemaining; // starts 3:00:00, counts down
+  final Duration timeRemaining; // starts 2:00:00, counts down
   final bool isComplete;
   final bool isActive;
 
@@ -56,21 +56,21 @@ class ExamSessionNotifier extends StateNotifier<ExamSessionState> {
   ExamSessionNotifier({required AppDatabase database})
     : _db = database,
       super(
-        ExamSessionState(
-          questions: const [],
-          currentIndex: 0,
-          answers: const {},
-          startTime: DateTime.fromMillisecondsSinceEpoch(0),
-          timeRemaining: const Duration(hours: 3),
-          isComplete: false,
-          isActive: false,
-        ),
+ExamSessionState(
+      questions: const [],
+      currentIndex: 0,
+      answers: const {},
+      startTime: DateTime.fromMillisecondsSinceEpoch(0),
+      timeRemaining: const Duration(minutes: 120),
+      isComplete: false,
+      isActive: false,
+    ),
       );
 
   final AppDatabase _db;
   Timer? _timer;
 
-  static const _examDuration = Duration(hours: 3);
+  static const _examDuration = Duration(minutes: 120);
 
   bool get _hasStarted => state.isActive && state.questions.isNotEmpty;
 
@@ -223,6 +223,11 @@ LIMIT ?
       timeRemaining: _examDuration,
       isComplete: false,
       isActive: true,
+    );
+
+    _timer = Timer.periodic(
+      const Duration(seconds: 1),
+      (_) => tickTimer(),
     );
   }
 

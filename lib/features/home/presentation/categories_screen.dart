@@ -80,52 +80,54 @@ class _CategoryTile extends ConsumerWidget {
     final progressAsyncValue = ref.watch(categoryProgressProvider(name));
     final theme = Theme.of(context);
 
-    return progressAsyncValue.when(
-      data: (progress) => InkWell(
-        onTap: () => context.push('/article-list/${Uri.encodeComponent(name)}'),
-        child: Card(
-          elevation: 4,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15),
-          ),
-          child: Column(
-            children: [
-              Expanded(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(icon, size: 40, color: theme.colorScheme.secondary),
-                    const SizedBox(height: 10),
-                    Text(
-                      name,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: theme.colorScheme.onSurface,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      '${_categoryProgressRead(progress)}/${_categoryProgressTotal(progress)}',
-                      style: TextStyle(
-                        color: theme.colorScheme.onSurface,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              LinearProgressIndicator(
-                minHeight: 3,
-                backgroundColor: theme.colorScheme.surface.withValues(alpha: 0.2),
-                color: theme.colorScheme.primary,
-                value: _categoryProgressValue(progress),
-              ),
-            ],
-          ),
-        ),
-      ),
+return progressAsyncValue.when(
+       data: (progress) => InkWell(
+         onTap: () => context.push('/article-list/${Uri.encodeComponent(name)}'),
+         child: Card(
+           elevation: 4,
+           shape: RoundedRectangleBorder(
+             borderRadius: BorderRadius.circular(15),
+           ),
+           child: Column(
+             mainAxisSize: MainAxisSize.min,
+             children: [
+               SizedBox(
+                 height: 80,
+                 child: Column(
+                   mainAxisAlignment: MainAxisAlignment.center,
+                   children: [
+                     Icon(icon, size: 40, color: theme.colorScheme.secondary),
+                     const SizedBox(height: 10),
+                     Text(
+                       name,
+                       textAlign: TextAlign.center,
+                       style: TextStyle(
+                         fontWeight: FontWeight.bold,
+                         color: theme.colorScheme.onSurface,
+                       ),
+                     ),
+                     const SizedBox(height: 6),
+                     Text(
+                       '${_categoryProgressRead(progress)}/${_categoryProgressTotal(progress)}',
+                       style: TextStyle(
+                         color: theme.colorScheme.onSurface,
+                         fontSize: 12,
+                         fontWeight: FontWeight.w600,
+                       ),
+                     ),
+                   ],
+                 ),
+               ),
+               LinearProgressIndicator(
+                 minHeight: 3,
+                 backgroundColor: theme.colorScheme.surface.withValues(alpha: 0.2),
+                 color: theme.colorScheme.primary,
+                 value: _categoryProgressValue(progress),
+               ),
+             ],
+           ),
+         ),
+       ),
       loading: () => const SizedBox.shrink(),
       error: (error, stack) => Card(
         elevation: 4,
@@ -198,7 +200,9 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
   Widget build(BuildContext context) {
     final streak = ref.watch(streakNotifierProvider);
     final theme = Theme.of(context);
-    final bodyItems = _buildBodyItems(streak, ref);
+    final todayPlanAsync = ref.watch(todayPlanProvider);
+    final syncState = ref.watch(syncStateProvider);
+    final weeklyStatsAsync = ref.watch(weeklyStatsProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -206,10 +210,53 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
         backgroundColor: theme.colorScheme.surface,
         foregroundColor: theme.colorScheme.onSurface,
       ),
-      body: ListView.builder(
+      body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        itemCount: bodyItems.length,
-        itemBuilder: (context, index) => bodyItems[index],
+        child: CustomScrollView(
+          slivers: [
+            SliverList(
+              delegate: SliverChildListDelegate([
+                _buildSyncStatusRow(syncState),
+                weeklyStatsAsync.when(
+                  data: (stats) => _buildWeeklySummaryCard(stats),
+                  loading: () => const SizedBox.shrink(),
+                  error: (_, _) => const SizedBox.shrink(),
+                ),
+                _buildCalculatorsCard(),
+                _buildCasesCard(),
+                _buildExamModeCard(),
+                streak.when(
+                  data: _buildStudyStatsRow,
+                  loading: _buildStudyStatsLoadingRow,
+                  error: (_, _) => _buildStudyStatsErrorRow(ref),
+                ),
+                todayPlanAsync.when(
+                  data: (plan) => _buildTodaysPlanCard(plan),
+                  loading: () => const SizedBox.shrink(),
+                  error: (_, _) => const SizedBox.shrink(),
+                ),
+              ]),
+            ),
+            if (streak.isLoading) _buildShimmerCategorySliverGrid(),
+            SliverToBoxAdapter(
+              child: _buildSectionHeader('Clinical'),
+            ),
+            _buildCategorySliverGrid(AppConfig.clinicalCategories),
+            const SliverToBoxAdapter(
+              child: SizedBox(height: 24),
+            ),
+            SliverToBoxAdapter(
+              child: _buildSectionHeader('Preclinical'),
+            ),
+            _buildCategorySliverGrid(AppConfig.preclinicalCategories),
+            SliverToBoxAdapter(
+              child: _buildFallbackGeneralTile(),
+            ),
+            const SliverToBoxAdapter(
+              child: SizedBox(height: 80),
+            ),
+          ],
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: theme.colorScheme.primary,
@@ -239,42 +286,66 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
     );
   }
 
-  List<Widget> _buildBodyItems(
-    AsyncValue<StudyStreakStats> streak,
-    WidgetRef ref,
-  ) {
-    final todayPlanAsync = ref.watch(todayPlanProvider);
-    final syncState = ref.watch(syncStateProvider);
-    final weeklyStatsAsync = ref.watch(weeklyStatsProvider);
+  Widget _buildShimmerCategorySliverGrid() {
+    final categories = AppConfig.clinicalCategories.take(6).toList();
 
-    return [
-      _buildSyncStatusRow(syncState),
-      weeklyStatsAsync.when(
-        data: (stats) => _buildWeeklySummaryCard(stats),
-        loading: () => const SizedBox.shrink(),
-        error: (_, _) => const SizedBox.shrink(),
+    return SliverGrid(
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        childAspectRatio: 1.1,
+        crossAxisSpacing: 15,
+        mainAxisSpacing: 15,
       ),
-      _buildCalculatorsCard(),
-      _buildCasesCard(),
-      streak.when(
-        data: _buildStudyStatsRow,
-        loading: _buildStudyStatsLoadingRow,
-        error: (_, _) => _buildStudyStatsErrorRow(ref),
+      delegate: SliverChildBuilderDelegate(
+        (context, index) => Shimmer.fromColors(
+          baseColor: Colors.grey[800]!,
+          highlightColor: Colors.grey[700]!,
+          child: Card(
+            elevation: 4,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Container(height: 12, width: 100, color: Colors.white),
+              ],
+            ),
+          ),
+        ),
+        childCount: categories.length,
       ),
-      todayPlanAsync.when(
-        data: (plan) => _buildTodaysPlanCard(plan),
-        loading: () => const SizedBox.shrink(),
-        error: (_, _) => const SizedBox.shrink(),
+    );
+  }
+
+  Widget _buildCategorySliverGrid(List<Map<String, Object?>> categories) {
+    return SliverGrid(
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        childAspectRatio: 1.1,
+        crossAxisSpacing: 15,
+        mainAxisSpacing: 15,
       ),
-      if (streak.isLoading) _buildShimmerCategoryGrid(),
-      _buildSectionHeader('Clinical'),
-      _buildCategoryGrid(AppConfig.clinicalCategories),
-      const SizedBox(height: 24),
-      _buildSectionHeader('Preclinical'),
-      _buildCategoryGrid(AppConfig.preclinicalCategories),
-      _buildFallbackGeneralTile(),
-      const SizedBox(height: 80),
-    ];
+      delegate: SliverChildBuilderDelegate(
+        (context, index) {
+          final category = categories[index];
+          final name = category['name']?.toString() ?? '';
+          final icon = category['icon'] as IconData? ?? Icons.category;
+
+          return _CategoryTile(name: name, icon: icon);
+        },
+        childCount: categories.length,
+      ),
+    );
   }
 
   Widget _buildWeeklySummaryCard(WeeklyStats stats) {
@@ -558,6 +629,59 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
     );
   }
 
+  Widget _buildExamModeCard() {
+    final theme = Theme.of(context);
+    return Card(
+      margin: const EdgeInsets.only(bottom: 16),
+      color: theme.colorScheme.secondaryContainer,
+      child: InkWell(
+        onTap: () => context.push('/exam'),
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Icon(
+                Icons.assignment_turned_in,
+                color: theme.colorScheme.secondary,
+                size: 32,
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'EHPLE Exam Mode',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: theme.colorScheme.onSecondaryContainer,
+                        fontSize: 16,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '200 questions · Timed · EHPLE-weighted',
+                      style: TextStyle(
+                        color: theme.colorScheme.onSecondaryContainer,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.arrow_forward_ios,
+                color: theme.colorScheme.onSecondaryContainer,
+                size: 16,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildTodaysPlanCard(TodayPlanData plan) {
     final theme = Theme.of(context);
     final hasContent = plan.dueCount > 0 || plan.weakFieldCount > 0;
@@ -709,72 +833,10 @@ const SizedBox(width: 8),
     );
   }
 
-  Widget _buildShimmerCategoryGrid() {
-    final categories = AppConfig.clinicalCategories.take(6).toList();
-
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        childAspectRatio: 1.1,
-        crossAxisSpacing: 15,
-        mainAxisSpacing: 15,
-      ),
-      itemCount: categories.length,
-      itemBuilder: (context, index) => Shimmer.fromColors(
-        baseColor: Colors.grey[800]!,
-        highlightColor: Colors.grey[700]!,
-        child: Card(
-          elevation: 4,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15),
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.circle,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Container(height: 12, width: 100, color: Colors.white),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget _buildFallbackGeneralTile() {
     return Padding(
       padding: const EdgeInsets.only(top: 16),
       child: const _CategoryTile(name: 'General', icon: Icons.folder),
-    );
-  }
-
-  Widget _buildCategoryGrid(List<Map<String, Object?>> categories) {
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        childAspectRatio: 1.1,
-        crossAxisSpacing: 15,
-        mainAxisSpacing: 15,
-      ),
-      itemCount: categories.length,
-      itemBuilder: (context, index) {
-        final category = categories[index];
-        final name = category['name']?.toString() ?? '';
-        final icon = category['icon'] as IconData? ?? Icons.category;
-
-        return _CategoryTile(name: name, icon: icon);
-      },
     );
   }
 }
