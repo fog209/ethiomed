@@ -189,7 +189,7 @@ final _router = GoRouter(
     GoRoute(
       path: '/search',
       builder: (context, state) {
-        final query = state.extra as String? ?? '';
+        final query = state.uri.queryParameters['q'] ?? state.extra as String? ?? '';
         return ArticleSearchScreen(initialQuery: query);
       },
     ),
