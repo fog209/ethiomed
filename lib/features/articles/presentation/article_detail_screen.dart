@@ -292,7 +292,7 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
-              widget.article!.category?.toUpperCase() ?? 'GENERAL',
+              widget.article?.category?.toUpperCase() ?? 'GENERAL',
               style: TextStyle(
                 color: theme.colorScheme.onSecondary,
                 fontWeight: FontWeight.bold,

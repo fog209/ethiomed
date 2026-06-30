@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:drift/drift.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 // ignore: depend_on_referenced_packages
 import 'package:sqlite3/sqlite3.dart';
 
@@ -315,6 +316,14 @@ Future<SearchResult> searchArticles({
 
   Future<void> _ensureSearchIndex() async {
     try {
+      final prefs = await SharedPreferences.getInstance();
+      final lastIndexedCount = prefs.getInt('fts_last_article_count') ?? -1;
+      final currentArticleCount = await _getArticleCount();
+
+      if (lastIndexedCount == currentArticleCount) {
+        return; // Already up to date — skip expensive rebuild check
+      }
+
       await _db.customStatement('''
         CREATE VIRTUAL TABLE IF NOT EXISTS article_search_fts
         USING fts5(
@@ -327,8 +336,8 @@ Future<SearchResult> searchArticles({
         ''');
 
       final indexedCount = await _getIndexedCount();
-      final articleCount = await _getArticleCount();
-      if (indexedCount == articleCount) {
+      if (indexedCount == currentArticleCount) {
+        await prefs.setInt('fts_last_article_count', currentArticleCount);
         return;
       }
 
@@ -353,6 +362,8 @@ Future<SearchResult> searchArticles({
           ],
         );
       }
+
+      await prefs.setInt('fts_last_article_count', currentArticleCount);
     } catch (error) {
       debugPrint('Unable to prepare article search index: $error');
       rethrow;
