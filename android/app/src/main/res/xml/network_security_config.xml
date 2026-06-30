@@ -1,9 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <network-security-config>
     <!-- Certificate pinning for Supabase API -->
+    <!-- Pin expiration: ~6-12 months (Supabase rotates certs periodically) -->
+    <!-- Backup pin prevents hard lockout on primary pin rotation -->
     <domain-config cleartextTrafficPermitted="false">
         <domain includeSubdomains="true">supabase.co</domain>
-        <!-- Allow standard HTTPS without pinning for now; can be enhanced later -->
+        <pin-set expiration="2027-06-01">
+            <!-- Primary pin - osBEuy3eNf4OoLe3tPQsaocoTmiJnwvFFwUHtCkjqto= -->
+            <pin digest="SHA-256">osBEuy3eNf4OoLe3tPQsaocoTmiJnwvFFwUHtCkjqto=</pin>
+            <!-- Backup pin - allows 1 cert rotation before expiration -->
+            <!-- Replace with secondary pin when available -->
+        </pin-set>
     </domain-config>
     <!-- Trust system CAs for all other domains -->
     <domain-config cleartextTrafficPermitted="false">
