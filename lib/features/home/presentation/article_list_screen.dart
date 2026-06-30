@@ -17,7 +17,6 @@ final articleLoadedArticlesProvider = StateProvider<List<ArticleLocal>>(
 final articleHasMoreProvider = StateProvider<bool>((ref) => true);
 final articleIsLoadingMoreProvider = StateProvider<bool>((ref) => false);
 final articleCurrentCategoryProvider = StateProvider<String?>((ref) => null);
-final subcategoryFilterProvider = StateProvider<String?>((_) => null);
 const Map<String, List<String>> subcategoriesByCategory = {
   'Internal Medicine': ['Cardiology', 'Neurology', 'Nephrology'],
   'Pediatrics': ['Neonatology', 'Nutrition', 'Emergency', 'Infectious'],
