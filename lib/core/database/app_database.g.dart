@@ -2732,6 +2732,672 @@ class QuizTableCompanion extends UpdateCompanion<QuizQuestionEntity> {
   }
 }
 
+class $FlashcardTableTable extends FlashcardTable
+    with TableInfo<$FlashcardTableTable, FlashcardEntity> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $FlashcardTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _deckNameMeta = const VerificationMeta(
+    'deckName',
+  );
+  @override
+  late final GeneratedColumn<String> deckName = GeneratedColumn<String>(
+    'deck_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _frontTextMeta = const VerificationMeta(
+    'frontText',
+  );
+  @override
+  late final GeneratedColumn<String> frontText = GeneratedColumn<String>(
+    'front_text',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _backTextMeta = const VerificationMeta(
+    'backText',
+  );
+  @override
+  late final GeneratedColumn<String> backText = GeneratedColumn<String>(
+    'back_text',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _sourceArticleIdMeta = const VerificationMeta(
+    'sourceArticleId',
+  );
+  @override
+  late final GeneratedColumn<String> sourceArticleId = GeneratedColumn<String>(
+    'source_article_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _easeFactorMeta = const VerificationMeta(
+    'easeFactor',
+  );
+  @override
+  late final GeneratedColumn<double> easeFactor = GeneratedColumn<double>(
+    'ease_factor',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(2.5),
+  );
+  static const VerificationMeta _intervalMeta = const VerificationMeta(
+    'interval',
+  );
+  @override
+  late final GeneratedColumn<int> interval = GeneratedColumn<int>(
+    'interval',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _repetitionsMeta = const VerificationMeta(
+    'repetitions',
+  );
+  @override
+  late final GeneratedColumn<int> repetitions = GeneratedColumn<int>(
+    'repetitions',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _nextDueAtMeta = const VerificationMeta(
+    'nextDueAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> nextDueAt = GeneratedColumn<DateTime>(
+    'next_due_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _lastQualityMeta = const VerificationMeta(
+    'lastQuality',
+  );
+  @override
+  late final GeneratedColumn<int> lastQuality = GeneratedColumn<int>(
+    'last_quality',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    clientDefault: DateTime.now,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    deckName,
+    frontText,
+    backText,
+    sourceArticleId,
+    easeFactor,
+    interval,
+    repetitions,
+    nextDueAt,
+    lastQuality,
+    createdAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'flashcard_table';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<FlashcardEntity> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('deck_name')) {
+      context.handle(
+        _deckNameMeta,
+        deckName.isAcceptableOrUnknown(data['deck_name']!, _deckNameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_deckNameMeta);
+    }
+    if (data.containsKey('front_text')) {
+      context.handle(
+        _frontTextMeta,
+        frontText.isAcceptableOrUnknown(data['front_text']!, _frontTextMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_frontTextMeta);
+    }
+    if (data.containsKey('back_text')) {
+      context.handle(
+        _backTextMeta,
+        backText.isAcceptableOrUnknown(data['back_text']!, _backTextMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_backTextMeta);
+    }
+    if (data.containsKey('source_article_id')) {
+      context.handle(
+        _sourceArticleIdMeta,
+        sourceArticleId.isAcceptableOrUnknown(
+          data['source_article_id']!,
+          _sourceArticleIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('ease_factor')) {
+      context.handle(
+        _easeFactorMeta,
+        easeFactor.isAcceptableOrUnknown(data['ease_factor']!, _easeFactorMeta),
+      );
+    }
+    if (data.containsKey('interval')) {
+      context.handle(
+        _intervalMeta,
+        interval.isAcceptableOrUnknown(data['interval']!, _intervalMeta),
+      );
+    }
+    if (data.containsKey('repetitions')) {
+      context.handle(
+        _repetitionsMeta,
+        repetitions.isAcceptableOrUnknown(
+          data['repetitions']!,
+          _repetitionsMeta,
+        ),
+      );
+    }
+    if (data.containsKey('next_due_at')) {
+      context.handle(
+        _nextDueAtMeta,
+        nextDueAt.isAcceptableOrUnknown(data['next_due_at']!, _nextDueAtMeta),
+      );
+    }
+    if (data.containsKey('last_quality')) {
+      context.handle(
+        _lastQualityMeta,
+        lastQuality.isAcceptableOrUnknown(
+          data['last_quality']!,
+          _lastQualityMeta,
+        ),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  FlashcardEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return FlashcardEntity(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      deckName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}deck_name'],
+      )!,
+      frontText: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}front_text'],
+      )!,
+      backText: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}back_text'],
+      )!,
+      sourceArticleId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}source_article_id'],
+      ),
+      easeFactor: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}ease_factor'],
+      )!,
+      interval: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}interval'],
+      ),
+      repetitions: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}repetitions'],
+      ),
+      nextDueAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}next_due_at'],
+      ),
+      lastQuality: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}last_quality'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $FlashcardTableTable createAlias(String alias) {
+    return $FlashcardTableTable(attachedDatabase, alias);
+  }
+}
+
+class FlashcardEntity extends DataClass implements Insertable<FlashcardEntity> {
+  final int id;
+  final String deckName;
+  final String frontText;
+  final String backText;
+  final String? sourceArticleId;
+  final double easeFactor;
+  final int? interval;
+  final int? repetitions;
+  final DateTime? nextDueAt;
+  final int? lastQuality;
+  final DateTime createdAt;
+  const FlashcardEntity({
+    required this.id,
+    required this.deckName,
+    required this.frontText,
+    required this.backText,
+    this.sourceArticleId,
+    required this.easeFactor,
+    this.interval,
+    this.repetitions,
+    this.nextDueAt,
+    this.lastQuality,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['deck_name'] = Variable<String>(deckName);
+    map['front_text'] = Variable<String>(frontText);
+    map['back_text'] = Variable<String>(backText);
+    if (!nullToAbsent || sourceArticleId != null) {
+      map['source_article_id'] = Variable<String>(sourceArticleId);
+    }
+    map['ease_factor'] = Variable<double>(easeFactor);
+    if (!nullToAbsent || interval != null) {
+      map['interval'] = Variable<int>(interval);
+    }
+    if (!nullToAbsent || repetitions != null) {
+      map['repetitions'] = Variable<int>(repetitions);
+    }
+    if (!nullToAbsent || nextDueAt != null) {
+      map['next_due_at'] = Variable<DateTime>(nextDueAt);
+    }
+    if (!nullToAbsent || lastQuality != null) {
+      map['last_quality'] = Variable<int>(lastQuality);
+    }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  FlashcardTableCompanion toCompanion(bool nullToAbsent) {
+    return FlashcardTableCompanion(
+      id: Value(id),
+      deckName: Value(deckName),
+      frontText: Value(frontText),
+      backText: Value(backText),
+      sourceArticleId: sourceArticleId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(sourceArticleId),
+      easeFactor: Value(easeFactor),
+      interval: interval == null && nullToAbsent
+          ? const Value.absent()
+          : Value(interval),
+      repetitions: repetitions == null && nullToAbsent
+          ? const Value.absent()
+          : Value(repetitions),
+      nextDueAt: nextDueAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(nextDueAt),
+      lastQuality: lastQuality == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastQuality),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory FlashcardEntity.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return FlashcardEntity(
+      id: serializer.fromJson<int>(json['id']),
+      deckName: serializer.fromJson<String>(json['deckName']),
+      frontText: serializer.fromJson<String>(json['frontText']),
+      backText: serializer.fromJson<String>(json['backText']),
+      sourceArticleId: serializer.fromJson<String?>(json['sourceArticleId']),
+      easeFactor: serializer.fromJson<double>(json['easeFactor']),
+      interval: serializer.fromJson<int?>(json['interval']),
+      repetitions: serializer.fromJson<int?>(json['repetitions']),
+      nextDueAt: serializer.fromJson<DateTime?>(json['nextDueAt']),
+      lastQuality: serializer.fromJson<int?>(json['lastQuality']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'deckName': serializer.toJson<String>(deckName),
+      'frontText': serializer.toJson<String>(frontText),
+      'backText': serializer.toJson<String>(backText),
+      'sourceArticleId': serializer.toJson<String?>(sourceArticleId),
+      'easeFactor': serializer.toJson<double>(easeFactor),
+      'interval': serializer.toJson<int?>(interval),
+      'repetitions': serializer.toJson<int?>(repetitions),
+      'nextDueAt': serializer.toJson<DateTime?>(nextDueAt),
+      'lastQuality': serializer.toJson<int?>(lastQuality),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  FlashcardEntity copyWith({
+    int? id,
+    String? deckName,
+    String? frontText,
+    String? backText,
+    Value<String?> sourceArticleId = const Value.absent(),
+    double? easeFactor,
+    Value<int?> interval = const Value.absent(),
+    Value<int?> repetitions = const Value.absent(),
+    Value<DateTime?> nextDueAt = const Value.absent(),
+    Value<int?> lastQuality = const Value.absent(),
+    DateTime? createdAt,
+  }) => FlashcardEntity(
+    id: id ?? this.id,
+    deckName: deckName ?? this.deckName,
+    frontText: frontText ?? this.frontText,
+    backText: backText ?? this.backText,
+    sourceArticleId: sourceArticleId.present
+        ? sourceArticleId.value
+        : this.sourceArticleId,
+    easeFactor: easeFactor ?? this.easeFactor,
+    interval: interval.present ? interval.value : this.interval,
+    repetitions: repetitions.present ? repetitions.value : this.repetitions,
+    nextDueAt: nextDueAt.present ? nextDueAt.value : this.nextDueAt,
+    lastQuality: lastQuality.present ? lastQuality.value : this.lastQuality,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  FlashcardEntity copyWithCompanion(FlashcardTableCompanion data) {
+    return FlashcardEntity(
+      id: data.id.present ? data.id.value : this.id,
+      deckName: data.deckName.present ? data.deckName.value : this.deckName,
+      frontText: data.frontText.present ? data.frontText.value : this.frontText,
+      backText: data.backText.present ? data.backText.value : this.backText,
+      sourceArticleId: data.sourceArticleId.present
+          ? data.sourceArticleId.value
+          : this.sourceArticleId,
+      easeFactor: data.easeFactor.present
+          ? data.easeFactor.value
+          : this.easeFactor,
+      interval: data.interval.present ? data.interval.value : this.interval,
+      repetitions: data.repetitions.present
+          ? data.repetitions.value
+          : this.repetitions,
+      nextDueAt: data.nextDueAt.present ? data.nextDueAt.value : this.nextDueAt,
+      lastQuality: data.lastQuality.present
+          ? data.lastQuality.value
+          : this.lastQuality,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('FlashcardEntity(')
+          ..write('id: $id, ')
+          ..write('deckName: $deckName, ')
+          ..write('frontText: $frontText, ')
+          ..write('backText: $backText, ')
+          ..write('sourceArticleId: $sourceArticleId, ')
+          ..write('easeFactor: $easeFactor, ')
+          ..write('interval: $interval, ')
+          ..write('repetitions: $repetitions, ')
+          ..write('nextDueAt: $nextDueAt, ')
+          ..write('lastQuality: $lastQuality, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    deckName,
+    frontText,
+    backText,
+    sourceArticleId,
+    easeFactor,
+    interval,
+    repetitions,
+    nextDueAt,
+    lastQuality,
+    createdAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is FlashcardEntity &&
+          other.id == this.id &&
+          other.deckName == this.deckName &&
+          other.frontText == this.frontText &&
+          other.backText == this.backText &&
+          other.sourceArticleId == this.sourceArticleId &&
+          other.easeFactor == this.easeFactor &&
+          other.interval == this.interval &&
+          other.repetitions == this.repetitions &&
+          other.nextDueAt == this.nextDueAt &&
+          other.lastQuality == this.lastQuality &&
+          other.createdAt == this.createdAt);
+}
+
+class FlashcardTableCompanion extends UpdateCompanion<FlashcardEntity> {
+  final Value<int> id;
+  final Value<String> deckName;
+  final Value<String> frontText;
+  final Value<String> backText;
+  final Value<String?> sourceArticleId;
+  final Value<double> easeFactor;
+  final Value<int?> interval;
+  final Value<int?> repetitions;
+  final Value<DateTime?> nextDueAt;
+  final Value<int?> lastQuality;
+  final Value<DateTime> createdAt;
+  const FlashcardTableCompanion({
+    this.id = const Value.absent(),
+    this.deckName = const Value.absent(),
+    this.frontText = const Value.absent(),
+    this.backText = const Value.absent(),
+    this.sourceArticleId = const Value.absent(),
+    this.easeFactor = const Value.absent(),
+    this.interval = const Value.absent(),
+    this.repetitions = const Value.absent(),
+    this.nextDueAt = const Value.absent(),
+    this.lastQuality = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  });
+  FlashcardTableCompanion.insert({
+    this.id = const Value.absent(),
+    required String deckName,
+    required String frontText,
+    required String backText,
+    this.sourceArticleId = const Value.absent(),
+    this.easeFactor = const Value.absent(),
+    this.interval = const Value.absent(),
+    this.repetitions = const Value.absent(),
+    this.nextDueAt = const Value.absent(),
+    this.lastQuality = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  }) : deckName = Value(deckName),
+       frontText = Value(frontText),
+       backText = Value(backText);
+  static Insertable<FlashcardEntity> custom({
+    Expression<int>? id,
+    Expression<String>? deckName,
+    Expression<String>? frontText,
+    Expression<String>? backText,
+    Expression<String>? sourceArticleId,
+    Expression<double>? easeFactor,
+    Expression<int>? interval,
+    Expression<int>? repetitions,
+    Expression<DateTime>? nextDueAt,
+    Expression<int>? lastQuality,
+    Expression<DateTime>? createdAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (deckName != null) 'deck_name': deckName,
+      if (frontText != null) 'front_text': frontText,
+      if (backText != null) 'back_text': backText,
+      if (sourceArticleId != null) 'source_article_id': sourceArticleId,
+      if (easeFactor != null) 'ease_factor': easeFactor,
+      if (interval != null) 'interval': interval,
+      if (repetitions != null) 'repetitions': repetitions,
+      if (nextDueAt != null) 'next_due_at': nextDueAt,
+      if (lastQuality != null) 'last_quality': lastQuality,
+      if (createdAt != null) 'created_at': createdAt,
+    });
+  }
+
+  FlashcardTableCompanion copyWith({
+    Value<int>? id,
+    Value<String>? deckName,
+    Value<String>? frontText,
+    Value<String>? backText,
+    Value<String?>? sourceArticleId,
+    Value<double>? easeFactor,
+    Value<int?>? interval,
+    Value<int?>? repetitions,
+    Value<DateTime?>? nextDueAt,
+    Value<int?>? lastQuality,
+    Value<DateTime>? createdAt,
+  }) {
+    return FlashcardTableCompanion(
+      id: id ?? this.id,
+      deckName: deckName ?? this.deckName,
+      frontText: frontText ?? this.frontText,
+      backText: backText ?? this.backText,
+      sourceArticleId: sourceArticleId ?? this.sourceArticleId,
+      easeFactor: easeFactor ?? this.easeFactor,
+      interval: interval ?? this.interval,
+      repetitions: repetitions ?? this.repetitions,
+      nextDueAt: nextDueAt ?? this.nextDueAt,
+      lastQuality: lastQuality ?? this.lastQuality,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (deckName.present) {
+      map['deck_name'] = Variable<String>(deckName.value);
+    }
+    if (frontText.present) {
+      map['front_text'] = Variable<String>(frontText.value);
+    }
+    if (backText.present) {
+      map['back_text'] = Variable<String>(backText.value);
+    }
+    if (sourceArticleId.present) {
+      map['source_article_id'] = Variable<String>(sourceArticleId.value);
+    }
+    if (easeFactor.present) {
+      map['ease_factor'] = Variable<double>(easeFactor.value);
+    }
+    if (interval.present) {
+      map['interval'] = Variable<int>(interval.value);
+    }
+    if (repetitions.present) {
+      map['repetitions'] = Variable<int>(repetitions.value);
+    }
+    if (nextDueAt.present) {
+      map['next_due_at'] = Variable<DateTime>(nextDueAt.value);
+    }
+    if (lastQuality.present) {
+      map['last_quality'] = Variable<int>(lastQuality.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('FlashcardTableCompanion(')
+          ..write('id: $id, ')
+          ..write('deckName: $deckName, ')
+          ..write('frontText: $frontText, ')
+          ..write('backText: $backText, ')
+          ..write('sourceArticleId: $sourceArticleId, ')
+          ..write('easeFactor: $easeFactor, ')
+          ..write('interval: $interval, ')
+          ..write('repetitions: $repetitions, ')
+          ..write('nextDueAt: $nextDueAt, ')
+          ..write('lastQuality: $lastQuality, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $ClinicalCasesTable extends ClinicalCases
     with TableInfo<$ClinicalCasesTable, ClinicalCase> {
   @override
@@ -4446,6 +5112,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $StudySessionsTable studySessions = $StudySessionsTable(this);
   late final $QuizQuestionsTable quizQuestions = $QuizQuestionsTable(this);
   late final $QuizTableTable quizTable = $QuizTableTable(this);
+  late final $FlashcardTableTable flashcardTable = $FlashcardTableTable(this);
   late final $ClinicalCasesTable clinicalCases = $ClinicalCasesTable(this);
   late final $CaseStagesTable caseStages = $CaseStagesTable(this);
   late final $CaseOptionsTable caseOptions = $CaseOptionsTable(this);
@@ -4453,6 +5120,14 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final Index idxQuizTableCategory = Index(
     'idx_quiz_table_category',
     'CREATE INDEX idx_quiz_table_category ON quiz_table (category)',
+  );
+  late final Index idxFlashcardDeck = Index(
+    'idx_flashcard_deck',
+    'CREATE INDEX idx_flashcard_deck ON flashcard_table (deck_name)',
+  );
+  late final Index idxFlashcardDue = Index(
+    'idx_flashcard_due',
+    'CREATE INDEX idx_flashcard_due ON flashcard_table (next_due_at)',
   );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
@@ -4464,11 +5139,14 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     studySessions,
     quizQuestions,
     quizTable,
+    flashcardTable,
     clinicalCases,
     caseStages,
     caseOptions,
     caseProgress,
     idxQuizTableCategory,
+    idxFlashcardDeck,
+    idxFlashcardDue,
   ];
 }
 
@@ -6039,6 +6717,328 @@ typedef $$QuizTableTableProcessedTableManager =
       QuizQuestionEntity,
       PrefetchHooks Function()
     >;
+typedef $$FlashcardTableTableCreateCompanionBuilder =
+    FlashcardTableCompanion Function({
+      Value<int> id,
+      required String deckName,
+      required String frontText,
+      required String backText,
+      Value<String?> sourceArticleId,
+      Value<double> easeFactor,
+      Value<int?> interval,
+      Value<int?> repetitions,
+      Value<DateTime?> nextDueAt,
+      Value<int?> lastQuality,
+      Value<DateTime> createdAt,
+    });
+typedef $$FlashcardTableTableUpdateCompanionBuilder =
+    FlashcardTableCompanion Function({
+      Value<int> id,
+      Value<String> deckName,
+      Value<String> frontText,
+      Value<String> backText,
+      Value<String?> sourceArticleId,
+      Value<double> easeFactor,
+      Value<int?> interval,
+      Value<int?> repetitions,
+      Value<DateTime?> nextDueAt,
+      Value<int?> lastQuality,
+      Value<DateTime> createdAt,
+    });
+
+class $$FlashcardTableTableFilterComposer
+    extends Composer<_$AppDatabase, $FlashcardTableTable> {
+  $$FlashcardTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get deckName => $composableBuilder(
+    column: $table.deckName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get frontText => $composableBuilder(
+    column: $table.frontText,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get backText => $composableBuilder(
+    column: $table.backText,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get sourceArticleId => $composableBuilder(
+    column: $table.sourceArticleId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get easeFactor => $composableBuilder(
+    column: $table.easeFactor,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get interval => $composableBuilder(
+    column: $table.interval,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get repetitions => $composableBuilder(
+    column: $table.repetitions,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get nextDueAt => $composableBuilder(
+    column: $table.nextDueAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get lastQuality => $composableBuilder(
+    column: $table.lastQuality,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$FlashcardTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $FlashcardTableTable> {
+  $$FlashcardTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get deckName => $composableBuilder(
+    column: $table.deckName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get frontText => $composableBuilder(
+    column: $table.frontText,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get backText => $composableBuilder(
+    column: $table.backText,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get sourceArticleId => $composableBuilder(
+    column: $table.sourceArticleId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get easeFactor => $composableBuilder(
+    column: $table.easeFactor,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get interval => $composableBuilder(
+    column: $table.interval,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get repetitions => $composableBuilder(
+    column: $table.repetitions,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get nextDueAt => $composableBuilder(
+    column: $table.nextDueAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get lastQuality => $composableBuilder(
+    column: $table.lastQuality,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$FlashcardTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $FlashcardTableTable> {
+  $$FlashcardTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get deckName =>
+      $composableBuilder(column: $table.deckName, builder: (column) => column);
+
+  GeneratedColumn<String> get frontText =>
+      $composableBuilder(column: $table.frontText, builder: (column) => column);
+
+  GeneratedColumn<String> get backText =>
+      $composableBuilder(column: $table.backText, builder: (column) => column);
+
+  GeneratedColumn<String> get sourceArticleId => $composableBuilder(
+    column: $table.sourceArticleId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get easeFactor => $composableBuilder(
+    column: $table.easeFactor,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get interval =>
+      $composableBuilder(column: $table.interval, builder: (column) => column);
+
+  GeneratedColumn<int> get repetitions => $composableBuilder(
+    column: $table.repetitions,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get nextDueAt =>
+      $composableBuilder(column: $table.nextDueAt, builder: (column) => column);
+
+  GeneratedColumn<int> get lastQuality => $composableBuilder(
+    column: $table.lastQuality,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+}
+
+class $$FlashcardTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $FlashcardTableTable,
+          FlashcardEntity,
+          $$FlashcardTableTableFilterComposer,
+          $$FlashcardTableTableOrderingComposer,
+          $$FlashcardTableTableAnnotationComposer,
+          $$FlashcardTableTableCreateCompanionBuilder,
+          $$FlashcardTableTableUpdateCompanionBuilder,
+          (
+            FlashcardEntity,
+            BaseReferences<
+              _$AppDatabase,
+              $FlashcardTableTable,
+              FlashcardEntity
+            >,
+          ),
+          FlashcardEntity,
+          PrefetchHooks Function()
+        > {
+  $$FlashcardTableTableTableManager(
+    _$AppDatabase db,
+    $FlashcardTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$FlashcardTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$FlashcardTableTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$FlashcardTableTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> deckName = const Value.absent(),
+                Value<String> frontText = const Value.absent(),
+                Value<String> backText = const Value.absent(),
+                Value<String?> sourceArticleId = const Value.absent(),
+                Value<double> easeFactor = const Value.absent(),
+                Value<int?> interval = const Value.absent(),
+                Value<int?> repetitions = const Value.absent(),
+                Value<DateTime?> nextDueAt = const Value.absent(),
+                Value<int?> lastQuality = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+              }) => FlashcardTableCompanion(
+                id: id,
+                deckName: deckName,
+                frontText: frontText,
+                backText: backText,
+                sourceArticleId: sourceArticleId,
+                easeFactor: easeFactor,
+                interval: interval,
+                repetitions: repetitions,
+                nextDueAt: nextDueAt,
+                lastQuality: lastQuality,
+                createdAt: createdAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String deckName,
+                required String frontText,
+                required String backText,
+                Value<String?> sourceArticleId = const Value.absent(),
+                Value<double> easeFactor = const Value.absent(),
+                Value<int?> interval = const Value.absent(),
+                Value<int?> repetitions = const Value.absent(),
+                Value<DateTime?> nextDueAt = const Value.absent(),
+                Value<int?> lastQuality = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+              }) => FlashcardTableCompanion.insert(
+                id: id,
+                deckName: deckName,
+                frontText: frontText,
+                backText: backText,
+                sourceArticleId: sourceArticleId,
+                easeFactor: easeFactor,
+                interval: interval,
+                repetitions: repetitions,
+                nextDueAt: nextDueAt,
+                lastQuality: lastQuality,
+                createdAt: createdAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$FlashcardTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $FlashcardTableTable,
+      FlashcardEntity,
+      $$FlashcardTableTableFilterComposer,
+      $$FlashcardTableTableOrderingComposer,
+      $$FlashcardTableTableAnnotationComposer,
+      $$FlashcardTableTableCreateCompanionBuilder,
+      $$FlashcardTableTableUpdateCompanionBuilder,
+      (
+        FlashcardEntity,
+        BaseReferences<_$AppDatabase, $FlashcardTableTable, FlashcardEntity>,
+      ),
+      FlashcardEntity,
+      PrefetchHooks Function()
+    >;
 typedef $$ClinicalCasesTableCreateCompanionBuilder =
     ClinicalCasesCompanion Function({
       required String id,
@@ -7379,6 +8379,8 @@ class $AppDatabaseManager {
       $$QuizQuestionsTableTableManager(_db, _db.quizQuestions);
   $$QuizTableTableTableManager get quizTable =>
       $$QuizTableTableTableManager(_db, _db.quizTable);
+  $$FlashcardTableTableTableManager get flashcardTable =>
+      $$FlashcardTableTableTableManager(_db, _db.flashcardTable);
   $$ClinicalCasesTableTableManager get clinicalCases =>
       $$ClinicalCasesTableTableManager(_db, _db.clinicalCases);
   $$CaseStagesTableTableManager get caseStages =>

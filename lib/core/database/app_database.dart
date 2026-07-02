@@ -113,6 +113,23 @@ class QuizTable extends Table {
   IntColumn get lastQuality => integer().nullable()();
 }
 
+@TableIndex(name: 'idx_flashcard_deck', columns: {#deckName})
+@TableIndex(name: 'idx_flashcard_due', columns: {#nextDueAt})
+@DataClassName('FlashcardEntity')
+class FlashcardTable extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get deckName => text()();
+  TextColumn get frontText => text()();
+  TextColumn get backText => text()();
+  TextColumn get sourceArticleId => text().nullable()();
+  RealColumn get easeFactor => real().withDefault(const Constant(2.5))();
+  IntColumn get interval => integer().nullable()();
+  IntColumn get repetitions => integer().nullable()();
+  DateTimeColumn get nextDueAt => dateTime().nullable()();
+  IntColumn get lastQuality => integer().nullable()();
+  DateTimeColumn get createdAt => dateTime().clientDefault(DateTime.now)();
+}
+
 class ClinicalCases extends Table {
   TextColumn get id => text()();
   TextColumn get title => text()();
@@ -163,23 +180,24 @@ class CaseProgress extends Table {
 }
 
 @DriftDatabase(
-  tables: [
-    Articles,
-    Bookmarks,
-    StudySessions,
-    QuizQuestions,
-    QuizTable,
-    ClinicalCases,
-    CaseStages,
-    CaseOptions,
-    CaseProgress,
-  ],
-)
-class AppDatabase extends _$AppDatabase {
-  AppDatabase() : super(_openConnection());
+   tables: [
+     Articles,
+     Bookmarks,
+     StudySessions,
+     QuizQuestions,
+     QuizTable,
+     FlashcardTable,
+     ClinicalCases,
+     CaseStages,
+     CaseOptions,
+     CaseProgress,
+   ],
+ )
+ class AppDatabase extends _$AppDatabase {
+   AppDatabase() : super(_openConnection());
 
-  @override
-  int get schemaVersion => 10;
+   @override
+   int get schemaVersion => 11;
 
   Future<void> _runMigrationStep(
     String name,
@@ -242,13 +260,16 @@ class AppDatabase extends _$AppDatabase {
         if (from < 9) {
           await _runMigrationStep('ensure quiz table sm2 columns', _ensureQuizTableSm2Columns);
         }
-        if (from < 10) {
-          await _runMigrationStep('create clinical cases', () => m.createTable(clinicalCases));
-          await _runMigrationStep('create case stages', () => m.createTable(caseStages));
-          await _runMigrationStep('create case options', () => m.createTable(caseOptions));
-          await _runMigrationStep('create case progress', () => m.createTable(caseProgress));
-        }
-      },
+if (from < 10) {
+           await _runMigrationStep('create clinical cases', () => m.createTable(clinicalCases));
+           await _runMigrationStep('create case stages', () => m.createTable(caseStages));
+           await _runMigrationStep('create case options', () => m.createTable(caseOptions));
+           await _runMigrationStep('create case progress', () => m.createTable(caseProgress));
+         }
+         if (from < 11) {
+           await _runMigrationStep('create flashcard table', () => m.createTable(flashcardTable));
+         }
+       },
     );
   }
 

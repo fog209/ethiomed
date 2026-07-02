@@ -9,6 +9,7 @@ import 'package:shimmer/shimmer.dart';
 import '../../../core/config/app_config.dart';
 import '../../../core/database/app_database.dart';
 import '../../../core/providers/sync_state_provider.dart';
+import '../../../features/flashcards/flashcard_provider.dart';
 import '../../../features/progress/category_progress_provider.dart';
 import '../../../features/progress/streak_notifier.dart';
 import '../../../features/progress/weekly_stats_provider.dart';
@@ -224,6 +225,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                 ),
                 _buildCalculatorsCard(),
                 _buildCasesCard(),
+                _buildFlashcardsCard(),
                 _buildExamModeCard(),
                 streak.when(
                   data: _buildStudyStatsRow,
@@ -297,31 +299,38 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
         mainAxisSpacing: 15,
       ),
       delegate: SliverChildBuilderDelegate(
-        (context, index) => Shimmer.fromColors(
-          baseColor: Colors.grey[800]!,
-          highlightColor: Colors.grey[700]!,
-          child: Card(
-            elevation: 4,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(15),
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
+        (context, index) {
+          final shimmerTheme = Theme.of(context);
+          return Shimmer.fromColors(
+            baseColor: shimmerTheme.colorScheme.surfaceContainerHighest,
+            highlightColor: shimmerTheme.colorScheme.surface,
+            child: Card(
+              elevation: 4,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: shimmerTheme.colorScheme.onSurface.withValues(alpha: 0.1),
+                      shape: BoxShape.circle,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 12),
-                Container(height: 12, width: 100, color: Colors.white),
-              ],
+                  const SizedBox(height: 12),
+                  Container(
+                    height: 12,
+                    width: 100,
+                    color: shimmerTheme.colorScheme.onSurface.withValues(alpha: 0.1),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ),
+          );
+        },
         childCount: categories.length,
       ),
     );
@@ -682,6 +691,73 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
     );
   }
 
+  Widget _buildFlashcardsCard() {
+    final theme = Theme.of(context);
+    final dueCardsAsync = ref.watch(flashcardDueProvider(null));
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: 16),
+      color: theme.colorScheme.secondaryContainer,
+      child: InkWell(
+        onTap: () => context.push('/flashcards'),
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Icon(
+                Icons.style,
+                color: theme.colorScheme.secondary,
+                size: 32,
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Flashcards',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: theme.colorScheme.onSecondaryContainer,
+                        fontSize: 16,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    dueCardsAsync.when(
+                      data: (cards) => Text(
+                        cards.isEmpty
+                            ? 'Anki-style spaced repetition'
+                            : '${cards.length} card${cards.length != 1 ? 's' : ''} due',
+                        style: TextStyle(
+                          color: theme.colorScheme.onSecondaryContainer,
+                          fontSize: 14,
+                        ),
+                      ),
+                      loading: () => Text(
+                        'Loading...',
+                        style: TextStyle(
+                          color: theme.colorScheme.onSecondaryContainer,
+                          fontSize: 14,
+                        ),
+                      ),
+                      error: (_, _) => const SizedBox.shrink(),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.arrow_forward_ios,
+                color: theme.colorScheme.onSecondaryContainer,
+                size: 16,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildTodaysPlanCard(TodayPlanData plan) {
     final theme = Theme.of(context);
     final hasContent = plan.dueCount > 0 || plan.weakFieldCount > 0;
@@ -734,7 +810,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
           Text(
             stats.currentStreak.toString(),
             style: TextStyle(
-              color: theme.colorScheme.primary,
+              color: theme.colorScheme.secondary,
               fontWeight: FontWeight.bold,
               fontSize: 24,
             ),

@@ -28,6 +28,7 @@ import 'features/onboarding/onboarding_screen.dart';
 import 'app/main_shell.dart';
 import 'features/subscription/presentation/paywall_screen.dart';
 import 'features/subscription/data/subscription_repository.dart';
+import 'features/flashcards/presentation/flashcard_review_screen.dart';
 
 bool _seenOnboarding = false;
 bool _seenDisclaimer = false;
@@ -211,6 +212,10 @@ GoRoute(
     GoRoute(
       path: '/exam-results',
       builder: (context, state) => const ExamResultsScreen(),
+    ),
+    GoRoute(
+      path: '/flashcards',
+      builder: (context, state) => const FlashcardReviewScreen(),
     ),
   ],
 );

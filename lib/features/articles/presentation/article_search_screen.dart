@@ -244,31 +244,34 @@ trailing: Text(
   Widget _buildShimmerSearchResults() {
     return ListView.builder(
       itemCount: 5,
-      itemBuilder: (context, index) => Shimmer.fromColors(
-        baseColor: Colors.grey[300]!,
-        highlightColor: Colors.grey[100]!,
-        child: ListTile(
-          leading: Container(
-            width: 40,
-            height: 40,
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
+      itemBuilder: (context, index) {
+        final shimmerTheme = Theme.of(context);
+        return Shimmer.fromColors(
+          baseColor: shimmerTheme.colorScheme.surfaceContainerHighest,
+          highlightColor: shimmerTheme.colorScheme.surface,
+          child: ListTile(
+            leading: Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: shimmerTheme.colorScheme.onSurface.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+            ),
+            title: Container(
+              height: 14,
+              width: double.infinity,
+              color: shimmerTheme.colorScheme.onSurface.withValues(alpha: 0.1),
+            ),
+            subtitle: Container(
+              height: 10,
+              width: 120,
+              margin: const EdgeInsets.only(top: 8),
+              color: shimmerTheme.colorScheme.onSurface.withValues(alpha: 0.1),
             ),
           ),
-          title: Container(
-            height: 14,
-            width: double.infinity,
-            color: Colors.white,
-          ),
-          subtitle: Container(
-            height: 10,
-            width: 120,
-            margin: const EdgeInsets.only(top: 8),
-            color: Colors.white,
-          ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

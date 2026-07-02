@@ -56,17 +56,30 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
   }
 
   Widget _buildShimmerQuestionCard() {
+    final shimmerTheme = Theme.of(context);
     return Shimmer.fromColors(
-      baseColor: Colors.grey[300]!,
-      highlightColor: Colors.grey[100]!,
+      baseColor: shimmerTheme.colorScheme.surfaceContainerHighest,
+      highlightColor: shimmerTheme.colorScheme.surface,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Container(height: 18, width: 120, color: Colors.white),
+          Container(
+            height: 18,
+            width: 120,
+            color: shimmerTheme.colorScheme.onSurface.withValues(alpha: 0.1),
+          ),
           const SizedBox(height: 24),
-          Container(height: 22, width: double.infinity, color: Colors.white),
+          Container(
+            height: 22,
+            width: double.infinity,
+            color: shimmerTheme.colorScheme.onSurface.withValues(alpha: 0.1),
+          ),
           const SizedBox(height: 12),
-          Container(height: 22, width: double.infinity, color: Colors.white),
+          Container(
+            height: 22,
+            width: double.infinity,
+            color: shimmerTheme.colorScheme.onSurface.withValues(alpha: 0.1),
+          ),
           const SizedBox(height: 24),
           ...List.generate(
             4,
@@ -76,7 +89,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                 height: 48,
                 width: double.infinity,
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: shimmerTheme.colorScheme.onSurface.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),

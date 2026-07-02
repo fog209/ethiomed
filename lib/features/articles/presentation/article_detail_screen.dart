@@ -202,8 +202,8 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
               context.canPop() ? context.pop() : context.go('/home'),
         ),
         title: Text(article.title),
-        backgroundColor: theme.colorScheme.primary,
-        foregroundColor: theme.colorScheme.onPrimary,
+        backgroundColor: theme.colorScheme.surface,
+        foregroundColor: theme.colorScheme.onSurface,
         actions: [
           IconButton(
             tooltip: 'High-Yield Mode',
@@ -332,23 +332,48 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
   }
 
   Widget _buildImagePlaceholder() {
+    final shimmerTheme = Theme.of(context);
     return Shimmer.fromColors(
-      baseColor: Colors.grey[300]!,
-      highlightColor: Colors.grey[100]!,
+      baseColor: shimmerTheme.colorScheme.surfaceContainerHighest,
+      highlightColor: shimmerTheme.colorScheme.surface,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(height: 200, width: double.infinity, color: Colors.white),
+          Container(
+            height: 200,
+            width: double.infinity,
+            color: shimmerTheme.colorScheme.onSurface.withValues(alpha: 0.1),
+          ),
           const SizedBox(height: 20),
-          Container(height: 24, width: double.infinity, color: Colors.white),
+          Container(
+            height: 24,
+            width: double.infinity,
+            color: shimmerTheme.colorScheme.onSurface.withValues(alpha: 0.1),
+          ),
           const SizedBox(height: 12),
-          Container(height: 12, width: 180, color: Colors.white),
+          Container(
+            height: 12,
+            width: 180,
+            color: shimmerTheme.colorScheme.onSurface.withValues(alpha: 0.1),
+          ),
           const SizedBox(height: 16),
-          Container(height: 14, width: double.infinity, color: Colors.white),
+          Container(
+            height: 14,
+            width: double.infinity,
+            color: shimmerTheme.colorScheme.onSurface.withValues(alpha: 0.1),
+          ),
           const SizedBox(height: 8),
-          Container(height: 14, width: double.infinity, color: Colors.white),
+          Container(
+            height: 14,
+            width: double.infinity,
+            color: shimmerTheme.colorScheme.onSurface.withValues(alpha: 0.1),
+          ),
           const SizedBox(height: 8),
-          Container(height: 14, width: double.infinity, color: Colors.white),
+          Container(
+            height: 14,
+            width: double.infinity,
+            color: shimmerTheme.colorScheme.onSurface.withValues(alpha: 0.1),
+          ),
         ],
       ),
     );
@@ -538,8 +563,8 @@ Widget _buildShowLowYieldButton() {
           onPressed: () =>
               context.canPop() ? context.pop() : context.go('/home'),
         ),
-        backgroundColor: theme.colorScheme.primary,
-        foregroundColor: theme.colorScheme.onPrimary,
+        backgroundColor: theme.colorScheme.surface,
+        foregroundColor: theme.colorScheme.onSurface,
       ),
       body: Center(
         child: Column(
