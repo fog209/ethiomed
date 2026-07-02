@@ -159,16 +159,20 @@ final _router = GoRouter(
       builder: (context, state) =>
           ArticleListScreen(category: state.pathParameters['category'] ?? ''),
     ),
-    GoRoute(
-      path: '/article-detail',
-      builder: (context, state) {
-        final article = state.extra;
-        if (article is ArticleLocal) {
-          return ArticleDetailScreen(article: article);
-        }
-        return ArticleDetailScreen();
-      },
-    ),
+GoRoute(
+       path: '/article-detail',
+       builder: (context, state) {
+         final article = state.extra;
+         if (article is ArticleLocal) {
+           return ArticleDetailScreen(article: article);
+         }
+         final id = state.uri.queryParameters['id'];
+         if (id != null && id.isNotEmpty) {
+           return ArticleDetailScreen(articleId: id);
+         }
+         return ArticleDetailScreen();
+       },
+     ),
     GoRoute(
       path: '/admin',
       redirect: (context, state) async {

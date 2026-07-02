@@ -98,8 +98,9 @@ class _ClinicalSectionConfig {
 
 class ArticleDetailScreen extends ConsumerStatefulWidget {
   final ArticleLocal? article;
+  final String? articleId;
 
-  const ArticleDetailScreen({super.key, this.article});
+  const ArticleDetailScreen({super.key, this.article, this.articleId});
 
   @override
   ConsumerState<ArticleDetailScreen> createState() =>
@@ -113,43 +114,32 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
   void initState() {
     super.initState();
     final article = widget.article;
-    if (article == null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (context.mounted) {
-          context.go('/home');
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('This article is no longer available.'),
-            ),
-          );
+    if (article != null && widget.articleId == null) {
+      final db = ref.read(databaseProvider);
+      final category = article.category;
+      Future.microtask(() async {
+        if (!mounted) {
+          return;
+        }
+        await ref.read(streakNotifierProvider.notifier).recordArticleRead();
+        if (!mounted) {
+          return;
+        }
+        await _recordViewHistory(db);
+        if (!mounted) {
+          return;
+        }
+        ref.invalidate(categoryProgressProvider(category ?? ''));
+        if (!mounted) {
+          return;
         }
       });
-      return;
     }
-    final db = ref.read(databaseProvider);
-    final category = article.category;
-    Future.microtask(() async {
-      if (!mounted) {
-        return;
-      }
-      await ref.read(streakNotifierProvider.notifier).recordArticleRead();
-      if (!mounted) {
-        return;
-      }
-      await _recordViewHistory(db);
-      if (!mounted) {
-        return;
-      }
-      ref.invalidate(categoryProgressProvider(category ?? ''));
-      if (!mounted) {
-        return;
-      }
-    });
   }
 
-  Future<void> _recordViewHistory(AppDatabase db) async {
-    final article = widget.article;
-    if (article == null) return;
+  Future<void> _recordViewHistory(AppDatabase db, {ArticleLocal? article}) async {
+    final targetArticle = article ?? widget.article;
+    if (targetArticle == null) return;
     try {
       await db
           .customSelect(
@@ -162,9 +152,9 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
             ) VALUES (?, ?, ?, ?)
             ''',
             variables: [
-              Variable(article.id),
-              Variable(article.title),
-              Variable(article.category ?? ''),
+              Variable(targetArticle.id),
+              Variable(targetArticle.title),
+              Variable(targetArticle.category ?? ''),
               Variable(DateTime.now()),
             ],
           )
@@ -177,10 +167,42 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final article = widget.article;
-    if (article == null) {
-      return const SizedBox.shrink();
+    if (article != null) {
+      return _buildContent(article);
     }
 
+    final articleId = widget.articleId;
+    if (articleId != null && articleId.isNotEmpty) {
+      final articleAsync = ref.watch(articleByIdProvider(articleId));
+      return articleAsync.when(
+        data: (fetchedArticle) {
+          if (fetchedArticle == null) {
+            return _buildEmptyArticleFallback(context);
+          }
+          Future.microtask(() async {
+            if (!mounted) return;
+            await ref.read(streakNotifierProvider.notifier).recordArticleRead();
+            if (!mounted) return;
+            final db = ref.read(databaseProvider);
+            _recordViewHistory(db, article: fetchedArticle);
+            if (!mounted) return;
+            ref.invalidate(categoryProgressProvider(fetchedArticle.category ?? ''));
+          });
+          return _buildContent(fetchedArticle);
+        },
+        loading: () => const Scaffold(
+          body: Center(child: CircularProgressIndicator()),
+        ),
+        error: (error, stack) => Scaffold(
+          body: Center(child: Text('Error loading article: $error')),
+        ),
+      );
+    }
+
+    return _buildEmptyArticleFallback(context);
+  }
+
+  Widget _buildContent(ArticleLocal article) {
     final ref = this.ref;
     final db = ref.watch(databaseProvider);
     final weakFieldsAsync = ref.watch(weakFieldsProvider(article.id));
@@ -248,11 +270,12 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
           ),
         ],
       ),
-      body: _buildBody(weakFields, highYieldMode, sections, imageUrl, videoUrl),
+      body: _buildBody(article, weakFields, highYieldMode, sections, imageUrl, videoUrl),
     );
   }
 
   Widget _buildBody(
+    ArticleLocal article,
     Set<String> weakFields,
     bool highYieldMode,
     Map<String, Object?> sections,
@@ -292,7 +315,7 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
-              widget.article?.category?.toUpperCase() ?? 'GENERAL',
+              article.category?.toUpperCase() ?? 'GENERAL',
               style: TextStyle(
                 color: theme.colorScheme.onSecondary,
                 fontWeight: FontWeight.bold,
