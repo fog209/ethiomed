@@ -9,6 +9,8 @@ final ThemeData darkTheme = ThemeData(
     onPrimary: Color(0xFFF9A825),
     secondary: Color(0xFFF9A825),
     onSecondary: Color(0xFF1A237E),
+    secondaryContainer: Color(0xFF1C2038),
+    onSecondaryContainer: Color(0xFFE8EAF6),
     surface: Color(0xFF0D0F1A),
     onSurface: Color(0xFFE8EAF6),
     surfaceContainerHighest: Color(0xFF1C2038),
@@ -32,7 +34,5 @@ final ThemeData darkTheme = ThemeData(
     color: Color(0xFF151829),
     surfaceTintColor: Colors.transparent,
   ),
-  dividerTheme: const DividerThemeData(
-    color: Color(0xFF252A45),
-  ),
+  dividerTheme: const DividerThemeData(color: Color(0xFF252A45)),
 );
