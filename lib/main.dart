@@ -91,6 +91,13 @@ void main() async {
     };
   }
 
+  if (kReleaseMode) {
+    if (AppConfig.supabaseUrl.isEmpty || AppConfig.supabaseAnonKey.isEmpty) {
+      throw StateError(
+          'SUPABASE_URL and SUPABASE_ANON_KEY must be provided via --dart-define');
+    }
+  }
+
   try {
     await Supabase.initialize(
       url: AppConfig.supabaseUrl,
