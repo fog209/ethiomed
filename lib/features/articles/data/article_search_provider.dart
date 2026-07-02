@@ -10,7 +10,7 @@ import 'package:sqlite3/sqlite3.dart';
 import '../../../core/database/app_database.dart';
 import '../../../core/errors/error_exceptions.dart';
 
-const int _maxSearchResults = 50;
+const int maxSearchResult = 50;
 const Duration _searchDebounceDuration = Duration(milliseconds: 300);
 const Object _unsetMessage = Object();
 
@@ -21,10 +21,7 @@ final articleSearchRepositoryProvider = Provider<ArticleSearchRepository>((
 });
 
 class SearchResult {
-  const SearchResult({
-    required this.results,
-    required this.totalCount,
-  });
+  const SearchResult({required this.results, required this.totalCount});
   final List<ArticleLocal> results;
   final int totalCount;
 }
@@ -151,7 +148,8 @@ class ArticleSearchController extends StateNotifier<ArticleSearchState> {
       }
 
       debugPrint('Article search failed: $error');
-      final unavailable = error is SearchUnavailableException ||
+      final unavailable =
+          error is SearchUnavailableException ||
           error.toString().toLowerCase().contains('fts5') ||
           error.toString().toLowerCase().contains('malformed');
       state = state.copyWith(
@@ -180,7 +178,7 @@ class ArticleSearchRepository {
 
   final AppDatabase _db;
 
-Future<SearchResult> searchArticles({
+  Future<SearchResult> searchArticles({
     required String query,
     required String? category,
   }) async {
@@ -203,35 +201,79 @@ Future<SearchResult> searchArticles({
     final filtered = category == null
         ? matches
         : matches
-            .where((article) => article.category == category)
-            .toList(growable: false);
+              .where((article) => article.category == category)
+              .toList(growable: false);
 
     return SearchResult(
-      results: filtered.take(_maxSearchResults).toList(growable: false),
+      results: filtered.take(maxSearchResult).toList(growable: false),
       totalCount: totalCount,
     );
   }
 
   Future<SearchResult> _searchAllArticles() async {
-    final countRows = await _db.customSelect('SELECT COUNT(*) AS count FROM articles').get();
-    final totalCount = countRows.isNotEmpty ? countRows.first.read<int>('count') : 0;
+    try {
+      final countFuture = _db
+          .customSelect('SELECT COUNT(*) AS count FROM articles')
+          .get();
 
-    final rows = await _db.customSelect(
-      'SELECT * FROM articles LIMIT ?',
-      variables: [Variable(_maxSearchResults)],
-    ).get();
+      final rowsFuture = _db
+          .customSelect(
+            'SELECT * FROM articles LIMIT ?',
+            variables: <Variable>[Variable<int>(maxSearchResult)],
+          )
+          .get();
 
-    final results = rows.map((row) => ArticleLocal(
-      id: row.read<String>('id'),
-      title: row.read<String>('title'),
-      category: row.read<String?>('category'),
-      content: row.read<String?>('content'),
-      imageUrl: row.read<String?>('image_url'),
-      videoUrl: row.read<String?>('video_url'),
-      isHighYield: row.read<bool?>('is_high_yield') ?? false,
-    )).toList(growable: false);
+      final both = await Future.wait<dynamic>(<Future<dynamic>>[
+        countFuture,
+        rowsFuture,
+      ]);
 
-    return SearchResult(results: results, totalCount: totalCount);
+      final countRows = both[0] as List<QueryRow>;
+      final rows = both[1] as List<QueryRow>;
+
+      final totalCount = countRows.isNotEmpty
+          ? countRows.first.read<int>('count')
+          : 0;
+
+      final mapped = rows
+          .map(
+            (row) => ArticleLocal(
+              id: row.read<String>('id'),
+              title: row.read<String>('title'),
+              category: row.read<String?>('category'),
+              content: row.read<String?>('content'),
+              imageUrl: row.read<String?>('image_url'),
+              videoUrl: row.read<String?>('video_url'),
+              isHighYield: row.read<bool?>('is_high_yield') ?? false,
+            ),
+          )
+          .toList(growable: false);
+
+      return SearchResult(results: mapped, totalCount: totalCount);
+    } catch (_) {
+      final rows = await _db
+          .customSelect(
+            'SELECT * FROM articles LIMIT ?',
+            variables: <Variable>[Variable<int>(maxSearchResult)],
+          )
+          .get();
+
+      final mapped = rows
+          .map(
+            (row) => ArticleLocal(
+              id: row.read<String>('id'),
+              title: row.read<String>('title'),
+              category: row.read<String?>('category'),
+              content: row.read<String?>('content'),
+              imageUrl: row.read<String?>('image_url'),
+              videoUrl: row.read<String?>('video_url'),
+              isHighYield: row.read<bool?>('is_high_yield') ?? false,
+            ),
+          )
+          .toList(growable: false);
+
+      return SearchResult(results: mapped, totalCount: mapped.length);
+    }
   }
 
   Future<SearchResult> _searchWithMatch(String query) async {
@@ -252,19 +294,21 @@ Future<SearchResult> searchArticles({
       return _searchAllArticles();
     }
 
-    final countRows = await _db.customSelect(
-      '''
-      SELECT COUNT(*) AS count
-      FROM article_search_fts
-      WHERE article_search_fts MATCH ?
-      ''',
-      variables: [Variable(ftsQuery)],
-    ).get();
-    final totalCount = countRows.isNotEmpty ? countRows.first.read<int>('count') : 0;
+    try {
+      final countFuture = _db
+          .customSelect(
+            '''
+        SELECT COUNT(*) AS count
+        FROM article_search_fts
+        WHERE article_search_fts MATCH ?
+        ''',
+            variables: <Variable>[Variable<String>(ftsQuery)],
+          )
+          .get();
 
-    final rows = await _db
-        .customSelect(
-          '''
+      final rowsFuture = _db
+          .customSelect(
+            '''
       SELECT
         a.id,
         a.title,
@@ -279,28 +323,81 @@ Future<SearchResult> searchArticles({
       ORDER BY rank
       LIMIT ?
       ''',
-          variables: <Variable<Object>>[
-            Variable(ftsQuery),
-            Variable(_maxSearchResults),
-          ],
-        )
-        .get();
+            variables: <Variable>[
+              Variable<String>(ftsQuery),
+              Variable<int>(maxSearchResult),
+            ],
+          )
+          .get();
 
-    final results = rows
-        .map(
-          (row) => ArticleLocal(
-            id: row.read<String>('id'),
-            title: row.read<String>('title'),
-            category: row.read<String?>('category'),
-            content: row.read<String?>('content'),
-            imageUrl: row.read<String?>('imageUrl'),
-            videoUrl: row.read<String?>('videoUrl'),
-            isHighYield: row.read<bool?>('isHighYield') ?? false,
-          ),
-        )
-        .toList(growable: false);
+      final both = await Future.wait<dynamic>(<Future<dynamic>>[
+        countFuture,
+        rowsFuture,
+      ]);
 
-    return SearchResult(results: results, totalCount: totalCount);
+      final countRows = both[0] as List<QueryRow>;
+      final rows = both[1] as List<QueryRow>;
+
+      final totalCount = countRows.isNotEmpty
+          ? countRows.first.read<int>('count')
+          : 0;
+
+      final results = rows
+          .map(
+            (row) => ArticleLocal(
+              id: row.read<String>('id'),
+              title: row.read<String>('title'),
+              category: row.read<String?>('category'),
+              content: row.read<String?>('content'),
+              imageUrl: row.read<String?>('imageUrl'),
+              videoUrl: row.read<String?>('videoUrl'),
+              isHighYield: row.read<bool?>('isHighYield') ?? false,
+            ),
+          )
+          .toList(growable: false);
+
+      return SearchResult(results: results, totalCount: totalCount);
+    } catch (_) {
+      final rows = await _db
+          .customSelect(
+            '''
+      SELECT
+        a.id,
+        a.title,
+        a.category,
+        a.content,
+        a.image_url AS imageUrl,
+        a.video_url AS videoUrl,
+        a.is_high_yield AS isHighYield
+      FROM article_search_fts
+      JOIN articles a ON a.id = article_search_fts.article_id
+      WHERE article_search_fts MATCH ?
+      ORDER BY rank
+      LIMIT ?
+      ''',
+            variables: <Variable>[
+              Variable<String>(ftsQuery),
+              Variable<int>(maxSearchResult),
+            ],
+          )
+          .get();
+
+      final results = rows
+          .map(
+            (row) => ArticleLocal(
+              id: row.read<String>('id'),
+              title: row.read<String>('title'),
+              category: row.read<String?>('category'),
+              content: row.read<String?>('content'),
+              imageUrl: row.read<String?>('imageUrl'),
+              videoUrl: row.read<String?>('videoUrl'),
+              isHighYield: row.read<bool?>('isHighYield') ?? false,
+            ),
+          )
+          .toList(growable: false);
+
+      return SearchResult(results: results, totalCount: results.length);
+    }
   }
 
   Future<void> _rebuildSearchIndex() async {
