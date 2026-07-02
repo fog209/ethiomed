@@ -1,19 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <network-security-config>
-    <!-- Certificate pinning for Supabase API -->
-    <!-- Pin expiration: ~6-12 months (Supabase rotates certs periodically) -->
-    <!-- Backup pin prevents hard lockout on primary pin rotation -->
-    <domain-config cleartextTrafficPermitted="false">
-        <domain includeSubdomains="true">supabase.co</domain>
-        <pin-set expiration="2027-06-01">
-            <!-- Primary pin - osBEuy3eNf4OoLe3tPQsaocoTmiJnwvFFwUHtCkjqto= -->
-            <pin digest="SHA-256">osBEuy3eNf4OoLe3tPQsaocoTmiJnwvFFwUHtCkjqto=</pin>
-            <!-- Backup pin - allows 1 cert rotation before expiration -->
-            <!-- Replace with secondary pin when available -->
-        </pin-set>
-    </domain-config>
-    <!-- Trust system CAs for all other domains -->
-    <domain-config cleartextTrafficPermitted="false">
-        <domain includeSubdomains="true">.</domain>
-    </domain-config>
+  <!--
+    Certificate pinning scaffold for Supabase domain.
+    TODO: Replace the placeholder pin values with the real SHA-256 pins.
+
+    How to extract pins (for each certificate in the chain as needed):
+      1) Determine the host:
+         kxcdzlyirdonkipcymvc.supabase.co
+      2) Fetch the leaf certificate(s) and compute SHA-256 SPKI pins.
+         Example commands (run locally):
+           - openssl s_client -connect kxcdzlyirdonkipcymvc.supabase.co:443 -servername kxcdzlyirdonkipcymvc.supabase.co </dev/null 2>/dev/null | openssl x509 -pubkey -noout | openssl dgst -sha256 -binary | base64
+      3) Paste the resulting base64 into the pins below (sha256="...").
+
+    Notes:
+    - Do not fabricate pin hashes. Keep TODO markers until you insert real values.
+  -->
+  <domain-config cleartextTrafficPermitted="false">
+    <domain includeSubdomains="true">kxcdzlyirdonkipcymvc.supabase.co</domain>
+
+    <pin-set
+      expiration="2028-01-01">
+      <!-- TODO: Replace with real SHA-256 pin for the Supabase leaf certificate -->
+      <pin digest="SHA-256">AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</pin>
+
+      <!-- TODO: Optionally pin the next/alternate certificate to support rotation -->
+      <pin digest="SHA-256">BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB=</pin>
+    </pin-set>
+  </domain-config>
+
+  <!-- Allow system default trust for any other domains not listed above -->
 </network-security-config>
