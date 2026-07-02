@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -21,6 +24,69 @@ class _FlashcardReviewScreenState extends ConsumerState<FlashcardReviewScreen> {
 
   void _revealAnswer() {
     setState(() => isRevealed = true);
+  }
+
+  Future<void> _importFlashcards() async {
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['json'],
+      );
+
+      if (result == null || result.files.isEmpty) {
+        return;
+      }
+
+      final file = result.files.single;
+      final bytes = file.bytes;
+      if (bytes == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Could not read file content.')),
+          );
+        }
+        return;
+      }
+
+      final jsonString = utf8.decode(bytes);
+      final jsonList = jsonDecode(jsonString);
+
+      if (jsonList is! List) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Invalid JSON: expected array of cards.')),
+          );
+        }
+        return;
+      }
+
+      final db = ref.read(databaseProvider);
+      final cards = <({String deck, String front, String back})>[];
+      for (final item in jsonList.whereType<Map<String, dynamic>>()) {
+        cards.add((
+          deck: item['deck']?.toString() ?? '',
+          front: item['front']?.toString() ?? '',
+          back: item['back']?.toString() ?? '',
+        ));
+      }
+
+      final count = await importFlashcardsFromJson(db, cards);
+      if (!mounted) return;
+
+      ref.invalidate(_flashcardsProvider(widget.deckName));
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('$count flashcards imported.')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Import failed: $e')),
+        );
+      }
+    }
   }
 
   void _onRatingTap(FlashcardEntity card, int quality) async {
@@ -67,6 +133,13 @@ class _FlashcardReviewScreenState extends ConsumerState<FlashcardReviewScreen> {
         ),
         backgroundColor: theme.colorScheme.surface,
         foregroundColor: theme.colorScheme.onSurface,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.upload_file),
+            tooltip: 'Import flashcards',
+            onPressed: _importFlashcards,
+          ),
+        ],
       ),
       body: SafeArea(
         child: asyncCards.when(
