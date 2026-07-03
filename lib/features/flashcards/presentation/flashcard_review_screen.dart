@@ -1,7 +1,7 @@
 import 'dart:convert';
 
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -15,7 +15,8 @@ class FlashcardReviewScreen extends ConsumerStatefulWidget {
   final String? deckName;
 
   @override
-  ConsumerState<FlashcardReviewScreen> createState() => _FlashcardReviewScreenState();
+  ConsumerState<FlashcardReviewScreen> createState() =>
+      _FlashcardReviewScreenState();
 }
 
 class _FlashcardReviewScreenState extends ConsumerState<FlashcardReviewScreen> {
@@ -26,35 +27,23 @@ class _FlashcardReviewScreenState extends ConsumerState<FlashcardReviewScreen> {
     setState(() => isRevealed = true);
   }
 
+  // Import flashcards from bundled asset.
+  // To add a new deck: copy your exported JSON file to assets/flashcards/import.json
+  // and rebuild the app. The JSON format is: [{"deck":"DeckName","front":"Question","back":"Answer"},...]
   Future<void> _importFlashcards() async {
     try {
-      final result = await FilePicker.platform.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: ['json'],
+      // Load the bundled import.json asset
+      final jsonString = await rootBundle.loadString(
+        'assets/flashcards/import.json',
       );
-
-      if (result == null || result.files.isEmpty) {
-        return;
-      }
-
-      final file = result.files.single;
-      final bytes = file.bytes;
-      if (bytes == null) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Could not read file content.')),
-          );
-        }
-        return;
-      }
-
-      final jsonString = utf8.decode(bytes);
       final jsonList = jsonDecode(jsonString);
 
       if (jsonList is! List) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Invalid JSON: expected array of cards.')),
+            const SnackBar(
+              content: Text('Invalid JSON: expected array of cards.'),
+            ),
           );
         }
         return;
@@ -76,15 +65,15 @@ class _FlashcardReviewScreenState extends ConsumerState<FlashcardReviewScreen> {
       ref.invalidate(_flashcardsProvider(widget.deckName));
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('$count flashcards imported.')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('$count flashcards imported.')));
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Import failed: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Import failed: $e')));
       }
     }
   }
@@ -209,9 +198,7 @@ class _FlashcardReviewScreenState extends ConsumerState<FlashcardReviewScreen> {
               ),
             ),
             const SizedBox(height: 24),
-            if (isRevealed) ...[
-              _buildRatingButtons(card),
-            ],
+            if (isRevealed) ...[_buildRatingButtons(card)],
           ],
         ),
       ),
@@ -287,6 +274,6 @@ class _FlashcardReviewScreenState extends ConsumerState<FlashcardReviewScreen> {
 
 final _flashcardsProvider =
     FutureProvider.family<List<FlashcardEntity>, String?>((ref, deckName) {
-  final service = ref.watch(flashcardReviewServiceProvider);
-  return service.getDueFlashcards(deckName);
-});
+      final service = ref.watch(flashcardReviewServiceProvider);
+      return service.getDueFlashcards(deckName);
+    });
