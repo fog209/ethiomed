@@ -1,0 +1,35 @@
+# WardReady Production Build Commands
+# ================================
+# Run these commands from the project root to build a secure, obfuscated AAB.
+
+## Prerequisites:
+# 1. Ensure key.properties exists with signing credentials
+# 2. Update the SUPABASE_ANON_KEY placeholder with your rotated key
+
+## Build Command:
+flutter build appbundle \
+  --release \
+  --obfuscate \
+  --split-debug-info=./debug-info \
+  --dart-define=SUPABASE_URL=https://kxcdzlyirdonkipcymvc.supabase.co \
+  --dart-define=SUPABASE_ANON_KEY=YOUR_ROTATED_ANON_KEY_HERE
+
+## Alternative: APK Build
+flutter build apk \
+  --release \
+  --obfuscate \
+  --split-debug-info=./debug-info \
+  --dart-define=SUPABASE_URL=https://kxcdzlyirdonkipcymvc.supabase.co \
+  --dart-define=SUPABASE_ANON_KEY=YOUR_ROTATED_ANON_KEY_HERE
+
+## Notes:
+# - The signature hash for certificate pinning is hardcoded in:
+#   android/app/src/main/res/xml/network_security_config.xml
+# - Update the SHA-256 pins in that file before production release
+# - The debug-info folder should NOT be committed to version control
+
+## To get SHA-256 signature hash (for certificate pinning):
+# keytool -list -v -keystore <your-keystore> -alias <key-alias>
+
+## To get SHA-256 from certificate (for network_security_config.xml):
+# openssl s_client -connect kxcdzlyirdonkipcymvc.supabase.co:443 -servername kxcdzlyirdonkipcymvc.supabase.co </dev/null 2>/dev/null | openssl x509 -pubkey -noout | openssl dgst -sha256 -binary | base64

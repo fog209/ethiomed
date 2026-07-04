@@ -15,15 +15,17 @@ class ExamSessionState {
     required this.timeRemaining,
     required this.isComplete,
     required this.isActive,
+    this.examDuration = 200,
   });
 
-  final List<QuizQuestionEntity> questions; // up to 200
-  final int currentIndex; // 0–199
-  final Map<int, String> answers; // index → 'a'|'b'|'c'|'d'
+  final List<QuizQuestionEntity> questions;
+  final int currentIndex;
+  final Map<int, String> answers;
   final DateTime startTime;
-  final Duration timeRemaining; // starts 2:00:00, counts down
+  final Duration timeRemaining;
   final bool isComplete;
   final bool isActive;
+  final int examDuration;
 
   ExamSessionState copyWith({
     List<QuizQuestionEntity>? questions,
@@ -33,6 +35,7 @@ class ExamSessionState {
     Duration? timeRemaining,
     bool? isComplete,
     bool? isActive,
+    int? examDuration,
   }) {
     return ExamSessionState(
       questions: questions ?? this.questions,
@@ -42,6 +45,7 @@ class ExamSessionState {
       timeRemaining: timeRemaining ?? this.timeRemaining,
       isComplete: isComplete ?? this.isComplete,
       isActive: isActive ?? this.isActive,
+      examDuration: examDuration ?? this.examDuration,
     );
   }
 }
@@ -56,21 +60,22 @@ class ExamSessionNotifier extends StateNotifier<ExamSessionState> {
   ExamSessionNotifier({required AppDatabase database})
     : _db = database,
       super(
-ExamSessionState(
-      questions: const [],
-      currentIndex: 0,
-      answers: const {},
-      startTime: DateTime.fromMillisecondsSinceEpoch(0),
-      timeRemaining: const Duration(minutes: 120),
-      isComplete: false,
-      isActive: false,
-    ),
+ ExamSessionState(
+ questions: const [],
+ currentIndex: 0,
+ answers: const {},
+ startTime: DateTime.fromMillisecondsSinceEpoch(0),
+ timeRemaining: const Duration(minutes: 120),
+ isComplete: false,
+ isActive: false,
+ examDuration: 200,
+ ),
       );
 
   final AppDatabase _db;
   Timer? _timer;
 
-  static const _examDuration = Duration(minutes: 120);
+  static const _secondsPerQuestion = 90;
 
   bool get _hasStarted => state.isActive && state.questions.isNotEmpty;
 
@@ -207,7 +212,11 @@ LIMIT ?
     return selected;
   }
 
-  Future<void> startExam() async {
+  Future<void> startExam({
+    int questionCount = 200,
+    String? specialtyFilter,
+    bool useTimer = true,
+  }) async {
     _timer?.cancel();
     _timer = null;
 
@@ -215,20 +224,47 @@ LIMIT ?
       domainWeights: _defaultDomainWeights,
     );
 
-    state = state.copyWith(
-      questions: questions,
+    final limitedQuestions = questions.length > questionCount
+        ? questions.sublist(0, questionCount)
+        : questions;
+
+    final totalTime = useTimer
+        ? Duration(seconds: questionCount * _secondsPerQuestion)
+        : Duration.zero;
+
+    state = ExamSessionState(
+      questions: limitedQuestions,
       currentIndex: 0,
       answers: const {},
       startTime: DateTime.now(),
-      timeRemaining: _examDuration,
+      timeRemaining: totalTime,
       isComplete: false,
       isActive: true,
+      examDuration: questionCount,
     );
 
-    _timer = Timer.periodic(
-      const Duration(seconds: 1),
-      (_) => tickTimer(),
-    );
+    if (useTimer && limitedQuestions.isNotEmpty) {
+      _timer = Timer.periodic(
+        const Duration(seconds: 1),
+        (_) => tickTimer(),
+      );
+    }
+  }
+
+  int get correctAnswerCount {
+    int correct = 0;
+    for (var i = 0; i < state.questions.length; i++) {
+      final answer = state.answers[i];
+      if (answer != null && state.questions[i].correctOption == answer.toUpperCase()) {
+        correct++;
+      }
+    }
+    return correct;
+  }
+
+  double get scorePercentage {
+    if (state.questions.isEmpty) return 0;
+    return (correctAnswerCount / state.questions.length) * 100;
   }
 
   void answerQuestion(String optionLetter) {
@@ -238,7 +274,15 @@ LIMIT ?
     final answers = Map<int, String>.from(state.answers);
     answers[idx] = optionLetter;
 
-    state = state.copyWith(answers: answers);
+    final isLast = idx >= state.questions.length - 1;
+    state = state.copyWith(
+      answers: answers,
+      currentIndex: isLast ? idx : idx + 1,
+    );
+
+    if (isLast) {
+      submitExam();
+    }
   }
 
   void previousQuestion() {
@@ -282,5 +326,20 @@ LIMIT ?
     _timer?.cancel();
     _timer = null;
     super.dispose();
+  }
+
+  void reset() {
+    _timer?.cancel();
+    _timer = null;
+    state = ExamSessionState(
+      questions: const [],
+      currentIndex: 0,
+      answers: const {},
+      startTime: DateTime.fromMillisecondsSinceEpoch(0),
+      timeRemaining: const Duration(minutes: 120),
+      isComplete: false,
+      isActive: false,
+      examDuration: 200,
+    );
   }
 }

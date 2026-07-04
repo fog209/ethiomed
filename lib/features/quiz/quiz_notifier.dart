@@ -191,6 +191,24 @@ class QuizNotifier extends FamilyAsyncNotifier<List<QuizTableData>, String> {
     }
   }
 
+  Future<List<QuizTableData>> loadMissedQuestions() async {
+    state = const AsyncLoading<List<QuizTableData>>();
+    try {
+      final questions = await _repository.getMissedQuestions();
+      if (questions.isEmpty) {
+        state = const AsyncData([]);
+        return [];
+      }
+      _currentIndex = 0;
+      _resetCurrentQuestionState();
+      state = AsyncData(questions);
+      return questions;
+    } catch (error, stackTrace) {
+      state = AsyncError(error, stackTrace);
+      rethrow;
+    }
+  }
+
   Future<List<QuizTableData>> _loadLocalQuestions([String? category]) async {
     final selectedCategory = category ?? arg;
     state = const AsyncLoading<List<QuizTableData>>();

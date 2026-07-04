@@ -143,7 +143,7 @@ class _GroupedArticleList extends StatelessWidget {
   Widget build(BuildContext context) {
     final grouped = <String, List<Article>>{};
     for (final article in articles) {
-      grouped.putIfAbsent(article.category, () => <Article>[]).add(article);
+      grouped.putIfAbsent(article.parentCategory, () => <Article>[]).add(article);
     }
 
     final categories = grouped.keys.toList(growable: false)..sort();

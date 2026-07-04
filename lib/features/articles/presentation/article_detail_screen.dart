@@ -99,8 +99,9 @@ class _ClinicalSectionConfig {
 class ArticleDetailScreen extends ConsumerStatefulWidget {
   final ArticleLocal? article;
   final String? articleId;
+  final String? scrollToSection;
 
-  const ArticleDetailScreen({super.key, this.article, this.articleId});
+  const ArticleDetailScreen({super.key, this.article, this.articleId, this.scrollToSection});
 
   @override
   ConsumerState<ArticleDetailScreen> createState() =>
@@ -109,6 +110,7 @@ class ArticleDetailScreen extends ConsumerStatefulWidget {
 
 class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
   bool _showLowYieldSections = false;
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
@@ -133,8 +135,35 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
         if (!mounted) {
           return;
         }
+        _scrollToInitialSection();
       });
+    } else if (widget.articleId != null) {
+      Future.microtask(_scrollToInitialSection);
     }
+  }
+
+  void _scrollToInitialSection() {
+    final scrollToSection = widget.scrollToSection;
+    if (scrollToSection == null || scrollToSection.isEmpty) {
+      return;
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final sectionIndex = _clinicalSectionOrder.indexOf(scrollToSection);
+      if (sectionIndex >= 0 && _scrollController.hasClients) {
+        final estimatedOffset = sectionIndex * 80.0;
+        _scrollController.animateTo(
+          estimatedOffset,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        );
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   Future<void> _recordViewHistory(AppDatabase db, {ArticleLocal? article}) async {
@@ -284,6 +313,7 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
   ) {
     final theme = Theme.of(context);
     return SingleChildScrollView(
+      controller: _scrollController,
       padding: const EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

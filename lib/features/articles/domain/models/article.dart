@@ -1,9 +1,10 @@
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
 
 class Article {
   final String id;
   final String title;
-  final String? category;
+  final List<String> category;
   final Map<String, dynamic>? content;
   final String? imageUrl;
   final String? videoUrl;
@@ -12,12 +13,15 @@ class Article {
   Article({
     required this.id,
     required this.title,
-    this.category,
+    required this.category,
     this.content,
     this.imageUrl,
     this.videoUrl,
     this.isHighYield = false,
   });
+
+  String get parentCategory => category.isNotEmpty ? category.first : 'General';
+  String get subcategory => category.length > 1 ? category[1] : '';
 
   int get estimatedReadMinutes {
     final content = this.content;
@@ -32,14 +36,8 @@ class Article {
   }
 
   factory Article.fromJson(Map<String, dynamic> json) {
-    final title = json['title'] as String? ?? '';
-    final rawCategory = json['category'] as String?;
-    if (rawCategory == null || rawCategory.trim().isEmpty) {
-      debugPrint('Article ${json['id']} has no category — assigned to General');
-    }
-    final category = rawCategory == null || rawCategory.trim().isEmpty
-        ? 'General'
-        : rawCategory;
+    final id = (json['id'] as String?) ?? '';
+    
     Map<String, dynamic>? content;
     final rawContent = json['content'];
     try {
@@ -47,27 +45,61 @@ class Article {
         content = rawContent;
       } else if (rawContent is Map) {
         content = rawContent.cast<String, dynamic>();
+      } else if (rawContent is String) {
+        content = jsonDecode(rawContent) as Map<String, dynamic>;
       } else {
-        debugPrint(
-          'Article ${json['id']}: content wrong type ${rawContent.runtimeType}',
-        );
         content = const <String, dynamic>{};
       }
     } catch (e) {
       debugPrint('Article content parse failed: $e');
       content = const <String, dynamic>{};
     }
-    final imageUrl = json['image_url'] as String?;
-    final videoUrl = json['video_url'] as String?;
+
+    final title = (json['title'] as String?) ?? (content['title'] as String?) ?? '';
+
+    final rawCategory = json['category'] ?? content['category'];
+    List<String> categoryPath = [];
+    if (rawCategory is List) {
+      categoryPath = rawCategory.map((e) => e.toString()).toList();
+    } else if (rawCategory is String && rawCategory.isNotEmpty) {
+      final sub = json['subcategory'] as String? ?? content['subcategory'] as String?;
+      categoryPath = _mapOldCategory(rawCategory, sub);
+    } else {
+      categoryPath = const ['General'];
+    }
+
+    final imageUrl = (json['image_url'] as String?) ?? (json['imageUrl'] as String?) ?? (content['image_url'] as String?);
+    final videoUrl = (json['video_url'] as String?) ?? (json['videoUrl'] as String?) ?? (content['video_url'] as String?);
+    final isHighYield = (json['is_high_yield'] as bool?) ?? (json['isHighYield'] as bool?) ?? (content['is_high_yield'] as bool?) ?? false;
 
     return Article(
-      id: (json['id'] as String?) ?? '',
+      id: id,
       title: title,
-      category: category,
+      category: categoryPath,
       content: content,
       imageUrl: imageUrl,
       videoUrl: videoUrl,
-      isHighYield: (json['is_high_yield'] as bool?) ?? false,
+      isHighYield: isHighYield,
     );
+  }
+
+  static List<String> _mapOldCategory(String cat, String? sub) {
+    if (sub != null && sub.isNotEmpty) {
+      return [cat, sub];
+    }
+    final categoryToParent = <String, String>{
+      'Cardiology': 'Internal Medicine',
+      'Pulmonology': 'Internal Medicine',
+      'Infectious Diseases': 'Internal Medicine',
+      'Neonatology': 'Pediatrics',
+      'Developmental Milestones': 'Pediatrics',
+      'Obstetrics': 'OB/GYN',
+      'Gynecology': 'OB/GYN',
+    };
+    final parent = categoryToParent[cat];
+    if (parent != null) {
+      return [parent, cat];
+    }
+    return [cat];
   }
 }

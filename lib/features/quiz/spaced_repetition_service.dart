@@ -64,7 +64,7 @@ class SpacedRepetitionService {
     }
   }
 
-  Future<SpacedRepetitionReviewResult> recordReview(int id, int quality) async {
+Future<SpacedRepetitionReviewResult> recordReview(int id, int quality) async {
     try {
       return await _db.transaction(() async {
         final question = await _getQuestion(id);
@@ -73,11 +73,15 @@ class SpacedRepetitionService {
         }
 
 final schedule = _calculateSchedule(
-           easeFactor: question.easeFactor,
-           interval: question.srInterval ?? 0,
-           repetitions: question.repetitions ?? 0,
-           quality: quality,
-         );
+          easeFactor: question.easeFactor,
+          interval: question.srInterval ?? 0,
+          repetitions: question.repetitions ?? 0,
+          quality: quality,
+        );
+
+        // Decrement wrong_count on correct answer (quality >= 3)
+        final wrongCountDecrement = quality >= 3 && question.wrongCount > 0 ? 1 : 0;
+        final newWrongCount = max(0, question.wrongCount - wrongCountDecrement);
 
         await _db
             .customSelect(
@@ -88,7 +92,9 @@ final schedule = _calculateSchedule(
             sr_interval = ?,
             repetitions = ?,
             next_due_at = ?,
-            last_quality = ?
+            last_quality = ?,
+            wrong_count = ?,
+            last_attempted_at = ?
           WHERE id = ?
           ''',
               variables: [
@@ -97,6 +103,8 @@ final schedule = _calculateSchedule(
                 Variable(schedule.repetitions),
                 Variable(schedule.dueAt),
                 Variable(quality),
+                Variable(newWrongCount),
+                Variable(DateTime.now()),
                 Variable(id),
               ],
             )

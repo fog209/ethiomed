@@ -55,7 +55,7 @@ class ArticleLocalStore {
               ArticlesCompanion.insert(
                 id: _storageIdForTitle(article.title),
                 title: article.title,
-                category: Value(article.category),
+                category: Value(article.category.isNotEmpty ? article.category.first : ''),
                 subcategory: Value(article.subcategory),
                 content: Value(jsonEncode(article.toJson())),
               ),

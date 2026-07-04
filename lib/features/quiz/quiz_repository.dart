@@ -155,6 +155,96 @@ class QuizRepository {
     ).get().then((rows) => rows.map(_questionFromRowSimple).toList(growable: false));
   }
 
+  Future<List<QuizQuestionEntity>> getMissedQuestions() async {
+    final rows = await _db
+        .customSelect(
+          '''
+          SELECT *
+          FROM quiz_table
+          WHERE wrong_count > 0
+          ORDER BY last_attempted_at DESC
+          ''',
+        )
+        .get();
+
+    return rows.map(_questionFromRowSimple).toList(growable: false);
+  }
+
+  Future<int> syncQuestionsFromSupabase() async {
+    try {
+      final response = await _supabase.from('questions').select();
+      final questions = response
+          .map(_questionFromJson)
+          .whereType<QuizQuestionEntity>()
+          .toList(growable: false);
+      await upsertQuestions(questions);
+      return questions.length;
+    } catch (e) {
+      debugPrint('Sync questions error: $e');
+      return 0;
+    }
+  }
+
+  Future<int> syncFlashcards() async {
+    try {
+      final response = await _supabase.from('flashcards').select();
+      final flashcards = response
+          .map(_flashcardFromJson)
+          .whereType<FlashcardEntity>()
+          .toList(growable: false);
+
+      await _db.transaction(() async {
+        for (final fc in flashcards) {
+          final companion = FlashcardTableCompanion.insert(
+            remoteId: Value(fc.remoteId ?? 0),
+            deckName: fc.deckName,
+            frontText: fc.frontText,
+            backText: fc.backText,
+            sourceArticleId: Value(fc.sourceArticleId ?? ''),
+            easeFactor: Value(fc.easeFactor),
+            createdAt: Value(fc.createdAt),
+          );
+          await _db
+              .into(_db.flashcardTable)
+              .insert(companion, onConflict: DoUpdate((_) => companion));
+        }
+      });
+
+      return flashcards.length;
+    } catch (e) {
+      debugPrint('Sync flashcards error: $e');
+      return 0;
+    }
+  }
+
+  FlashcardEntity? _flashcardFromJson(Map<String, Object?> json) {
+    final deckName = _string(json['deck_name']) ?? _string(json['deckName']);
+    final frontText = _string(json['front_text']) ?? _string(json['frontText']);
+    final backText = _string(json['back_text']) ?? _string(json['backText']);
+
+    if (deckName == null || frontText == null || backText == null) {
+      return null;
+    }
+
+    return FlashcardEntity(
+      id: 0,
+      remoteId: int.tryParse(json['id'].toString()) ?? 0,
+      deckName: deckName,
+      frontText: frontText,
+      backText: backText,
+      sourceArticleId: _string(json['source_article_id']) ??
+          _string(json['sourceArticleId']),
+      easeFactor: 2.5,
+      interval: null,
+      repetitions: null,
+      nextDueAt: null,
+      lastQuality: null,
+      createdAt: DateTime.now(),
+      updatedAt: null,
+      parentCategory: null,
+    );
+  }
+
   QuizQuestionEntity _questionFromRowSimple(QueryRow row) {
     return QuizQuestionEntity(
       id: row.read<int>('id'),
@@ -274,4 +364,9 @@ final quizRepositoryProvider = Provider<QuizRepository>((ref) {
     onSuccessfulSync: () =>
         ref.read(syncStateProvider.notifier).setSuccessfulSync(),
   );
+});
+
+final missedQuestionsProvider = FutureProvider<List<QuizQuestionEntity>>((ref) async {
+  final repository = ref.watch(quizRepositoryProvider);
+  return repository.getMissedQuestions();
 });

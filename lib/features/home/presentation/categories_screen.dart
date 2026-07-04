@@ -14,6 +14,24 @@ import '../../../features/progress/category_progress_provider.dart';
 import '../../../features/progress/streak_notifier.dart';
 import '../../../features/progress/weekly_stats_provider.dart';
 import '../../articles/data/article_repository.dart';
+import '../../quiz/quiz_notifier.dart';
+import '../../quiz/quiz_repository.dart';
+
+const _defaultQuizCategory = AppConfig.internalMedicineCategory;
+
+/// Returns true when the given category has at least one subcategory in the DB.
+final categoryHasSubcategoriesProvider =
+    FutureProvider.family<bool, String>((ref, parentCategory) async {
+  final db = ref.watch(databaseProvider);
+  final subs = await db.fetchSubcategories(parentCategory);
+  return subs.isNotEmpty;
+});
+
+final missedQuestionsCountProvider = FutureProvider<int>((ref) async {
+  final repository = ref.watch(quizRepositoryProvider);
+  final missedQuestions = await repository.getMissedQuestions();
+  return missedQuestions.length;
+});
 
 final todayPlanProvider = FutureProvider<TodayPlanData>((ref) async {
   final db = ref.watch(databaseProvider);
@@ -83,7 +101,24 @@ class _CategoryTile extends ConsumerWidget {
 
 return progressAsyncValue.when(
        data: (progress) => InkWell(
-         onTap: () => context.push('/article-list/${Uri.encodeComponent(name)}'),
+         onTap: () {
+           final hasSubsAsync = ref.read(
+             categoryHasSubcategoriesProvider(name),
+           );
+           hasSubsAsync.when(
+             data: (hasSubs) {
+               if (hasSubs) {
+                 context.push('/subcategories/${Uri.encodeComponent(name)}');
+               } else {
+                 context.push('/article-list/${Uri.encodeComponent(name)}');
+               }
+             },
+             loading: () =>
+                 context.push('/article-list/${Uri.encodeComponent(name)}'),
+             error: (_, _) =>
+                 context.push('/article-list/${Uri.encodeComponent(name)}'),
+           );
+         },
          child: Card(
            elevation: 4,
            shape: RoundedRectangleBorder(
@@ -223,6 +258,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                   loading: () => const SizedBox.shrink(),
                   error: (_, _) => const SizedBox.shrink(),
                 ),
+                _buildReviewMistakesCard(),
                 _buildCalculatorsCard(),
                 _buildCasesCard(),
                 _buildFlashcardsCard(),
@@ -644,7 +680,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
       margin: const EdgeInsets.only(bottom: 16),
       color: theme.colorScheme.secondaryContainer,
       child: InkWell(
-        onTap: () => context.push('/exam'),
+        onTap: () => context.push('/exam-setup'),
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -906,6 +942,76 @@ const SizedBox(width: 8),
           fontWeight: FontWeight.bold,
         ),
       ),
+    );
+  }
+
+  Widget _buildReviewMistakesCard() {
+    final theme = Theme.of(context);
+    final missedAsync = ref.watch(missedQuestionsCountProvider);
+
+    return missedAsync.when(
+      data: (count) {
+        if (count == 0) {
+          return const SizedBox.shrink();
+        }
+        return Card(
+          margin: const EdgeInsets.only(bottom: 16),
+          color: theme.colorScheme.secondaryContainer,
+          child: InkWell(
+            onTap: () async {
+              final notifier = ref.read(quizNotifierProvider(_defaultQuizCategory).notifier);
+              await notifier.loadMissedQuestions();
+              if (mounted) {
+                context.push('/quiz');
+              }
+            },
+            borderRadius: BorderRadius.circular(12),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.quiz,
+                    color: theme.colorScheme.secondary,
+                    size: 32,
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Review Mistakes',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: theme.colorScheme.onSecondaryContainer,
+                            fontSize: 16,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '$count question${count > 1 ? 's' : ''} to review',
+                          style: TextStyle(
+                            color: theme.colorScheme.onSecondaryContainer,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Icon(
+                    Icons.arrow_forward_ios,
+                    color: theme.colorScheme.onSecondaryContainer,
+                    size: 16,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+      loading: () => const SizedBox.shrink(),
+      error: (_, _) => const SizedBox.shrink(),
     );
   }
 

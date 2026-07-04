@@ -57,14 +57,14 @@ class _ArticleDetail extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 10),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: <Widget>[
-                _MetaChip(label: 'Category', value: article.category),
-                _MetaChip(label: 'Subcategory', value: article.subcategory),
-              ],
-            ),
+Wrap(
+               spacing: 8,
+               runSpacing: 8,
+               children: <Widget>[
+                 _MetaChip(label: 'Category', value: article.parentCategory),
+                 _MetaChip(label: 'Subcategory', value: article.subcategory),
+               ],
+             ),
             const SizedBox(height: 22),
             for (final section in article.textSections)
               _ArticleSectionView(section: section),

@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shimmer/shimmer.dart';
+
 import '../../../core/database/app_database.dart';
 import '../../../core/widgets/empty_state.dart';
-import '../../../features/articles/article_providers.dart';
+import '../../articles/article_providers.dart';
 import '../../articles/data/article_repository.dart';
 
 const int _articlesPageSize = 20;

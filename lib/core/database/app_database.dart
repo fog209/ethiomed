@@ -13,7 +13,9 @@ class MigrationErrorStore {
   static String? value;
 }
 
-final migrationErrorProvider = StateProvider<String?>((ref) => MigrationErrorStore.value);
+final migrationErrorProvider = StateProvider<String?>(
+  (ref) => MigrationErrorStore.value,
+);
 
 void setMigrationError(String value) {
   MigrationErrorStore.value = value;
@@ -29,6 +31,7 @@ class Articles extends Table {
   TextColumn get videoUrl => text().nullable()();
   TextColumn get subcategory => text().nullable()();
   BoolColumn get isHighYield => boolean().withDefault(const Constant(false))();
+  TextColumn get parentCategory => text().nullable()();
   @override
   Set<Column> get primaryKey => {id};
 }
@@ -64,13 +67,27 @@ class Bookmarks extends Table {
 }
 
 class StudySessions extends Table {
-  DateTimeColumn get date => dateTime()();
-  IntColumn get articlesViewedCount =>
-      integer().withDefault(const Constant(0))();
+   DateTimeColumn get date => dateTime()();
+   IntColumn get articlesViewedCount =>
+       integer().withDefault(const Constant(0))();
+   IntColumn get quizSeconds => integer().nullable()();
 
-  @override
-  Set<Column> get primaryKey => {date};
-}
+   @override
+   Set<Column> get primaryKey => {date};
+ }
+
+ class QuizSessions extends Table {
+   IntColumn get id => integer().autoIncrement()();
+   DateTimeColumn get startTime => dateTime()();
+   DateTimeColumn get endTime => dateTime().nullable()();
+   TextColumn get mode => text().withDefault(const Constant('tutor'))();
+   IntColumn get totalQuestions => integer().withDefault(const Constant(0))();
+   IntColumn get correctAnswers => integer().nullable()();
+   TextColumn get specialtyFilter => text().nullable()();
+
+   @override
+   Set<Column> get primaryKey => {id};
+ }
 
 @DataClassName('QuizQuestionLocal')
 class QuizQuestions extends Table {
@@ -111,6 +128,21 @@ class QuizTable extends Table {
   DateTimeColumn get nextDueAt => dateTime().nullable()();
   RealColumn get easeFactor => real().withDefault(const Constant(2.5))();
   IntColumn get lastQuality => integer().nullable()();
+
+/// Mirror of Supabase `updated_at` used for incremental sync.
+  DateTimeColumn get updatedAt => dateTime().nullable()();
+
+/// Parent category for taxonomy synchronization.
+  TextColumn get parentCategory => text().nullable()();
+
+/// Source type: 'original' or 'past_exam'.
+  TextColumn get sourceType => text().withDefault(const Constant('original'))();
+
+/// Exam year, e.g., 2022, 2023.
+  IntColumn get examYear => integer().nullable()();
+
+/// Exam source description, e.g., "EHPLE October".
+  TextColumn get examSource => text().nullable()();
 }
 
 @TableIndex(name: 'idx_flashcard_deck', columns: {#deckName})
@@ -118,6 +150,7 @@ class QuizTable extends Table {
 @DataClassName('FlashcardEntity')
 class FlashcardTable extends Table {
   IntColumn get id => integer().autoIncrement()();
+  IntColumn get remoteId => integer().unique().nullable()();
   TextColumn get deckName => text()();
   TextColumn get frontText => text()();
   TextColumn get backText => text()();
@@ -128,6 +161,12 @@ class FlashcardTable extends Table {
   DateTimeColumn get nextDueAt => dateTime().nullable()();
   IntColumn get lastQuality => integer().nullable()();
   DateTimeColumn get createdAt => dateTime().clientDefault(DateTime.now)();
+
+  /// Mirror of Supabase `updated_at` used for incremental sync.
+  DateTimeColumn get updatedAt => dateTime().nullable()();
+
+  /// Parent category for taxonomy synchronization.
+  TextColumn get parentCategory => text().nullable()();
 }
 
 class ClinicalCases extends Table {
@@ -135,7 +174,8 @@ class ClinicalCases extends Table {
   TextColumn get title => text()();
   TextColumn get specialty => text()();
   TextColumn get difficulty => text().withDefault(const Constant('medium'))();
-  IntColumn get estimatedTimeMinutes => integer().withDefault(const Constant(15))();
+  IntColumn get estimatedTimeMinutes =>
+      integer().withDefault(const Constant(15))();
   TextColumn get learningObjectives => text().nullable()();
 
   @override
@@ -146,7 +186,8 @@ class CaseStages extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get caseId => text().references(ClinicalCases, #id)();
   IntColumn get stageNumber => integer()();
-  TextColumn get stageType => text().withDefault(const Constant('presentation'))();
+  TextColumn get stageType =>
+      text().withDefault(const Constant('presentation'))();
   TextColumn get content => text()();
 
   @override
@@ -184,6 +225,7 @@ class CaseProgress extends Table {
      Articles,
      Bookmarks,
      StudySessions,
+     QuizSessions,
      QuizQuestions,
      QuizTable,
      FlashcardTable,
@@ -193,11 +235,11 @@ class CaseProgress extends Table {
      CaseProgress,
    ],
  )
- class AppDatabase extends _$AppDatabase {
-   AppDatabase() : super(_openConnection());
+class AppDatabase extends _$AppDatabase {
+  AppDatabase() : super(_openConnection());
 
-   @override
-   int get schemaVersion => 11;
+  @override
+  int get schemaVersion => 15;
 
   Future<void> _runMigrationStep(
     String name,
@@ -211,67 +253,224 @@ class CaseProgress extends Table {
     }
   }
 
+  /// Migrates existing flat categories to their parent categories.
+  /// Call during version 14 migration or via sync process.
+  Future<void> migrateCategoryToParentCategory() async {
+    final categoryToParent = <String, String>{
+      'Cardiology': 'Internal Medicine',
+      'Pulmonology': 'Internal Medicine',
+      'Infectious Diseases': 'Internal Medicine',
+      'Neonatology': 'Pediatrics',
+      'Developmental Milestones': 'Pediatrics',
+      'Obstetrics': 'OB/GYN',
+      'Gynecology': 'OB/GYN',
+    };
+
+    for (final entry in categoryToParent.entries) {
+      final category = entry.key;
+      final parentCategory = entry.value;
+      await customSelect(
+        'UPDATE articles SET parent_category = ? WHERE category = ?',
+        variables: [Variable(parentCategory), Variable(category)],
+      ).get();
+    }
+  }
+
   @override
   MigrationStrategy get migration {
     return MigrationStrategy(
       onCreate: (m) async => await m.createAll(),
       onUpgrade: (m, from, to) async {
         if (from < 2) {
-          await _runMigrationStep('create bookmarks', () => m.createTable(bookmarks));
+          await _runMigrationStep(
+            'create bookmarks',
+            () => m.createTable(bookmarks),
+          );
         }
         if (from < 3) {
-          await _runMigrationStep('create quiz questions', () => m.createTable(quizQuestions));
+          await _runMigrationStep(
+            'create quiz questions',
+            () => m.createTable(quizQuestions),
+          );
         }
         if (from < 4) {
           if (from >= 3) {
-            await _runMigrationStep('drop old quiz questions', () => m.drop(quizQuestions));
+            await _runMigrationStep(
+              'drop old quiz questions',
+              () => m.drop(quizQuestions),
+            );
           }
-          await _runMigrationStep('create quiz table', () => m.createTable(quizTable));
+          await _runMigrationStep(
+            'create quiz table',
+            () => m.createTable(quizTable),
+          );
         }
         if (from < 5) {
-          await _runMigrationStep('add quiz srInterval', () => m.addColumn(
-            quizTable,
-            quizTable.srInterval as GeneratedColumn<Object>,
-          ));
-          await _runMigrationStep('add quiz repetitions', () => m.addColumn(
-            quizTable,
-            quizTable.repetitions as GeneratedColumn<Object>,
-          ));
-          await _runMigrationStep('add quiz nextDueAt', () => m.addColumn(
-            quizTable,
-            quizTable.nextDueAt as GeneratedColumn<Object>,
-          ));
+          await _runMigrationStep(
+            'add quiz srInterval',
+            () => m.addColumn(
+              quizTable,
+              quizTable.srInterval as GeneratedColumn<Object>,
+            ),
+          );
+          await _runMigrationStep(
+            'add quiz repetitions',
+            () => m.addColumn(
+              quizTable,
+              quizTable.repetitions as GeneratedColumn<Object>,
+            ),
+          );
+          await _runMigrationStep(
+            'add quiz nextDueAt',
+            () => m.addColumn(
+              quizTable,
+              quizTable.nextDueAt as GeneratedColumn<Object>,
+            ),
+          );
         }
         if (from < 6) {
-          await _runMigrationStep('add articles isHighYield', () => m.addColumn(
-            articles,
-            articles.isHighYield as GeneratedColumn<Object>,
-          ));
+          await _runMigrationStep(
+            'add articles isHighYield',
+            () => m.addColumn(
+              articles,
+              articles.isHighYield as GeneratedColumn<Object>,
+            ),
+          );
         }
         if (from < 7) {
-          await _runMigrationStep('add articles subcategory', () => m.addColumn(
-            articles,
-            articles.subcategory as GeneratedColumn<Object>,
-          ));
+          await _runMigrationStep(
+            'add articles subcategory',
+            () => m.addColumn(
+              articles,
+              articles.subcategory as GeneratedColumn<Object>,
+            ),
+          );
         }
         if (from < 8) {
-          await _runMigrationStep('ensure study sessions', _ensureStudySessionsTable);
+          await _runMigrationStep(
+            'ensure study sessions',
+            _ensureStudySessionsTable,
+          );
         }
         if (from < 9) {
-          await _runMigrationStep('ensure quiz table sm2 columns', _ensureQuizTableSm2Columns);
+          await _runMigrationStep(
+            'ensure quiz table sm2 columns',
+            _ensureQuizTableSm2Columns,
+          );
         }
-if (from < 10) {
-           await _runMigrationStep('create clinical cases', () => m.createTable(clinicalCases));
-           await _runMigrationStep('create case stages', () => m.createTable(caseStages));
-           await _runMigrationStep('create case options', () => m.createTable(caseOptions));
-           await _runMigrationStep('create case progress', () => m.createTable(caseProgress));
+        if (from < 10) {
+          await _runMigrationStep(
+            'create clinical cases',
+            () => m.createTable(clinicalCases),
+          );
+          await _runMigrationStep(
+            'create case stages',
+            () => m.createTable(caseStages),
+          );
+          await _runMigrationStep(
+            'create case options',
+            () => m.createTable(caseOptions),
+          );
+          await _runMigrationStep(
+            'create case progress',
+            () => m.createTable(caseProgress),
+          );
+        }
+        if (from < 11) {
+          await _runMigrationStep(
+            'create flashcard table',
+            () => m.createTable(flashcardTable),
+          );
+        }
+        if (from < 12) {
+          await _runMigrationStep('add updated_at columns', () async {
+            await _addUpdatedAtColumnIfMissing(quizTable);
+            await _addUpdatedAtColumnIfMissing(flashcardTable);
+          });
+        }
+
+if (from < 13) {
+          await _runMigrationStep(
+            'add flashcard remote_id + updated_at + parent_category',
+            () async {
+              // remote_id (INTEGER)
+              final flashcardTableName = flashcardTable.actualTableName;
+              final columns = await customSelect(
+                'PRAGMA table_info($flashcardTableName)',
+              ).get();
+              final columnNames = columns
+                  .map((row) => row.read<String>('name'))
+                  .toSet();
+
+              if (!columnNames.contains('remote_id')) {
+                await customStatement(
+                  'ALTER TABLE $flashcardTableName ADD COLUMN remote_id INTEGER',
+                );
+              }
+
+              // updated_at (may exist already, but safe to ensure)
+              await _addUpdatedAtColumnIfMissing(flashcardTable);
+
+              // parent_category
+              if (!columnNames.contains('parent_category')) {
+                await customStatement(
+                  'ALTER TABLE $flashcardTableName ADD COLUMN parent_category TEXT',
+                );
+              }
+            },
+          );
+
+          // Ensure quiz updated_at and parent_category exist for cursor sync.
+          await _runMigrationStep('ensure quiz sync columns', () async {
+            await _addUpdatedAtColumnIfMissing(quizTable);
+            final quizTableName = quizTable.actualTableName;
+            final columns = await customSelect(
+              'PRAGMA table_info($quizTableName)',
+            ).get();
+            final columnNames = columns.map((row) => row.read<String>('name')).toSet();
+            if (!columnNames.contains('parent_category')) {
+              await customStatement(
+                'ALTER TABLE $quizTableName ADD COLUMN parent_category TEXT',
+              );
+            }
+          });
+
+          // Ensure articles parent_category exists.
+          await _runMigrationStep('add articles parent_category', () async {
+            final articlesTableName = articles.actualTableName;
+            final columns = await customSelect(
+              'PRAGMA table_info($articlesTableName)',
+            ).get();
+            final columnNames = columns.map((row) => row.read<String>('name')).toSet();
+if (!columnNames.contains('parent_category')) {
+               await customStatement(
+                 'ALTER TABLE $articlesTableName ADD COLUMN parent_category TEXT',
+               );
+             }
+           });
          }
-         if (from < 11) {
-           await _runMigrationStep('create flashcard table', () => m.createTable(flashcardTable));
-         }
-       },
-    );
-  }
+if (from < 14) {
+            await _runMigrationStep(
+              'create quiz sessions table',
+              () => m.createTable(quizSessions),
+            );
+          }
+          if (from < 15) {
+            await _runMigrationStep('add quiz_seconds to study_sessions', () async {
+              final columns = await customSelect(
+                'PRAGMA table_info(study_sessions)',
+              ).get();
+              final columnNames = columns.map((row) => row.read<String>('name')).toSet();
+              if (!columnNames.contains('quiz_seconds')) {
+                await customStatement(
+                  'ALTER TABLE study_sessions ADD COLUMN quiz_seconds INTEGER',
+                );
+              }
+            });
+          }
+        },
+      );
+    }
 
   Future<void> recordArticleView() async {
     await _ensureStudySessionsTable();
@@ -320,6 +519,54 @@ if (from < 10) {
         Variable(correctIncrement),
       ],
     ).get();
+  }
+
+  Future<void> recordQuizSession({
+    required int questionsAttempted,
+    required int correctAnswers,
+    required Duration duration,
+  }) async {
+    await _ensureStudySessionsTable();
+
+    final today = DateTime.now();
+    final day = DateTime(today.year, today.month, today.day);
+    final dayKey = _dateKey(day);
+    final seconds = duration.inSeconds;
+
+    await customSelect(
+      '''
+      INSERT INTO study_sessions (
+        date,
+        session_date,
+        quizzes_completed,
+        quiz_correct,
+        quiz_seconds
+      ) VALUES (?, ?, ?, ?, ?)
+      ON CONFLICT(date) DO UPDATE SET
+        quizzes_completed = quizzes_completed + ?,
+        quiz_correct = quiz_correct + ?,
+        quiz_seconds = COALESCE(quiz_seconds, 0) + ?
+      ''',
+      variables: [
+        Variable(dayKey),
+        Variable(dayKey),
+        Variable(questionsAttempted),
+        Variable(correctAnswers),
+        Variable(seconds),
+        Variable(questionsAttempted),
+        Variable(correctAnswers),
+        Variable(seconds),
+      ],
+    ).get();
+  }
+
+  Future<int> getTotalStudySeconds() async {
+    await _ensureStudySessionsTable();
+    final rows = await customSelect(
+      'SELECT COALESCE(SUM(quiz_seconds), 0) AS total FROM study_sessions',
+    ).get();
+
+    return rows.isNotEmpty ? rows.first.read<int>('total') : 0;
   }
 
   Future<int> countCurrentStudyStreak() async {
@@ -405,11 +652,16 @@ if (from < 10) {
         'ALTER TABLE study_sessions ADD COLUMN quizzes_completed INTEGER NOT NULL DEFAULT 0',
       );
     }
-    if (!columnNames.contains('quiz_correct')) {
-      await customStatement(
-        'ALTER TABLE study_sessions ADD COLUMN quiz_correct INTEGER NOT NULL DEFAULT 0',
-      );
-    }
+if (!columnNames.contains('quiz_correct')) {
+       await customStatement(
+         'ALTER TABLE study_sessions ADD COLUMN quiz_correct INTEGER NOT NULL DEFAULT 0',
+       );
+     }
+     if (!columnNames.contains('quiz_seconds')) {
+       await customStatement(
+         'ALTER TABLE study_sessions ADD COLUMN quiz_seconds INTEGER',
+       );
+     }
 
     if (columnNames.contains('session_date')) {
       await customStatement('''
@@ -445,6 +697,59 @@ if (from < 10) {
     }
 
     return rows.first.read<int>('count');
+  }
+
+  /// Returns distinct non-null subcategories under [parentCategory], sorted
+  /// alphabetically. Used by SubcategoryScreen to build its list dynamically.
+  Future<List<String>> fetchSubcategories(String parentCategory) async {
+    final rows = await customSelect(
+      '''
+      SELECT DISTINCT subcategory
+      FROM articles
+      WHERE parent_category = ?
+        AND subcategory IS NOT NULL
+        AND subcategory != ''
+      ORDER BY subcategory ASC
+      ''',
+      variables: [Variable(parentCategory)],
+    ).get();
+    return rows.map((r) => r.read<String>('subcategory')).toList();
+  }
+
+  /// Returns articles whose title matches [query] under [parentCategory],
+  /// searching across both subcategory and flat-category articles.
+  Future<List<ArticleLocal>> searchWithinParent(
+    String parentCategory,
+    String query, {
+    int limit = 50,
+  }) async {
+    final pattern = '%${query.replaceAll('%', '\\%').replaceAll('_', '\\_')}%';
+    final rows = await customSelect(
+      '''
+      SELECT *
+      FROM articles
+      WHERE parent_category = ?
+        AND title LIKE ? ESCAPE '\\'
+      ORDER BY title ASC
+      LIMIT ?
+      ''',
+      variables: [
+        Variable(parentCategory),
+        Variable(pattern),
+        Variable(limit),
+      ],
+    ).get();
+    return rows.map((r) => ArticleLocal(
+          id: r.read<String>('id'),
+          title: r.read<String>('title'),
+          category: r.readNullable<String>('category'),
+          content: r.readNullable<String>('content'),
+          imageUrl: r.readNullable<String>('image_url'),
+          videoUrl: r.readNullable<String>('video_url'),
+          subcategory: r.readNullable<String>('subcategory'),
+          isHighYield: r.read<bool>('is_high_yield'),
+          parentCategory: r.readNullable<String>('parent_category'),
+        )).toList();
   }
 
   Future<int> countReadArticlesByCategory(String category) async {
@@ -517,9 +822,7 @@ if (from < 10) {
       )
       ''');
 
-    final columns = await customSelect(
-      'PRAGMA table_info(view_history)',
-    ).get();
+    final columns = await customSelect('PRAGMA table_info(view_history)').get();
     final columnNames = columns.map((row) => row.read<String>('name')).toSet();
 
     if (!columnNames.contains('article_title')) {
@@ -540,8 +843,7 @@ if (from < 10) {
   }
 
   Future<void> _ensureQuizTableSm2Columns() async {
-    await customStatement(
-      '''
+    await customStatement('''
       CREATE TABLE IF NOT EXISTS quiz_table (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         remote_id TEXT NOT NULL UNIQUE,
@@ -562,14 +864,12 @@ if (from < 10) {
         repetitions INTEGER,
         next_due_at INTEGER,
         ease_factor REAL,
-        last_quality INTEGER
+        last_quality INTEGER,
+        updated_at INTEGER
       )
-      ''',
-    );
+      ''');
 
-    final columns = await customSelect(
-      'PRAGMA table_info(quiz_table)',
-    ).get();
+    final columns = await customSelect('PRAGMA table_info(quiz_table)').get();
     final columnNames = columns.map((row) => row.read<String>('name')).toSet();
 
     if (!columnNames.contains('ease_factor')) {
@@ -600,6 +900,19 @@ if (from < 10) {
     if (!columnNames.contains('tested_field')) {
       await customStatement(
         "ALTER TABLE quiz_table ADD COLUMN tested_field TEXT NOT NULL DEFAULT 'clinicalFeatures'",
+      );
+    }
+  }
+
+  Future<void> _addUpdatedAtColumnIfMissing(dynamic table) async {
+    // Use PRAGMA to detect column existence to keep migration step safe.
+    final tableName = table.actualTableName;
+    final columns = await customSelect('PRAGMA table_info($tableName)').get();
+    final columnNames = columns.map((row) => row.read<String>('name')).toSet();
+
+    if (!columnNames.contains('updated_at')) {
+      await customStatement(
+        'ALTER TABLE $tableName ADD COLUMN updated_at INTEGER',
       );
     }
   }

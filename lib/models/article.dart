@@ -2,7 +2,6 @@ class Article {
   const Article({
     required this.title,
     required this.category,
-    required this.subcategory,
     required this.theEssence,
     required this.theLogic,
     required this.thePortrait,
@@ -16,8 +15,7 @@ class Article {
   });
 
   final String title;
-  final String category;
-  final String subcategory;
+  final List<String> category;
   final String theEssence;
   final String theLogic;
   final String thePortrait;
@@ -29,11 +27,23 @@ class Article {
   final List<String> relatedTopics;
   final String mnemonics;
 
+  String get parentCategory => category.isNotEmpty ? category.first : 'General';
+  String get subcategory => category.length > 1 ? category[1] : '';
+
   factory Article.fromJson(Map<String, dynamic> json) {
+    final rawCategory = json['category'];
+    List<String> categoryPath = [];
+    if (rawCategory is List) {
+      categoryPath = rawCategory.map((e) => e.toString()).toList();
+    } else if (rawCategory is String && rawCategory.isNotEmpty) {
+      categoryPath = _mapOldCategory(rawCategory, json['subcategory'] as String?);
+    } else {
+      categoryPath = const ['General'];
+    }
+
     return Article(
       title: json['title'] as String? ?? '',
-      category: json['category'] as String? ?? '',
-      subcategory: json['subcategory'] as String? ?? '',
+      category: categoryPath,
       theEssence: json['theEssence'] as String? ?? '',
       theLogic: json['theLogic'] as String? ?? '',
       thePortrait: json['thePortrait'] as String? ?? '',
@@ -47,6 +57,26 @@ class Article {
           .toList(growable: false),
       mnemonics: json['mnemonics'] as String? ?? '',
     );
+  }
+
+  static List<String> _mapOldCategory(String cat, String? sub) {
+    if (sub != null && sub.isNotEmpty) {
+      return [cat, sub];
+    }
+    final categoryToParent = <String, String>{
+      'Cardiology': 'Internal Medicine',
+      'Pulmonology': 'Internal Medicine',
+      'Infectious Diseases': 'Internal Medicine',
+      'Neonatology': 'Pediatrics',
+      'Developmental Milestones': 'Pediatrics',
+      'Obstetrics': 'OB/GYN',
+      'Gynecology': 'OB/GYN',
+    };
+    final parent = categoryToParent[cat];
+    if (parent != null) {
+      return [parent, cat];
+    }
+    return [cat];
   }
 
   Map<String, dynamic> toJson() {
@@ -75,7 +105,6 @@ class Article {
   static const List<String> wardReadyArticleKeys = <String>[
     'title',
     'category',
-    'subcategory',
     'theEssence',
     'theLogic',
     'thePortrait',

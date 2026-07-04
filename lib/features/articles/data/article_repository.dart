@@ -40,6 +40,8 @@ class ArticleRepository {
   );
 
 Future<List<ArticleLocal>> fetchAndSyncArticles() async {
+    // TODO: Implement rate limiter check - if user pulls more than 50 articles in 1 minute,
+    // pause sync and show rate limit warning to prevent content scraping abuse.
     try {
       final response = await _supabase
           .from('articles')
@@ -56,8 +58,15 @@ Future<List<ArticleLocal>> fetchAndSyncArticles() async {
                  ArticlesCompanion.insert(
                    id: article.id,
                    title: article.title,
-                   category: Value(article.category),
-                   content: Value(jsonEncode(article.content)),
+                   category: Value(article.subcategory.isNotEmpty
+                       ? article.subcategory
+                       : article.parentCategory),
+                   parentCategory: Value(article.parentCategory.isNotEmpty
+                       ? article.parentCategory
+                       : null),
+                   subcategory: Value(
+                       article.subcategory.isNotEmpty ? article.subcategory : null),
+                   content: Value(jsonEncode(article.content ?? const <String, dynamic>{})),
                    imageUrl: Value(article.imageUrl),
                    videoUrl: Value(article.videoUrl),
                    isHighYield: Value(article.isHighYield),
@@ -123,12 +132,15 @@ Future<List<ArticleLocal>> fetchAndSyncArticles() async {
     int offset = 0,
     String? category,
     String? subcategory,
+    String? parentCategory,
     bool highYieldOnly = false,
   }) {
     final query = _db.select(_db.articles)
       ..orderBy([(table) => OrderingTerm.asc(table.title)]);
 
-    if (category != null && category.trim().isNotEmpty) {
+    if (parentCategory != null && parentCategory.trim().isNotEmpty) {
+      query.where((table) => table.parentCategory.equals(parentCategory.trim()));
+    } else if (category != null && category.trim().isNotEmpty) {
       query.where((table) => table.category.equals(category.trim()));
     }
 
@@ -154,12 +166,15 @@ Future<List<ArticleLocal>> fetchAndSyncArticles() async {
     required int limit,
     required int offset,
     String? subcategory,
+    String? parentCategory,
     bool highYieldOnly = false,
   }) {
     final query = _db.select(_db.articles)
       ..orderBy([(table) => OrderingTerm.asc(table.title)]);
 
-    if (category.trim().isNotEmpty) {
+    if (parentCategory != null && parentCategory.trim().isNotEmpty) {
+      query.where((table) => table.parentCategory.equals(parentCategory.trim()));
+    } else if (category.trim().isNotEmpty) {
       query.where((table) => table.category.equals(category.trim()));
     }
 
@@ -177,24 +192,34 @@ Future<List<ArticleLocal>> fetchAndSyncArticles() async {
         .watch();
   }
 
-  Future<int> countArticlesInCategory(
+Future<int> countArticlesInCategory(
     String category, {
     String? subcategory,
+    String? parentCategory,
     bool highYieldOnly = false,
   }) async {
     return await _db.articles
         .count(
           where: (table) {
-            final categoryFilter = table.category.equals(category.trim());
+            final parentCategoryFilter =
+                parentCategory == null || parentCategory.trim().isEmpty
+                    ? null
+                    : table.parentCategory.equals(parentCategory.trim());
+            final categoryFilter =
+                (parentCategory == null || parentCategory.trim().isEmpty) &&
+                        category.trim().isNotEmpty
+                    ? table.category.equals(category.trim())
+                    : null;
             final subcategoryFilter =
                 subcategory == null || subcategory.trim().isEmpty
-                ? null
-                : table.subcategory.equals(subcategory.trim());
+                    ? null
+                    : table.subcategory.equals(subcategory.trim());
             final highYieldFilter = highYieldOnly
                 ? table.isHighYield.equals(true)
                 : null;
 
             return [
+              parentCategoryFilter,
               categoryFilter,
               subcategoryFilter,
               highYieldFilter,
@@ -208,11 +233,18 @@ Future<List<ArticleLocal>> fetchAndSyncArticles() async {
     required String category,
     required int page,
     String? subcategory,
+    String? parentCategory,
     bool highYieldOnly = false,
   }) async {
     final offset = (page - 1) * _articlesPageSize;
     final query = _db.select(_db.articles)
-      ..where((table) => table.category.equals(category));
+      ..orderBy([(table) => OrderingTerm.asc(table.title)]);
+
+    if (parentCategory != null && parentCategory.trim().isNotEmpty) {
+      query.where((table) => table.parentCategory.equals(parentCategory.trim()));
+    } else if (category.trim().isNotEmpty) {
+      query.where((table) => table.category.equals(category.trim()));
+    }
 
     if (subcategory != null && subcategory.trim().isNotEmpty) {
       query.where((table) => table.subcategory.equals(subcategory.trim()));
@@ -228,6 +260,15 @@ Future<List<ArticleLocal>> fetchAndSyncArticles() async {
         .get();
 
     return result;
+  }
+
+  Future<List<ArticleLocal>> fetchRecentlyUpdatedArticles({
+    int limit = 5,
+  }) async {
+    return (_db.select(_db.articles)
+          ..orderBy([(table) => OrderingTerm.desc(table.id)])
+          ..limit(limit))
+        .get();
   }
 }
 
@@ -265,6 +306,7 @@ class ArticlePageQuery {
     required this.offset,
     this.category,
     this.subcategory,
+    this.parentCategory,
     required this.requestId,
   });
 
@@ -272,6 +314,7 @@ class ArticlePageQuery {
   final int offset;
   final String? category;
   final String? subcategory;
+  final String? parentCategory;
   final int requestId;
 
   @override
@@ -282,12 +325,13 @@ class ArticlePageQuery {
             other.offset == offset &&
             other.category == category &&
             other.subcategory == subcategory &&
+            other.parentCategory == parentCategory &&
             other.requestId == requestId;
   }
 
   @override
   int get hashCode =>
-      Object.hash(limit, offset, category, subcategory, requestId);
+      Object.hash(limit, offset, category, subcategory, parentCategory, requestId);
 }
 
 final paginatedArticlesProvider =
@@ -298,6 +342,7 @@ final paginatedArticlesProvider =
           .watchArticlesPaged(
             category: query.category ?? '',
             subcategory: query.subcategory,
+            parentCategory: query.parentCategory,
             limit: query.limit,
             offset: query.offset,
             highYieldOnly: highYieldOnly,

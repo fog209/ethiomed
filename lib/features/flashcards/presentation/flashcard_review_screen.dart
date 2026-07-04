@@ -6,7 +6,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/database/app_database.dart';
+import '../../../core/services/security_service.dart';
 import '../../../core/widgets/empty_state.dart';
+import '../../quiz/quiz_repository.dart';
 import '../flashcard_review_service.dart';
 
 class FlashcardReviewScreen extends ConsumerStatefulWidget {
@@ -22,9 +24,69 @@ class FlashcardReviewScreen extends ConsumerStatefulWidget {
 class _FlashcardReviewScreenState extends ConsumerState<FlashcardReviewScreen> {
   int currentIndex = 0;
   bool isRevealed = false;
+  bool _isSyncing = false;
 
   void _revealAnswer() {
     setState(() => isRevealed = true);
+  }
+
+  Future<void> _syncDecks() async {
+    if (_isSyncing) return;
+
+    final security = SecurityService();
+    if (!security.isSyncAllowed) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Sync disabled: App integrity check failed')),
+        );
+      }
+      return;
+    }
+
+    setState(() {
+      _isSyncing = true;
+    });
+
+    try {
+      final repository = ref.read(quizRepositoryProvider);
+      var totalUpdated = 0;
+
+      try {
+        final questionsCount = await repository.syncQuestionsFromSupabase();
+        totalUpdated += questionsCount;
+      } catch (e) {
+        debugPrint('Questions sync failed: $e');
+      }
+
+      try {
+        final flashcardsCount = await repository.syncFlashcards();
+        totalUpdated += flashcardsCount;
+      } catch (e) {
+        debugPrint('Flashcards sync failed: $e');
+      }
+
+      if (!mounted) return;
+      setState(() {
+        _isSyncing = false;
+      });
+
+      ref.invalidate(_flashcardsProvider(widget.deckName));
+
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('$totalUpdated items updated.')));
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isSyncing = false;
+        });
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Sync failed: $e')));
+      }
+    }
   }
 
   // Import flashcards from bundled asset.
@@ -123,6 +185,21 @@ class _FlashcardReviewScreenState extends ConsumerState<FlashcardReviewScreen> {
         backgroundColor: theme.colorScheme.surface,
         foregroundColor: theme.colorScheme.onSurface,
         actions: [
+          if (_isSyncing)
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              child: SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+            )
+          else
+            IconButton(
+              icon: const Icon(Icons.sync),
+              tooltip: 'Sync Decks',
+              onPressed: _syncDecks,
+            ),
           IconButton(
             icon: const Icon(Icons.upload_file),
             tooltip: 'Import flashcards',

@@ -83,35 +83,7 @@ class SettingsScreen extends ConsumerWidget {
           }
         },
       ),
-      SwitchListTile(
-        value: themeMode == ThemeMode.dark,
-        title: const Text('Dark Mode'),
-        subtitle: const Text('Use dark theme throughout the app'),
-        secondary: Icon(Icons.dark_mode, color: primaryColor),
-        onChanged: (enabled) async {
-          final newMode = enabled ? ThemeMode.dark : ThemeMode.light;
-          await saveThemeMode(newMode);
-          ref.read(themeModeProvider.notifier).state = newMode;
-          if (!context.mounted) {
-            return;
-          }
-        },
-      ),
-      SwitchListTile(
-        value: dailyRemindersEnabled,
-        title: const Text('Daily study reminders'),
-        subtitle: const Text('Remind me at 8:00 AM when SM-2 cards are due'),
-        secondary: Icon(Icons.notifications, color: primaryColor),
-        onChanged: (enabled) async {
-          await ref
-              .read(dailyStudyRemindersEnabledProvider.notifier)
-              .setEnabled(enabled);
-          if (!context.mounted) {
-            return;
-          }
-        },
-      ),
-      SwitchListTile(
+SwitchListTile(
         value: themeMode == ThemeMode.dark,
         title: const Text('Dark Mode'),
         subtitle: const Text('Use dark theme throughout the app'),

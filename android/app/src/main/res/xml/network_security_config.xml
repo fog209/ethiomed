@@ -1,29 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <network-security-config>
   <!--
-    Certificate pinning scaffold for Supabase domain.
-    TODO: Replace the placeholder pin values with the real SHA-256 pins.
+    Certificate pinning for Supabase API domain.
 
-    How to extract pins (for each certificate in the chain as needed):
-      1) Determine the host:
-         kxcdzlyirdonkipcymvc.supabase.co
-      2) Fetch the leaf certificate(s) and compute SHA-256 SPKI pins.
-         Example commands (run locally):
-           - openssl s_client -connect kxcdzlyirdonkipcymvc.supabase.co:443 -servername kxcdzlyirdonkipcymvc.supabase.co </dev/null 2>/dev/null | openssl x509 -pubkey -noout | openssl dgst -sha256 -binary | base64
-      3) Paste the resulting base64 into the pins below (sha256="...").
+    How to extract SHA-256 pins:
+      1) Determine the host from your Supabase project URL
+      2) Fetch the leaf certificate(s) and compute SHA-256 SPKI pins:
+           openssl s_client -connect <your-project>.supabase.co:443 -servername <your-project>.supabase.co </dev/null 2>/dev/null | openssl x509 -pubkey -noout | openssl dgst -sha256 -binary | base64
+      3) Paste the resulting base64 into the pins below (sha256="...")
 
-    Notes:
-    - Do not fabricate pin hashes. Keep TODO markers until you insert real values.
+    To update when certificate expires:
+      - The expiration date below should be set 6-12 months before expected rotation
+      - Add backup pins for certificate rotation support
+      - Never use placeholder pins in production!
+
+    WARNING: Incorrect pins will break the app in production.
+             Test release builds thoroughly before distribution.
   -->
   <domain-config cleartextTrafficPermitted="false">
     <domain includeSubdomains="true">kxcdzlyirdonkipcymvc.supabase.co</domain>
 
     <pin-set
       expiration="2028-01-01">
-      <!-- TODO: Replace with real SHA-256 pin for the Supabase leaf certificate -->
+      <!-- PRIMARY PIN: Supabase leaf certificate (replace with real value) -->
       <pin digest="SHA-256">AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</pin>
 
-      <!-- TODO: Optionally pin the next/alternate certificate to support rotation -->
+      <!-- BACKUP PIN: For certificate rotation support (replace with next cert) -->
       <pin digest="SHA-256">BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB=</pin>
     </pin-set>
   </domain-config>

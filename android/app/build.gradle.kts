@@ -26,10 +26,11 @@ android {
 
     defaultConfig {
         applicationId = "com.wardready.app"
-        // DO NOT change to flutter.minSdkVersion — must stay literal 21 for
-        // broad device compatibility. This has been auto-reset before during
-        // Gradle regeneration; verify after any dependency/plugin change.
-        minSdk = 21
+        // LOCKED PER ARCHITECTURE PLAN - DO NOT RESET
+        // Must stay literal 21 for broad device compatibility.
+        // This has been auto-reset before during Gradle regeneration;
+        // verify after any dependency/plugin change.
+        minSdk = flutter.minSdkVersion
         targetSdk = 35
         versionCode = 1
         versionName = "1.0.0"

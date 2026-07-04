@@ -107,6 +107,7 @@ class FlashcardReviewService {
   FlashcardEntity _flashcardFromRow(QueryRow row) {
     return FlashcardEntity(
       id: row.read<int>('id'),
+      remoteId: row.read<int?>('remote_id'),
       deckName: row.read<String>('deck_name'),
       frontText: row.read<String>('front_text'),
       backText: row.read<String>('back_text'),
@@ -117,6 +118,8 @@ class FlashcardReviewService {
       nextDueAt: row.read<DateTime?>('next_due_at'),
       lastQuality: row.read<int?>('last_quality'),
       createdAt: row.read<DateTime>('created_at'),
+      updatedAt: row.read<DateTime?>('updated_at'),
+      parentCategory: row.read<String?>('parent_category'),
     );
   }
 

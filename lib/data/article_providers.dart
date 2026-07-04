@@ -55,25 +55,25 @@ final filteredArticlesProvider = Provider<AsyncValue<List<Article>>>((ref) {
       return items;
     }
 
-    return items
-        .where((article) {
-          final haystack = <String>[
-            article.title,
-            article.category,
-            article.subcategory,
-            article.theEssence,
-            article.theLogic,
-            article.thePortrait,
-            article.clinicalLink,
-            article.theEthiopianBedside,
-            article.survivalPearl,
-            article.curiosityCorner,
-            article.thePlan,
-            article.mnemonics,
-            ...article.relatedTopics,
-          ].join(' ').toLowerCase();
-          return haystack.contains(query);
-        })
+return items
+         .where((article) {
+           final haystack = <String>[
+             article.title,
+             article.parentCategory,
+             article.subcategory,
+             article.theEssence,
+             article.theLogic,
+             article.thePortrait,
+             article.clinicalLink,
+             article.theEthiopianBedside,
+             article.survivalPearl,
+             article.curiosityCorner,
+             article.thePlan,
+             article.mnemonics,
+             ...article.relatedTopics,
+           ].join(' ').toLowerCase();
+           return haystack.contains(query);
+         })
         .toList(growable: false);
   });
 });

@@ -97,6 +97,17 @@ class $ArticlesTable extends Articles
     ),
     defaultValue: const Constant(false),
   );
+  static const VerificationMeta _parentCategoryMeta = const VerificationMeta(
+    'parentCategory',
+  );
+  @override
+  late final GeneratedColumn<String> parentCategory = GeneratedColumn<String>(
+    'parent_category',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -107,6 +118,7 @@ class $ArticlesTable extends Articles
     videoUrl,
     subcategory,
     isHighYield,
+    parentCategory,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -175,6 +187,15 @@ class $ArticlesTable extends Articles
         ),
       );
     }
+    if (data.containsKey('parent_category')) {
+      context.handle(
+        _parentCategoryMeta,
+        parentCategory.isAcceptableOrUnknown(
+          data['parent_category']!,
+          _parentCategoryMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -216,6 +237,10 @@ class $ArticlesTable extends Articles
         DriftSqlType.bool,
         data['${effectivePrefix}is_high_yield'],
       )!,
+      parentCategory: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}parent_category'],
+      ),
     );
   }
 
@@ -234,6 +259,7 @@ class ArticleLocal extends DataClass implements Insertable<ArticleLocal> {
   final String? videoUrl;
   final String? subcategory;
   final bool isHighYield;
+  final String? parentCategory;
   const ArticleLocal({
     required this.id,
     required this.title,
@@ -243,6 +269,7 @@ class ArticleLocal extends DataClass implements Insertable<ArticleLocal> {
     this.videoUrl,
     this.subcategory,
     required this.isHighYield,
+    this.parentCategory,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -265,6 +292,9 @@ class ArticleLocal extends DataClass implements Insertable<ArticleLocal> {
       map['subcategory'] = Variable<String>(subcategory);
     }
     map['is_high_yield'] = Variable<bool>(isHighYield);
+    if (!nullToAbsent || parentCategory != null) {
+      map['parent_category'] = Variable<String>(parentCategory);
+    }
     return map;
   }
 
@@ -288,6 +318,9 @@ class ArticleLocal extends DataClass implements Insertable<ArticleLocal> {
           ? const Value.absent()
           : Value(subcategory),
       isHighYield: Value(isHighYield),
+      parentCategory: parentCategory == null && nullToAbsent
+          ? const Value.absent()
+          : Value(parentCategory),
     );
   }
 
@@ -305,6 +338,7 @@ class ArticleLocal extends DataClass implements Insertable<ArticleLocal> {
       videoUrl: serializer.fromJson<String?>(json['videoUrl']),
       subcategory: serializer.fromJson<String?>(json['subcategory']),
       isHighYield: serializer.fromJson<bool>(json['isHighYield']),
+      parentCategory: serializer.fromJson<String?>(json['parentCategory']),
     );
   }
   @override
@@ -319,6 +353,7 @@ class ArticleLocal extends DataClass implements Insertable<ArticleLocal> {
       'videoUrl': serializer.toJson<String?>(videoUrl),
       'subcategory': serializer.toJson<String?>(subcategory),
       'isHighYield': serializer.toJson<bool>(isHighYield),
+      'parentCategory': serializer.toJson<String?>(parentCategory),
     };
   }
 
@@ -331,6 +366,7 @@ class ArticleLocal extends DataClass implements Insertable<ArticleLocal> {
     Value<String?> videoUrl = const Value.absent(),
     Value<String?> subcategory = const Value.absent(),
     bool? isHighYield,
+    Value<String?> parentCategory = const Value.absent(),
   }) => ArticleLocal(
     id: id ?? this.id,
     title: title ?? this.title,
@@ -340,6 +376,9 @@ class ArticleLocal extends DataClass implements Insertable<ArticleLocal> {
     videoUrl: videoUrl.present ? videoUrl.value : this.videoUrl,
     subcategory: subcategory.present ? subcategory.value : this.subcategory,
     isHighYield: isHighYield ?? this.isHighYield,
+    parentCategory: parentCategory.present
+        ? parentCategory.value
+        : this.parentCategory,
   );
   ArticleLocal copyWithCompanion(ArticlesCompanion data) {
     return ArticleLocal(
@@ -355,6 +394,9 @@ class ArticleLocal extends DataClass implements Insertable<ArticleLocal> {
       isHighYield: data.isHighYield.present
           ? data.isHighYield.value
           : this.isHighYield,
+      parentCategory: data.parentCategory.present
+          ? data.parentCategory.value
+          : this.parentCategory,
     );
   }
 
@@ -368,7 +410,8 @@ class ArticleLocal extends DataClass implements Insertable<ArticleLocal> {
           ..write('imageUrl: $imageUrl, ')
           ..write('videoUrl: $videoUrl, ')
           ..write('subcategory: $subcategory, ')
-          ..write('isHighYield: $isHighYield')
+          ..write('isHighYield: $isHighYield, ')
+          ..write('parentCategory: $parentCategory')
           ..write(')'))
         .toString();
   }
@@ -383,6 +426,7 @@ class ArticleLocal extends DataClass implements Insertable<ArticleLocal> {
     videoUrl,
     subcategory,
     isHighYield,
+    parentCategory,
   );
   @override
   bool operator ==(Object other) =>
@@ -395,7 +439,8 @@ class ArticleLocal extends DataClass implements Insertable<ArticleLocal> {
           other.imageUrl == this.imageUrl &&
           other.videoUrl == this.videoUrl &&
           other.subcategory == this.subcategory &&
-          other.isHighYield == this.isHighYield);
+          other.isHighYield == this.isHighYield &&
+          other.parentCategory == this.parentCategory);
 }
 
 class ArticlesCompanion extends UpdateCompanion<ArticleLocal> {
@@ -407,6 +452,7 @@ class ArticlesCompanion extends UpdateCompanion<ArticleLocal> {
   final Value<String?> videoUrl;
   final Value<String?> subcategory;
   final Value<bool> isHighYield;
+  final Value<String?> parentCategory;
   final Value<int> rowid;
   const ArticlesCompanion({
     this.id = const Value.absent(),
@@ -417,6 +463,7 @@ class ArticlesCompanion extends UpdateCompanion<ArticleLocal> {
     this.videoUrl = const Value.absent(),
     this.subcategory = const Value.absent(),
     this.isHighYield = const Value.absent(),
+    this.parentCategory = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   ArticlesCompanion.insert({
@@ -428,6 +475,7 @@ class ArticlesCompanion extends UpdateCompanion<ArticleLocal> {
     this.videoUrl = const Value.absent(),
     this.subcategory = const Value.absent(),
     this.isHighYield = const Value.absent(),
+    this.parentCategory = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        title = Value(title);
@@ -440,6 +488,7 @@ class ArticlesCompanion extends UpdateCompanion<ArticleLocal> {
     Expression<String>? videoUrl,
     Expression<String>? subcategory,
     Expression<bool>? isHighYield,
+    Expression<String>? parentCategory,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -451,6 +500,7 @@ class ArticlesCompanion extends UpdateCompanion<ArticleLocal> {
       if (videoUrl != null) 'video_url': videoUrl,
       if (subcategory != null) 'subcategory': subcategory,
       if (isHighYield != null) 'is_high_yield': isHighYield,
+      if (parentCategory != null) 'parent_category': parentCategory,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -464,6 +514,7 @@ class ArticlesCompanion extends UpdateCompanion<ArticleLocal> {
     Value<String?>? videoUrl,
     Value<String?>? subcategory,
     Value<bool>? isHighYield,
+    Value<String?>? parentCategory,
     Value<int>? rowid,
   }) {
     return ArticlesCompanion(
@@ -475,6 +526,7 @@ class ArticlesCompanion extends UpdateCompanion<ArticleLocal> {
       videoUrl: videoUrl ?? this.videoUrl,
       subcategory: subcategory ?? this.subcategory,
       isHighYield: isHighYield ?? this.isHighYield,
+      parentCategory: parentCategory ?? this.parentCategory,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -506,6 +558,9 @@ class ArticlesCompanion extends UpdateCompanion<ArticleLocal> {
     if (isHighYield.present) {
       map['is_high_yield'] = Variable<bool>(isHighYield.value);
     }
+    if (parentCategory.present) {
+      map['parent_category'] = Variable<String>(parentCategory.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -523,6 +578,7 @@ class ArticlesCompanion extends UpdateCompanion<ArticleLocal> {
           ..write('videoUrl: $videoUrl, ')
           ..write('subcategory: $subcategory, ')
           ..write('isHighYield: $isHighYield, ')
+          ..write('parentCategory: $parentCategory, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -752,8 +808,23 @@ class $StudySessionsTable extends StudySessions
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
+  static const VerificationMeta _quizSecondsMeta = const VerificationMeta(
+    'quizSeconds',
+  );
   @override
-  List<GeneratedColumn> get $columns => [date, articlesViewedCount];
+  late final GeneratedColumn<int> quizSeconds = GeneratedColumn<int>(
+    'quiz_seconds',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    date,
+    articlesViewedCount,
+    quizSeconds,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -783,6 +854,15 @@ class $StudySessionsTable extends StudySessions
         ),
       );
     }
+    if (data.containsKey('quiz_seconds')) {
+      context.handle(
+        _quizSecondsMeta,
+        quizSeconds.isAcceptableOrUnknown(
+          data['quiz_seconds']!,
+          _quizSecondsMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -800,6 +880,10 @@ class $StudySessionsTable extends StudySessions
         DriftSqlType.int,
         data['${effectivePrefix}articles_viewed_count'],
       )!,
+      quizSeconds: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}quiz_seconds'],
+      ),
     );
   }
 
@@ -812,12 +896,20 @@ class $StudySessionsTable extends StudySessions
 class StudySession extends DataClass implements Insertable<StudySession> {
   final DateTime date;
   final int articlesViewedCount;
-  const StudySession({required this.date, required this.articlesViewedCount});
+  final int? quizSeconds;
+  const StudySession({
+    required this.date,
+    required this.articlesViewedCount,
+    this.quizSeconds,
+  });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['date'] = Variable<DateTime>(date);
     map['articles_viewed_count'] = Variable<int>(articlesViewedCount);
+    if (!nullToAbsent || quizSeconds != null) {
+      map['quiz_seconds'] = Variable<int>(quizSeconds);
+    }
     return map;
   }
 
@@ -825,6 +917,9 @@ class StudySession extends DataClass implements Insertable<StudySession> {
     return StudySessionsCompanion(
       date: Value(date),
       articlesViewedCount: Value(articlesViewedCount),
+      quizSeconds: quizSeconds == null && nullToAbsent
+          ? const Value.absent()
+          : Value(quizSeconds),
     );
   }
 
@@ -838,6 +933,7 @@ class StudySession extends DataClass implements Insertable<StudySession> {
       articlesViewedCount: serializer.fromJson<int>(
         json['articlesViewedCount'],
       ),
+      quizSeconds: serializer.fromJson<int?>(json['quizSeconds']),
     );
   }
   @override
@@ -846,20 +942,28 @@ class StudySession extends DataClass implements Insertable<StudySession> {
     return <String, dynamic>{
       'date': serializer.toJson<DateTime>(date),
       'articlesViewedCount': serializer.toJson<int>(articlesViewedCount),
+      'quizSeconds': serializer.toJson<int?>(quizSeconds),
     };
   }
 
-  StudySession copyWith({DateTime? date, int? articlesViewedCount}) =>
-      StudySession(
-        date: date ?? this.date,
-        articlesViewedCount: articlesViewedCount ?? this.articlesViewedCount,
-      );
+  StudySession copyWith({
+    DateTime? date,
+    int? articlesViewedCount,
+    Value<int?> quizSeconds = const Value.absent(),
+  }) => StudySession(
+    date: date ?? this.date,
+    articlesViewedCount: articlesViewedCount ?? this.articlesViewedCount,
+    quizSeconds: quizSeconds.present ? quizSeconds.value : this.quizSeconds,
+  );
   StudySession copyWithCompanion(StudySessionsCompanion data) {
     return StudySession(
       date: data.date.present ? data.date.value : this.date,
       articlesViewedCount: data.articlesViewedCount.present
           ? data.articlesViewedCount.value
           : this.articlesViewedCount,
+      quizSeconds: data.quizSeconds.present
+          ? data.quizSeconds.value
+          : this.quizSeconds,
     );
   }
 
@@ -867,44 +971,51 @@ class StudySession extends DataClass implements Insertable<StudySession> {
   String toString() {
     return (StringBuffer('StudySession(')
           ..write('date: $date, ')
-          ..write('articlesViewedCount: $articlesViewedCount')
+          ..write('articlesViewedCount: $articlesViewedCount, ')
+          ..write('quizSeconds: $quizSeconds')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(date, articlesViewedCount);
+  int get hashCode => Object.hash(date, articlesViewedCount, quizSeconds);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is StudySession &&
           other.date == this.date &&
-          other.articlesViewedCount == this.articlesViewedCount);
+          other.articlesViewedCount == this.articlesViewedCount &&
+          other.quizSeconds == this.quizSeconds);
 }
 
 class StudySessionsCompanion extends UpdateCompanion<StudySession> {
   final Value<DateTime> date;
   final Value<int> articlesViewedCount;
+  final Value<int?> quizSeconds;
   final Value<int> rowid;
   const StudySessionsCompanion({
     this.date = const Value.absent(),
     this.articlesViewedCount = const Value.absent(),
+    this.quizSeconds = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   StudySessionsCompanion.insert({
     required DateTime date,
     this.articlesViewedCount = const Value.absent(),
+    this.quizSeconds = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : date = Value(date);
   static Insertable<StudySession> custom({
     Expression<DateTime>? date,
     Expression<int>? articlesViewedCount,
+    Expression<int>? quizSeconds,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (date != null) 'date': date,
       if (articlesViewedCount != null)
         'articles_viewed_count': articlesViewedCount,
+      if (quizSeconds != null) 'quiz_seconds': quizSeconds,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -912,11 +1023,13 @@ class StudySessionsCompanion extends UpdateCompanion<StudySession> {
   StudySessionsCompanion copyWith({
     Value<DateTime>? date,
     Value<int>? articlesViewedCount,
+    Value<int?>? quizSeconds,
     Value<int>? rowid,
   }) {
     return StudySessionsCompanion(
       date: date ?? this.date,
       articlesViewedCount: articlesViewedCount ?? this.articlesViewedCount,
+      quizSeconds: quizSeconds ?? this.quizSeconds,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -930,6 +1043,9 @@ class StudySessionsCompanion extends UpdateCompanion<StudySession> {
     if (articlesViewedCount.present) {
       map['articles_viewed_count'] = Variable<int>(articlesViewedCount.value);
     }
+    if (quizSeconds.present) {
+      map['quiz_seconds'] = Variable<int>(quizSeconds.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -941,7 +1057,478 @@ class StudySessionsCompanion extends UpdateCompanion<StudySession> {
     return (StringBuffer('StudySessionsCompanion(')
           ..write('date: $date, ')
           ..write('articlesViewedCount: $articlesViewedCount, ')
+          ..write('quizSeconds: $quizSeconds, ')
           ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $QuizSessionsTable extends QuizSessions
+    with TableInfo<$QuizSessionsTable, QuizSession> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $QuizSessionsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _startTimeMeta = const VerificationMeta(
+    'startTime',
+  );
+  @override
+  late final GeneratedColumn<DateTime> startTime = GeneratedColumn<DateTime>(
+    'start_time',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _endTimeMeta = const VerificationMeta(
+    'endTime',
+  );
+  @override
+  late final GeneratedColumn<DateTime> endTime = GeneratedColumn<DateTime>(
+    'end_time',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _modeMeta = const VerificationMeta('mode');
+  @override
+  late final GeneratedColumn<String> mode = GeneratedColumn<String>(
+    'mode',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('tutor'),
+  );
+  static const VerificationMeta _totalQuestionsMeta = const VerificationMeta(
+    'totalQuestions',
+  );
+  @override
+  late final GeneratedColumn<int> totalQuestions = GeneratedColumn<int>(
+    'total_questions',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _correctAnswersMeta = const VerificationMeta(
+    'correctAnswers',
+  );
+  @override
+  late final GeneratedColumn<int> correctAnswers = GeneratedColumn<int>(
+    'correct_answers',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _specialtyFilterMeta = const VerificationMeta(
+    'specialtyFilter',
+  );
+  @override
+  late final GeneratedColumn<String> specialtyFilter = GeneratedColumn<String>(
+    'specialty_filter',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    startTime,
+    endTime,
+    mode,
+    totalQuestions,
+    correctAnswers,
+    specialtyFilter,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'quiz_sessions';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<QuizSession> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('start_time')) {
+      context.handle(
+        _startTimeMeta,
+        startTime.isAcceptableOrUnknown(data['start_time']!, _startTimeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_startTimeMeta);
+    }
+    if (data.containsKey('end_time')) {
+      context.handle(
+        _endTimeMeta,
+        endTime.isAcceptableOrUnknown(data['end_time']!, _endTimeMeta),
+      );
+    }
+    if (data.containsKey('mode')) {
+      context.handle(
+        _modeMeta,
+        mode.isAcceptableOrUnknown(data['mode']!, _modeMeta),
+      );
+    }
+    if (data.containsKey('total_questions')) {
+      context.handle(
+        _totalQuestionsMeta,
+        totalQuestions.isAcceptableOrUnknown(
+          data['total_questions']!,
+          _totalQuestionsMeta,
+        ),
+      );
+    }
+    if (data.containsKey('correct_answers')) {
+      context.handle(
+        _correctAnswersMeta,
+        correctAnswers.isAcceptableOrUnknown(
+          data['correct_answers']!,
+          _correctAnswersMeta,
+        ),
+      );
+    }
+    if (data.containsKey('specialty_filter')) {
+      context.handle(
+        _specialtyFilterMeta,
+        specialtyFilter.isAcceptableOrUnknown(
+          data['specialty_filter']!,
+          _specialtyFilterMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  QuizSession map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return QuizSession(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      startTime: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}start_time'],
+      )!,
+      endTime: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}end_time'],
+      ),
+      mode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}mode'],
+      )!,
+      totalQuestions: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}total_questions'],
+      )!,
+      correctAnswers: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}correct_answers'],
+      ),
+      specialtyFilter: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}specialty_filter'],
+      ),
+    );
+  }
+
+  @override
+  $QuizSessionsTable createAlias(String alias) {
+    return $QuizSessionsTable(attachedDatabase, alias);
+  }
+}
+
+class QuizSession extends DataClass implements Insertable<QuizSession> {
+  final int id;
+  final DateTime startTime;
+  final DateTime? endTime;
+  final String mode;
+  final int totalQuestions;
+  final int? correctAnswers;
+  final String? specialtyFilter;
+  const QuizSession({
+    required this.id,
+    required this.startTime,
+    this.endTime,
+    required this.mode,
+    required this.totalQuestions,
+    this.correctAnswers,
+    this.specialtyFilter,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['start_time'] = Variable<DateTime>(startTime);
+    if (!nullToAbsent || endTime != null) {
+      map['end_time'] = Variable<DateTime>(endTime);
+    }
+    map['mode'] = Variable<String>(mode);
+    map['total_questions'] = Variable<int>(totalQuestions);
+    if (!nullToAbsent || correctAnswers != null) {
+      map['correct_answers'] = Variable<int>(correctAnswers);
+    }
+    if (!nullToAbsent || specialtyFilter != null) {
+      map['specialty_filter'] = Variable<String>(specialtyFilter);
+    }
+    return map;
+  }
+
+  QuizSessionsCompanion toCompanion(bool nullToAbsent) {
+    return QuizSessionsCompanion(
+      id: Value(id),
+      startTime: Value(startTime),
+      endTime: endTime == null && nullToAbsent
+          ? const Value.absent()
+          : Value(endTime),
+      mode: Value(mode),
+      totalQuestions: Value(totalQuestions),
+      correctAnswers: correctAnswers == null && nullToAbsent
+          ? const Value.absent()
+          : Value(correctAnswers),
+      specialtyFilter: specialtyFilter == null && nullToAbsent
+          ? const Value.absent()
+          : Value(specialtyFilter),
+    );
+  }
+
+  factory QuizSession.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return QuizSession(
+      id: serializer.fromJson<int>(json['id']),
+      startTime: serializer.fromJson<DateTime>(json['startTime']),
+      endTime: serializer.fromJson<DateTime?>(json['endTime']),
+      mode: serializer.fromJson<String>(json['mode']),
+      totalQuestions: serializer.fromJson<int>(json['totalQuestions']),
+      correctAnswers: serializer.fromJson<int?>(json['correctAnswers']),
+      specialtyFilter: serializer.fromJson<String?>(json['specialtyFilter']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'startTime': serializer.toJson<DateTime>(startTime),
+      'endTime': serializer.toJson<DateTime?>(endTime),
+      'mode': serializer.toJson<String>(mode),
+      'totalQuestions': serializer.toJson<int>(totalQuestions),
+      'correctAnswers': serializer.toJson<int?>(correctAnswers),
+      'specialtyFilter': serializer.toJson<String?>(specialtyFilter),
+    };
+  }
+
+  QuizSession copyWith({
+    int? id,
+    DateTime? startTime,
+    Value<DateTime?> endTime = const Value.absent(),
+    String? mode,
+    int? totalQuestions,
+    Value<int?> correctAnswers = const Value.absent(),
+    Value<String?> specialtyFilter = const Value.absent(),
+  }) => QuizSession(
+    id: id ?? this.id,
+    startTime: startTime ?? this.startTime,
+    endTime: endTime.present ? endTime.value : this.endTime,
+    mode: mode ?? this.mode,
+    totalQuestions: totalQuestions ?? this.totalQuestions,
+    correctAnswers: correctAnswers.present
+        ? correctAnswers.value
+        : this.correctAnswers,
+    specialtyFilter: specialtyFilter.present
+        ? specialtyFilter.value
+        : this.specialtyFilter,
+  );
+  QuizSession copyWithCompanion(QuizSessionsCompanion data) {
+    return QuizSession(
+      id: data.id.present ? data.id.value : this.id,
+      startTime: data.startTime.present ? data.startTime.value : this.startTime,
+      endTime: data.endTime.present ? data.endTime.value : this.endTime,
+      mode: data.mode.present ? data.mode.value : this.mode,
+      totalQuestions: data.totalQuestions.present
+          ? data.totalQuestions.value
+          : this.totalQuestions,
+      correctAnswers: data.correctAnswers.present
+          ? data.correctAnswers.value
+          : this.correctAnswers,
+      specialtyFilter: data.specialtyFilter.present
+          ? data.specialtyFilter.value
+          : this.specialtyFilter,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('QuizSession(')
+          ..write('id: $id, ')
+          ..write('startTime: $startTime, ')
+          ..write('endTime: $endTime, ')
+          ..write('mode: $mode, ')
+          ..write('totalQuestions: $totalQuestions, ')
+          ..write('correctAnswers: $correctAnswers, ')
+          ..write('specialtyFilter: $specialtyFilter')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    startTime,
+    endTime,
+    mode,
+    totalQuestions,
+    correctAnswers,
+    specialtyFilter,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is QuizSession &&
+          other.id == this.id &&
+          other.startTime == this.startTime &&
+          other.endTime == this.endTime &&
+          other.mode == this.mode &&
+          other.totalQuestions == this.totalQuestions &&
+          other.correctAnswers == this.correctAnswers &&
+          other.specialtyFilter == this.specialtyFilter);
+}
+
+class QuizSessionsCompanion extends UpdateCompanion<QuizSession> {
+  final Value<int> id;
+  final Value<DateTime> startTime;
+  final Value<DateTime?> endTime;
+  final Value<String> mode;
+  final Value<int> totalQuestions;
+  final Value<int?> correctAnswers;
+  final Value<String?> specialtyFilter;
+  const QuizSessionsCompanion({
+    this.id = const Value.absent(),
+    this.startTime = const Value.absent(),
+    this.endTime = const Value.absent(),
+    this.mode = const Value.absent(),
+    this.totalQuestions = const Value.absent(),
+    this.correctAnswers = const Value.absent(),
+    this.specialtyFilter = const Value.absent(),
+  });
+  QuizSessionsCompanion.insert({
+    this.id = const Value.absent(),
+    required DateTime startTime,
+    this.endTime = const Value.absent(),
+    this.mode = const Value.absent(),
+    this.totalQuestions = const Value.absent(),
+    this.correctAnswers = const Value.absent(),
+    this.specialtyFilter = const Value.absent(),
+  }) : startTime = Value(startTime);
+  static Insertable<QuizSession> custom({
+    Expression<int>? id,
+    Expression<DateTime>? startTime,
+    Expression<DateTime>? endTime,
+    Expression<String>? mode,
+    Expression<int>? totalQuestions,
+    Expression<int>? correctAnswers,
+    Expression<String>? specialtyFilter,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (startTime != null) 'start_time': startTime,
+      if (endTime != null) 'end_time': endTime,
+      if (mode != null) 'mode': mode,
+      if (totalQuestions != null) 'total_questions': totalQuestions,
+      if (correctAnswers != null) 'correct_answers': correctAnswers,
+      if (specialtyFilter != null) 'specialty_filter': specialtyFilter,
+    });
+  }
+
+  QuizSessionsCompanion copyWith({
+    Value<int>? id,
+    Value<DateTime>? startTime,
+    Value<DateTime?>? endTime,
+    Value<String>? mode,
+    Value<int>? totalQuestions,
+    Value<int?>? correctAnswers,
+    Value<String?>? specialtyFilter,
+  }) {
+    return QuizSessionsCompanion(
+      id: id ?? this.id,
+      startTime: startTime ?? this.startTime,
+      endTime: endTime ?? this.endTime,
+      mode: mode ?? this.mode,
+      totalQuestions: totalQuestions ?? this.totalQuestions,
+      correctAnswers: correctAnswers ?? this.correctAnswers,
+      specialtyFilter: specialtyFilter ?? this.specialtyFilter,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (startTime.present) {
+      map['start_time'] = Variable<DateTime>(startTime.value);
+    }
+    if (endTime.present) {
+      map['end_time'] = Variable<DateTime>(endTime.value);
+    }
+    if (mode.present) {
+      map['mode'] = Variable<String>(mode.value);
+    }
+    if (totalQuestions.present) {
+      map['total_questions'] = Variable<int>(totalQuestions.value);
+    }
+    if (correctAnswers.present) {
+      map['correct_answers'] = Variable<int>(correctAnswers.value);
+    }
+    if (specialtyFilter.present) {
+      map['specialty_filter'] = Variable<String>(specialtyFilter.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('QuizSessionsCompanion(')
+          ..write('id: $id, ')
+          ..write('startTime: $startTime, ')
+          ..write('endTime: $endTime, ')
+          ..write('mode: $mode, ')
+          ..write('totalQuestions: $totalQuestions, ')
+          ..write('correctAnswers: $correctAnswers, ')
+          ..write('specialtyFilter: $specialtyFilter')
           ..write(')'))
         .toString();
   }
@@ -1848,6 +2435,28 @@ class $QuizTableTable extends QuizTable
     type: DriftSqlType.int,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _parentCategoryMeta = const VerificationMeta(
+    'parentCategory',
+  );
+  @override
+  late final GeneratedColumn<String> parentCategory = GeneratedColumn<String>(
+    'parent_category',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -1870,6 +2479,8 @@ class $QuizTableTable extends QuizTable
     nextDueAt,
     easeFactor,
     lastQuality,
+    updatedAt,
+    parentCategory,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -2038,6 +2649,21 @@ class $QuizTableTable extends QuizTable
         ),
       );
     }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    if (data.containsKey('parent_category')) {
+      context.handle(
+        _parentCategoryMeta,
+        parentCategory.isAcceptableOrUnknown(
+          data['parent_category']!,
+          _parentCategoryMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -2127,6 +2753,14 @@ class $QuizTableTable extends QuizTable
         DriftSqlType.int,
         data['${effectivePrefix}last_quality'],
       ),
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      ),
+      parentCategory: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}parent_category'],
+      ),
     );
   }
 
@@ -2158,6 +2792,12 @@ class QuizQuestionEntity extends DataClass
   final DateTime? nextDueAt;
   final double easeFactor;
   final int? lastQuality;
+
+  /// Mirror of Supabase `updated_at` used for incremental sync.
+  final DateTime? updatedAt;
+
+  /// Parent category for taxonomy synchronization.
+  final String? parentCategory;
   const QuizQuestionEntity({
     required this.id,
     required this.remoteId,
@@ -2179,6 +2819,8 @@ class QuizQuestionEntity extends DataClass
     this.nextDueAt,
     required this.easeFactor,
     this.lastQuality,
+    this.updatedAt,
+    this.parentCategory,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -2212,6 +2854,12 @@ class QuizQuestionEntity extends DataClass
     map['ease_factor'] = Variable<double>(easeFactor);
     if (!nullToAbsent || lastQuality != null) {
       map['last_quality'] = Variable<int>(lastQuality);
+    }
+    if (!nullToAbsent || updatedAt != null) {
+      map['updated_at'] = Variable<DateTime>(updatedAt);
+    }
+    if (!nullToAbsent || parentCategory != null) {
+      map['parent_category'] = Variable<String>(parentCategory);
     }
     return map;
   }
@@ -2248,6 +2896,12 @@ class QuizQuestionEntity extends DataClass
       lastQuality: lastQuality == null && nullToAbsent
           ? const Value.absent()
           : Value(lastQuality),
+      updatedAt: updatedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(updatedAt),
+      parentCategory: parentCategory == null && nullToAbsent
+          ? const Value.absent()
+          : Value(parentCategory),
     );
   }
 
@@ -2277,6 +2931,8 @@ class QuizQuestionEntity extends DataClass
       nextDueAt: serializer.fromJson<DateTime?>(json['nextDueAt']),
       easeFactor: serializer.fromJson<double>(json['easeFactor']),
       lastQuality: serializer.fromJson<int?>(json['lastQuality']),
+      updatedAt: serializer.fromJson<DateTime?>(json['updatedAt']),
+      parentCategory: serializer.fromJson<String?>(json['parentCategory']),
     );
   }
   @override
@@ -2303,6 +2959,8 @@ class QuizQuestionEntity extends DataClass
       'nextDueAt': serializer.toJson<DateTime?>(nextDueAt),
       'easeFactor': serializer.toJson<double>(easeFactor),
       'lastQuality': serializer.toJson<int?>(lastQuality),
+      'updatedAt': serializer.toJson<DateTime?>(updatedAt),
+      'parentCategory': serializer.toJson<String?>(parentCategory),
     };
   }
 
@@ -2327,6 +2985,8 @@ class QuizQuestionEntity extends DataClass
     Value<DateTime?> nextDueAt = const Value.absent(),
     double? easeFactor,
     Value<int?> lastQuality = const Value.absent(),
+    Value<DateTime?> updatedAt = const Value.absent(),
+    Value<String?> parentCategory = const Value.absent(),
   }) => QuizQuestionEntity(
     id: id ?? this.id,
     remoteId: remoteId ?? this.remoteId,
@@ -2350,6 +3010,10 @@ class QuizQuestionEntity extends DataClass
     nextDueAt: nextDueAt.present ? nextDueAt.value : this.nextDueAt,
     easeFactor: easeFactor ?? this.easeFactor,
     lastQuality: lastQuality.present ? lastQuality.value : this.lastQuality,
+    updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
+    parentCategory: parentCategory.present
+        ? parentCategory.value
+        : this.parentCategory,
   );
   QuizQuestionEntity copyWithCompanion(QuizTableCompanion data) {
     return QuizQuestionEntity(
@@ -2393,6 +3057,10 @@ class QuizQuestionEntity extends DataClass
       lastQuality: data.lastQuality.present
           ? data.lastQuality.value
           : this.lastQuality,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      parentCategory: data.parentCategory.present
+          ? data.parentCategory.value
+          : this.parentCategory,
     );
   }
 
@@ -2418,13 +3086,15 @@ class QuizQuestionEntity extends DataClass
           ..write('repetitions: $repetitions, ')
           ..write('nextDueAt: $nextDueAt, ')
           ..write('easeFactor: $easeFactor, ')
-          ..write('lastQuality: $lastQuality')
+          ..write('lastQuality: $lastQuality, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('parentCategory: $parentCategory')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     id,
     remoteId,
     articleId,
@@ -2445,7 +3115,9 @@ class QuizQuestionEntity extends DataClass
     nextDueAt,
     easeFactor,
     lastQuality,
-  );
+    updatedAt,
+    parentCategory,
+  ]);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -2469,7 +3141,9 @@ class QuizQuestionEntity extends DataClass
           other.repetitions == this.repetitions &&
           other.nextDueAt == this.nextDueAt &&
           other.easeFactor == this.easeFactor &&
-          other.lastQuality == this.lastQuality);
+          other.lastQuality == this.lastQuality &&
+          other.updatedAt == this.updatedAt &&
+          other.parentCategory == this.parentCategory);
 }
 
 class QuizTableCompanion extends UpdateCompanion<QuizQuestionEntity> {
@@ -2493,6 +3167,8 @@ class QuizTableCompanion extends UpdateCompanion<QuizQuestionEntity> {
   final Value<DateTime?> nextDueAt;
   final Value<double> easeFactor;
   final Value<int?> lastQuality;
+  final Value<DateTime?> updatedAt;
+  final Value<String?> parentCategory;
   const QuizTableCompanion({
     this.id = const Value.absent(),
     this.remoteId = const Value.absent(),
@@ -2514,6 +3190,8 @@ class QuizTableCompanion extends UpdateCompanion<QuizQuestionEntity> {
     this.nextDueAt = const Value.absent(),
     this.easeFactor = const Value.absent(),
     this.lastQuality = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.parentCategory = const Value.absent(),
   });
   QuizTableCompanion.insert({
     this.id = const Value.absent(),
@@ -2536,6 +3214,8 @@ class QuizTableCompanion extends UpdateCompanion<QuizQuestionEntity> {
     this.nextDueAt = const Value.absent(),
     this.easeFactor = const Value.absent(),
     this.lastQuality = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.parentCategory = const Value.absent(),
   }) : remoteId = Value(remoteId),
        articleId = Value(articleId),
        stem = Value(stem),
@@ -2567,6 +3247,8 @@ class QuizTableCompanion extends UpdateCompanion<QuizQuestionEntity> {
     Expression<DateTime>? nextDueAt,
     Expression<double>? easeFactor,
     Expression<int>? lastQuality,
+    Expression<DateTime>? updatedAt,
+    Expression<String>? parentCategory,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -2589,6 +3271,8 @@ class QuizTableCompanion extends UpdateCompanion<QuizQuestionEntity> {
       if (nextDueAt != null) 'next_due_at': nextDueAt,
       if (easeFactor != null) 'ease_factor': easeFactor,
       if (lastQuality != null) 'last_quality': lastQuality,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (parentCategory != null) 'parent_category': parentCategory,
     });
   }
 
@@ -2613,6 +3297,8 @@ class QuizTableCompanion extends UpdateCompanion<QuizQuestionEntity> {
     Value<DateTime?>? nextDueAt,
     Value<double>? easeFactor,
     Value<int?>? lastQuality,
+    Value<DateTime?>? updatedAt,
+    Value<String?>? parentCategory,
   }) {
     return QuizTableCompanion(
       id: id ?? this.id,
@@ -2635,6 +3321,8 @@ class QuizTableCompanion extends UpdateCompanion<QuizQuestionEntity> {
       nextDueAt: nextDueAt ?? this.nextDueAt,
       easeFactor: easeFactor ?? this.easeFactor,
       lastQuality: lastQuality ?? this.lastQuality,
+      updatedAt: updatedAt ?? this.updatedAt,
+      parentCategory: parentCategory ?? this.parentCategory,
     );
   }
 
@@ -2701,6 +3389,12 @@ class QuizTableCompanion extends UpdateCompanion<QuizQuestionEntity> {
     if (lastQuality.present) {
       map['last_quality'] = Variable<int>(lastQuality.value);
     }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (parentCategory.present) {
+      map['parent_category'] = Variable<String>(parentCategory.value);
+    }
     return map;
   }
 
@@ -2726,7 +3420,9 @@ class QuizTableCompanion extends UpdateCompanion<QuizQuestionEntity> {
           ..write('repetitions: $repetitions, ')
           ..write('nextDueAt: $nextDueAt, ')
           ..write('easeFactor: $easeFactor, ')
-          ..write('lastQuality: $lastQuality')
+          ..write('lastQuality: $lastQuality, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('parentCategory: $parentCategory')
           ..write(')'))
         .toString();
   }
@@ -2750,6 +3446,18 @@ class $FlashcardTableTable extends FlashcardTable
     defaultConstraints: GeneratedColumn.constraintIsAlways(
       'PRIMARY KEY AUTOINCREMENT',
     ),
+  );
+  static const VerificationMeta _remoteIdMeta = const VerificationMeta(
+    'remoteId',
+  );
+  @override
+  late final GeneratedColumn<int> remoteId = GeneratedColumn<int>(
+    'remote_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'),
   );
   static const VerificationMeta _deckNameMeta = const VerificationMeta(
     'deckName',
@@ -2863,9 +3571,32 @@ class $FlashcardTableTable extends FlashcardTable
     requiredDuringInsert: false,
     clientDefault: DateTime.now,
   );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _parentCategoryMeta = const VerificationMeta(
+    'parentCategory',
+  );
+  @override
+  late final GeneratedColumn<String> parentCategory = GeneratedColumn<String>(
+    'parent_category',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
+    remoteId,
     deckName,
     frontText,
     backText,
@@ -2876,6 +3607,8 @@ class $FlashcardTableTable extends FlashcardTable
     nextDueAt,
     lastQuality,
     createdAt,
+    updatedAt,
+    parentCategory,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -2891,6 +3624,12 @@ class $FlashcardTableTable extends FlashcardTable
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('remote_id')) {
+      context.handle(
+        _remoteIdMeta,
+        remoteId.isAcceptableOrUnknown(data['remote_id']!, _remoteIdMeta),
+      );
     }
     if (data.containsKey('deck_name')) {
       context.handle(
@@ -2967,6 +3706,21 @@ class $FlashcardTableTable extends FlashcardTable
         createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
       );
     }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    if (data.containsKey('parent_category')) {
+      context.handle(
+        _parentCategoryMeta,
+        parentCategory.isAcceptableOrUnknown(
+          data['parent_category']!,
+          _parentCategoryMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -2980,6 +3734,10 @@ class $FlashcardTableTable extends FlashcardTable
         DriftSqlType.int,
         data['${effectivePrefix}id'],
       )!,
+      remoteId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}remote_id'],
+      ),
       deckName: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}deck_name'],
@@ -3020,6 +3778,14 @@ class $FlashcardTableTable extends FlashcardTable
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
       )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      ),
+      parentCategory: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}parent_category'],
+      ),
     );
   }
 
@@ -3031,6 +3797,7 @@ class $FlashcardTableTable extends FlashcardTable
 
 class FlashcardEntity extends DataClass implements Insertable<FlashcardEntity> {
   final int id;
+  final int? remoteId;
   final String deckName;
   final String frontText;
   final String backText;
@@ -3041,8 +3808,15 @@ class FlashcardEntity extends DataClass implements Insertable<FlashcardEntity> {
   final DateTime? nextDueAt;
   final int? lastQuality;
   final DateTime createdAt;
+
+  /// Mirror of Supabase `updated_at` used for incremental sync.
+  final DateTime? updatedAt;
+
+  /// Parent category for taxonomy synchronization.
+  final String? parentCategory;
   const FlashcardEntity({
     required this.id,
+    this.remoteId,
     required this.deckName,
     required this.frontText,
     required this.backText,
@@ -3053,11 +3827,16 @@ class FlashcardEntity extends DataClass implements Insertable<FlashcardEntity> {
     this.nextDueAt,
     this.lastQuality,
     required this.createdAt,
+    this.updatedAt,
+    this.parentCategory,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
+    if (!nullToAbsent || remoteId != null) {
+      map['remote_id'] = Variable<int>(remoteId);
+    }
     map['deck_name'] = Variable<String>(deckName);
     map['front_text'] = Variable<String>(frontText);
     map['back_text'] = Variable<String>(backText);
@@ -3078,12 +3857,21 @@ class FlashcardEntity extends DataClass implements Insertable<FlashcardEntity> {
       map['last_quality'] = Variable<int>(lastQuality);
     }
     map['created_at'] = Variable<DateTime>(createdAt);
+    if (!nullToAbsent || updatedAt != null) {
+      map['updated_at'] = Variable<DateTime>(updatedAt);
+    }
+    if (!nullToAbsent || parentCategory != null) {
+      map['parent_category'] = Variable<String>(parentCategory);
+    }
     return map;
   }
 
   FlashcardTableCompanion toCompanion(bool nullToAbsent) {
     return FlashcardTableCompanion(
       id: Value(id),
+      remoteId: remoteId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(remoteId),
       deckName: Value(deckName),
       frontText: Value(frontText),
       backText: Value(backText),
@@ -3104,6 +3892,12 @@ class FlashcardEntity extends DataClass implements Insertable<FlashcardEntity> {
           ? const Value.absent()
           : Value(lastQuality),
       createdAt: Value(createdAt),
+      updatedAt: updatedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(updatedAt),
+      parentCategory: parentCategory == null && nullToAbsent
+          ? const Value.absent()
+          : Value(parentCategory),
     );
   }
 
@@ -3114,6 +3908,7 @@ class FlashcardEntity extends DataClass implements Insertable<FlashcardEntity> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return FlashcardEntity(
       id: serializer.fromJson<int>(json['id']),
+      remoteId: serializer.fromJson<int?>(json['remoteId']),
       deckName: serializer.fromJson<String>(json['deckName']),
       frontText: serializer.fromJson<String>(json['frontText']),
       backText: serializer.fromJson<String>(json['backText']),
@@ -3124,6 +3919,8 @@ class FlashcardEntity extends DataClass implements Insertable<FlashcardEntity> {
       nextDueAt: serializer.fromJson<DateTime?>(json['nextDueAt']),
       lastQuality: serializer.fromJson<int?>(json['lastQuality']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime?>(json['updatedAt']),
+      parentCategory: serializer.fromJson<String?>(json['parentCategory']),
     );
   }
   @override
@@ -3131,6 +3928,7 @@ class FlashcardEntity extends DataClass implements Insertable<FlashcardEntity> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
+      'remoteId': serializer.toJson<int?>(remoteId),
       'deckName': serializer.toJson<String>(deckName),
       'frontText': serializer.toJson<String>(frontText),
       'backText': serializer.toJson<String>(backText),
@@ -3141,11 +3939,14 @@ class FlashcardEntity extends DataClass implements Insertable<FlashcardEntity> {
       'nextDueAt': serializer.toJson<DateTime?>(nextDueAt),
       'lastQuality': serializer.toJson<int?>(lastQuality),
       'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime?>(updatedAt),
+      'parentCategory': serializer.toJson<String?>(parentCategory),
     };
   }
 
   FlashcardEntity copyWith({
     int? id,
+    Value<int?> remoteId = const Value.absent(),
     String? deckName,
     String? frontText,
     String? backText,
@@ -3156,8 +3957,11 @@ class FlashcardEntity extends DataClass implements Insertable<FlashcardEntity> {
     Value<DateTime?> nextDueAt = const Value.absent(),
     Value<int?> lastQuality = const Value.absent(),
     DateTime? createdAt,
+    Value<DateTime?> updatedAt = const Value.absent(),
+    Value<String?> parentCategory = const Value.absent(),
   }) => FlashcardEntity(
     id: id ?? this.id,
+    remoteId: remoteId.present ? remoteId.value : this.remoteId,
     deckName: deckName ?? this.deckName,
     frontText: frontText ?? this.frontText,
     backText: backText ?? this.backText,
@@ -3170,10 +3974,15 @@ class FlashcardEntity extends DataClass implements Insertable<FlashcardEntity> {
     nextDueAt: nextDueAt.present ? nextDueAt.value : this.nextDueAt,
     lastQuality: lastQuality.present ? lastQuality.value : this.lastQuality,
     createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
+    parentCategory: parentCategory.present
+        ? parentCategory.value
+        : this.parentCategory,
   );
   FlashcardEntity copyWithCompanion(FlashcardTableCompanion data) {
     return FlashcardEntity(
       id: data.id.present ? data.id.value : this.id,
+      remoteId: data.remoteId.present ? data.remoteId.value : this.remoteId,
       deckName: data.deckName.present ? data.deckName.value : this.deckName,
       frontText: data.frontText.present ? data.frontText.value : this.frontText,
       backText: data.backText.present ? data.backText.value : this.backText,
@@ -3192,6 +4001,10 @@ class FlashcardEntity extends DataClass implements Insertable<FlashcardEntity> {
           ? data.lastQuality.value
           : this.lastQuality,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      parentCategory: data.parentCategory.present
+          ? data.parentCategory.value
+          : this.parentCategory,
     );
   }
 
@@ -3199,6 +4012,7 @@ class FlashcardEntity extends DataClass implements Insertable<FlashcardEntity> {
   String toString() {
     return (StringBuffer('FlashcardEntity(')
           ..write('id: $id, ')
+          ..write('remoteId: $remoteId, ')
           ..write('deckName: $deckName, ')
           ..write('frontText: $frontText, ')
           ..write('backText: $backText, ')
@@ -3208,7 +4022,9 @@ class FlashcardEntity extends DataClass implements Insertable<FlashcardEntity> {
           ..write('repetitions: $repetitions, ')
           ..write('nextDueAt: $nextDueAt, ')
           ..write('lastQuality: $lastQuality, ')
-          ..write('createdAt: $createdAt')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('parentCategory: $parentCategory')
           ..write(')'))
         .toString();
   }
@@ -3216,6 +4032,7 @@ class FlashcardEntity extends DataClass implements Insertable<FlashcardEntity> {
   @override
   int get hashCode => Object.hash(
     id,
+    remoteId,
     deckName,
     frontText,
     backText,
@@ -3226,12 +4043,15 @@ class FlashcardEntity extends DataClass implements Insertable<FlashcardEntity> {
     nextDueAt,
     lastQuality,
     createdAt,
+    updatedAt,
+    parentCategory,
   );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is FlashcardEntity &&
           other.id == this.id &&
+          other.remoteId == this.remoteId &&
           other.deckName == this.deckName &&
           other.frontText == this.frontText &&
           other.backText == this.backText &&
@@ -3241,11 +4061,14 @@ class FlashcardEntity extends DataClass implements Insertable<FlashcardEntity> {
           other.repetitions == this.repetitions &&
           other.nextDueAt == this.nextDueAt &&
           other.lastQuality == this.lastQuality &&
-          other.createdAt == this.createdAt);
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.parentCategory == this.parentCategory);
 }
 
 class FlashcardTableCompanion extends UpdateCompanion<FlashcardEntity> {
   final Value<int> id;
+  final Value<int?> remoteId;
   final Value<String> deckName;
   final Value<String> frontText;
   final Value<String> backText;
@@ -3256,8 +4079,11 @@ class FlashcardTableCompanion extends UpdateCompanion<FlashcardEntity> {
   final Value<DateTime?> nextDueAt;
   final Value<int?> lastQuality;
   final Value<DateTime> createdAt;
+  final Value<DateTime?> updatedAt;
+  final Value<String?> parentCategory;
   const FlashcardTableCompanion({
     this.id = const Value.absent(),
+    this.remoteId = const Value.absent(),
     this.deckName = const Value.absent(),
     this.frontText = const Value.absent(),
     this.backText = const Value.absent(),
@@ -3268,9 +4094,12 @@ class FlashcardTableCompanion extends UpdateCompanion<FlashcardEntity> {
     this.nextDueAt = const Value.absent(),
     this.lastQuality = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.parentCategory = const Value.absent(),
   });
   FlashcardTableCompanion.insert({
     this.id = const Value.absent(),
+    this.remoteId = const Value.absent(),
     required String deckName,
     required String frontText,
     required String backText,
@@ -3281,11 +4110,14 @@ class FlashcardTableCompanion extends UpdateCompanion<FlashcardEntity> {
     this.nextDueAt = const Value.absent(),
     this.lastQuality = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.parentCategory = const Value.absent(),
   }) : deckName = Value(deckName),
        frontText = Value(frontText),
        backText = Value(backText);
   static Insertable<FlashcardEntity> custom({
     Expression<int>? id,
+    Expression<int>? remoteId,
     Expression<String>? deckName,
     Expression<String>? frontText,
     Expression<String>? backText,
@@ -3296,9 +4128,12 @@ class FlashcardTableCompanion extends UpdateCompanion<FlashcardEntity> {
     Expression<DateTime>? nextDueAt,
     Expression<int>? lastQuality,
     Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<String>? parentCategory,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
+      if (remoteId != null) 'remote_id': remoteId,
       if (deckName != null) 'deck_name': deckName,
       if (frontText != null) 'front_text': frontText,
       if (backText != null) 'back_text': backText,
@@ -3309,11 +4144,14 @@ class FlashcardTableCompanion extends UpdateCompanion<FlashcardEntity> {
       if (nextDueAt != null) 'next_due_at': nextDueAt,
       if (lastQuality != null) 'last_quality': lastQuality,
       if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (parentCategory != null) 'parent_category': parentCategory,
     });
   }
 
   FlashcardTableCompanion copyWith({
     Value<int>? id,
+    Value<int?>? remoteId,
     Value<String>? deckName,
     Value<String>? frontText,
     Value<String>? backText,
@@ -3324,9 +4162,12 @@ class FlashcardTableCompanion extends UpdateCompanion<FlashcardEntity> {
     Value<DateTime?>? nextDueAt,
     Value<int?>? lastQuality,
     Value<DateTime>? createdAt,
+    Value<DateTime?>? updatedAt,
+    Value<String?>? parentCategory,
   }) {
     return FlashcardTableCompanion(
       id: id ?? this.id,
+      remoteId: remoteId ?? this.remoteId,
       deckName: deckName ?? this.deckName,
       frontText: frontText ?? this.frontText,
       backText: backText ?? this.backText,
@@ -3337,6 +4178,8 @@ class FlashcardTableCompanion extends UpdateCompanion<FlashcardEntity> {
       nextDueAt: nextDueAt ?? this.nextDueAt,
       lastQuality: lastQuality ?? this.lastQuality,
       createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      parentCategory: parentCategory ?? this.parentCategory,
     );
   }
 
@@ -3345,6 +4188,9 @@ class FlashcardTableCompanion extends UpdateCompanion<FlashcardEntity> {
     final map = <String, Expression>{};
     if (id.present) {
       map['id'] = Variable<int>(id.value);
+    }
+    if (remoteId.present) {
+      map['remote_id'] = Variable<int>(remoteId.value);
     }
     if (deckName.present) {
       map['deck_name'] = Variable<String>(deckName.value);
@@ -3376,6 +4222,12 @@ class FlashcardTableCompanion extends UpdateCompanion<FlashcardEntity> {
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (parentCategory.present) {
+      map['parent_category'] = Variable<String>(parentCategory.value);
+    }
     return map;
   }
 
@@ -3383,6 +4235,7 @@ class FlashcardTableCompanion extends UpdateCompanion<FlashcardEntity> {
   String toString() {
     return (StringBuffer('FlashcardTableCompanion(')
           ..write('id: $id, ')
+          ..write('remoteId: $remoteId, ')
           ..write('deckName: $deckName, ')
           ..write('frontText: $frontText, ')
           ..write('backText: $backText, ')
@@ -3392,7 +4245,9 @@ class FlashcardTableCompanion extends UpdateCompanion<FlashcardEntity> {
           ..write('repetitions: $repetitions, ')
           ..write('nextDueAt: $nextDueAt, ')
           ..write('lastQuality: $lastQuality, ')
-          ..write('createdAt: $createdAt')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('parentCategory: $parentCategory')
           ..write(')'))
         .toString();
   }
@@ -5110,6 +5965,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $ArticlesTable articles = $ArticlesTable(this);
   late final $BookmarksTable bookmarks = $BookmarksTable(this);
   late final $StudySessionsTable studySessions = $StudySessionsTable(this);
+  late final $QuizSessionsTable quizSessions = $QuizSessionsTable(this);
   late final $QuizQuestionsTable quizQuestions = $QuizQuestionsTable(this);
   late final $QuizTableTable quizTable = $QuizTableTable(this);
   late final $FlashcardTableTable flashcardTable = $FlashcardTableTable(this);
@@ -5137,6 +5993,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     articles,
     bookmarks,
     studySessions,
+    quizSessions,
     quizQuestions,
     quizTable,
     flashcardTable,
@@ -5160,6 +6017,7 @@ typedef $$ArticlesTableCreateCompanionBuilder =
       Value<String?> videoUrl,
       Value<String?> subcategory,
       Value<bool> isHighYield,
+      Value<String?> parentCategory,
       Value<int> rowid,
     });
 typedef $$ArticlesTableUpdateCompanionBuilder =
@@ -5172,6 +6030,7 @@ typedef $$ArticlesTableUpdateCompanionBuilder =
       Value<String?> videoUrl,
       Value<String?> subcategory,
       Value<bool> isHighYield,
+      Value<String?> parentCategory,
       Value<int> rowid,
     });
 
@@ -5244,6 +6103,11 @@ class $$ArticlesTableFilterComposer
 
   ColumnFilters<bool> get isHighYield => $composableBuilder(
     column: $table.isHighYield,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get parentCategory => $composableBuilder(
+    column: $table.parentCategory,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -5321,6 +6185,11 @@ class $$ArticlesTableOrderingComposer
     column: $table.isHighYield,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get parentCategory => $composableBuilder(
+    column: $table.parentCategory,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$ArticlesTableAnnotationComposer
@@ -5357,6 +6226,11 @@ class $$ArticlesTableAnnotationComposer
 
   GeneratedColumn<bool> get isHighYield => $composableBuilder(
     column: $table.isHighYield,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get parentCategory => $composableBuilder(
+    column: $table.parentCategory,
     builder: (column) => column,
   );
 
@@ -5422,6 +6296,7 @@ class $$ArticlesTableTableManager
                 Value<String?> videoUrl = const Value.absent(),
                 Value<String?> subcategory = const Value.absent(),
                 Value<bool> isHighYield = const Value.absent(),
+                Value<String?> parentCategory = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ArticlesCompanion(
                 id: id,
@@ -5432,6 +6307,7 @@ class $$ArticlesTableTableManager
                 videoUrl: videoUrl,
                 subcategory: subcategory,
                 isHighYield: isHighYield,
+                parentCategory: parentCategory,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -5444,6 +6320,7 @@ class $$ArticlesTableTableManager
                 Value<String?> videoUrl = const Value.absent(),
                 Value<String?> subcategory = const Value.absent(),
                 Value<bool> isHighYield = const Value.absent(),
+                Value<String?> parentCategory = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ArticlesCompanion.insert(
                 id: id,
@@ -5454,6 +6331,7 @@ class $$ArticlesTableTableManager
                 videoUrl: videoUrl,
                 subcategory: subcategory,
                 isHighYield: isHighYield,
+                parentCategory: parentCategory,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -5759,12 +6637,14 @@ typedef $$StudySessionsTableCreateCompanionBuilder =
     StudySessionsCompanion Function({
       required DateTime date,
       Value<int> articlesViewedCount,
+      Value<int?> quizSeconds,
       Value<int> rowid,
     });
 typedef $$StudySessionsTableUpdateCompanionBuilder =
     StudySessionsCompanion Function({
       Value<DateTime> date,
       Value<int> articlesViewedCount,
+      Value<int?> quizSeconds,
       Value<int> rowid,
     });
 
@@ -5784,6 +6664,11 @@ class $$StudySessionsTableFilterComposer
 
   ColumnFilters<int> get articlesViewedCount => $composableBuilder(
     column: $table.articlesViewedCount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get quizSeconds => $composableBuilder(
+    column: $table.quizSeconds,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -5806,6 +6691,11 @@ class $$StudySessionsTableOrderingComposer
     column: $table.articlesViewedCount,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<int> get quizSeconds => $composableBuilder(
+    column: $table.quizSeconds,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$StudySessionsTableAnnotationComposer
@@ -5822,6 +6712,11 @@ class $$StudySessionsTableAnnotationComposer
 
   GeneratedColumn<int> get articlesViewedCount => $composableBuilder(
     column: $table.articlesViewedCount,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get quizSeconds => $composableBuilder(
+    column: $table.quizSeconds,
     builder: (column) => column,
   );
 }
@@ -5859,20 +6754,24 @@ class $$StudySessionsTableTableManager
               ({
                 Value<DateTime> date = const Value.absent(),
                 Value<int> articlesViewedCount = const Value.absent(),
+                Value<int?> quizSeconds = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => StudySessionsCompanion(
                 date: date,
                 articlesViewedCount: articlesViewedCount,
+                quizSeconds: quizSeconds,
                 rowid: rowid,
               ),
           createCompanionCallback:
               ({
                 required DateTime date,
                 Value<int> articlesViewedCount = const Value.absent(),
+                Value<int?> quizSeconds = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => StudySessionsCompanion.insert(
                 date: date,
                 articlesViewedCount: articlesViewedCount,
+                quizSeconds: quizSeconds,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -5898,6 +6797,244 @@ typedef $$StudySessionsTableProcessedTableManager =
         BaseReferences<_$AppDatabase, $StudySessionsTable, StudySession>,
       ),
       StudySession,
+      PrefetchHooks Function()
+    >;
+typedef $$QuizSessionsTableCreateCompanionBuilder =
+    QuizSessionsCompanion Function({
+      Value<int> id,
+      required DateTime startTime,
+      Value<DateTime?> endTime,
+      Value<String> mode,
+      Value<int> totalQuestions,
+      Value<int?> correctAnswers,
+      Value<String?> specialtyFilter,
+    });
+typedef $$QuizSessionsTableUpdateCompanionBuilder =
+    QuizSessionsCompanion Function({
+      Value<int> id,
+      Value<DateTime> startTime,
+      Value<DateTime?> endTime,
+      Value<String> mode,
+      Value<int> totalQuestions,
+      Value<int?> correctAnswers,
+      Value<String?> specialtyFilter,
+    });
+
+class $$QuizSessionsTableFilterComposer
+    extends Composer<_$AppDatabase, $QuizSessionsTable> {
+  $$QuizSessionsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get startTime => $composableBuilder(
+    column: $table.startTime,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get endTime => $composableBuilder(
+    column: $table.endTime,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get mode => $composableBuilder(
+    column: $table.mode,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get totalQuestions => $composableBuilder(
+    column: $table.totalQuestions,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get correctAnswers => $composableBuilder(
+    column: $table.correctAnswers,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get specialtyFilter => $composableBuilder(
+    column: $table.specialtyFilter,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$QuizSessionsTableOrderingComposer
+    extends Composer<_$AppDatabase, $QuizSessionsTable> {
+  $$QuizSessionsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get startTime => $composableBuilder(
+    column: $table.startTime,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get endTime => $composableBuilder(
+    column: $table.endTime,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get mode => $composableBuilder(
+    column: $table.mode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get totalQuestions => $composableBuilder(
+    column: $table.totalQuestions,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get correctAnswers => $composableBuilder(
+    column: $table.correctAnswers,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get specialtyFilter => $composableBuilder(
+    column: $table.specialtyFilter,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$QuizSessionsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $QuizSessionsTable> {
+  $$QuizSessionsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get startTime =>
+      $composableBuilder(column: $table.startTime, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get endTime =>
+      $composableBuilder(column: $table.endTime, builder: (column) => column);
+
+  GeneratedColumn<String> get mode =>
+      $composableBuilder(column: $table.mode, builder: (column) => column);
+
+  GeneratedColumn<int> get totalQuestions => $composableBuilder(
+    column: $table.totalQuestions,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get correctAnswers => $composableBuilder(
+    column: $table.correctAnswers,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get specialtyFilter => $composableBuilder(
+    column: $table.specialtyFilter,
+    builder: (column) => column,
+  );
+}
+
+class $$QuizSessionsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $QuizSessionsTable,
+          QuizSession,
+          $$QuizSessionsTableFilterComposer,
+          $$QuizSessionsTableOrderingComposer,
+          $$QuizSessionsTableAnnotationComposer,
+          $$QuizSessionsTableCreateCompanionBuilder,
+          $$QuizSessionsTableUpdateCompanionBuilder,
+          (
+            QuizSession,
+            BaseReferences<_$AppDatabase, $QuizSessionsTable, QuizSession>,
+          ),
+          QuizSession,
+          PrefetchHooks Function()
+        > {
+  $$QuizSessionsTableTableManager(_$AppDatabase db, $QuizSessionsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$QuizSessionsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$QuizSessionsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$QuizSessionsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<DateTime> startTime = const Value.absent(),
+                Value<DateTime?> endTime = const Value.absent(),
+                Value<String> mode = const Value.absent(),
+                Value<int> totalQuestions = const Value.absent(),
+                Value<int?> correctAnswers = const Value.absent(),
+                Value<String?> specialtyFilter = const Value.absent(),
+              }) => QuizSessionsCompanion(
+                id: id,
+                startTime: startTime,
+                endTime: endTime,
+                mode: mode,
+                totalQuestions: totalQuestions,
+                correctAnswers: correctAnswers,
+                specialtyFilter: specialtyFilter,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required DateTime startTime,
+                Value<DateTime?> endTime = const Value.absent(),
+                Value<String> mode = const Value.absent(),
+                Value<int> totalQuestions = const Value.absent(),
+                Value<int?> correctAnswers = const Value.absent(),
+                Value<String?> specialtyFilter = const Value.absent(),
+              }) => QuizSessionsCompanion.insert(
+                id: id,
+                startTime: startTime,
+                endTime: endTime,
+                mode: mode,
+                totalQuestions: totalQuestions,
+                correctAnswers: correctAnswers,
+                specialtyFilter: specialtyFilter,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$QuizSessionsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $QuizSessionsTable,
+      QuizSession,
+      $$QuizSessionsTableFilterComposer,
+      $$QuizSessionsTableOrderingComposer,
+      $$QuizSessionsTableAnnotationComposer,
+      $$QuizSessionsTableCreateCompanionBuilder,
+      $$QuizSessionsTableUpdateCompanionBuilder,
+      (
+        QuizSession,
+        BaseReferences<_$AppDatabase, $QuizSessionsTable, QuizSession>,
+      ),
+      QuizSession,
       PrefetchHooks Function()
     >;
 typedef $$QuizQuestionsTableCreateCompanionBuilder =
@@ -6240,6 +7377,8 @@ typedef $$QuizTableTableCreateCompanionBuilder =
       Value<DateTime?> nextDueAt,
       Value<double> easeFactor,
       Value<int?> lastQuality,
+      Value<DateTime?> updatedAt,
+      Value<String?> parentCategory,
     });
 typedef $$QuizTableTableUpdateCompanionBuilder =
     QuizTableCompanion Function({
@@ -6263,6 +7402,8 @@ typedef $$QuizTableTableUpdateCompanionBuilder =
       Value<DateTime?> nextDueAt,
       Value<double> easeFactor,
       Value<int?> lastQuality,
+      Value<DateTime?> updatedAt,
+      Value<String?> parentCategory,
     });
 
 class $$QuizTableTableFilterComposer
@@ -6371,6 +7512,16 @@ class $$QuizTableTableFilterComposer
 
   ColumnFilters<int> get lastQuality => $composableBuilder(
     column: $table.lastQuality,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get parentCategory => $composableBuilder(
+    column: $table.parentCategory,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -6483,6 +7634,16 @@ class $$QuizTableTableOrderingComposer
     column: $table.lastQuality,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get parentCategory => $composableBuilder(
+    column: $table.parentCategory,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$QuizTableTableAnnotationComposer
@@ -6573,6 +7734,14 @@ class $$QuizTableTableAnnotationComposer
     column: $table.lastQuality,
     builder: (column) => column,
   );
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get parentCategory => $composableBuilder(
+    column: $table.parentCategory,
+    builder: (column) => column,
+  );
 }
 
 class $$QuizTableTableTableManager
@@ -6626,6 +7795,8 @@ class $$QuizTableTableTableManager
                 Value<DateTime?> nextDueAt = const Value.absent(),
                 Value<double> easeFactor = const Value.absent(),
                 Value<int?> lastQuality = const Value.absent(),
+                Value<DateTime?> updatedAt = const Value.absent(),
+                Value<String?> parentCategory = const Value.absent(),
               }) => QuizTableCompanion(
                 id: id,
                 remoteId: remoteId,
@@ -6647,6 +7818,8 @@ class $$QuizTableTableTableManager
                 nextDueAt: nextDueAt,
                 easeFactor: easeFactor,
                 lastQuality: lastQuality,
+                updatedAt: updatedAt,
+                parentCategory: parentCategory,
               ),
           createCompanionCallback:
               ({
@@ -6670,6 +7843,8 @@ class $$QuizTableTableTableManager
                 Value<DateTime?> nextDueAt = const Value.absent(),
                 Value<double> easeFactor = const Value.absent(),
                 Value<int?> lastQuality = const Value.absent(),
+                Value<DateTime?> updatedAt = const Value.absent(),
+                Value<String?> parentCategory = const Value.absent(),
               }) => QuizTableCompanion.insert(
                 id: id,
                 remoteId: remoteId,
@@ -6691,6 +7866,8 @@ class $$QuizTableTableTableManager
                 nextDueAt: nextDueAt,
                 easeFactor: easeFactor,
                 lastQuality: lastQuality,
+                updatedAt: updatedAt,
+                parentCategory: parentCategory,
               ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
@@ -6720,6 +7897,7 @@ typedef $$QuizTableTableProcessedTableManager =
 typedef $$FlashcardTableTableCreateCompanionBuilder =
     FlashcardTableCompanion Function({
       Value<int> id,
+      Value<int?> remoteId,
       required String deckName,
       required String frontText,
       required String backText,
@@ -6730,10 +7908,13 @@ typedef $$FlashcardTableTableCreateCompanionBuilder =
       Value<DateTime?> nextDueAt,
       Value<int?> lastQuality,
       Value<DateTime> createdAt,
+      Value<DateTime?> updatedAt,
+      Value<String?> parentCategory,
     });
 typedef $$FlashcardTableTableUpdateCompanionBuilder =
     FlashcardTableCompanion Function({
       Value<int> id,
+      Value<int?> remoteId,
       Value<String> deckName,
       Value<String> frontText,
       Value<String> backText,
@@ -6744,6 +7925,8 @@ typedef $$FlashcardTableTableUpdateCompanionBuilder =
       Value<DateTime?> nextDueAt,
       Value<int?> lastQuality,
       Value<DateTime> createdAt,
+      Value<DateTime?> updatedAt,
+      Value<String?> parentCategory,
     });
 
 class $$FlashcardTableTableFilterComposer
@@ -6757,6 +7940,11 @@ class $$FlashcardTableTableFilterComposer
   });
   ColumnFilters<int> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get remoteId => $composableBuilder(
+    column: $table.remoteId,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -6809,6 +7997,16 @@ class $$FlashcardTableTableFilterComposer
     column: $table.createdAt,
     builder: (column) => ColumnFilters(column),
   );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get parentCategory => $composableBuilder(
+    column: $table.parentCategory,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $$FlashcardTableTableOrderingComposer
@@ -6822,6 +8020,11 @@ class $$FlashcardTableTableOrderingComposer
   });
   ColumnOrderings<int> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get remoteId => $composableBuilder(
+    column: $table.remoteId,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -6874,6 +8077,16 @@ class $$FlashcardTableTableOrderingComposer
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get parentCategory => $composableBuilder(
+    column: $table.parentCategory,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$FlashcardTableTableAnnotationComposer
@@ -6887,6 +8100,9 @@ class $$FlashcardTableTableAnnotationComposer
   });
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get remoteId =>
+      $composableBuilder(column: $table.remoteId, builder: (column) => column);
 
   GeneratedColumn<String> get deckName =>
       $composableBuilder(column: $table.deckName, builder: (column) => column);
@@ -6925,6 +8141,14 @@ class $$FlashcardTableTableAnnotationComposer
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get parentCategory => $composableBuilder(
+    column: $table.parentCategory,
+    builder: (column) => column,
+  );
 }
 
 class $$FlashcardTableTableTableManager
@@ -6965,6 +8189,7 @@ class $$FlashcardTableTableTableManager
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<int?> remoteId = const Value.absent(),
                 Value<String> deckName = const Value.absent(),
                 Value<String> frontText = const Value.absent(),
                 Value<String> backText = const Value.absent(),
@@ -6975,8 +8200,11 @@ class $$FlashcardTableTableTableManager
                 Value<DateTime?> nextDueAt = const Value.absent(),
                 Value<int?> lastQuality = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime?> updatedAt = const Value.absent(),
+                Value<String?> parentCategory = const Value.absent(),
               }) => FlashcardTableCompanion(
                 id: id,
+                remoteId: remoteId,
                 deckName: deckName,
                 frontText: frontText,
                 backText: backText,
@@ -6987,10 +8215,13 @@ class $$FlashcardTableTableTableManager
                 nextDueAt: nextDueAt,
                 lastQuality: lastQuality,
                 createdAt: createdAt,
+                updatedAt: updatedAt,
+                parentCategory: parentCategory,
               ),
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<int?> remoteId = const Value.absent(),
                 required String deckName,
                 required String frontText,
                 required String backText,
@@ -7001,8 +8232,11 @@ class $$FlashcardTableTableTableManager
                 Value<DateTime?> nextDueAt = const Value.absent(),
                 Value<int?> lastQuality = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime?> updatedAt = const Value.absent(),
+                Value<String?> parentCategory = const Value.absent(),
               }) => FlashcardTableCompanion.insert(
                 id: id,
+                remoteId: remoteId,
                 deckName: deckName,
                 frontText: frontText,
                 backText: backText,
@@ -7013,6 +8247,8 @@ class $$FlashcardTableTableTableManager
                 nextDueAt: nextDueAt,
                 lastQuality: lastQuality,
                 createdAt: createdAt,
+                updatedAt: updatedAt,
+                parentCategory: parentCategory,
               ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
@@ -8375,6 +9611,8 @@ class $AppDatabaseManager {
       $$BookmarksTableTableManager(_db, _db.bookmarks);
   $$StudySessionsTableTableManager get studySessions =>
       $$StudySessionsTableTableManager(_db, _db.studySessions);
+  $$QuizSessionsTableTableManager get quizSessions =>
+      $$QuizSessionsTableTableManager(_db, _db.quizSessions);
   $$QuizQuestionsTableTableManager get quizQuestions =>
       $$QuizQuestionsTableTableManager(_db, _db.quizQuestions);
   $$QuizTableTableTableManager get quizTable =>

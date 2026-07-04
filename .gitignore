@@ -62,3 +62,6 @@ backups/
 
 # Supabase env (ignored)
 lib/app/env.dart
+
+# Root .env file with real credentials (never commit)
+.env

@@ -213,21 +213,30 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
           isAnswerRevealed: notifier.isAnswerRevealed,
           onTap: () => notifier.selectOption(QuizOption.d),
         ),
-if (notifier.isAnswerRevealed) ...[
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: theme.colorScheme.secondary),
-              ),
-              child: Text(
-                'Explanation: ${question.explanation}',
-                style: TextStyle(height: 1.5, color: theme.colorScheme.onSurface),
-              ),
-            ),
+        if (notifier.isAnswerRevealed) ...[
           const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: theme.colorScheme.secondary),
+            ),
+            child: Text(
+              'Explanation: ${question.explanation}',
+              style: TextStyle(height: 1.5, color: theme.colorScheme.onSurface),
+            ),
+          ),
+          const SizedBox(height: 16),
+if (question.articleId.isNotEmpty)
+             SizedBox(
+               width: double.infinity,
+               child: OutlinedButton.icon(
+                 icon: const Icon(Icons.article_outlined, size: 18),
+                 label: const Text('Source Article'),
+                 onPressed: () => context.push('/article-detail', extra: {'id': question.articleId, 'section': question.testedField}),
+               ),
+             ),
           _buildSm2Buttons(question, notifier),
         ],
       ],
@@ -327,35 +336,35 @@ if (notifier.isAnswerRevealed) ...[
     );
   }
 
-Future<void> _recordReviewAndAdvance(
-     QuizTableData question,
-     int quality,
-     QuizNotifier notifier,
-   ) async {
-     final selectedOption = notifier.selectedOption;
-     final isCorrect =
-         selectedOption != null &&
-         question.correctOption == selectedOption.name.toUpperCase();
+  Future<void> _recordReviewAndAdvance(
+    QuizTableData question,
+    int quality,
+    QuizNotifier notifier,
+  ) async {
+    final selectedOption = notifier.selectedOption;
+    final isCorrect =
+        selectedOption != null &&
+        question.correctOption == selectedOption.name.toUpperCase();
 
-     await notifier.recordReview(question.id, quality);
-     await ref.read(streakNotifierProvider.notifier).recordQuizResult(isCorrect);
-     if (!mounted) {
-       return;
-     }
+    await notifier.recordReview(question.id, quality);
+    await ref.read(streakNotifierProvider.notifier).recordQuizResult(isCorrect);
+    if (!mounted) {
+      return;
+    }
 
-     if (notifier.isLastQuestion) {
-       if (notifier.wrongAnswerCount > 0) {
-         _showRetryScreen(context, notifier.wrongQuestionIds);
-       } else {
-         _resetQuizAndPop(context);
-       }
-       return;
-     }
+    if (notifier.isLastQuestion) {
+      if (notifier.wrongAnswerCount > 0) {
+        _showRetryScreen(context, notifier.wrongQuestionIds);
+      } else {
+        _resetQuizAndPop(context);
+      }
+      return;
+    }
 
-     await notifier.nextQuestion();
-   }
+    await notifier.nextQuestion();
+  }
 
-Future<void> _resetQuizAndPop(BuildContext context) async {
+  Future<void> _resetQuizAndPop(BuildContext context) async {
     final notifier = ref.read(quizNotifierProvider(_defaultQuizCategory).notifier);
     await notifier.saveCurrentStateToDrift();
     if (!mounted) {

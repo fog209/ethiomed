@@ -41,33 +41,13 @@ class SystemHealthScreen extends ConsumerWidget {
             children: [
               _buildSection('Sync Audit', theme),
               _buildInfoRow('Last Question Sync', data.lastQuestionSync, theme),
-              _buildInfoRow(
-                'Last Flashcard Sync',
-                data.lastFlashcardSync,
-                theme,
-              ),
+              _buildInfoRow('Last Flashcard Sync', data.lastFlashcardSync, theme),
               const SizedBox(height: 24),
               _buildSection('Data Grounding', theme),
-              _buildInfoRow(
-                'Total Articles',
-                data.articleCount.toString(),
-                theme,
-              ),
-              _buildInfoRow(
-                'Total Questions',
-                data.questionCount.toString(),
-                theme,
-              ),
-              _buildInfoRow(
-                'Total Flashcards',
-                data.flashcardCount.toString(),
-                theme,
-              ),
-              _buildInfoRow(
-                'Due Flashcards',
-                data.dueFlashcardCount.toString(),
-                theme,
-              ),
+              _buildInfoRow('Total Articles', data.articleCount.toString(), theme),
+              _buildInfoRow('Total Questions', data.questionCount.toString(), theme),
+              _buildInfoRow('Total Flashcards', data.flashcardCount.toString(), theme),
+              _buildInfoRow('Due Flashcards', data.dueFlashcardCount.toString(), theme),
               const SizedBox(height: 24),
               _buildSection('Security Audit', theme),
               _buildInfoRow('APK Signature Hash', data.signatureHash, theme),
@@ -95,15 +75,9 @@ class SystemHealthScreen extends ConsumerWidget {
       final lastFlashcardSync =
           prefs.getString('last_flashcard_sync') ?? 'Never synced';
 
-      final articleCount = await (db.select(
-        db.articles,
-      )..limit(10000)).get().then((l) => l.length);
-      final questionCount = await (db.select(
-        db.quizTable,
-      )..limit(10000)).get().then((l) => l.length);
-      final flashcardCount = await (db.select(
-        db.flashcardTable,
-      )..limit(10000)).get().then((l) => l.length);
+      final articleCount = await (db.select(db.articles)..limit(10000)).get().then((l) => l.length);
+      final questionCount = await (db.select(db.quizTable)..limit(10000)).get().then((l) => l.length);
+      final flashcardCount = await (db.select(db.flashcardTable)..limit(10000)).get().then((l) => l.length);
 
       final dueFlashcards = await db
           .customSelect(
@@ -120,7 +94,7 @@ class SystemHealthScreen extends ConsumerWidget {
           ? 'MATCHES EXPECTED (valid)'
           : 'VERIFY IN PRODUCTION';
 
-      return (
+      return SystemHealthData(
         lastQuestionSync: lastQuestionSync,
         lastFlashcardSync: lastFlashcardSync,
         articleCount: articleCount,
@@ -150,21 +124,14 @@ class SystemHealthScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildInfoRow(
-    String label,
-    String value,
-    ThemeData theme, {
-    bool isWarning = false,
-  }) {
+  Widget _buildInfoRow(String label, String value, ThemeData theme,
+      {bool isWarning = false}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            label,
-            style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
-          ),
+          Text(label, style: TextStyle(color: theme.colorScheme.onSurfaceVariant)),
           Text(
             value,
             style: TextStyle(
@@ -180,14 +147,26 @@ class SystemHealthScreen extends ConsumerWidget {
   }
 }
 
-typedef SystemHealthData = ({
-  String lastQuestionSync,
-  String lastFlashcardSync,
-  int articleCount,
-  int questionCount,
-  int flashcardCount,
-  int dueFlashcardCount,
-  String signatureHash,
-  String signatureStatus,
-  bool isSignatureValid,
-});
+class SystemHealthData {
+  SystemHealthData({
+    required this.lastQuestionSync,
+    required this.lastFlashcardSync,
+    required this.articleCount,
+    required this.questionCount,
+    required this.flashcardCount,
+    required this.dueFlashcardCount,
+    required this.signatureHash,
+    required this.signatureStatus,
+    required this.isSignatureValid,
+  });
+
+  final String lastQuestionSync;
+  final String lastFlashcardSync;
+  final int articleCount;
+  final int questionCount;
+  final int flashcardCount;
+  final int dueFlashcardCount;
+  final String signatureHash;
+  final String signatureStatus;
+  final bool isSignatureValid;
+}

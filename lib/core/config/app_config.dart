@@ -4,9 +4,9 @@ import '../../app/env.dart';
 class AppConfig {
   static const String appTitle = 'WardReady';
 
-  static const String supabaseUrl = Env.supabaseUrl;
+  static String get supabaseUrl => Env.supabaseUrl;
 
-  static const String supabaseAnonKey = Env.supabaseAnonKey;
+  static String get supabaseAnonKey => Env.supabaseAnonKey;
 
   static const String internalMedicineCategory = 'Internal Medicine';
 

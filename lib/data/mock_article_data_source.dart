@@ -17,8 +17,7 @@ class MockArticleDataSource implements ArticleRemoteDataSource {
 const List<Article> mockArticles = <Article>[
   Article(
     title: 'Diabetes',
-    category: 'Internal Medicine',
-    subcategory: 'Endocrinology',
+    category: ['Internal Medicine'],
     theEssence:
         '[[Diabetes]] is chronic hyperglycemia from impaired insulin secretion, insulin action, or both. In exams and wards, think of it as a vascular disease with glucose as the visible clue.',
     theLogic:
@@ -45,8 +44,7 @@ const List<Article> mockArticles = <Article>[
   ),
   Article(
     title: 'Diabetic Ketoacidosis',
-    category: 'Emergency Medicine',
-    subcategory: 'Endocrine Emergencies',
+    category: ['Emergency Medicine', 'Endocrine Emergencies'],
     theEssence:
         '[[Diabetic Ketoacidosis]] is insulin deficiency causing hyperglycemia, ketosis, acidosis, and dehydration. It is a fluids-first emergency.',
     theLogic:
@@ -68,8 +66,7 @@ const List<Article> mockArticles = <Article>[
   ),
   Article(
     title: 'Hypertension',
-    category: 'Internal Medicine',
-    subcategory: 'Cardiology',
+    category: ['Internal Medicine', 'Cardiology'],
     theEssence:
         '[[Hypertension]] is persistently elevated arterial pressure that silently damages brain, heart, kidneys, eyes, and vessels.',
     theLogic:
@@ -91,8 +88,7 @@ const List<Article> mockArticles = <Article>[
   ),
   Article(
     title: 'Pneumonia',
-    category: 'Internal Medicine',
-    subcategory: 'Pulmonology',
+    category: ['Internal Medicine', 'Pulmonology'],
     theEssence:
         '[[Pneumonia]] is infection of lung parenchyma causing inflammation, impaired gas exchange, and systemic illness.',
     theLogic:
@@ -115,8 +111,7 @@ const List<Article> mockArticles = <Article>[
   ),
   Article(
     title: 'Tuberculosis',
-    category: 'Internal Medicine',
-    subcategory: 'Infectious Diseases',
+    category: ['Internal Medicine', 'Infectious Diseases'],
     theEssence:
         '[[Tuberculosis]] is chronic infection with Mycobacterium tuberculosis, most often pulmonary, spread through airborne droplets.',
     theLogic:
@@ -139,8 +134,7 @@ const List<Article> mockArticles = <Article>[
   ),
   Article(
     title: 'Malaria',
-    category: 'Internal Medicine',
-    subcategory: 'Infectious Diseases',
+    category: ['Internal Medicine', 'Infectious Diseases'],
     theEssence:
         '[[Malaria]] is Plasmodium infection transmitted by Anopheles mosquitoes, with fever plus risk of anemia, hypoglycemia, cerebral disease, and death.',
     theLogic:
@@ -163,8 +157,7 @@ const List<Article> mockArticles = <Article>[
   ),
   Article(
     title: 'Sepsis',
-    category: 'Emergency Medicine',
-    subcategory: 'Infectious Emergencies',
+    category: ['Emergency Medicine', 'Infectious Emergencies'],
     theEssence:
         '[[Sepsis]] is life-threatening organ dysfunction from a dysregulated response to infection. It is infection plus failing physiology.',
     theLogic:
@@ -172,7 +165,7 @@ const List<Article> mockArticles = <Article>[
     thePortrait:
         'Fever or hypothermia, tachycardia, tachypnea, confusion, low blood pressure, oliguria, mottled skin, or suspected sources such as [[Pneumonia]], urinary infection, abdominal infection, or [[Malaria]].',
     clinicalLink:
-        'Normal temperature does not exclude sepsis. Altered mental status, low urine output, and hypotension are bedside signs of organ dysfunction.',
+        'Normal temperature does not exclude sepsia. Altered mental status, low urine output, and hypotension are bedside signs of organ dysfunction.',
     theEthiopianBedside:
         'Late presentation is common when transport is difficult. Source control may require early referral if surgery, drainage, or obstetric care is needed.',
     survivalPearl:
@@ -187,8 +180,7 @@ const List<Article> mockArticles = <Article>[
   ),
   Article(
     title: 'Asthma',
-    category: 'Internal Medicine',
-    subcategory: 'Pulmonology',
+    category: ['Internal Medicine', 'Pulmonology'],
     theEssence:
         '[[Asthma]] is variable airway inflammation and bronchoconstriction causing episodic wheeze, cough, chest tightness, and breathlessness.',
     theLogic:
@@ -209,9 +201,52 @@ const List<Article> mockArticles = <Article>[
     mnemonics: 'Asthma attack care: O B S - Oxygen, Bronchodilator, Steroid.',
   ),
   Article(
+    title: 'Neonatal Jaundice',
+    category: ['Pediatrics', 'Neonatology'],
+    theEssence:
+        '[[Neonatal Jaundice]] is yellow discoloration of the skin and sclera caused by elevated bilirubin in the first weeks of life. It is common and usually benign, but severe cases risk kernicterus.',
+    theLogic:
+        'Neonates have high red cell turnover and immature liver conjugation, leading to unconjugated bilirubin accumulation. Pathological causes include hemolysis, ABO/Rh incompatibility, sepsis, and metabolic disorders.',
+    thePortrait:
+        'Yellow skin and sclera appearing within first days of life, poor feeding, lethargy, or high-pitched cry in severe cases. Timing of onset guides whether physiological or pathological.',
+    clinicalLink:
+        'Connect early jaundice (< 24 hours) with [[Sepsis]] and hemolysis. Late-onset or worsening jaundice needs bilirubin measurement and etiology workup.',
+    theEthiopianBedside:
+        'Phototherapy availability is limited in many settings. Assess hydration and feeding. Exchange transfusion requires referral. Educate parents on danger signs.',
+    survivalPearl:
+        'Jaundice in the first 24 hours is always pathological until proven otherwise.',
+    curiosityCorner:
+        'Bilirubin deposited in the basal ganglia causes kernicterus, an irreversible encephalopathy.',
+    thePlan:
+        'Assess clinical jaundice, measure bilirubin where possible, check blood group compatibility, manage hydration and feeding, initiate phototherapy per guidelines, and refer for exchange transfusion if needed.',
+    relatedTopics: <String>['Sepsis', 'Anemia', 'Neonatal Sepsis'],
+    mnemonics: 'Pathological jaundice: FRESH - First 24h, Rapid rise, Elevated conjugated, Sick, Hemolytic signs.',
+  ),
+  Article(
+    title: 'Cardiac Failure',
+    category: ['Internal Medicine', 'Cardiology'],
+    theEssence:
+        '[[Cardiac Failure]] is the inability of the heart to meet the body\'s metabolic demands, causing fluid overload and reduced cardiac output.',
+    theLogic:
+        'Systolic failure reduces ejection; diastolic failure impairs filling. Both cause backward pressure buildup, leading to pulmonary or peripheral congestion.',
+    thePortrait:
+        'Dyspnea on exertion or at rest, orthopnea, paroxysmal nocturnal dyspnea, bilateral leg edema, elevated JVP, and basal crackles. Common Ethiopian causes include rheumatic heart disease and [[Hypertension]].',
+    clinicalLink:
+        'Distinguish left from right failure: left causes pulmonary congestion, right causes peripheral edema and hepatomegaly.',
+    theEthiopianBedside:
+        'Rheumatic heart disease is a dominant cause in Ethiopia. Ask about prior sore throat illness and joint pain. Medication adherence and dietary salt restriction are key counselling points.',
+    survivalPearl:
+        'Sitting up, oxygen, and a diuretic are the three core moves for acute pulmonary edema.',
+    curiosityCorner:
+        'The body compensates with fluid retention and tachycardia, which temporarily maintains output but accelerates deterioration.',
+    thePlan:
+        'Assess severity with vitals and examination, start diuresis, restrict salt and fluid, optimize cardiac medications, investigate etiology, and manage precipitating factors.',
+    relatedTopics: <String>['Hypertension', 'Rheumatic Heart Disease', 'Pneumonia'],
+    mnemonics: 'Heart failure symptoms: SOAP - Shortness of breath, Orthopnea, Ankle edema, Poor exercise tolerance.',
+  ),
+  Article(
     title: 'Preeclampsia',
-    category: 'OB/GYN',
-    subcategory: 'Obstetrics',
+    category: ['OB/GYN', 'Obstetrics'],
     theEssence:
         '[[Preeclampsia]] is new hypertension after 20 weeks of pregnancy with proteinuria or maternal organ dysfunction.',
     theLogic:

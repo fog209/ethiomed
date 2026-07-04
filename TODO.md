@@ -1,0 +1,8 @@
+- [x] Update Drift schema: add `updated_at` to `QuizTable` (local `quiz_table`) and `FlashcardTable` (local `flashcard_table`) plus migration steps in `AppDatabase` (in progress).
+- [ ] Create `lib/features/quiz/data/quiz_repository.dart` implementing:
+  - [ ] `fetchAndSyncQuizContent()` using Supabase `questions` and `updated_at` cursor stored in `SharedPreferences`
+  - [ ] `fetchAndSyncFlashcards()` using Supabase table for flashcards and `updated_at` cursor stored in `SharedPreferences` (with asset fallback only when Supabase unreachable and local tables are empty)
+- [ ] Wire cold-start sync on app startup when online (similar pattern to `CategoriesScreen` auto-sync for articles).
+- [ ] UI: add “Sync Decks” button with Idle → Syncing → Success/Error state machine (snackbar messages).
+- [ ] Run `flutter analyze` and fix any compile/lint errors.
+- [ ] Provide final summary of schema + sync logic + UI behavior.
