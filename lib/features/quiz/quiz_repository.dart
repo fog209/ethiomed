@@ -15,6 +15,8 @@ import '../../../core/services/postgrest_status_helper.dart';
 import '../../../core/database/app_database.dart';
 import '../../../core/errors/app_exception.dart';
 
+enum QuestionScope { all, newOnly, incorrectOnly }
+
 class QuizRepository {
   static void _noop() {}
 
@@ -25,12 +27,12 @@ class QuizRepository {
     VoidCallback? onRateLimited,
     VoidCallback? onDiskFull,
     VoidCallback? onSuccessfulSync,
-  }) : _supabase = supabase,
-       _db = database,
-       _onServerUnreachable = onServerUnreachable ?? _noop,
-       _onRateLimited = onRateLimited ?? _noop,
-       _onDiskFull = onDiskFull ?? _noop,
-       _onSuccessfulSync = onSuccessfulSync ?? _noop;
+  })  : _supabase = supabase,
+        _db = database,
+        _onServerUnreachable = onServerUnreachable ?? _noop,
+        _onRateLimited = onRateLimited ?? _noop,
+        _onDiskFull = onDiskFull ?? _noop,
+        _onSuccessfulSync = onSuccessfulSync ?? _noop;
 
   final SupabaseClient _supabase;
   final AppDatabase _db;
@@ -170,6 +172,96 @@ class QuizRepository {
     return rows.map(_questionFromRowSimple).toList(growable: false);
   }
 
+  Future<List<QuizQuestionEntity>> buildCustomQuiz({
+    String? specialtyFilter,
+    QuestionScope scope = QuestionScope.all,
+    int questionCount = 50,
+  }) async {
+    try {
+      final List<Variable> conditions = [];
+      String whereClause = '';
+
+      if (specialtyFilter != null && specialtyFilter.isNotEmpty) {
+        whereClause += ' AND category = ?';
+        conditions.add(Variable(specialtyFilter));
+      }
+
+      switch (scope) {
+        case QuestionScope.newOnly:
+          whereClause += ' AND last_attempted_at IS NULL';
+          break;
+        case QuestionScope.incorrectOnly:
+          whereClause += ' AND wrong_count > 0';
+          break;
+        case QuestionScope.all:
+          break;
+      }
+
+      final rows = await _db
+          .customSelect(
+            '''
+            SELECT *
+            FROM quiz_table
+            WHERE 1=1 $whereClause
+            ORDER BY RANDOM()
+            LIMIT ?
+            ''',
+            variables: [...conditions, Variable(questionCount)],
+          )
+          .get();
+
+      return rows.map(_questionFromRowSimple).toList(growable: false);
+    } catch (e) {
+      debugPrint('Build custom quiz error: $e');
+      return const [];
+    }
+  }
+
+  Future<void> saveQuizAttempt({
+    required int sessionId,
+    required int questionId,
+    required String? selectedOption,
+    required bool isCorrect,
+    required int? confidenceLevel,
+    required int timeSpentSeconds,
+  }) async {
+    try {
+      await _db.into(_db.quizAttemptDetails).insert(
+        QuizAttemptDetailsCompanion.insert(
+          sessionId: Value(sessionId),
+          questionId: Value(questionId),
+          selectedOption: Value(selectedOption),
+          isCorrect: Value(isCorrect),
+          confidenceLevel: Value(confidenceLevel),
+          timeSpentSeconds: Value(timeSpentSeconds),
+        ),
+      );
+    } catch (e) {
+      debugPrint('Save quiz attempt error: $e');
+    }
+  }
+
+  Future<List<QuizQuestionEntity>> getHighPriorityMistakes() async {
+    try {
+      final rows = await _db
+          .customSelect(
+            '''
+            SELECT q.*
+            FROM quiz_table q
+            INNER JOIN quiz_attempt_details qad ON q.id = qad.question_id
+            WHERE qad.is_correct = 0 AND qad.confidence_level = 3
+            ORDER BY qad.answered_at DESC
+            ''',
+          )
+          .get();
+
+      return rows.map(_questionFromRowSimple).toList(growable: false);
+    } catch (e) {
+      debugPrint('Get high priority mistakes error: $e');
+      return const [];
+    }
+  }
+
   Future<int> syncQuestionsFromSupabase() async {
     try {
       final response = await _supabase.from('questions').select();
@@ -263,6 +355,9 @@ class QuizRepository {
       wrongCount: row.read<int?>('wrong_count') ?? 0,
       lastAttemptedAt: row.read<DateTime?>('last_attempted_at'),
       easeFactor: row.read<double?>('ease_factor') ?? 2.5,
+      sourceType: row.read<String?>('source_type') ?? 'original',
+      examYear: row.read<int?>('exam_year'),
+      examSource: row.read<String?>('exam_source'),
     );
   }
 
@@ -281,6 +376,9 @@ class QuizRepository {
       category: question.category,
       difficulty: Value(question.difficulty),
       testedField: Value(question.testedField),
+      sourceType: Value(question.sourceType),
+      examYear: Value(question.examYear),
+      examSource: Value(question.examSource),
     );
   }
 
@@ -326,6 +424,9 @@ class QuizRepository {
       wrongCount: 0,
       lastAttemptedAt: null,
       easeFactor: 2.5,
+      sourceType: _string(json['source_type']) ?? 'original',
+      examYear: int.tryParse(json['exam_year']?.toString() ?? ''),
+      examSource: _string(json['exam_source']),
     );
   }
 
@@ -369,4 +470,9 @@ final quizRepositoryProvider = Provider<QuizRepository>((ref) {
 final missedQuestionsProvider = FutureProvider<List<QuizQuestionEntity>>((ref) async {
   final repository = ref.watch(quizRepositoryProvider);
   return repository.getMissedQuestions();
+});
+
+final highPriorityMistakesProvider = FutureProvider<List<QuizQuestionEntity>>((ref) async {
+  final repository = ref.watch(quizRepositoryProvider);
+  return repository.getHighPriorityMistakes();
 });

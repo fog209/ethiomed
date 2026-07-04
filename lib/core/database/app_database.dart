@@ -85,12 +85,23 @@ class StudySessions extends Table {
    IntColumn get correctAnswers => integer().nullable()();
    TextColumn get specialtyFilter => text().nullable()();
 
-   @override
-   Set<Column> get primaryKey => {id};
- }
+@override
+    Set<Column> get primaryKey => {id};
+  }
 
-@DataClassName('QuizQuestionLocal')
-class QuizQuestions extends Table {
+  class QuizAttemptDetails extends Table {
+    IntColumn get id => integer().autoIncrement()();
+    IntColumn get sessionId => integer().nullable()();
+    IntColumn get questionId => integer().nullable()();
+    TextColumn get selectedOption => text().withLength(min: 1, max: 1).nullable()();
+    BoolColumn get isCorrect => boolean().withDefault(const Constant(false))();
+    IntColumn get confidenceLevel => integer().nullable()();
+    IntColumn get timeSpentSeconds => integer().withDefault(const Constant(0))();
+    DateTimeColumn get answeredAt => dateTime().clientDefault(DateTime.now)();
+  }
+
+  @DataClassName('QuizQuestionLocal')
+  class QuizQuestions extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get articleId => text().nullable()();
   TextColumn get stem => text()();
@@ -135,8 +146,8 @@ class QuizTable extends Table {
 /// Parent category for taxonomy synchronization.
   TextColumn get parentCategory => text().nullable()();
 
-/// Source type: 'original' or 'past_exam'.
-  TextColumn get sourceType => text().withDefault(const Constant('original'))();
+/// Source type: 'original' or 'past_exam'. Nullable; treat NULL as 'original'.
+   TextColumn get sourceType => text().nullable()();
 
 /// Exam year, e.g., 2022, 2023.
   IntColumn get examYear => integer().nullable()();
@@ -233,13 +244,14 @@ class CaseProgress extends Table {
      CaseStages,
      CaseOptions,
      CaseProgress,
+     QuizAttemptDetails,
    ],
  )
-class AppDatabase extends _$AppDatabase {
-  AppDatabase() : super(_openConnection());
+ class AppDatabase extends _$AppDatabase {
+   AppDatabase() : super(_openConnection());
 
-  @override
-  int get schemaVersion => 15;
+   @override
+   int get schemaVersion => 17;
 
   Future<void> _runMigrationStep(
     String name,
@@ -455,22 +467,62 @@ if (from < 14) {
               () => m.createTable(quizSessions),
             );
           }
-          if (from < 15) {
-            await _runMigrationStep('add quiz_seconds to study_sessions', () async {
-              final columns = await customSelect(
-                'PRAGMA table_info(study_sessions)',
-              ).get();
-              final columnNames = columns.map((row) => row.read<String>('name')).toSet();
-              if (!columnNames.contains('quiz_seconds')) {
-                await customStatement(
-                  'ALTER TABLE study_sessions ADD COLUMN quiz_seconds INTEGER',
-                );
-              }
-            });
-          }
-        },
-      );
-    }
+if (from < 15) {
+             await _runMigrationStep('add quiz_seconds to study_sessions', () async {
+               final columns = await customSelect(
+                 'PRAGMA table_info(study_sessions)',
+               ).get();
+               final columnNames = columns.map((row) => row.read<String>('name')).toSet();
+               if (!columnNames.contains('quiz_seconds')) {
+                 await customStatement(
+                   'ALTER TABLE study_sessions ADD COLUMN quiz_seconds INTEGER',
+                 );
+               }
+             });
+           }
+           if (from < 16) {
+             await _runMigrationStep('add past exam columns to quiz_table', () async {
+               final columns = await customSelect(
+                 'PRAGMA table_info(quiz_table)',
+               ).get();
+               final columnNames = columns.map((row) => row.read<String>('name')).toSet();
+
+if (!columnNames.contains('source_type')) {
+                  await customStatement(
+                    'ALTER TABLE quiz_table ADD COLUMN source_type TEXT DEFAULT \'original\'',
+                  );
+                }
+               if (!columnNames.contains('exam_year')) {
+                 await customStatement(
+                   'ALTER TABLE quiz_table ADD COLUMN exam_year INTEGER',
+                 );
+               }
+if (!columnNames.contains('exam_source')) {
+                  await customStatement(
+                    'ALTER TABLE quiz_table ADD COLUMN exam_source TEXT',
+                  );
+                }
+              });
+            }
+            if (from < 17) {
+              await _runMigrationStep('create quiz attempt details table', () async {
+                await customStatement('''
+                  CREATE TABLE IF NOT EXISTS quiz_attempt_details (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    session_id INTEGER NOT NULL REFERENCES quiz_sessions(id),
+                    question_id INTEGER NOT NULL REFERENCES quiz_table(id),
+                    selected_option TEXT,
+                    is_correct INTEGER NOT NULL DEFAULT 0,
+                    confidence_level INTEGER,
+                    time_spent_seconds INTEGER NOT NULL DEFAULT 0,
+                    answered_at TEXT NOT NULL DEFAULT ''
+                  )
+                ''');
+              });
+            }
+          },
+       );
+     }
 
   Future<void> recordArticleView() async {
     await _ensureStudySessionsTable();

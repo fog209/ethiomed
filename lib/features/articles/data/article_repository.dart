@@ -270,6 +270,45 @@ Future<int> countArticlesInCategory(
           ..limit(limit))
         .get();
   }
+
+  Future<List<HighYieldArticle>> getHighYieldArticles() async {
+    final rows = await _db
+        .customSelect(
+          '''
+          SELECT article_id, COUNT(*) as exam_count,
+                 GROUP_CONCAT(DISTINCT exam_year) as years,
+                 GROUP_CONCAT(DISTINCT exam_source) as sources
+          FROM quiz_table
+          WHERE source_type = 'past_exam'
+          GROUP BY article_id
+          HAVING COUNT(*) >= 2
+          ''',
+        )
+        .get();
+
+    return rows.map((row) {
+      final yearsStr = row.read<String?>('years');
+      final years = yearsStr != null
+          ? yearsStr
+              .split(',')
+              .map((y) => int.tryParse(y.trim()))
+              .whereType<int>()
+              .toList(growable: false)
+          : const <int>[];
+
+      final sourcesStr = row.read<String?>('sources');
+      final sources = sourcesStr != null
+          ? sourcesStr.split(',').toList(growable: false)
+          : const <String>[];
+
+      return (
+        articleId: row.read<String>('article_id'),
+        examCount: row.read<int>('exam_count'),
+        years: years,
+        sources: sources,
+      );
+    }).toList(growable: false);
+  }
 }
 
 final articleRepositoryProvider = Provider<ArticleRepository>((ref) {
@@ -440,6 +479,13 @@ class ArticleListState {
     );
   }
 }
+
+typedef HighYieldArticle = ({
+  String articleId,
+  int examCount,
+  List<int> years,
+  List<String> sources,
+});
 
 const Object _unsetMessage = Object();
 
