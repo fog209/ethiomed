@@ -1,44 +1,11 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
-import 'core/config/app_config.dart';
-import 'core/database/app_database.dart';
-import 'core/providers/session_timeout_provider.dart';
 import 'core/theme/app_theme.dart';
-import 'features/admin/presentation/admin_dashboard_screen.dart';
-import 'features/admin/data/admin_repository.dart';
-import 'features/articles/presentation/article_detail_screen.dart';
-import 'features/articles/presentation/article_search_screen.dart';
-import 'features/quiz/presentation/exam_screen.dart';
-import 'features/quiz/presentation/exam_results_screen.dart';
-import 'features/calculators/calculators_screen.dart';
-import 'features/cases/presentation/case_screen.dart';
-import 'features/home/presentation/article_list_screen.dart';
-import 'features/auth/presentation/login_screen.dart';
-import 'features/auth/presentation/signup_screen.dart';
-import 'features/legal/disclaimer_screen.dart';
-import 'features/legal/privacy_screen.dart';
-import 'features/legal/terms_screen.dart';
-import 'features/onboarding/onboarding_screen.dart';
-import 'app/main_shell.dart';
-import 'features/subscription/presentation/paywall_screen.dart';
-import 'features/subscription/data/subscription_repository.dart';
-import 'features/flashcards/presentation/flashcard_review_screen.dart';
-
-bool _seenOnboarding = false;
-bool _seenDisclaimer = false;
-
-final themeModeProvider = StateProvider<ThemeMode>((ref) => ThemeMode.dark);
-
-Future<void> saveThemeMode(ThemeMode mode) async {
-  final prefs = await SharedPreferences.getInstance();
-  await prefs.setInt('themeMode', mode.index);
-}
+import 'screens/article_catalog_screen.dart';
+import 'screens/article_detail_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -48,232 +15,37 @@ void main() async {
     overlays: const [SystemUiOverlay.top, SystemUiOverlay.bottom],
   );
 
-  final prefs = await SharedPreferences.getInstance();
-  _seenOnboarding = prefs.getBool('hasSeenOnboarding') ?? false;
-  _seenDisclaimer = prefs.getBool('hasSeenDisclaimer') ?? false;
-
-  FlutterError.onError = (FlutterErrorDetails details) {
-    debugPrint('FlutterError: ${details.exception}');
-    debugPrint('Stack: ${details.stack}');
-  };
-
-  PlatformDispatcher.instance.onError = (error, stack) {
-    debugPrint('Unhandled error: $error');
-    debugPrint('Stack: $stack');
-    return true;
-  };
-
-  if (kReleaseMode) {
-    ErrorWidget.builder = (FlutterErrorDetails details) {
-      return Scaffold(
-        backgroundColor: const Color(0xFF1A237E),
-        body: Center(
-          child: Padding(
-            padding: EdgeInsets.all(24),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.error_outline, size: 48, color: Color(0xFFF9A825)),
-                SizedBox(height: 16),
-                const Text(
-                  'Something went wrong.\nPlease restart the app.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.white,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-    };
-  }
-
-  if (kReleaseMode) {
-    if (AppConfig.supabaseUrl.isEmpty || AppConfig.supabaseAnonKey.isEmpty) {
-      throw StateError(
-          'SUPABASE_URL and SUPABASE_ANON_KEY must be provided via --dart-define');
-    }
-  }
-
-  try {
-    await Supabase.initialize(
-      url: AppConfig.supabaseUrl,
-      publishableKey: AppConfig.supabaseAnonKey,
-    );
-  } on PostgrestException catch (e) {
-    debugPrint('Supabase error: ${e.message}');
-    rethrow;
-  } catch (e) {
-    debugPrint('Error: $e');
-    rethrow;
-  }
-
-  final themeIndex = prefs.getInt('themeMode') ?? ThemeMode.dark.index;
-  runApp(ProviderScope(overrides: [
-    themeModeProvider.overrideWith((ref) => ThemeMode.values[themeIndex]),
-  ], child: const MyApp()));
+  runApp(const ProviderScope(child: WardReadyApp()));
 }
 
 final _router = GoRouter(
   initialLocation: '/',
-  errorBuilder: (context, state) => Scaffold(
-    backgroundColor: Theme.of(context).colorScheme.surface,
-    body: Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.explore_off, color: Theme.of(context).colorScheme.primary, size: 64),
-          const SizedBox(height: 16),
-          Text(
-            'Page not found',
-            style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 20),
-          ),
-          const SizedBox(height: 24),
-          ElevatedButton(
-            onPressed: () => context.go('/home'),
-            child: const Text('Go Home'),
-          ),
-        ],
-      ),
-    ),
-  ),
-  routes: [
-    GoRoute(path: '/', builder: (context, state) => const InitialFlowGate()),
-    GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
-    GoRoute(path: '/signup', builder: (context, state) => const SignupScreen()),
-    GoRoute(path: '/home', builder: (context, state) => const AppEntrance()),
+  routes: <RouteBase>[
     GoRoute(
-      path: '/disclaimer',
-      builder: (context, state) => const DisclaimerScreen(),
-    ),
-    GoRoute(path: '/terms', builder: (context, state) => const TermsScreen()),
-    GoRoute(
-      path: '/privacy',
-      builder: (context, state) => const PrivacyScreen(),
+      path: '/',
+      builder: (context, state) => const ArticleCatalogScreen(),
     ),
     GoRoute(
-      path: '/article-list/:category',
-      builder: (context, state) =>
-          ArticleListScreen(category: state.pathParameters['category'] ?? ''),
-    ),
-GoRoute(
-       path: '/article-detail',
-       builder: (context, state) {
-         final article = state.extra;
-         if (article is ArticleLocal) {
-           return ArticleDetailScreen(article: article);
-         }
-         final id = state.uri.queryParameters['id'];
-         if (id != null && id.isNotEmpty) {
-           return ArticleDetailScreen(articleId: id);
-         }
-         return ArticleDetailScreen();
-       },
-     ),
-    GoRoute(
-      path: '/admin',
-      redirect: (context, state) async {
-        final container = ProviderScope.containerOf(context, listen: false);
-        final isAdmin = await container.read(currentAdminProfileProvider.future);
-        if (!isAdmin) return '/home';
-        return null;
-      },
-      builder: (context, state) => const AdminDashboardScreen(),
-    ),
-    GoRoute(
-      path: '/subscription',
-      builder: (context, state) => const PaywallScreen(),
-    ),
-    GoRoute(
-      path: '/calculators',
-      builder: (context, state) => const CalculatorsScreen(),
-    ),
-    GoRoute(
-      path: '/calculator-detail',
+      path: '/articles/:title',
       builder: (context, state) {
-        final name = state.extra as String? ?? '';
-        return CalculatorDetailScreen(name: name);
+        final encodedTitle = state.pathParameters['title'] ?? '';
+        return ArticleDetailScreen(title: Uri.decodeComponent(encodedTitle));
       },
-    ),
-    GoRoute(
-      path: '/search',
-      builder: (context, state) {
-        final query = state.uri.queryParameters['q'] ?? state.extra as String? ?? '';
-        return ArticleSearchScreen(initialQuery: query);
-      },
-    ),
-    GoRoute(
-      path: '/cases',
-      builder: (context, state) => const ClinicalCasesScreen(),
-    ),
-GoRoute(
-      path: '/case-detail',
-      builder: (context, state) {
-        final caseId = state.extra as String? ?? '';
-        return CaseDetailScreen(caseId: caseId);
-      },
-    ),
-    GoRoute(
-      path: '/exam',
-      builder: (context, state) => const ExamScreen(),
-    ),
-    GoRoute(
-      path: '/exam-results',
-      builder: (context, state) => const ExamResultsScreen(),
-    ),
-    GoRoute(
-      path: '/flashcards',
-      builder: (context, state) => const FlashcardReviewScreen(),
     ),
   ],
 );
 
-class InitialFlowGate extends StatefulWidget {
-  const InitialFlowGate({super.key});
+class WardReadyApp extends StatelessWidget {
+  const WardReadyApp({super.key});
 
-  @override
-  State<InitialFlowGate> createState() => _InitialFlowGateGateState();
-}
-
-class _InitialFlowGateGateState extends State<InitialFlowGate> {
   @override
   Widget build(BuildContext context) {
-    if (!_seenOnboarding) {
-      return const OnboardingScreen();
-    }
-
-    if (!_seenDisclaimer) {
-      return const DisclaimerScreen();
-    }
-
-    return const MainShell();
-  }
-}
-
-class MyApp extends ConsumerWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final ThemeMode themeMode = ref.watch(themeModeProvider);
-
-    final isDark = themeMode == ThemeMode.dark ||
-        (themeMode == ThemeMode.system &&
-            View.of(context).platformDispatcher.platformBrightness ==
-                Brightness.dark);
-
     final systemUiOverlayStyle = SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
-      statusBarIconBrightness:
-          isDark ? Brightness.light : Brightness.dark,
-      statusBarBrightness:
-          isDark ? Brightness.dark : Brightness.light,
+      statusBarIconBrightness: Brightness.light,
+      statusBarBrightness: Brightness.dark,
       systemNavigationBarColor: Colors.transparent,
-      systemNavigationBarIconBrightness:
-          isDark ? Brightness.light : Brightness.dark,
+      systemNavigationBarIconBrightness: Brightness.light,
       systemNavigationBarContrastEnforced: false,
     );
 
@@ -281,67 +53,11 @@ class MyApp extends ConsumerWidget {
       value: systemUiOverlayStyle,
       child: MaterialApp.router(
         routerConfig: _router,
-        title: AppConfig.appTitle,
+        title: 'WardReady',
         debugShowCheckedModeBanner: false,
-        themeMode: themeMode,
-        theme: ThemeData.light(),
+        themeMode: ThemeMode.dark,
         darkTheme: darkTheme,
       ),
-    );
-  }
-}
-
-class AppEntrance extends ConsumerWidget {
-  const AppEntrance({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final authState = Supabase.instance.client.auth.onAuthStateChange;
-
-    return StreamBuilder<AuthState>(
-      stream: authState,
-      builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          return const Center(
-            child: Text('Something went wrong. Pull down to retry.'),
-          );
-        }
-
-        final session = snapshot.data?.session;
-
-        if (session != null) {
-          ref.read(sessionTimeoutProvider.notifier).resetTimer();
-        }
-
-        if (session == null) {
-          return const LoginScreen();
-        }
-
-        return const SubscriptionGuard();
-      },
-    );
-  }
-}
-
-class SubscriptionGuard extends ConsumerWidget {
-  const SubscriptionGuard({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final isSubscribed = ref.watch(isSubscribedProvider);
-
-    return isSubscribed.when(
-      data: (active) {
-        if (active) {
-          return const MainShell();
-        } else {
-          return const PaywallScreen();
-        }
-      },
-      loading: () =>
-          const Scaffold(body: Center(child: CircularProgressIndicator())),
-      error: (err, stack) =>
-          Scaffold(body: Center(child: Text("Sync Error: $err"))),
     );
   }
 }
