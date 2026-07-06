@@ -31,7 +31,12 @@ class AdminUser {
     Map<String, dynamic> sub = {};
 
     if (subsData is List && subsData.isNotEmpty) {
-      sub = subsData.first as Map<String, dynamic>;
+      final firstElement = subsData.first;
+      if (firstElement is Map<String, dynamic>) {
+        sub = firstElement;
+      } else {
+        debugPrint('Warning: subscriptions first element is not a Map');
+      }
     } else if (subsData is Map<String, dynamic>) {
       sub = subsData;
     }

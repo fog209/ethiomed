@@ -9,13 +9,13 @@ Every article must follow the WardReady schema with these exact fields:
 |-------|------|-------------|
 | `id` | TEXT | Unique identifier (lowercase, hyphenated slug) |
 | `title` | TEXT | Article title |
-| `category` | JSONB | Array like `["Internal Medicine", "Cardiology"]` |
+| `category` | TEXT | Parent category (e.g., 'Internal Medicine') |
+| `subcategory` | TEXT | Subcategory (e.g., 'Cardiology') |
 | `content` | JSONB | Object with 10 clinical sections |
 | `image_url` | TEXT | Optional - URL to image in Supabase Storage |
 | `video_url` | TEXT | Optional - YouTube or video link |
 | `is_high_yield` | BOOLEAN | Recommended: true if high-yield content |
-| `parent_category` | TEXT | Auto-derived but should match `category[0]` |
-| `subcategory` | TEXT | Should match `category[1]` |
+| `parent_category` | TEXT | Should match `category` value |
 | `updated_at` | TIMESTAMPTZ | REQUIRED for incremental sync |
 
 ### 2. Sample SQL INSERT Statement
@@ -24,15 +24,16 @@ INSERT INTO articles (
   id,
   title,
   category,
+  subcategory,
   content,
   is_high_yield,
   parent_category,
-  subcategory,
   updated_at
 ) VALUES (
   'wardready-acute-myocardial-infarction',
   'Acute Myocardial Infarction',
-  '["Internal Medicine", "Cardiology"]'::jsonb,
+  'Internal Medicine',
+  'Cardiology',
   '{
     "definition": "Myocardial infarction is myocardial necrosis due to ischemia.",
     "epidemiology": "Leading cause of death worldwide...",
@@ -47,7 +48,6 @@ INSERT INTO articles (
   }'::jsonb,
   true,
   'Internal Medicine',
-  'Cardiology',
   NOW()
 );
 ```
@@ -64,25 +64,68 @@ INSERT INTO articles (
 9. `ethiopianContext` - Local clinical pearls (REQUIRED)
 10. `mnemonics` - Memory aids (REQUIRED)
 
-### 4. Category Taxonomy Rules
+### 4. Category Taxonomy Rules (v2.0)
 
-#### Parent Categories (Top-Level)
-- Internal Medicine
-- Pediatrics
-- OB/GYN
-- Surgery
-- Psychiatry
-- Community Medicine
-- Emergency Medicine
-- Anesthesia
+#### ⚠️ IMPORTANT: OFFICIAL CATEGORY TAXONOMY (v2.0)
+Do NOT use retired categories (Cardiology, Neurology, Nephrology, etc.). 
+All clinical articles must map to one of the 14 Clinical or 5 Pre-Clinical categories below.
 
-#### Subcategories (Second-Level)
-- Cardiology (under Internal Medicine)
-- Pulmonology (under Internal Medicine)
-- Infectious Diseases (under Internal Medicine)
-- Neonatology (under Pediatrics)
-- Obstetrics (under OB/GYN)
-- etc.
+**Clinical (14):**
+1. Internal Medicine (Includes: Cardio, Neuro, Nephro, GI, Pulmo, Endo, Rheum)
+2. Surgery
+3. Pediatrics
+4. Obstetrics and Gynecology
+5. Psychiatry
+6. Ophthalmology
+7. ENT (Otolaryngology)
+8. Dermatology
+9. Radiology
+10. Emergency Medicine
+11. Orthopedics
+12. Anesthesiology
+13. Public Health and Epidemiology
+14. Forensic Medicine
+
+**Pre-Clinical (5):**
+15. Anatomy
+16. Physiology
+17. Biochemistry
+18. Microbiology
+19. Pathology
+
+**Example Valid Insert:**
+```sql
+INSERT INTO articles (
+  id,
+  title,
+  category,
+  subcategory,
+  content,
+  is_high_yield,
+  parent_category,
+  updated_at
+) VALUES (
+  'wardready-heart-failure',
+  'Heart Failure Management',
+  'Internal Medicine',
+  'Cardiology',
+  '{
+    "definition": "...",
+    "epidemiology": "...",
+    "etiology": "...",
+    "pathophysiology": "...",
+    "clinicalFeatures": "...",
+    "diagnosis": "...",
+    "treatment": "...",
+    "complications": "...",
+    "ethiopianContext": "...",
+    "mnemonics": "..."
+  }'::jsonb,
+  true,
+  'Internal Medicine',
+  NOW()
+);
+```
 
 ### 5. The `updated_at` Requirement
 **CRITICAL**: Every INSERT or UPDATE must include `updated_at` or the sync will not detect changes.
