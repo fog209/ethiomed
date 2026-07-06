@@ -1,0 +1,18 @@
+WardReady Release Notes
+=======================
+
+Release Build Command (REQUIRED):
+flutter build apk --release --obfuscate --split-debug-info=./debug-symbols
+
+This ensures:
+- Code obfuscation via R8/ProGuard
+- Debug symbols split out for crash reporting
+- Minified and shrunk resources
+
+Current Build Configuration:
+- compileSdk: 36
+- targetSdk: 35  
+- allowBackup: false (AndroidManifest.xml)
+- minifyEnabled: true (build.gradle.kts)
+- shrinkResources: true (build.gradle.kts)
+- Proguard: enabled with default and custom rules

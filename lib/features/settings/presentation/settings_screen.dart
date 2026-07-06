@@ -139,7 +139,7 @@ class SettingsScreen extends ConsumerWidget {
           );
         },
         loading: () => const SizedBox.shrink(),
-        error: (_, __) => const SizedBox.shrink(),
+        error: (e, s) => Center(child: Text('Error loading admin status')),
       ),
       Padding(
         padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),

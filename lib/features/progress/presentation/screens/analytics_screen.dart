@@ -160,10 +160,10 @@ class AnalyticsScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          studyTimeAsync.when(
-            loading: () => const SizedBox.shrink(),
-            error: (_, _) => const SizedBox.shrink(),
-            data: (totalSeconds) => Card(
+studyTimeAsync.when(
+             loading: () => const SizedBox.shrink(),
+             error: (error, _) => Center(child: Text('Error loading study time')),
+             data: (totalSeconds) => Card(
               color: theme.colorScheme.secondaryContainer,
               child: Padding(
                 padding: const EdgeInsets.all(16),
@@ -178,10 +178,10 @@ class AnalyticsScreen extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 16),
-          pastExamCoverageAsync.when(
-            loading: () => const SizedBox.shrink(),
-            error: (_, _) => const SizedBox.shrink(),
-            data: (coverage) => Card(
+pastExamCoverageAsync.when(
+             loading: () => const SizedBox.shrink(),
+             error: (error, _) => Center(child: Text('Error loading coverage')),
+             data: (coverage) => Card(
               color: theme.colorScheme.secondaryContainer.withValues(alpha: 0.7),
               child: Padding(
                 padding: const EdgeInsets.all(16),

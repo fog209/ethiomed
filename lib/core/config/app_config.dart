@@ -26,6 +26,12 @@ class AppConfig {
         {'name': 'Ophthalmology', 'icon': Icons.remove_red_eye},
         {'name': 'ENT', 'icon': Icons.hearing},
         {'name': 'Pharmacology', 'icon': Icons.medication},
+        {'name': 'Radiology', 'icon': Icons.medical_services},
+        {'name': 'Emergency Medicine', 'icon': Icons.emergency},
+        {'name': 'Orthopedics', 'icon': Icons.accessibility},
+        {'name': 'Anesthesiology', 'icon': Icons.airline_seat_flat},
+        {'name': 'Public Health and Epidemiology', 'icon': Icons.public},
+        {'name': 'Forensic Medicine', 'icon': Icons.gavel},
       ];
 
   static const List<Map<String, Object?>> preclinicalCategories =

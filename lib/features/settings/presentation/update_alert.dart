@@ -39,7 +39,7 @@ class UpdateAlert extends ConsumerWidget {
         );
       },
       loading: () => const SizedBox.shrink(),
-      error: (_, _) => const SizedBox.shrink(),
+      error: (e, s) => const SizedBox.shrink(), // Silent: update check is optional
     );
   }
 }

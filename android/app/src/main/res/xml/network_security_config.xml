@@ -19,15 +19,9 @@
   -->
   <domain-config cleartextTrafficPermitted="false">
     <domain includeSubdomains="true">kxcdzlyirdonkipcymvc.supabase.co</domain>
-
-    <pin-set
-      expiration="2028-01-01">
-      <!-- PRIMARY PIN: Supabase leaf certificate (replace with real value) -->
-      <pin digest="SHA-256">AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</pin>
-
-      <!-- BACKUP PIN: For certificate rotation support (replace with next cert) -->
-      <pin digest="SHA-256">BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB=</pin>
-    </pin-set>
+    
+    <!-- Certificate pinning disabled until real SHA-256 pins are configured -->
+    <!-- See: openssl s_client -connect kxcdzlyirdonkipcymvc.supabase.co:443 </dev/null 2>/dev/null | openssl x509 -pubkey -noout | openssl dgst -sha256 -binary | base64 -->
   </domain-config>
 
   <!-- Allow system default trust for any other domains not listed above -->

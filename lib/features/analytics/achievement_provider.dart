@@ -124,7 +124,7 @@ class TrophyCaseSection extends ConsumerWidget {
         );
       },
       loading: () => const SizedBox.shrink(),
-      error: (e, s) => const SizedBox.shrink(),
+      error: (e, s) => const Center(child: Text('Error loading badges')),
     );
   }
 }

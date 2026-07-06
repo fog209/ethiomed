@@ -268,11 +268,11 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                   loading: _buildStudyStatsLoadingRow,
                   error: (_, _) => _buildStudyStatsErrorRow(ref),
                 ),
-                todayPlanAsync.when(
-                  data: (plan) => _buildTodaysPlanCard(plan),
-                  loading: () => const SizedBox.shrink(),
-                  error: (_, _) => const SizedBox.shrink(),
-                ),
+todayPlanAsync.when(
+                   data: (plan) => _buildTodaysPlanCard(plan),
+                   loading: () => const SizedBox.shrink(),
+                   error: (e, _) => const SizedBox.shrink(), // Silent: plan is optional
+                 ),
               ]),
             ),
             if (streak.isLoading) _buildShimmerCategorySliverGrid(),
@@ -760,25 +760,31 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                       ),
                     ),
                     const SizedBox(height: 4),
-                    dueCardsAsync.when(
-                      data: (cards) => Text(
-                        cards.isEmpty
-                            ? 'Anki-style spaced repetition'
-                            : '${cards.length} card${cards.length != 1 ? 's' : ''} due',
-                        style: TextStyle(
-                          color: theme.colorScheme.onSecondaryContainer,
-                          fontSize: 14,
-                        ),
-                      ),
-                      loading: () => Text(
-                        'Loading...',
-                        style: TextStyle(
-                          color: theme.colorScheme.onSecondaryContainer,
-                          fontSize: 14,
-                        ),
-                      ),
-                      error: (_, _) => const SizedBox.shrink(),
-                    ),
+dueCardsAsync.when(
+                       data: (cards) => Text(
+                         cards.isEmpty
+                             ? 'Anki-style spaced repetition'
+                             : '${cards.length} card${cards.length != 1 ? 's' : ''} due',
+                         style: TextStyle(
+                           color: theme.colorScheme.onSecondaryContainer,
+                           fontSize: 14,
+                         ),
+                       ),
+                       loading: () => Text(
+                         'Loading...',
+                         style: TextStyle(
+                           color: theme.colorScheme.onSecondaryContainer,
+                           fontSize: 14,
+                         ),
+                       ),
+                       error: (_, _) => Text(
+                         'Flashcards unavailable',
+                         style: TextStyle(
+                           color: theme.colorScheme.onSecondaryContainer,
+                           fontSize: 14,
+                         ),
+                       ),
+                     ),
                   ],
                 ),
               ),
@@ -1011,7 +1017,10 @@ const SizedBox(width: 8),
         );
       },
       loading: () => const SizedBox.shrink(),
-      error: (_, _) => const SizedBox.shrink(),
+      error: (_, _) => const Text(
+        'Review mistakes unavailable',
+        style: TextStyle(color: Colors.grey, fontSize: 12),
+      ),
     );
   }
 
