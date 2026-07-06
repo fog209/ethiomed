@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../data/article_providers.dart';
+import '../features/articles/article_providers.dart';
 
 class CrossLinkText extends ConsumerWidget {
   const CrossLinkText({super.key, required this.text, this.style});

@@ -65,3 +65,12 @@ lib/app/env.dart
 
 # Root .env file with real credentials (never commit)
 .env
+
+# Android signing keys (never commit)
+android/key.properties
+**/*.jks
+**/*.keystore
+
+# Firebase config (contains sensitive project IDs)
+# Note: google-services.json is not currently used - Firebase is optional
+# android/app/google-services.json

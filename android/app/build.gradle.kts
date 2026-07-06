@@ -26,10 +26,6 @@ android {
 
     defaultConfig {
         applicationId = "com.wardready.app"
-        // LOCKED PER ARCHITECTURE PLAN - DO NOT RESET
-        // Must stay literal 21 for broad device compatibility.
-        // This has been auto-reset before during Gradle regeneration;
-        // verify after any dependency/plugin change.
         minSdk = flutter.minSdkVersion
         targetSdk = 35
         versionCode = 1
