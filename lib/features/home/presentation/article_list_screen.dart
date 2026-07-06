@@ -25,8 +25,9 @@ const Map<String, List<String>> subcategoriesByCategory = {
 
 class ArticleListScreen extends ConsumerStatefulWidget {
   final String category;
+  final String? parentCategory;
 
-  const ArticleListScreen({super.key, required this.category});
+  const ArticleListScreen({super.key, required this.category, this.parentCategory});
 
   @override
   ConsumerState<ArticleListScreen> createState() => _ArticleListScreenState();
@@ -48,7 +49,7 @@ class _ArticleListScreenState extends ConsumerState<ArticleListScreen> {
   @override
   void didUpdateWidget(covariant ArticleListScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.category != widget.category) {
+    if (oldWidget.category != widget.category || oldWidget.parentCategory != widget.parentCategory) {
       _resetPagination();
     }
   }
@@ -95,11 +96,13 @@ class _ArticleListScreenState extends ConsumerState<ArticleListScreen> {
 
     ref.read(articleIsLoadingMoreProvider.notifier).state = true;
     final selectedSubcategory = ref.read(subcategoryFilterProvider);
+    debugPrint('ArticleListScreen: Loading articles for category="${widget.category}", parentCategory="${widget.parentCategory}"');
     ref
         .read(articleListControllerProvider.notifier)
         .loadNextPage(
-          widget.category,
+          widget.parentCategory ?? widget.category,
           subcategory: selectedSubcategory,
+          parentCategory: widget.parentCategory,
           highYieldOnly: ref.read(highYieldModeProvider),
         );
   }
@@ -117,8 +120,9 @@ class _ArticleListScreenState extends ConsumerState<ArticleListScreen> {
     final totalArticlesAsync = ref.watch(
       articlesCountInCategoryAndSubcategoryProvider(
         ArticleCountQuery(
-          category: widget.category,
+          category: widget.parentCategory ?? widget.category,
           subcategory: selectedSubcategory,
+          parentCategory: widget.parentCategory,
         ),
       ),
     );
@@ -130,8 +134,9 @@ class _ArticleListScreenState extends ConsumerState<ArticleListScreen> {
       ArticlePageQuery(
         limit: _articlesPageSize,
         offset: offset,
-        category: widget.category,
+        category: widget.parentCategory ?? widget.category,
         subcategory: selectedSubcategory,
+        parentCategory: widget.parentCategory,
         requestId: requestId,
       ),
     );
@@ -200,7 +205,7 @@ class _ArticleListScreenState extends ConsumerState<ArticleListScreen> {
                   ),
                   child: Row(
                     children: [
-ChoiceChip(
+                      ChoiceChip(
                           label: const Text('All'),
                           selected: selectedSubcategory == null,
                           selectedColor: Theme.of(context).colorScheme.primary,
@@ -312,8 +317,9 @@ ChoiceChip(
             .read(
               articlesCountInCategoryAndSubcategoryProvider(
                 ArticleCountQuery(
-                  category: widget.category,
+                  category: widget.parentCategory ?? widget.category,
                   subcategory: ref.read(subcategoryFilterProvider),
+                  parentCategory: widget.parentCategory,
                 ),
               ),
             )

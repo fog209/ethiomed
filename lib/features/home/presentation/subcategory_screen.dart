@@ -218,45 +218,46 @@ class _SubcategoryScreenState extends ConsumerState<SubcategoryScreen> {
 // ── Sub-widgets ───────────────────────────────────────────────────────────────
 
 class _ViewAllTile extends StatelessWidget {
-  const _ViewAllTile({required this.parentCategory});
+   const _ViewAllTile({required this.parentCategory});
 
-  final String parentCategory;
+   final String parentCategory;
 
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-      color: theme.colorScheme.secondaryContainer,
-      child: ListTile(
-        leading: Icon(
-          Icons.list_alt,
-          color: theme.colorScheme.secondary,
-        ),
-        title: Text(
-          'View All Articles',
-          style: TextStyle(
-            color: theme.colorScheme.onSecondaryContainer,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        subtitle: Text(
-          'Browse every article under $parentCategory',
-          style: TextStyle(
-            color: theme.colorScheme.onSecondaryContainer.withValues(alpha: 0.8),
-          ),
-        ),
-        trailing: Icon(
-          Icons.chevron_right,
-          color: theme.colorScheme.onSecondaryContainer,
-        ),
-        onTap: () => context.push(
-          '/article-list/${Uri.encodeComponent(parentCategory)}',
-        ),
-      ),
-    );
-  }
-}
+   @override
+   Widget build(BuildContext context) {
+     final theme = Theme.of(context);
+     return Card(
+       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+       color: theme.colorScheme.secondaryContainer,
+       child: ListTile(
+         leading: Icon(
+           Icons.list_alt,
+           color: theme.colorScheme.secondary,
+         ),
+         title: Text(
+           'View All Articles',
+           style: TextStyle(
+             color: theme.colorScheme.onSecondaryContainer,
+             fontWeight: FontWeight.bold,
+           ),
+         ),
+         subtitle: Text(
+           'Browse every article under $parentCategory',
+           style: TextStyle(
+             color: theme.colorScheme.onSecondaryContainer.withValues(alpha: 0.8),
+           ),
+         ),
+         trailing: Icon(
+           Icons.chevron_right,
+           color: theme.colorScheme.onSecondaryContainer,
+         ),
+         onTap: () => context.push(
+           '/article-list/${Uri.encodeComponent(parentCategory)}'
+           '?parentCategory=${Uri.encodeComponent(parentCategory)}',
+         ),
+       ),
+     );
+   }
+ }
 
 class _SubcategoryTile extends StatelessWidget {
   const _SubcategoryTile({
