@@ -108,7 +108,27 @@ ScaffoldMessenger.of(context).showSnackBar(
           );
         },
         loading: () => _buildShimmerUserList(),
-        error: (error, stack) => Center(child: Text('Error: $error')),
+        error: (error, stack) => Center(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.error_outline, color: Colors.red, size: 48),
+                const SizedBox(height: 16),
+                const Text(
+                  "Couldn't load dashboard data",
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const Text("Please check your connection or admin permissions."),
+                TextButton(
+                  onPressed: () => ref.refresh(adminUsersProvider),
+                  child: const Text("Retry"),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

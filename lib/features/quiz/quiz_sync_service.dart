@@ -19,9 +19,11 @@ class QuizSyncService {
       debugPrint('Supabase error: ${e.message}');
       rethrow;
     } on SocketException {
-      debugPrint('Offline: serving from local cache');
+      debugPrint('Sync failed: No Internet Connection');
+      rethrow;
     } on DioException {
-      debugPrint('Offline: serving from local cache');
+      debugPrint('Sync failed: No Internet Connection');
+      rethrow;
     } catch (e) {
       debugPrint('Error: $e');
       rethrow;

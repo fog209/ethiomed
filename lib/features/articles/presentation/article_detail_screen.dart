@@ -196,7 +196,9 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
           )
           .get();
     } catch (error) {
-      debugPrint('Unable to record article view history: $error');
+      // AUDIT NOTE: This failure is intentionally silent.
+      // Failing to record history should not interrupt the user's reading experience.
+      debugPrint('View history background write failed: $error');
     }
   }
 

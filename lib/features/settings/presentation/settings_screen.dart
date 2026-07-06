@@ -156,15 +156,22 @@ class SettingsScreen extends ConsumerWidget {
         leading: Icon(Icons.share, color: primaryColor),
         title: const Text('Share WardReady'),
         onTap: () async {
-          final box = context.findRenderObject() as RenderBox?;
-          if (box != null) {
-            await Share.share(
-              _shareMessage,
-              sharePositionOrigin: box.localToGlobal(Offset.zero) & box.size,
-            );
-            if (!context.mounted) {
-              return;
+          try {
+            final box = context.findRenderObject() as RenderBox?;
+            if (box != null) {
+              await Share.share(
+                _shareMessage,
+                sharePositionOrigin: box.localToGlobal(Offset.zero) & box.size,
+              );
+              if (!context.mounted) {
+                return;
+              }
             }
+          } catch (e) {
+            if (!context.mounted) return;
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("Could not open share menu.")),
+            );
           }
         },
       ),
@@ -230,8 +237,15 @@ class SettingsScreen extends ConsumerWidget {
         leading: const Icon(Icons.logout, color: Colors.red),
         title: const Text('Logout', style: TextStyle(color: Colors.red)),
         onTap: () async {
-          await ref.read(authServiceProvider).signOut();
-          if (context.mounted) context.go('/login');
+          try {
+            await ref.read(authServiceProvider).signOut();
+            if (context.mounted) context.go('/login');
+          } catch (e) {
+            if (!context.mounted) return;
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("Failed to sign out. Please try again.")),
+            );
+          }
         },
       ),
       Padding(
