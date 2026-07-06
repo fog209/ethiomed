@@ -4,11 +4,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+
 import '../../../core/database/app_database.dart';
 import '../../../core/services/notification_service.dart';
 import '../../../core/theme/theme_mode_provider.dart';
-import '../../admin/data/admin_repository.dart';
 import '../../auth/data/auth_service.dart';
+import '../../../main.dart' show currentAdminProfileProvider;
 
 class SettingsScreen extends ConsumerWidget {
   static const String _adminTelegramUrl = 'https://t.me/WardReadyAdmin';
@@ -83,7 +84,7 @@ class SettingsScreen extends ConsumerWidget {
           }
         },
       ),
-SwitchListTile(
+      SwitchListTile(
         value: themeMode == ThemeMode.dark,
         title: const Text('Dark Mode'),
         subtitle: const Text('Use dark theme throughout the app'),
@@ -138,7 +139,7 @@ SwitchListTile(
           );
         },
         loading: () => const SizedBox.shrink(),
-        error: (_, _) => const SizedBox.shrink(),
+        error: (_, __) => const SizedBox.shrink(),
       ),
       Padding(
         padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
@@ -175,7 +176,23 @@ SwitchListTile(
       ListTile(
         leading: Icon(Icons.help_outline, color: primaryColor),
         title: const Text('Technical Support'),
+        subtitle: const Text('support@wardready.app'),
         onTap: _openAdminTelegram,
+      ),
+      ListTile(
+        leading: Icon(Icons.feedback, color: primaryColor),
+        title: const Text('Support & Feedback'),
+        subtitle: const Text('Send us your questions and suggestions'),
+        onTap: () async {
+          final emailLaunchUri = Uri(
+            scheme: 'mailto',
+            path: 'support@wardready.app',
+            query: 'subject=WardReady Feedback',
+          );
+          if (await canLaunchUrl(emailLaunchUri)) {
+            await launchUrl(emailLaunchUri);
+          }
+        },
       ),
       const Divider(),
       Padding(
@@ -194,6 +211,13 @@ SwitchListTile(
         title: const Text('Terms of Service'),
         trailing: const Icon(Icons.chevron_right),
         onTap: () => context.push('/terms'),
+      ),
+      ListTile(
+        leading: Icon(Icons.science, color: primaryColor),
+        title: const Text('Lab Reference'),
+        subtitle: const Text('Ethiopian lab values and drug doses'),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () => context.push('/lab-reference'),
       ),
       ListTile(
         leading: Icon(Icons.privacy_tip, color: primaryColor),

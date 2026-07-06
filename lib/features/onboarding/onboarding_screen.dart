@@ -13,8 +13,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
 
-  static const _hasSeenOnboardingKey = 'hasSeenOnboarding';
-
   @override
   void dispose() {
     _pageController.dispose();
@@ -23,7 +21,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   void _skipOrGetStarted() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_hasSeenOnboardingKey, true);
+    await prefs.setBool('hasSeenOnboarding', true);
 
     if (!mounted) return;
 
@@ -35,7 +33,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     }
   }
 
-  Widget _dots(ColorScheme colorScheme) {
+  Widget _dots() {
+    const activeColor = Color(0xFFFFB300);
+    const inactiveColor = Colors.grey;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: List.generate(3, (index) {
@@ -46,7 +47,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           width: isActive ? 24 : 8,
           height: isActive ? 8 : 8,
           decoration: BoxDecoration(
-            color: isActive ? colorScheme.secondary : Colors.grey,
+            color: isActive ? activeColor : inactiveColor,
             borderRadius: BorderRadius.circular(999),
           ),
         );
@@ -56,7 +57,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    const gold = Color(0xFFFFB300);
 
     return Scaffold(
       body: SafeArea(
@@ -73,28 +74,31 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             Column(
               children: [
                 const SizedBox(height: 16),
-                _dots(theme.colorScheme),
+                _dots(),
                 const SizedBox(height: 24),
 
                 Expanded(
                   child: PageView(
                     controller: _pageController,
                     onPageChanged: (i) => setState(() => _currentPage = i),
-                    children: [
+                    children: const [
                       _OnboardSlide(
                         icon: Icons.local_library,
+                        iconColor: gold,
                         title: '441 Clinical Articles',
                         description:
                             'Full references for every rotation — offline, always.',
                       ),
                       _OnboardSlide(
                         icon: Icons.flag,
+                        iconColor: gold,
                         title: 'Built for Ethiopian Medicine',
                         description:
                             'MoH protocols. EFDA drugs. Ethiopian clinical context.',
                       ),
                       _OnboardSlide(
                         icon: Icons.quiz,
+                        iconColor: gold,
                         title: 'EHPLE Exam Practice',
                         description:
                             '2,000+ MCQs with spaced repetition. Know what you know.',
@@ -110,8 +114,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     height: 56,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: theme.colorScheme.secondary,
-                        foregroundColor: theme.colorScheme.onSecondary,
+                        backgroundColor: gold,
+                        foregroundColor: const Color(0xFF1A237E),
                       ),
                       onPressed: () {
                         if (_currentPage < 2) {
@@ -144,30 +148,31 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
 class _OnboardSlide extends StatelessWidget {
   final IconData icon;
+  final Color iconColor;
   final String title;
   final String description;
 
   const _OnboardSlide({
     required this.icon,
+    required this.iconColor,
     required this.title,
     required this.description,
   });
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.all(24),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: 80, color: theme.colorScheme.secondary),
+          Icon(icon, size: 80, color: iconColor),
           const SizedBox(height: 24),
           Text(
             title,
             textAlign: TextAlign.center,
-            style: TextStyle(
-              color: theme.colorScheme.onSurface,
+            style: const TextStyle(
+              color: Color(0xFF1A237E),
               fontSize: 28,
               fontWeight: FontWeight.bold,
             ),
@@ -176,7 +181,7 @@ class _OnboardSlide extends StatelessWidget {
           Text(
             description,
             textAlign: TextAlign.center,
-            style: TextStyle(color: theme.colorScheme.onSurface, fontSize: 16, height: 1.6),
+            style: const TextStyle(fontSize: 16, height: 1.6),
           ),
         ],
       ),

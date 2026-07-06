@@ -2,10 +2,41 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/database/app_database.dart';
+import '../../../analytics/achievement_provider.dart';
 
 final totalStudyTimeProvider = FutureProvider<int>((ref) async {
   final db = ref.watch(databaseProvider);
   return db.getTotalStudySeconds();
+});
+
+typedef PastExamCoverage = ({
+  int totalPastExamQuestions,
+  int masteredPastExamQuestions,
+  double coveragePercent,
+});
+
+final pastExamCoverageProvider =
+    FutureProvider<PastExamCoverage>((ref) async {
+  final db = ref.watch(databaseProvider);
+
+  final rows = await db.customSelect('''
+    SELECT 
+      COUNT(*) as total_past_exam,
+      SUM(CASE WHEN COALESCE(last_quality, 0) >= 3 THEN 1 ELSE 0 END) as mastered
+    FROM quiz_table
+    WHERE source_type = 'past_exam'
+  ''').get();
+
+  if (rows.isEmpty) {
+    return (totalPastExamQuestions: 0, masteredPastExamQuestions: 0, coveragePercent: 0.0);
+  }
+
+  final row = rows.first;
+  final total = row.read<int>('total_past_exam');
+  final mastered = row.read<int?>('mastered') ?? 0;
+  final coverage = total > 0 ? (mastered / total) * 100 : 0.0;
+
+  return (totalPastExamQuestions: total, masteredPastExamQuestions: mastered, coveragePercent: coverage);
 });
 
 typedef SpecialtyAnalytics = ({
@@ -117,6 +148,7 @@ class AnalyticsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final analyticsAsync = ref.watch(specialtyAnalyticsProvider);
     final studyTimeAsync = ref.watch(totalStudyTimeProvider);
+    final pastExamCoverageAsync = ref.watch(pastExamCoverageProvider);
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -146,7 +178,48 @@ class AnalyticsScreen extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 16),
-          analyticsAsync.when(
+          pastExamCoverageAsync.when(
+            loading: () => const SizedBox.shrink(),
+            error: (_, _) => const SizedBox.shrink(),
+            data: (coverage) => Card(
+              color: theme.colorScheme.secondaryContainer.withValues(alpha: 0.7),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Past Exam Coverage',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: theme.colorScheme.onSecondaryContainer,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    LinearProgressIndicator(
+                      value: coverage.coveragePercent / 100,
+                      minHeight: 6,
+                      backgroundColor: theme.colorScheme.surface.withValues(alpha: 0.2),
+                      color: theme.colorScheme.secondary,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${coverage.coveragePercent.toStringAsFixed(0)}% (${coverage.masteredPastExamQuestions}/${coverage.totalPastExamQuestions} questions)',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+),
+           const SizedBox(height: 16),
+           const TrophyCaseSection(),
+           const SizedBox(height: 16),
+           analyticsAsync.when(
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (error, _) => Center(
               child: Text('Error loading analytics: $error'),
