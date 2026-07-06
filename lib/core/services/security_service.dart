@@ -14,6 +14,29 @@ import 'package:flutter/services.dart';
 ///
 /// IMPORTANT: The hash format is lowercase hex without colons/spaces.
 class SecurityService {
+  /// ============================================================================
+  /// RELEASE SIGNATURE HASH INSTRUCTIONS
+  /// ============================================================================
+  ///
+  /// To populate this hash for production:
+  ///
+  /// Step 1: Build the release APK
+  ///   flutter build apk --release --dart-define=SUPABASE_URL=... --dart-define=SUPABASE_ANON_KEY=...
+  ///
+  /// Step 2: Install the APK on a physical Android device (NOT emulator)
+  ///
+  /// Step 3: Open the app and navigate to "System Health" screen
+  ///   (Settings → System Health, or directly via /system-health route)
+  ///
+  /// Step 4: Look for the "APK Signature Hash" row - it displays the runtime
+  ///   SHA-256 hash of the signing certificate
+  ///
+  /// Step 5: Copy that hash and paste it below, replacing the placeholder value
+  ///
+  /// Step 6: Rebuild the APK with the correct hash embedded
+  ///
+  /// Note: The hash is 64 lowercase hex characters (SHA-256 = 256 bits = 32 bytes)
+  /// ============================================================================
   static const String expectedSignatureHash =
       'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
 
@@ -44,15 +67,34 @@ class SecurityService {
     }
   }
 
+  /// Returns the actual runtime signature hash for display in System Health screen.
+  /// Call after `initialize()` to get the computed hash value.
+  Future<String> getActualSignatureHash() async {
+    if (!kReleaseMode) {
+      return 'DEBUG MODE';
+    }
+    try {
+      final Uint8List? signature = await _channel.invokeMethod<Uint8List>(
+        'getSha256Signature',
+      );
+      if (signature == null) return 'UNAVAILABLE';
+      return _bytesToHex(signature).toLowerCase();
+    } catch (e) {
+      return 'ERROR: $e';
+    }
+  }
+
   /// Disables sync functionality if signature verification fails.
   bool isSyncAllowed = true;
 
   /// Called during app initialization to check signature.
-  Future<void> initialize() async {
+  /// Returns true if signature is valid (or debug mode), false if tampered.
+  Future<bool> initialize() async {
     isSyncAllowed = await verifyAppSignature();
     if (!isSyncAllowed) {
       debugPrint('WARNING: App signature verification failed - sync disabled');
     }
+    return isSyncAllowed;
   }
 
   static String _bytesToHex(Uint8List bytes) {

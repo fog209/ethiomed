@@ -5,6 +5,7 @@ import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/database/app_database.dart';
+import 'quiz_repository.dart';
 
 class ExamSessionState {
   const ExamSessionState({
@@ -16,11 +17,15 @@ class ExamSessionState {
     required this.isComplete,
     required this.isActive,
     this.examDuration = 200,
+    this.confidenceLevels = const {},
+    this.questionStartTimes = const {},
   });
 
   final List<QuizQuestionEntity> questions;
   final int currentIndex;
   final Map<int, String> answers;
+  final Map<int, int> confidenceLevels;
+  final Map<int, DateTime> questionStartTimes;
   final DateTime startTime;
   final Duration timeRemaining;
   final bool isComplete;
@@ -31,6 +36,8 @@ class ExamSessionState {
     List<QuizQuestionEntity>? questions,
     int? currentIndex,
     Map<int, String>? answers,
+    Map<int, int>? confidenceLevels,
+    Map<int, DateTime>? questionStartTimes,
     DateTime? startTime,
     Duration? timeRemaining,
     bool? isComplete,
@@ -41,6 +48,8 @@ class ExamSessionState {
       questions: questions ?? this.questions,
       currentIndex: currentIndex ?? this.currentIndex,
       answers: answers ?? this.answers,
+      confidenceLevels: confidenceLevels ?? this.confidenceLevels,
+      questionStartTimes: questionStartTimes ?? this.questionStartTimes,
       startTime: startTime ?? this.startTime,
       timeRemaining: timeRemaining ?? this.timeRemaining,
       isComplete: isComplete ?? this.isComplete,
@@ -58,19 +67,21 @@ final examSessionProvider =
 
 class ExamSessionNotifier extends StateNotifier<ExamSessionState> {
   ExamSessionNotifier({required AppDatabase database})
-    : _db = database,
-      super(
- ExamSessionState(
- questions: const [],
- currentIndex: 0,
- answers: const {},
- startTime: DateTime.fromMillisecondsSinceEpoch(0),
- timeRemaining: const Duration(minutes: 120),
- isComplete: false,
- isActive: false,
- examDuration: 200,
- ),
-      );
+      : _db = database,
+        super(
+  ExamSessionState(
+  questions: const [],
+  currentIndex: 0,
+  answers: const {},
+  confidenceLevels: const {},
+  questionStartTimes: const {},
+  startTime: DateTime.fromMillisecondsSinceEpoch(0),
+  timeRemaining: const Duration(minutes: 120),
+  isComplete: false,
+  isActive: false,
+  examDuration: 200,
+  ),
+        );
 
   final AppDatabase _db;
   Timer? _timer;
@@ -127,6 +138,9 @@ class ExamSessionNotifier extends StateNotifier<ExamSessionState> {
       repetitions: row.read<int?>('repetitions'),
       nextDueAt: row.read<DateTime?>('next_due_at'),
       easeFactor: row.read<double?>('ease_factor') ?? 2.5,
+      sourceType: row.read<String?>('source_type') ?? 'original',
+      examYear: row.read<int?>('exam_year'),
+      examSource: row.read<String?>('exam_source'),
     );
   }
 
@@ -138,7 +152,6 @@ class ExamSessionNotifier extends StateNotifier<ExamSessionState> {
     final selectedIds = <int>{};
     final selected = <QuizQuestionEntity>[];
 
-    // For each domain, select up to weight, taking all if fewer exist.
     for (final entry in domainWeights.entries) {
       final category = entry.key;
       final weight = entry.value;
@@ -150,12 +163,12 @@ class ExamSessionNotifier extends StateNotifier<ExamSessionState> {
       final rows = await _db
           .customSelect(
             '''
-SELECT *
-FROM quiz_table
-WHERE category = ?
-ORDER BY RANDOM()
-LIMIT ?
-''',
+            SELECT *
+            FROM quiz_table
+            WHERE category = ?
+            ORDER BY RANDOM()
+            LIMIT ?
+            ''',
             variables: [Variable<String>(category), Variable<int>(limit)],
           )
           .get();
@@ -170,7 +183,6 @@ LIMIT ?
       selected.addAll(domainQuestions);
     }
 
-    // Fill remainder to 200 with random questions excluding already-selected IDs.
     if (selectedIds.length < 200) {
       final remaining = 200 - selectedIds.length;
 
@@ -178,11 +190,11 @@ LIMIT ?
         final rows = await _db
             .customSelect(
               '''
-SELECT *
-FROM quiz_table
-ORDER BY RANDOM()
-LIMIT ?
-''',
+              SELECT *
+              FROM quiz_table
+              ORDER BY RANDOM()
+              LIMIT ?
+              ''',
               variables: [Variable<int>(remaining)],
             )
             .get();
@@ -196,12 +208,12 @@ LIMIT ?
         ];
 
         final rows = await _db.customSelect('''
-SELECT *
-FROM quiz_table
-WHERE id NOT IN ($placeholders)
-ORDER BY RANDOM()
-LIMIT ?
-''', variables: vars).get();
+              SELECT *
+              FROM quiz_table
+              WHERE id NOT IN ($placeholders)
+              ORDER BY RANDOM()
+              LIMIT ?
+              ''', variables: vars).get();
 
         selected.addAll(rows.map(_quizTableDataFromRow));
       }
@@ -236,6 +248,8 @@ LIMIT ?
       questions: limitedQuestions,
       currentIndex: 0,
       answers: const {},
+      confidenceLevels: const {},
+      questionStartTimes: const {},
       startTime: DateTime.now(),
       timeRemaining: totalTime,
       isComplete: false,
@@ -249,6 +263,86 @@ LIMIT ?
         (_) => tickTimer(),
       );
     }
+  }
+
+  Future<void> startCustomQuiz({
+    int questionCount = 50,
+    String? specialtyFilter,
+    QuestionScope scope = QuestionScope.all,
+    bool useTimer = true,
+  }) async {
+    _timer?.cancel();
+    _timer = null;
+
+    final questions = await _buildCustomQuestions(
+      specialtyFilter: specialtyFilter,
+      scope: scope,
+      questionCount: questionCount,
+    );
+
+    final totalTime = useTimer
+        ? Duration(seconds: questionCount * _secondsPerQuestion)
+        : Duration.zero;
+
+    state = ExamSessionState(
+      questions: questions,
+      currentIndex: 0,
+      answers: const {},
+      confidenceLevels: const {},
+      questionStartTimes: const {},
+      startTime: DateTime.now(),
+      timeRemaining: totalTime,
+      isComplete: false,
+      isActive: true,
+      examDuration: questionCount,
+    );
+
+    if (useTimer && questions.isNotEmpty) {
+      _timer = Timer.periodic(
+        const Duration(seconds: 1),
+        (_) => tickTimer(),
+      );
+    }
+  }
+
+  Future<List<QuizQuestionEntity>> _buildCustomQuestions({
+    required String? specialtyFilter,
+    required QuestionScope scope,
+    required int questionCount,
+  }) async {
+    final List<Variable> conditions = [];
+    String whereClause = '';
+
+    if (specialtyFilter != null && specialtyFilter.isNotEmpty) {
+      whereClause += ' AND category = ?';
+      conditions.add(Variable(specialtyFilter));
+    }
+
+    switch (scope) {
+      case QuestionScope.newOnly:
+        whereClause += ' AND last_attempted_at IS NULL';
+        break;
+      case QuestionScope.incorrectOnly:
+        whereClause += ' AND wrong_count > 0';
+        break;
+      case QuestionScope.all:
+        break;
+    }
+
+    final rows = await _db
+        .customSelect(
+          '''
+          SELECT *
+          FROM quiz_table
+          WHERE 1=1 $whereClause
+          ORDER BY RANDOM()
+          LIMIT ?
+          ''',
+          variables: [...conditions, Variable(questionCount)],
+        )
+        .get();
+
+    return rows.map(_quizTableDataFromRow).toList(growable: false);
   }
 
   int get correctAnswerCount {
@@ -284,6 +378,17 @@ LIMIT ?
       submitExam();
     }
   }
+
+  void setConfidence(int confidence) {
+    if (!_hasStarted) return;
+
+    final idx = state.currentIndex;
+    final confidenceLevels = Map<int, int>.from(state.confidenceLevels);
+    confidenceLevels[idx] = confidence;
+    state = state.copyWith(confidenceLevels: confidenceLevels);
+  }
+
+  int? getConfidence(int questionIndex) => state.confidenceLevels[questionIndex];
 
   void previousQuestion() {
     if (!_hasStarted) return;

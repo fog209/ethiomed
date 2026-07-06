@@ -206,29 +206,37 @@ class _ExamScreenState extends ConsumerState<ExamScreen> {
                 _buildOptionCard('C', currentQuestion.optionC, hasAnswered && currentAnswer == 'c'),
                 _buildOptionCard('D', currentQuestion.optionD, hasAnswered && currentAnswer == 'd'),
                 const SizedBox(height: 16),
-LinearProgressIndicator(
-                   value: (state.currentIndex + 1) / questions.length,
-                   backgroundColor: theme.colorScheme.surface.withValues(alpha: 0.2),
-                 ),
-                 const SizedBox(height: 16),
-                 if (state.currentIndex < questions.length - 1)
-                   ElevatedButton(
-                     onPressed: hasAnswered
-                         ? () {
-                             ref.read(examSessionProvider.notifier).nextQuestion();
-                           }
-                         : null,
-                     child: const Text('Next'),
-                   )
-else
-                    ElevatedButton(
-                      onPressed: hasAnswered
-                          ? () {
-                              ref.read(examSessionProvider.notifier).submitExam();
-                            }
-                          : null,
-                      child: const Text('Submit Exam'),
+                if (hasAnswered) ...[
+                  Text(
+                    'How confident were you?',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: theme.colorScheme.onSurface,
                     ),
+                  ),
+                  const SizedBox(height: 8),
+                  _ConfidenceRow(theme: theme),
+                  const SizedBox(height: 16),
+                ],
+                const SizedBox(height: 16),
+                if (state.currentIndex < questions.length - 1)
+                  ElevatedButton(
+                    onPressed: hasAnswered
+                        ? () {
+                            ref.read(examSessionProvider.notifier).nextQuestion();
+                          }
+                        : null,
+                    child: const Text('Next'),
+                  )
+                else
+                  ElevatedButton(
+                    onPressed: hasAnswered
+                        ? () {
+                            ref.read(examSessionProvider.notifier).submitExam();
+                          }
+                        : null,
+                    child: const Text('Submit Exam'),
+                  ),
               ],
             ),
           ),
@@ -242,13 +250,13 @@ else
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: InkWell(
-onTap: isSelected
-              ? null
-              : () {
-                  ref.read(examSessionProvider.notifier)
-                      .answerQuestion(label.toLowerCase());
-                },
-          borderRadius: BorderRadius.circular(12),
+        onTap: isSelected
+            ? null
+            : () {
+                ref.read(examSessionProvider.notifier)
+                    .answerQuestion(label.toLowerCase());
+              },
+        borderRadius: BorderRadius.circular(12),
         child: Container(
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
@@ -276,6 +284,50 @@ onTap: isSelected
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _ConfidenceRow extends ConsumerWidget {
+  const _ConfidenceRow({required this.theme});
+
+  final ThemeData theme;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final currentIdx = ref.watch(examSessionProvider.select((s) => s.currentIndex));
+    final currentConfidence = ref.watch(examSessionProvider.select((s) => s.confidenceLevels[currentIdx]));
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        _buildConfidenceChip(ref, 1, 'Guessing', currentConfidence),
+        _buildConfidenceChip(ref, 2, 'Somewhat Sure', currentConfidence),
+        _buildConfidenceChip(ref, 3, 'Confident', currentConfidence),
+      ],
+    );
+  }
+
+  Widget _buildConfidenceChip(WidgetRef ref, int level, String label, int? currentLevel) {
+    final isSelected = currentLevel == level;
+    return ChoiceChip(
+      label: Text(label),
+      selected: isSelected,
+      onSelected: isSelected
+          ? null
+          : (selected) {
+              if (selected) {
+                ref.read(examSessionProvider.notifier).setConfidence(level);
+              }
+            },
+      backgroundColor: theme.colorScheme.surfaceContainerHighest,
+      selectedColor: theme.colorScheme.secondary,
+      labelStyle: TextStyle(
+        color: isSelected
+            ? theme.colorScheme.onSecondary
+            : theme.colorScheme.onSurface,
+        fontSize: 12,
       ),
     );
   }

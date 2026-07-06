@@ -4,9 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shimmer/shimmer.dart';
-import '../../../core/widgets/empty_state.dart';
 
+import '../../../core/widgets/empty_state.dart';
 import '../../../core/config/app_config.dart';
+import '../../../features/content/data/content_flag_service.dart';
+import '../../../features/content/presentation/content_flag_widget.dart';
 import '../../../features/progress/streak_notifier.dart';
 import 'quiz_notifier.dart';
 import 'quiz_option.dart';
@@ -229,14 +231,19 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
           ),
           const SizedBox(height: 16),
 if (question.articleId.isNotEmpty)
-             SizedBox(
-               width: double.infinity,
-               child: OutlinedButton.icon(
-                 icon: const Icon(Icons.article_outlined, size: 18),
-                 label: const Text('Source Article'),
-                 onPressed: () => context.push('/article-detail', extra: {'id': question.articleId, 'section': question.testedField}),
-               ),
-             ),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  icon: const Icon(Icons.article_outlined, size: 18),
+                  label: const Text('Source Article'),
+                  onPressed: () => context.push('/article-detail', extra: {'id': question.articleId, 'section': question.testedField}),
+                ),
+              ),
+          const SizedBox(height: 12),
+          ContentFlagWidget(
+            contentType: ContentType.question,
+            contentId: question.remoteId,
+          ),
           _buildSm2Buttons(question, notifier),
         ],
       ],
@@ -457,6 +464,7 @@ if (question.articleId.isNotEmpty)
 
   Widget _buildQuestionHeader(QuizTableData question) {
     final theme = Theme.of(context);
+    final isPastExam = question.sourceType == 'past_exam';
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -488,6 +496,35 @@ if (question.articleId.isNotEmpty)
             color: theme.colorScheme.onSurface,
           ),
         ),
+        if (isPastExam) ...[
+          const SizedBox(height: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.secondary.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.history_edu,
+                  size: 14,
+                  color: theme.colorScheme.secondary,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  'Real Exam Question — ${question.examYear ?? ''}',
+                  style: TextStyle(
+                    color: theme.colorScheme.secondary,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ],
     );
   }
