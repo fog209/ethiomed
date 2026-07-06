@@ -1,21 +1,27 @@
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'firebase_options.dart';
 import 'app/env.dart';
 import 'app/main_shell.dart';
 import 'core/config/app_config.dart';
 import 'core/database/app_database.dart';
 import 'core/screens/database_recovery_screen.dart';
+import 'core/services/security_service.dart';
 import 'core/theme/app_theme.dart';
 import 'features/admin/presentation/admin_dashboard_screen.dart';
 import 'features/articles/presentation/article_detail_screen.dart';
 import 'features/articles/presentation/article_search_screen.dart';
 import 'features/auth/presentation/login_screen.dart';
 import 'features/auth/presentation/signup_screen.dart';
-import 'features/calculators/calculators_screen.dart';
+import 'features/calculators/calculators_screen.dart' show CalculatorsScreen, CalculatorDetailScreen;
 import 'features/cases/presentation/case_screen.dart';
 import 'features/flashcards/presentation/flashcard_review_screen.dart';
 import 'features/home/presentation/article_list_screen.dart';
@@ -28,15 +34,38 @@ import 'features/quiz/presentation/exam_results_screen.dart';
 import 'features/quiz/presentation/exam_screen.dart';
 import 'features/quiz/presentation/exam_setup_screen.dart';
 import 'features/quiz/quiz_screen.dart';
+import 'features/settings/presentation/lab_reference_screen.dart';
 import 'features/settings/presentation/system_health_screen.dart';
 import 'features/subscription/presentation/paywall_screen.dart';
+import 'features/subscription/data/subscription_repository.dart';
 
-/// Whether Supabase was successfully initialized. False → offline/mock mode.
 bool _supabaseInitialized = false;
+bool _tampered = false;
 
-final supabaseInitializedProvider = Provider<bool>(
-  (ref) => _supabaseInitialized,
-);
+final supabaseInitializedProvider = Provider<bool>((ref) => _supabaseInitialized);
+final isTamperedProvider = Provider<bool>((ref) => _tampered);
+
+final onboardingCompleteProvider = FutureProvider<bool>((ref) async {
+  final prefs = await SharedPreferences.getInstance();
+  return prefs.getBool('hasSeenOnboarding') ?? false;
+});
+
+final currentAdminProfileProvider = FutureProvider<bool>((ref) async {
+  if (!_supabaseInitialized) return false;
+  final user = Supabase.instance.client.auth.currentUser;
+  if (user == null) return false;
+  try {
+    final profile = await Supabase.instance.client
+        .from('profiles')
+        .select('is_admin')
+        .eq('id', user.id)
+        .maybeSingle();
+    return profile?['is_admin'] == true;
+  } catch (e) {
+    debugPrint('Admin profile check failed: $e');
+    return false;
+  }
+});
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -46,11 +75,27 @@ void main() async {
     overlays: const [SystemUiOverlay.top, SystemUiOverlay.bottom],
   );
 
-  // 1. Load environment variables (.env → --dart-define → offline fallback).
+  if (kReleaseMode) {
+    final security = SecurityService();
+    _tampered = !await security.initialize();
+  }
+
   await Env.load();
 
-  // 2. Attempt Supabase init; fall back gracefully if credentials are absent
-  //    or the network is unavailable at startup.
+  bool firebaseInitialized = false;
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    firebaseInitialized = true;
+  } catch (e) {
+    debugPrint('Firebase init skipped: $e');
+  }
+
+  if (firebaseInitialized) {
+    FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterError;
+  }
+
   if (Env.isConfigured) {
     try {
       await Supabase.initialize(
@@ -70,9 +115,87 @@ void main() async {
   runApp(const ProviderScope(child: WardReadyApp()));
 }
 
+bool _isAtLoginOrSubscription(String location) {
+  return location == '/login' || location == '/subscription' || location == '/signup';
+}
+
 final _router = GoRouter(
-  initialLocation: '/onboarding',
+  initialLocation: '/',
+  redirect: (context, state) async {
+    final prefs = await SharedPreferences.getInstance();
+    final hasSeenOnboarding = prefs.getBool('hasSeenOnboarding') ?? false;
+    final hasSeenDisclaimer = prefs.getBool('hasSeenDisclaimer') ?? false;
+    final location = state.uri.path;
+
+    if (!hasSeenOnboarding) {
+      return '/onboarding';
+    }
+    if (!hasSeenDisclaimer && location != '/disclaimer') {
+      return '/disclaimer';
+    }
+
+    // Skip auth/subscription gating if Supabase not configured (offline/mock mode)
+    if (!_supabaseInitialized) {
+      debugPrint('Router: Supabase not initialized — skipping auth/subscription gate.');
+      if (location == '') {
+        return '/home';
+      }
+      return null;
+    }
+
+    // Check if user is authenticated
+    final session = Supabase.instance.client.auth.currentSession;
+    if (session == null) {
+      debugPrint('Router: No auth session — redirecting to /login.');
+      if (!_isAtLoginOrSubscription(location)) {
+        return '/login';
+      }
+      return null;
+    }
+
+    // Check subscription status - admin check first, using direct Supabase calls
+    try {
+      final user = Supabase.instance.client.auth.currentUser;
+      if (user != null) {
+        final profile = await Supabase.instance.client
+            .from('profiles')
+            .select('is_admin')
+            .eq('id', user.id)
+            .maybeSingle()
+            .catchError((_) => null);
+        if (profile?['is_admin'] == true) {
+          debugPrint('Router: User is admin — allowing access.');
+          if (location == '') {
+            return '/home';
+          }
+          return null;
+        }
+      }
+
+      // Check subscription
+      final repo = SubscriptionRepository(Supabase.instance.client);
+      final isSubscribed = await repo.checkSubscriptionStatus();
+      if (!isSubscribed) {
+        debugPrint('Router: Subscription invalid — redirecting to /subscription.');
+        if (!_isAtLoginOrSubscription(location)) {
+          return '/subscription';
+        }
+        return null;
+      }
+    } catch (e) {
+      debugPrint('Router: Subscription check error — allowing access: $e');
+    }
+
+    if (location == '') {
+      return '/home';
+    }
+    return null;
+  },
   routes: <RouteBase>[
+    GoRoute(
+      path: '/',
+      builder: (context, state) => const OnboardingScreen(),
+    ),
     GoRoute(
       path: '/onboarding',
       builder: (context, state) => const OnboardingScreen(),
@@ -106,10 +229,14 @@ final _router = GoRouter(
       builder: (context, state) {
         final encoded = state.pathParameters['category'] ?? '';
         final category = Uri.decodeComponent(encoded);
-        return ArticleListScreen(category: category);
+        final parentCategory = state.uri.queryParameters['parentCategory'];
+        return ArticleListScreen(
+          category: category,
+          parentCategory: parentCategory != null ? Uri.decodeComponent(parentCategory) : null,
+        );
       },
     ),
-GoRoute(
+    GoRoute(
       path: '/article-detail',
       builder: (context, state) {
         final extra = state.extra;
@@ -188,6 +315,10 @@ GoRoute(
       builder: (context, state) => const SystemHealthScreen(),
     ),
     GoRoute(
+      path: '/lab-reference',
+      builder: (context, state) => const LabReferenceScreen(),
+    ),
+    GoRoute(
       path: '/db-recovery',
       builder: (context, state) => const DatabaseRecoveryScreen(),
     ),
@@ -199,6 +330,10 @@ class WardReadyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (kReleaseMode && _tampered) {
+      return const _SecurityAlertScreen();
+    }
+
     final systemUiOverlayStyle = SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
       statusBarIconBrightness: Brightness.light,
@@ -216,6 +351,50 @@ class WardReadyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         themeMode: ThemeMode.dark,
         darkTheme: darkTheme,
+      ),
+    );
+  }
+}
+
+class _SecurityAlertScreen extends StatelessWidget {
+  const _SecurityAlertScreen();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return MaterialApp(
+      home: Scaffold(
+        backgroundColor: theme.colorScheme.surface,
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(32),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.warning_amber_rounded,
+                  color: theme.colorScheme.error,
+                  size: 64,
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  'Security Alert',
+                  style: theme.textTheme.headlineMedium?.copyWith(
+                    color: theme.colorScheme.onSurface,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'This version of WardReady has been tampered with or re-signed. Please install the official version to protect your data.',
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    color: theme.colorScheme.onSurface,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
