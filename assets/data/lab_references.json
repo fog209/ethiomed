@@ -1,0 +1,63 @@
+{
+  "cbc": {
+    "title": "Complete Blood Count (CBC)",
+    "values": [
+      {"name": "Hemoglobin (Male)", "normal": "13-17 g/dL", "units": "g/dL"},
+      {"name": "Hemoglobin (Female)", "normal": "12-15 g/dL", "units": "g/dL"},
+      {"name": "Hematocrit (Male)", "normal": "40-50%", "units": "%"},
+      {"name": "Hematocrit (Female)", "normal": "35-45%", "units": "%"},
+      {"name": "White Blood Cell Count", "normal": "4,500-11,000", "units": "/μL"},
+      {"name": "Platelets", "normal": "150,000-450,000", "units": "/μL"}
+    ]
+  },
+  "electrolytes": {
+    "title": "Electrolytes",
+    "values": [
+      {"name": "Sodium", "normal": "135-145", "units": "mmol/L"},
+      {"name": "Potassium", "normal": "3.5-5.0", "units": "mmol/L"},
+      {"name": "Chloride", "normal": "96-106", "units": "mmol/L"},
+      {"name": "CO2 (HCO3)", "normal": "22-28", "units": "mmol/L"},
+      {"name": "Glucose (Fasting)", "normal": "70-100", "units": "mg/dL"}
+    ]
+  },
+  "lfts": {
+    "title": "Liver Function Tests",
+    "values": [
+      {"name": "ALT (SGPT)", "normal": "7-56", "units": "U/L"},
+      {"name": "AST (SGOT)", "normal": "10-40", "units": "U/L"},
+      {"name": "ALP", "normal": "44-147", "units": "U/L"},
+      {"name": "Total Bilirubin", "normal": "0.1-1.2", "units": "mg/dL"},
+      {"name": "Albumin", "normal": "3.5-5.0", "units": "g/dL"},
+      {"name": "PT/INR", "normal": "10-13 sec / 0.8-1.2", "units": ""}
+    ]
+  },
+  "renal": {
+    "title": "Renal Function",
+    "values": [
+      {"name": "BUN", "normal": "7-20", "units": "mg/dL"},
+      {"name": "Creatinine (Male)", "normal": "0.8-1.3", "units": "mg/dL"},
+      {"name": "Creatinine (Female)", "normal": "0.6-1.1", "units": "mg/dL"},
+      {"name": "BUN/Creatinine Ratio", "normal": "10-20", "units": ""},
+      {"name": "eGFR", "normal": ">60", "units": "mL/min/1.73m²"}
+    ]
+  },
+  "cardiac": {
+    "title": "Cardiac Markers",
+    "values": [
+      {"name": "Troponin I", "normal": "<0.04", "units": "ng/mL"},
+      {"name": "CK-MB", "normal": "<5", "units": "ng/mL"},
+      {"name": "BNP", "normal": "<100", "units": "pg/mL (Ethiopia adjusted)"}
+    ]
+  },
+  "common_drugs": {
+    "title": "Essential EFDA Drugs",
+    "drugs": [
+      {"name": "Paracetamol", "dose": "500-1000 mg Q6H PRN"},
+      {"name": "Amoxicillin", "dose": "500 mg TID (adult)"},
+      {"name": "Ciprofloxacin", "dose": "500 mg BID (uncomplicated)"},
+      {"name": "Artemether-Lumefantrine", "dose": "4 tablets BID x 3 days (adult)"},
+      {"name": "INH (TB)", "dose": "300 mg daily x 6 months"},
+      {"name": "ARV (TLE)", "dose": "Once daily (standard regimen)"}
+    ]
+  }
+}

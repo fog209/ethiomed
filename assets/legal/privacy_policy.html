@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy - WardReady</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; line-height: 1.6; }
+    h1 { color: #1A237E; }
+    h2 { color: #F9A825; margin-top: 24px; }
+    .disclaimer { background: #fff3cd; padding: 16px; border-left: 4px solid #ffc107; margin: 20px 0; }
+  </style>
+</head>
+<body>
+  <h1>Privacy Policy</h1>
+  <p><strong>Last Updated:</strong> July 5, 2026</p>
+
+  <h2>1. Information We Collect</h2>
+  <p>WardReady collects the following data for educational purposes:</p>
+  <ul>
+    <li><strong>Study Progress:</strong> Number of articles read, quiz scores, and session timestamps (stored locally on device)</li>
+    <li><strong>Quiz Performance:</strong> Question ratings and review history for spaced repetition scheduling</li>
+    <li><strong>Device Information:</strong> App version and crash reports (via Firebase Crashlytics when enabled)</li>
+  </ul>
+
+  <h2>2. How We Use Your Information</h2>
+  <ul>
+    <li>To track your study progress and maintain your personal learning streak</li>
+    <li>To personalize quiz scheduling using the SM-2 spaced repetition algorithm</li>
+    <li>To identify weak knowledge areas and prioritize review</li>
+    <li>To improve app stability through anonymous crash reporting</li>
+  </ul>
+
+  <h2>3. Data Security</h2>
+  <p>All user data is stored locally on your device using encrypted storage. When you sync content from Supabase:</p>
+  <ul>
+    <li>The anon role has <strong>SELECT-only access</strong> to content tables</li>
+    <li>No personal user data is transmitted to Supabase</li>
+    <li>Row Level Security policies prevent data modification by the anon role</li>
+  </ul>
+
+  <h2>4. Firebase Crashlytics</h2>
+  <p>When Firebase is configured, we collect anonymous crash reports to fix bugs:</p>
+  <ul>
+    <li>Stack traces and device state at time of crash</li>
+    <li>No personal health information is included in crash reports</li>
+    <li>You can disable crash reporting by uninstalling the app</li>
+  </ul>
+
+  <h2>5. Medical Disclaimer</h2>
+  <div class="disclaimer">
+    <strong>IMPORTANT - MEDICAL CONTENT DISCLAIMER:</strong>
+    <p>The medical content in WardReady is for educational purposes only. It is designed to help Ethiopian health science students prepare for the EHPLE examination. This app does NOT provide medical advice, diagnosis, or treatment recommendations. Always consult qualified healthcare professionals for patient care decisions. The content authors and developers assume no liability for clinical decisions made based on this material.</p>
+  </div>
+
+  <h2>6. Contact</h2>
+  <p>For privacy questions, contact: support@wardready.app</p>
+
+  <h2>7. Changes to This Policy</h2>
+  <p>We may update this policy. Check back for revisions.</p>
+</body>
+</html>
