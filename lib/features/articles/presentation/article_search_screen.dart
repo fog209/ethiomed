@@ -136,10 +136,12 @@ class _ArticleSearchScreenState extends ConsumerState<ArticleSearchScreen> {
                     color: isSelected
                         ? theme.colorScheme.onSecondary
                         : theme.colorScheme.onSurface,
+                    fontWeight: isSelected ? FontWeight.bold : null,
                   ),
                 ),
                 selected: isSelected,
                 selectedColor: secondary,
+                backgroundColor: theme.colorScheme.surfaceContainerHighest,
                 side: isSelected
                     ? BorderSide(color: secondary)
                     : BorderSide(color: outline),

@@ -5,7 +5,6 @@ import 'dart:io';
 import 'package:drift/drift.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-// ignore: depend_on_referenced_packages
 import 'package:sqlite3/sqlite3.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -399,21 +398,23 @@ final articlesCountInCategoryProvider = FutureProvider.family<int, String>((
 });
 
 class ArticleCountQuery {
-  const ArticleCountQuery({required this.category, this.subcategory});
+  const ArticleCountQuery({required this.category, this.subcategory, this.parentCategory});
 
   final String category;
   final String? subcategory;
+  final String? parentCategory;
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         other is ArticleCountQuery &&
             other.category == category &&
-            other.subcategory == subcategory;
+            other.subcategory == subcategory &&
+            other.parentCategory == parentCategory;
   }
 
   @override
-  int get hashCode => Object.hash(category, subcategory);
+  int get hashCode => Object.hash(category, subcategory, parentCategory);
 }
 
 final articlesCountInCategoryAndSubcategoryProvider =
@@ -424,6 +425,7 @@ final articlesCountInCategoryAndSubcategoryProvider =
           .countArticlesInCategory(
             query.category,
             subcategory: query.subcategory,
+            parentCategory: query.parentCategory,
             highYieldOnly: highYieldOnly,
           );
     });
@@ -434,6 +436,7 @@ class ArticleListState {
   const ArticleListState({
     this.category,
     this.subcategory,
+    this.parentCategory,
     this.articles = const <ArticleLocal>[],
     this.currentPage = 0,
     this.hasMore = true,
@@ -444,6 +447,7 @@ class ArticleListState {
 
   final String? category;
   final String? subcategory;
+  final String? parentCategory;
   final List<ArticleLocal> articles;
   final int currentPage;
   final bool hasMore;
@@ -458,6 +462,7 @@ class ArticleListState {
   ArticleListState copyWith({
     String? category,
     String? subcategory,
+    String? parentCategory,
     List<ArticleLocal>? articles,
     int? currentPage,
     bool? hasMore,
@@ -468,6 +473,7 @@ class ArticleListState {
     return ArticleListState(
       category: category ?? this.category,
       subcategory: subcategory ?? this.subcategory,
+      parentCategory: parentCategory ?? this.parentCategory,
       articles: articles ?? this.articles,
       currentPage: currentPage ?? this.currentPage,
       hasMore: hasMore ?? this.hasMore,
@@ -497,6 +503,7 @@ class ArticleListController extends StateNotifier<ArticleListState> {
   Future<void> loadNextPage(
     String category, {
     String? subcategory,
+    String? parentCategory,
     bool highYieldOnly = false,
   }) async {
     if (state.isLoadingMore || !state.hasMore) {
@@ -504,12 +511,13 @@ class ArticleListController extends StateNotifier<ArticleListState> {
     }
 
     final shouldReset =
-        state.category != category || state.subcategory != subcategory;
+        state.category != category || state.subcategory != subcategory || state.parentCategory != parentCategory;
     final nextPage = shouldReset ? 1 : state.currentPage + 1;
 
     state = state.copyWith(
       category: category,
       subcategory: subcategory,
+      parentCategory: parentCategory,
       currentPage: nextPage,
       isLoadingMore: true,
       status: ArticleListStatus.loading,
@@ -523,15 +531,18 @@ class ArticleListController extends StateNotifier<ArticleListState> {
         category: category,
         page: nextPage,
         subcategory: subcategory,
+        parentCategory: parentCategory,
         highYieldOnly: highYieldOnly,
       );
+
+      debugPrint('ArticleListController: Loaded ${pageArticles.length} articles for category="$category", parentCategory="$parentCategory"');
 
       if (!mounted) {
         return;
       }
 
       final previousArticles =
-          state.category == category && state.subcategory == subcategory
+          state.category == category && state.subcategory == subcategory && state.parentCategory == parentCategory
           ? state.articles
           : const <ArticleLocal>[];
       final combinedArticles = <ArticleLocal>[

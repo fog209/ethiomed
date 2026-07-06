@@ -23,6 +23,8 @@ class Article {
   String get parentCategory => category.isNotEmpty ? category.first : 'General';
   String get subcategory => category.length > 1 ? category[1] : '';
 
+  String get categoryName => category.length > 1 ? category[1] : parentCategory;
+
   int get estimatedReadMinutes {
     final content = this.content;
     if (content == null) return 1;

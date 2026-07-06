@@ -42,6 +42,7 @@ class ArticleSearchState {
   const ArticleSearchState({
     this.query = '',
     this.category,
+    this.subcategory,
     this.results = const <ArticleLocal>[],
     this.count = 0,
     this.totalCount = 0,
@@ -51,6 +52,7 @@ class ArticleSearchState {
 
   final String query;
   final String? category;
+  final String? subcategory;
   final List<ArticleLocal> results;
   final int count;
   final int totalCount;
@@ -68,6 +70,7 @@ class ArticleSearchState {
   ArticleSearchState copyWith({
     String? query,
     String? category,
+    String? subcategory,
     List<ArticleLocal>? results,
     int? count,
     int? totalCount,
@@ -77,6 +80,7 @@ class ArticleSearchState {
     return ArticleSearchState(
       query: query ?? this.query,
       category: category ?? this.category,
+      subcategory: subcategory ?? this.subcategory,
       results: results ?? this.results,
       count: count ?? this.count,
       totalCount: totalCount ?? this.totalCount,
@@ -110,7 +114,7 @@ class ArticleSearchController extends StateNotifier<ArticleSearchState> {
     });
   }
 
-  void updateCategory(String? category) {
+void updateCategory(String? category, {String? subcategory}) {
     _debounceTimer?.cancel();
     state = state.copyWith(
       category: category,
@@ -119,10 +123,10 @@ class ArticleSearchController extends StateNotifier<ArticleSearchState> {
       status: ArticleSearchStatus.loading,
       message: null,
     );
-    unawaited(_runSearch(state.query, category));
+    unawaited(_runSearch(state.query, category, subcategory: subcategory));
   }
 
-  Future<void> _runSearch(String query, String? category) async {
+  Future<void> _runSearch(String query, String? category, {String? subcategory}) async {
     try {
       final searchResult = await _repository.searchArticles(
         query: query,
@@ -181,6 +185,7 @@ class ArticleSearchRepository {
   Future<SearchResult> searchArticles({
     required String query,
     required String? category,
+    String? subcategory,
   }) async {
     await _ensureSearchIndex();
 
@@ -189,28 +194,29 @@ class ArticleSearchRepository {
     late int totalCount;
 
     if (trimmedQuery.isEmpty) {
-      final searchResult = await _searchAllArticles();
+      final searchResult = await _searchAllArticles(
+        category: category,
+        subcategory: subcategory,
+      );
       matches = searchResult.results;
       totalCount = searchResult.totalCount;
     } else {
-      final searchResult = await _searchWithMatch(trimmedQuery);
+      final searchResult = await _searchWithMatch(
+        trimmedQuery,
+        category: category,
+        subcategory: subcategory,
+      );
       matches = searchResult.results;
       totalCount = searchResult.totalCount;
     }
 
-    final filtered = category == null
-        ? matches
-        : matches
-              .where((article) => article.category == category)
-              .toList(growable: false);
-
     return SearchResult(
-      results: filtered.take(maxSearchResult).toList(growable: false),
+      results: matches.take(maxSearchResult).toList(growable: false),
       totalCount: totalCount,
     );
   }
 
-  Future<SearchResult> _searchAllArticles() async {
+  Future<SearchResult> _searchAllArticles({String? category, String? subcategory}) async {
     try {
       final countFuture = _db
           .customSelect('SELECT COUNT(*) AS count FROM articles')
@@ -219,7 +225,7 @@ class ArticleSearchRepository {
       final rowsFuture = _db
           .customSelect(
             'SELECT * FROM articles LIMIT ?',
-            variables: <Variable>[Variable<int>(maxSearchResult)],
+            variables: <Variable>[Variable<int>(maxSearchResult * 2)],
           )
           .get();
 
@@ -235,12 +241,13 @@ class ArticleSearchRepository {
           ? countRows.first.read<int>('count')
           : 0;
 
-      final mapped = rows
+      var mapped = rows
           .map(
             (row) => ArticleLocal(
               id: row.read<String>('id'),
               title: row.read<String>('title'),
               category: row.read<String?>('category'),
+              subcategory: row.read<String?>('subcategory'),
               content: row.read<String?>('content'),
               imageUrl: row.read<String?>('image_url'),
               videoUrl: row.read<String?>('video_url'),
@@ -248,22 +255,31 @@ class ArticleSearchRepository {
             ),
           )
           .toList(growable: false);
+
+      if (category != null || subcategory != null) {
+        mapped = mapped
+            .where((a) =>
+                (category == null || a.category == category) &&
+                (subcategory == null || a.subcategory == subcategory))
+            .toList(growable: false);
+      }
 
       return SearchResult(results: mapped, totalCount: totalCount);
     } catch (_) {
       final rows = await _db
           .customSelect(
             'SELECT * FROM articles LIMIT ?',
-            variables: <Variable>[Variable<int>(maxSearchResult)],
+            variables: <Variable>[Variable<int>(maxSearchResult * 2)],
           )
           .get();
 
-      final mapped = rows
+      var mapped = rows
           .map(
             (row) => ArticleLocal(
               id: row.read<String>('id'),
               title: row.read<String>('title'),
               category: row.read<String?>('category'),
+              subcategory: row.read<String?>('subcategory'),
               content: row.read<String?>('content'),
               imageUrl: row.read<String?>('image_url'),
               videoUrl: row.read<String?>('video_url'),
@@ -272,26 +288,34 @@ class ArticleSearchRepository {
           )
           .toList(growable: false);
 
+      if (category != null || subcategory != null) {
+        mapped = mapped
+            .where((a) =>
+                (category == null || a.category == category) &&
+                (subcategory == null || a.subcategory == subcategory))
+            .toList(growable: false);
+      }
+
       return SearchResult(results: mapped, totalCount: mapped.length);
     }
   }
 
-  Future<SearchResult> _searchWithMatch(String query) async {
+  Future<SearchResult> _searchWithMatch(String query, {String? category, String? subcategory}) async {
     try {
-      return await _searchWithMatchOnce(query);
+      return await _searchWithMatchOnce(query, category: category, subcategory: subcategory);
     } on SqliteException catch (e) {
       if (_isFts5Corruption(e)) {
         await _rebuildSearchIndex();
-        return _searchWithMatchOnce(query);
+        return _searchWithMatchOnce(query, category: category, subcategory: subcategory);
       }
       rethrow;
     }
   }
 
-  Future<SearchResult> _searchWithMatchOnce(String query) async {
+  Future<SearchResult> _searchWithMatchOnce(String query, {String? category, String? subcategory}) async {
     final ftsQuery = _toFtsQuery(query);
     if (ftsQuery.isEmpty) {
-      return _searchAllArticles();
+      return _searchAllArticles(category: category, subcategory: subcategory);
     }
 
     try {
@@ -313,6 +337,7 @@ class ArticleSearchRepository {
         a.id,
         a.title,
         a.category,
+        a.subcategory,
         a.content,
         a.image_url AS imageUrl,
         a.video_url AS videoUrl,
@@ -325,7 +350,7 @@ class ArticleSearchRepository {
       ''',
             variables: <Variable>[
               Variable<String>(ftsQuery),
-              Variable<int>(maxSearchResult),
+              Variable<int>(maxSearchResult * 2),
             ],
           )
           .get();
@@ -338,16 +363,13 @@ class ArticleSearchRepository {
       final countRows = both[0] as List<QueryRow>;
       final rows = both[1] as List<QueryRow>;
 
-      final totalCount = countRows.isNotEmpty
-          ? countRows.first.read<int>('count')
-          : 0;
-
-      final results = rows
+      var results = rows
           .map(
             (row) => ArticleLocal(
               id: row.read<String>('id'),
               title: row.read<String>('title'),
               category: row.read<String?>('category'),
+              subcategory: row.read<String?>('subcategory'),
               content: row.read<String?>('content'),
               imageUrl: row.read<String?>('imageUrl'),
               videoUrl: row.read<String?>('videoUrl'),
@@ -356,7 +378,21 @@ class ArticleSearchRepository {
           )
           .toList(growable: false);
 
-      return SearchResult(results: results, totalCount: totalCount);
+      if (category != null || subcategory != null) {
+        results = results
+            .where((a) =>
+                (category == null || a.category == category) &&
+                (subcategory == null || a.subcategory == subcategory))
+            .toList(growable: false);
+      }
+
+      results = _applyFuzzyScore(query, results);
+
+      final totalCount = countRows.isNotEmpty
+          ? countRows.first.read<int>('count')
+          : results.length;
+
+      return SearchResult(results: results.take(maxSearchResult).toList(growable: false), totalCount: totalCount);
     } catch (_) {
       final rows = await _db
           .customSelect(
@@ -365,6 +401,7 @@ class ArticleSearchRepository {
         a.id,
         a.title,
         a.category,
+        a.subcategory,
         a.content,
         a.image_url AS imageUrl,
         a.video_url AS videoUrl,
@@ -377,17 +414,18 @@ class ArticleSearchRepository {
       ''',
             variables: <Variable>[
               Variable<String>(ftsQuery),
-              Variable<int>(maxSearchResult),
+              Variable<int>(maxSearchResult * 2),
             ],
           )
           .get();
 
-      final results = rows
+      var results = rows
           .map(
             (row) => ArticleLocal(
               id: row.read<String>('id'),
               title: row.read<String>('title'),
               category: row.read<String?>('category'),
+              subcategory: row.read<String?>('subcategory'),
               content: row.read<String?>('content'),
               imageUrl: row.read<String?>('imageUrl'),
               videoUrl: row.read<String?>('videoUrl'),
@@ -396,7 +434,17 @@ class ArticleSearchRepository {
           )
           .toList(growable: false);
 
-      return SearchResult(results: results, totalCount: results.length);
+      if (category != null || subcategory != null) {
+        results = results
+            .where((a) =>
+                (category == null || a.category == category) &&
+                (subcategory == null || a.subcategory == subcategory))
+            .toList(growable: false);
+      }
+
+      results = _applyFuzzyScore(query, results);
+
+      return SearchResult(results: results.take(maxSearchResult).toList(growable: false), totalCount: results.length);
     }
   }
 
@@ -491,7 +539,52 @@ class ArticleSearchRepository {
       return 0;
     }
 
-    return rows.first.read<int>('count');
+return rows.first.read<int>('count');
+    }
+
+  int _levenshteinDistance(String a, String b) {
+    if (a.isEmpty) return b.length;
+    if (b.isEmpty) return a.length;
+
+    final matrix = List.generate(
+      a.length + 1,
+      (i) => List.filled(b.length + 1, 0),
+    );
+
+    for (var i = 0; i <= a.length; i++) {
+      matrix[i][0] = i;
+    }
+    for (var j = 0; j <= b.length; j++) {
+      matrix[0][j] = j;
+    }
+
+    for (var i = 1; i <= a.length; i++) {
+      for (var j = 1; j <= b.length; j++) {
+        final cost = a[i - 1] == b[j - 1] ? 0 : 1;
+        matrix[i][j] = [
+          matrix[i - 1][j] + 1,
+          matrix[i][j - 1] + 1,
+          matrix[i - 1][j - 1] + cost,
+        ].reduce((a, b) => a < b ? a : b);
+      }
+    }
+
+    return matrix[a.length][b.length];
+  }
+
+  List<ArticleLocal> _applyFuzzyScore(String query, List<ArticleLocal> results) {
+    final queryLower = query.toLowerCase();
+    final scored = results.map((article) {
+      final titleLower = article.title.toLowerCase();
+      final distance = _levenshteinDistance(titleLower, queryLower);
+      final startsWithMatch = titleLower.startsWith(queryLower) ? -1000 : 0;
+      final containsMatch = titleLower.contains(queryLower) ? -500 : 0;
+      final score = distance + startsWithMatch + containsMatch;
+      return (article: article, score: score);
+    }).toList();
+
+    scored.sort((a, b) => a.score.compareTo(b.score));
+    return scored.map((e) => e.article).toList();
   }
 
   String _toFtsQuery(String query) {

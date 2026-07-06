@@ -6,11 +6,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/database/app_database.dart';
 import '../../../features/articles/article_providers.dart';
+import '../../../features/articles/presentation/article_comments_section.dart';
+import '../../../features/content/data/content_flag_service.dart';
+import '../../../features/content/presentation/content_flag_widget.dart';
 import '../../../features/progress/category_progress_provider.dart';
 import '../../../features/progress/streak_notifier.dart';
 import '../../../features/quiz/weakness_service.dart';
@@ -119,10 +123,13 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
     if (article != null && widget.articleId == null) {
       final db = ref.read(databaseProvider);
       final category = article.category;
+      final articleId = article.id;
       Future.microtask(() async {
         if (!mounted) {
           return;
         }
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('last_viewed_article', articleId);
         await ref.read(streakNotifierProvider.notifier).recordArticleRead();
         if (!mounted) {
           return;
@@ -263,6 +270,7 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
                 ref.read(highYieldModeProvider.notifier).state = !highYieldMode,
             icon: Icon(highYieldMode ? Icons.bolt : Icons.bolt_outlined),
           ),
+          ContentFlagWidget(contentType: ContentType.article, contentId: article.id),
           StreamBuilder<List<Bookmark>>(
             stream: (db.select(
               db.bookmarks,
@@ -333,28 +341,66 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
                   ),
-                ),
-              ),
-            ),
+),
+             ),
+           ),
 
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            margin: const EdgeInsets.only(bottom: 20),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.secondary.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Text(
-              article.category?.toUpperCase() ?? 'GENERAL',
-              style: TextStyle(
-                color: theme.colorScheme.onSecondary,
-                fontWeight: FontWeight.bold,
-                fontSize: 12,
-              ),
-            ),
-          ),
+           Container(
+             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+             margin: const EdgeInsets.only(bottom: 20),
+             decoration: BoxDecoration(
+               color: theme.colorScheme.secondary.withValues(alpha: 0.2),
+               borderRadius: BorderRadius.circular(20),
+             ),
+             child: Text(
+               article.category?.toUpperCase() ?? 'GENERAL',
+               style: TextStyle(
+                 color: theme.colorScheme.onSecondary,
+                 fontWeight: FontWeight.bold,
+                 fontSize: 12,
+               ),
+             ),
+           ),
 
-          ..._buildClinicalSections(sections, weakFields, highYieldMode),
+           Builder(builder: (innerContext) {
+             final pastExamInfoAsync = ref.watch(pastExamArticleInfoProvider(article.id));
+             final pastExamInfo = pastExamInfoAsync.valueOrNull;
+if (pastExamInfo == null || !pastExamInfo.isHighYield) {
+                return const SizedBox.shrink();
+              }
+              final sortedYears = [...pastExamInfo.years]
+                ..sort((a, b) => b.compareTo(a));
+              final yearsText = sortedYears.join(', ');
+              return Container(
+               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+               margin: const EdgeInsets.only(bottom: 16),
+               decoration: BoxDecoration(
+                 color: theme.colorScheme.secondaryContainer,
+                 borderRadius: BorderRadius.circular(20),
+               ),
+               child: Row(
+                 mainAxisSize: MainAxisSize.min,
+                 children: [
+                   Icon(
+                     Icons.local_fire_department,
+                     size: 16,
+                     color: theme.colorScheme.onSecondaryContainer,
+                   ),
+                   const SizedBox(width: 6),
+                   Text(
+                     'Tested in ${pastExamInfo.examCount} Past Exams ($yearsText)',
+                     style: TextStyle(
+                       color: theme.colorScheme.onSecondaryContainer,
+                       fontWeight: FontWeight.bold,
+                       fontSize: 12,
+                     ),
+                   ),
+                 ],
+               ),
+             );
+           }),
+
+           ..._buildClinicalSections(sections, weakFields, highYieldMode),
 
           const SizedBox(height: 20),
 
@@ -379,6 +425,8 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
             ),
 
           const SizedBox(height: 40),
+
+          DiscussionSection(articleId: article.id),
         ],
       ),
     );
@@ -563,20 +611,23 @@ static const _clinicalSections = <String, _ClinicalSectionConfig>{
           }
 
 final isWeak =
-              weakFields.contains(key) &&
-              !_nonHighlightableWeakFields.contains(key);
-          final isHighYield = highYieldMode && _highYieldFields.contains(key);
-          final isMediumYield =
-              highYieldMode && _mediumYieldFields.contains(key);
-          final initiallyExpanded = highYieldMode && isHighYield
-              ? true
-              : isMediumYield
-                  ? false
-                  : config.initiallyExpanded;
+               weakFields.contains(key) &&
+               !_nonHighlightableWeakFields.contains(key);
+           final isHighYield = highYieldMode && _highYieldFields.contains(key);
+           final isMediumYield =
+               highYieldMode && _mediumYieldFields.contains(key);
+           final isEthiopianContext = key == 'ethiopianContext';
+           final initiallyExpanded = highYieldMode && isHighYield
+               ? true
+               : isMediumYield
+                   ? false
+                   : config.initiallyExpanded;
 final theme = Theme.of(context);
            final borderColor = isHighYield ? theme.colorScheme.secondary : theme.colorScheme.outline;
-          final borderWidth = isHighYield ? 3.0 : 4.0;
-          final backgroundColor = theme.colorScheme.surfaceContainerHighest;
+           final borderWidth = isHighYield ? 3.0 : 4.0;
+           final backgroundColor = isEthiopianContext
+               ? const Color(0xFFE8F5E9)
+               : theme.colorScheme.surfaceContainerHighest;
 
           return _buildMarkdownExpansionTile(
             title: config.title,
@@ -719,20 +770,20 @@ Widget _buildMarkdownExpansionTile({
           style: TextStyle(color: theme.colorScheme.onSurface),
         ),
         children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: MarkdownBody(
-              data: linkedContent,
-              styleSheet: MarkdownStyleSheet.fromTheme(theme).copyWith(
-                p: TextStyle(color: theme.colorScheme.onSurface),
-                a: TextStyle(
-                  color: theme.colorScheme.primary,
-                  decoration: TextDecoration.none,
+Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: MarkdownBody(
+                data: linkedContent,
+                styleSheet: MarkdownStyleSheet.fromTheme(theme).copyWith(
+                  p: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                  a: TextStyle(
+                    color: theme.colorScheme.primary,
+                    decoration: TextDecoration.underline,
+                  ),
                 ),
+                onTapLink: _handleLinkTap,
               ),
-              onTapLink: _handleLinkTap,
             ),
-          ),
         ],
       ),
     );
@@ -748,13 +799,58 @@ Widget _buildMarkdownExpansionTile({
       );
       result = result.replaceAll(pattern, '[$term](search:$term)');
     }
+    result = result.replaceAllMapped(
+      RegExp(r'\[\[([^\]]+)\]\]'),
+      (match) => '[${match[1]}](internal:article:${match[1]!})',
+    );
     return result;
   }
 
   void _handleLinkTap(String text, String? href, String title) {
-    if (href != null && href.startsWith('search:')) {
-      final query = href.substring(7);
-      context.push('/search', extra: query);
+    if (href != null) {
+      if (href.startsWith('search:')) {
+        final query = href.substring(7);
+        context.push('/search', extra: query);
+      } else if (href.startsWith('internal:article:')) {
+        final term = href.substring(16);
+        _handleInternalLink(term);
+      } else if (href.startsWith('internal:')) {
+        final term = href.substring(9);
+        _handleInternalLink(term);
+      }
+    }
+  }
+
+  void _handleInternalLink(String term) async {
+    final db = ref.read(databaseProvider);
+    final articles = await db.customSelect(
+      'SELECT id FROM articles WHERE title LIKE ?',
+      variables: [Variable('%$term%')],
+    ).get();
+    if (!mounted) return;
+    ArticleLocal? matchedArticle;
+    for (final row in articles) {
+      final id = row.read<String>('id');
+      final article = await (db.select(db.articles)
+            ..where((t) => t.id.equals(id)))
+          .get();
+      if (article.isNotEmpty &&
+          article.first.title.toLowerCase() == term.toLowerCase()) {
+        matchedArticle = article.first;
+        break;
+      }
+    }
+    if (!mounted) return;
+    if (matchedArticle != null) {
+      context.push('/article-detail/${Uri.encodeComponent(matchedArticle.id)}');
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Content coming soon! This topic is currently being curated.',
+          ),
+        ),
+      );
     }
   }
 
