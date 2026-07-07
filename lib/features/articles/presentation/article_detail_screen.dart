@@ -779,7 +779,7 @@ Padding(
                 styleSheet: MarkdownStyleSheet.fromTheme(theme).copyWith(
                   p: TextStyle(color: Theme.of(context).colorScheme.onSurface),
                   a: TextStyle(
-                    color: theme.colorScheme.primary,
+                    color: theme.colorScheme.secondary,
                     decoration: TextDecoration.underline,
                   ),
                 ),
