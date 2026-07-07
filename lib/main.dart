@@ -142,33 +142,33 @@ final _router = GoRouter(
     final hasSeenDisclaimer = prefs.getBool('hasSeenDisclaimer') ?? false;
     final location = state.uri.path;
 
+    // 1. Onboarding gate (only fires if not already on the onboarding route)
     if (!hasSeenOnboarding) {
-      return '/onboarding';
-    }
-    if (!hasSeenDisclaimer && location != '/disclaimer') {
-      return '/disclaimer';
-    }
-
-    // Skip auth/subscription gating if Supabase not configured (offline/mock mode)
-    if (!_supabaseInitialized) {
-      debugPrint('Router: Supabase not initialized — skipping auth/subscription gate.');
-      if (location == '') {
-        return '/home';
-      }
+      if (location != '/onboarding') return '/onboarding';
       return null;
     }
 
-    // Check if user is authenticated
+    // 2. Disclaimer gate (only fires if not already on the disclaimer route)
+    if (!hasSeenDisclaimer) {
+      if (location != '/disclaimer') return '/disclaimer';
+      return null;
+    }
+
+    // 3. Auth gate — skipped entirely when Supabase is not configured
+    if (!_supabaseInitialized) {
+      debugPrint('Router: Supabase not initialized — skipping auth/subscription gate.');
+      if (location == '/') return '/home';
+      return null;
+    }
+
     final session = Supabase.instance.client.auth.currentSession;
     if (session == null) {
       debugPrint('Router: No auth session — redirecting to /login.');
-      if (!_isAtLoginOrSubscription(location)) {
-        return '/login';
-      }
+      if (!_isAtLoginOrSubscription(location)) return '/login';
       return null;
     }
 
-    // Check subscription status - admin check first, using direct Supabase calls
+    // 4. Subscription / admin gate (only for authenticated users)
     try {
       final user = Supabase.instance.client.auth.currentUser;
       if (user != null) {
@@ -178,32 +178,27 @@ final _router = GoRouter(
             .eq('id', user.id)
             .maybeSingle()
             .catchError((_) => null);
-        if (profile?['is_admin'] == true) {
-          debugPrint('Router: User is admin — allowing access.');
-          if (location == '') {
-            return '/home';
-          }
+        final isAdmin = profile?['is_admin'] == true;
+
+        if (isAdmin) {
+          if (location == '/') return '/home';
           return null;
         }
-      }
 
-      // Check subscription
-      final repo = SubscriptionRepository(Supabase.instance.client);
-      final isSubscribed = await repo.checkSubscriptionStatus();
-      if (!isSubscribed) {
-        debugPrint('Router: Subscription invalid — redirecting to /subscription.');
-        if (!_isAtLoginOrSubscription(location)) {
-          return '/subscription';
+        final repo = SubscriptionRepository(Supabase.instance.client);
+        final isSubscribed = await repo.checkSubscriptionStatus();
+        if (!isSubscribed) {
+          debugPrint('Router: Subscription invalid — redirecting to /subscription.');
+          if (location != '/subscription') return '/subscription';
+          return null;
         }
-        return null;
       }
     } catch (e) {
       debugPrint('Router: Subscription check error — allowing access: $e');
     }
 
-    if (location == '') {
-      return '/home';
-    }
+    // 5. All checks passed — allow through (or land on Home from the root path)
+    if (location == '/') return '/home';
     return null;
   },
   routes: <RouteBase>[
