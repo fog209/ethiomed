@@ -37,7 +37,6 @@ import 'features/quiz/presentation/exam_results_screen.dart';
 import 'features/quiz/presentation/exam_screen.dart';
 import 'features/quiz/presentation/exam_setup_screen.dart';
 import 'features/quiz/quiz_screen.dart';
-import 'features/settings/presentation/lab_reference_screen.dart';
 import 'features/settings/presentation/system_health_screen.dart';
 import 'features/subscription/presentation/paywall_screen.dart';
 import 'features/subscription/data/subscription_repository.dart';
@@ -323,10 +322,6 @@ final _router = GoRouter(
     GoRoute(
       path: '/system-health',
       builder: (context, state) => const SystemHealthScreen(),
-    ),
-    GoRoute(
-      path: '/lab-reference',
-      builder: (context, state) => const LabReferenceScreen(),
     ),
     GoRoute(
       path: '/db-recovery',

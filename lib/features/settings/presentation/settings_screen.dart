@@ -205,16 +205,7 @@ class SettingsScreen extends ConsumerWidget {
         leading: Icon(Icons.feedback, color: primaryColor),
         title: const Text('Support & Feedback'),
         subtitle: const Text('Send us your questions and suggestions'),
-        onTap: () async {
-          final emailLaunchUri = Uri(
-            scheme: 'mailto',
-            path: 'support@wardready.app',
-            query: 'subject=WardReady Feedback',
-          );
-          if (await canLaunchUrl(emailLaunchUri)) {
-            await launchUrl(emailLaunchUri);
-          }
-        },
+        onTap: () => throw Exception('Manual Test Crash'),
       ),
       const Divider(),
       Padding(
@@ -233,13 +224,6 @@ class SettingsScreen extends ConsumerWidget {
         title: const Text('Terms of Service'),
         trailing: const Icon(Icons.chevron_right),
         onTap: () => context.push('/terms'),
-      ),
-      ListTile(
-        leading: Icon(Icons.science, color: primaryColor),
-        title: const Text('Lab Reference'),
-        subtitle: const Text('Ethiopian lab values and drug doses'),
-        trailing: const Icon(Icons.chevron_right),
-        onTap: () => context.push('/lab-reference'),
       ),
       ListTile(
         leading: Icon(Icons.privacy_tip, color: primaryColor),
