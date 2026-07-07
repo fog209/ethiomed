@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
@@ -9,6 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'firebase_options.dart';
+import 'core/services/error_logger_service.dart';
 import 'app/env.dart';
 import 'app/main_shell.dart';
 import 'core/config/app_config.dart';
@@ -92,9 +95,21 @@ void main() async {
     debugPrint('Firebase init skipped: $e');
   }
 
-  if (firebaseInitialized) {
-    FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterError;
-  }
+  FlutterError.onError = (details) {
+    FlutterError.presentError(details);
+    ErrorLoggerService.logError(details.exceptionAsString(), details.stack);
+    if (firebaseInitialized) {
+      FirebaseCrashlytics.instance.recordFlutterError(details);
+    }
+  };
+
+  PlatformDispatcher.instance.onError = (error, stack) {
+    ErrorLoggerService.logError(error.toString(), stack);
+    if (firebaseInitialized) {
+      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+    }
+    return true;
+  };
 
   if (Env.isConfigured) {
     try {

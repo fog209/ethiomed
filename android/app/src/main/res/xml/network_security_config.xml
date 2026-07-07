@@ -1,27 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <network-security-config>
+  <!-- Certificate pinning is intentionally disabled pending public launch per owner decision. -->
   <!--
-    Certificate pinning for Supabase API domain.
-
-    How to extract SHA-256 pins:
-      1) Determine the host from your Supabase project URL
-      2) Fetch the leaf certificate(s) and compute SHA-256 SPKI pins:
-           openssl s_client -connect <your-project>.supabase.co:443 -servername <your-project>.supabase.co </dev/null 2>/dev/null | openssl x509 -pubkey -noout | openssl dgst -sha256 -binary | base64
-      3) Paste the resulting base64 into the pins below (sha256="...")
-
-    To update when certificate expires:
-      - The expiration date below should be set 6-12 months before expected rotation
-      - Add backup pins for certificate rotation support
-      - Never use placeholder pins in production!
-
-    WARNING: Incorrect pins will break the app in production.
-             Test release builds thoroughly before distribution.
+    NOTE: Placeholder pins were removed to restore connectivity.
+    To enable pinning in the future:
+      1) Extract SHA-256 SPKI pin:
+         openssl s_client -connect kxcdzlyirdonkipcymvc.supabase.co:443 </dev/null 2>/dev/null | openssl x509 -pubkey -noout | openssl dgst -sha256 -binary | base64
+      2) Add <pin-set> with real pin value
   -->
   <domain-config cleartextTrafficPermitted="false">
     <domain includeSubdomains="true">kxcdzlyirdonkipcymvc.supabase.co</domain>
-    
+
     <!-- Certificate pinning disabled until real SHA-256 pins are configured -->
-    <!-- See: openssl s_client -connect kxcdzlyirdonkipcymvc.supabase.co:443 </dev/null 2>/dev/null | openssl x509 -pubkey -noout | openssl dgst -sha256 -binary | base64 -->
+    <!-- See: openssl command above -->
   </domain-config>
 
   <!-- Allow system default trust for any other domains not listed above -->

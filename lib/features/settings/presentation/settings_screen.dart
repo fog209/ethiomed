@@ -1,11 +1,13 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/database/app_database.dart';
+import '../../../core/services/error_logger_service.dart';
 import '../../../core/services/notification_service.dart';
 import '../../../core/theme/theme_mode_provider.dart';
 import '../../auth/data/auth_service.dart';
@@ -185,6 +187,19 @@ class SettingsScreen extends ConsumerWidget {
         title: const Text('Technical Support'),
         subtitle: const Text('support@wardready.app'),
         onTap: _openAdminTelegram,
+      ),
+      ListTile(
+        leading: Icon(Icons.copy_all, color: primaryColor),
+        title: const Text('Copy Debug Logs'),
+        subtitle: const Text('Use this if technical support asks for logs'),
+        onTap: () async {
+          final logs = await ErrorLoggerService.getLogs();
+          await Clipboard.setData(ClipboardData(text: logs));
+          if (!context.mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Logs copied to clipboard!')),
+          );
+        },
       ),
       ListTile(
         leading: Icon(Icons.feedback, color: primaryColor),

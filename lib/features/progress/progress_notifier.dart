@@ -107,7 +107,7 @@ class ProgressNotifier extends AsyncNotifier<ProgressData> {
   Future<List<CategoryProgressRow>> _loadCategoryProgress() async {
     // Single GROUP BY query replaces the previous 1 + 2N pattern (list
     // categories, then countArticlesByCategory + countReadArticlesByCategory
-    // per category). At 19 categories that was ~39 round-trips; now 2 (the
+    // per category). At 25 categories that was ~51 round-trips; now 2 (the
     // batch query plus the view_history ensure inside it).
     final rows = await _db.loadCategoryProgressBatch();
     return [

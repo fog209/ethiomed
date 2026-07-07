@@ -827,7 +827,7 @@ if (!columnNames.contains('quiz_correct')) {
   ///
   /// Replaces the previous 1 + 2N pattern (one query to list categories, then
   /// [countArticlesByCategory] + [countReadArticlesByCategory] per category)
-  /// with one GROUP BY query. At 19 categories this collapses ~39 round-trips
+  /// with one GROUP BY query. At 25 categories this collapses 51 round-trips
   /// into 2 (this query plus the [view_history] ensure).
   ///
   /// Semantics match the per-category methods exactly:
