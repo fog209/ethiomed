@@ -37,8 +37,11 @@ class SecurityService {
   ///
   /// Note: The hash is 64 lowercase hex characters (SHA-256 = 256 bits = 32 bytes)
   /// ============================================================================
+  // This MUST be updated any time the release keystore changes — verify with
+  // 'keytool -list -v -keystore android/app/upload-keystore.jks' and update this
+  // value, or every legitimate release will incorrectly trigger the tamper alert.
   static const String expectedSignatureHash =
-      'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+      'ccca78d472e4ddb6a7aded6496db383a9ef98cb0640378d63b2c4bef8b8d7cca';
 
   static const MethodChannel _channel =
       MethodChannel('com.wardready.app/security');
