@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <network-security-config>
-  <!-- Certificate pinning is intentionally disabled pending public launch per owner decision. -->
   <!--
-    NOTE: Placeholder pins were removed to restore connectivity.
-    To enable pinning in the future:
-      1) Extract SHA-256 SPKI pin:
-         openssl s_client -connect kxcdzlyirdonkipcymvc.supabase.co:443 </dev/null 2>/dev/null | openssl x509 -pubkey -noout | openssl dgst -sha256 -binary | base64
-      2) Add <pin-set> with real pin value
+    Certificate pinning for the WardReady Supabase project (sideload distribution).
+    Pins verified live against kxcdzlyirdonkipcymvc.supabase.co (TLS 1.3, GTS/WE1 chain).
+    - Primary pin: leaf cert (CN=supabase.co, issuer WE1).
+    - Backup pin: WE1 intermediate — survives routine Google leaf rotation.
+    - expiration: if both pins ever rotate and no APK update ships in time, the
+      device falls back to system trust automatically (prevents permanent lockout).
+    Do NOT pin the broad "supabase.co" domain (would trust all projects).
   -->
   <domain-config cleartextTrafficPermitted="false">
     <domain includeSubdomains="true">kxcdzlyirdonkipcymvc.supabase.co</domain>
-
-    <!-- Certificate pinning disabled until real SHA-256 pins are configured -->
-    <!-- See: openssl command above -->
+    <pin-set expiration="2026-10-06">
+      <pin digest="SHA-256">ZcJbApTb7wyllleAjHw2vYAskqdT+DhMY9aPDFwAtf4=</pin>
+      <pin digest="SHA-256">kIdp6NNEd8wsugYyyIYFsi1ylMCED3hZbSR8ZFsa/A4=</pin>
+    </pin-set>
   </domain-config>
-
-  <!-- Allow system default trust for any other domains not listed above -->
 </network-security-config>
