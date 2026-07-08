@@ -97,7 +97,7 @@ void main() {
         'title': 'Test',
         'category': null,
       });
-      expect(article.category, equals('General'));
+      expect(article.category, equals(['General']));
     });
 
     test('category as empty string defaults to General', () {
@@ -106,7 +106,7 @@ void main() {
         'title': 'Test',
         'category': '',
       });
-      expect(article.category, equals('General'));
+      expect(article.category, equals(['General']));
     });
 
     test('category as whitespace defaults to General', () {
@@ -115,7 +115,7 @@ void main() {
         'title': 'Test',
         'category': '   ',
       });
-      expect(article.category, equals('General'));
+      expect(article.category, equals(['General']));
     });
   });
 }

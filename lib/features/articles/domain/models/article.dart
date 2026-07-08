@@ -63,9 +63,9 @@ class Article {
     List<String> categoryPath = [];
     if (rawCategory is List) {
       categoryPath = rawCategory.map((e) => e.toString()).toList();
-    } else if (rawCategory is String && rawCategory.isNotEmpty) {
+    } else if (rawCategory is String && rawCategory.trim().isNotEmpty) {
       final sub = json['subcategory'] as String? ?? content['subcategory'] as String?;
-      categoryPath = _mapOldCategory(rawCategory, sub);
+      categoryPath = _mapOldCategory(rawCategory.trim(), sub);
     } else {
       categoryPath = const ['General'];
     }
