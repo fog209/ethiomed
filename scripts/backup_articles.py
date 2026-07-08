@@ -3,10 +3,42 @@ import json
 import os
 import datetime
 
-SUPABASE_URL = 'https://kxcdzlyirdonkipcymvc.supabase.co'
-SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt4Y2R6bHlpcmRvbmtpcGN5bXZjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwMTgxNzcsImV4cCI6MjA5NjU5NDE3N30.S70lUuSwgQBb05BFdcjRAP8F4x2ydeVppljuS6yKlQY'
-
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
+def _load_env():
+    """Load SUPABASE_URL / SUPABASE_ANON_KEY.
+
+    Mirrors lib/app/env.dart: read a root .env file (git-ignored) first,
+    then fall back to process environment variables. Credentials are never
+    hardcoded here.
+    """
+    env_path = os.path.join(PROJECT_ROOT, '.env')
+    if os.path.isfile(env_path):
+        with open(env_path, 'r', encoding='utf-8') as f:
+            for line in f:
+                trimmed = line.strip()
+                if not trimmed or trimmed.startswith('#'):
+                    continue
+                idx = trimmed.find('=')
+                if idx < 1:
+                    continue
+                key = trimmed[:idx].strip()
+                value = trimmed[idx + 1:].strip()
+                if key in ('SUPABASE_URL', 'SUPABASE_ANON_KEY') and value:
+                    os.environ.setdefault(key, value)
+
+    supabase_url = os.environ.get('SUPABASE_URL', '')
+    supabase_anon_key = os.environ.get('SUPABASE_ANON_KEY', '')
+    if not supabase_url or not supabase_anon_key:
+        print('Backup aborted: SUPABASE_URL and SUPABASE_ANON_KEY must be set.')
+        print('Set them in a git-ignored .env file or as environment variables.')
+        os._exit(1)
+    return supabase_url, supabase_anon_key
+
+
+SUPABASE_URL, SUPABASE_ANON_KEY = _load_env()
+
 BACKUP_DIR = os.path.join(PROJECT_ROOT, 'backups')
 ARTICLES_URL = f'{SUPABASE_URL}/rest/v1/articles'
 
