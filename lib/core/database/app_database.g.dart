@@ -782,6 +782,271 @@ class BookmarksCompanion extends UpdateCompanion<Bookmark> {
   }
 }
 
+class $ArticleNotesTable extends ArticleNotes
+    with TableInfo<$ArticleNotesTable, ArticleNote> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ArticleNotesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _articleIdMeta = const VerificationMeta(
+    'articleId',
+  );
+  @override
+  late final GeneratedColumn<String> articleId = GeneratedColumn<String>(
+    'article_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _noteTextMeta = const VerificationMeta(
+    'noteText',
+  );
+  @override
+  late final GeneratedColumn<String> noteText = GeneratedColumn<String>(
+    'note_text',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    clientDefault: DateTime.now,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [articleId, noteText, updatedAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'article_notes';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ArticleNote> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('article_id')) {
+      context.handle(
+        _articleIdMeta,
+        articleId.isAcceptableOrUnknown(data['article_id']!, _articleIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_articleIdMeta);
+    }
+    if (data.containsKey('note_text')) {
+      context.handle(
+        _noteTextMeta,
+        noteText.isAcceptableOrUnknown(data['note_text']!, _noteTextMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {articleId};
+  @override
+  ArticleNote map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ArticleNote(
+      articleId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}article_id'],
+      )!,
+      noteText: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}note_text'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $ArticleNotesTable createAlias(String alias) {
+    return $ArticleNotesTable(attachedDatabase, alias);
+  }
+}
+
+class ArticleNote extends DataClass implements Insertable<ArticleNote> {
+  final String articleId;
+  final String noteText;
+  final DateTime updatedAt;
+  const ArticleNote({
+    required this.articleId,
+    required this.noteText,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['article_id'] = Variable<String>(articleId);
+    map['note_text'] = Variable<String>(noteText);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  ArticleNotesCompanion toCompanion(bool nullToAbsent) {
+    return ArticleNotesCompanion(
+      articleId: Value(articleId),
+      noteText: Value(noteText),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory ArticleNote.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ArticleNote(
+      articleId: serializer.fromJson<String>(json['articleId']),
+      noteText: serializer.fromJson<String>(json['noteText']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'articleId': serializer.toJson<String>(articleId),
+      'noteText': serializer.toJson<String>(noteText),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  ArticleNote copyWith({
+    String? articleId,
+    String? noteText,
+    DateTime? updatedAt,
+  }) => ArticleNote(
+    articleId: articleId ?? this.articleId,
+    noteText: noteText ?? this.noteText,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  ArticleNote copyWithCompanion(ArticleNotesCompanion data) {
+    return ArticleNote(
+      articleId: data.articleId.present ? data.articleId.value : this.articleId,
+      noteText: data.noteText.present ? data.noteText.value : this.noteText,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ArticleNote(')
+          ..write('articleId: $articleId, ')
+          ..write('noteText: $noteText, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(articleId, noteText, updatedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ArticleNote &&
+          other.articleId == this.articleId &&
+          other.noteText == this.noteText &&
+          other.updatedAt == this.updatedAt);
+}
+
+class ArticleNotesCompanion extends UpdateCompanion<ArticleNote> {
+  final Value<String> articleId;
+  final Value<String> noteText;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const ArticleNotesCompanion({
+    this.articleId = const Value.absent(),
+    this.noteText = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ArticleNotesCompanion.insert({
+    required String articleId,
+    this.noteText = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : articleId = Value(articleId);
+  static Insertable<ArticleNote> custom({
+    Expression<String>? articleId,
+    Expression<String>? noteText,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (articleId != null) 'article_id': articleId,
+      if (noteText != null) 'note_text': noteText,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ArticleNotesCompanion copyWith({
+    Value<String>? articleId,
+    Value<String>? noteText,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return ArticleNotesCompanion(
+      articleId: articleId ?? this.articleId,
+      noteText: noteText ?? this.noteText,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (articleId.present) {
+      map['article_id'] = Variable<String>(articleId.value);
+    }
+    if (noteText.present) {
+      map['note_text'] = Variable<String>(noteText.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ArticleNotesCompanion(')
+          ..write('articleId: $articleId, ')
+          ..write('noteText: $noteText, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $StudySessionsTable extends StudySessions
     with TableInfo<$StudySessionsTable, StudySession> {
   @override
@@ -6653,6 +6918,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $ArticlesTable articles = $ArticlesTable(this);
   late final $BookmarksTable bookmarks = $BookmarksTable(this);
+  late final $ArticleNotesTable articleNotes = $ArticleNotesTable(this);
   late final $StudySessionsTable studySessions = $StudySessionsTable(this);
   late final $QuizSessionsTable quizSessions = $QuizSessionsTable(this);
   late final $QuizQuestionsTable quizQuestions = $QuizQuestionsTable(this);
@@ -6683,6 +6949,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   List<DatabaseSchemaEntity> get allSchemaEntities => [
     articles,
     bookmarks,
+    articleNotes,
     studySessions,
     quizSessions,
     quizQuestions,
@@ -7324,6 +7591,168 @@ typedef $$BookmarksTableProcessedTableManager =
       (Bookmark, $$BookmarksTableReferences),
       Bookmark,
       PrefetchHooks Function({bool articleId})
+    >;
+typedef $$ArticleNotesTableCreateCompanionBuilder =
+    ArticleNotesCompanion Function({
+      required String articleId,
+      Value<String> noteText,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+typedef $$ArticleNotesTableUpdateCompanionBuilder =
+    ArticleNotesCompanion Function({
+      Value<String> articleId,
+      Value<String> noteText,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+
+class $$ArticleNotesTableFilterComposer
+    extends Composer<_$AppDatabase, $ArticleNotesTable> {
+  $$ArticleNotesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get articleId => $composableBuilder(
+    column: $table.articleId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get noteText => $composableBuilder(
+    column: $table.noteText,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ArticleNotesTableOrderingComposer
+    extends Composer<_$AppDatabase, $ArticleNotesTable> {
+  $$ArticleNotesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get articleId => $composableBuilder(
+    column: $table.articleId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get noteText => $composableBuilder(
+    column: $table.noteText,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ArticleNotesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ArticleNotesTable> {
+  $$ArticleNotesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get articleId =>
+      $composableBuilder(column: $table.articleId, builder: (column) => column);
+
+  GeneratedColumn<String> get noteText =>
+      $composableBuilder(column: $table.noteText, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$ArticleNotesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ArticleNotesTable,
+          ArticleNote,
+          $$ArticleNotesTableFilterComposer,
+          $$ArticleNotesTableOrderingComposer,
+          $$ArticleNotesTableAnnotationComposer,
+          $$ArticleNotesTableCreateCompanionBuilder,
+          $$ArticleNotesTableUpdateCompanionBuilder,
+          (
+            ArticleNote,
+            BaseReferences<_$AppDatabase, $ArticleNotesTable, ArticleNote>,
+          ),
+          ArticleNote,
+          PrefetchHooks Function()
+        > {
+  $$ArticleNotesTableTableManager(_$AppDatabase db, $ArticleNotesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ArticleNotesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ArticleNotesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ArticleNotesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> articleId = const Value.absent(),
+                Value<String> noteText = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ArticleNotesCompanion(
+                articleId: articleId,
+                noteText: noteText,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String articleId,
+                Value<String> noteText = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ArticleNotesCompanion.insert(
+                articleId: articleId,
+                noteText: noteText,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ArticleNotesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ArticleNotesTable,
+      ArticleNote,
+      $$ArticleNotesTableFilterComposer,
+      $$ArticleNotesTableOrderingComposer,
+      $$ArticleNotesTableAnnotationComposer,
+      $$ArticleNotesTableCreateCompanionBuilder,
+      $$ArticleNotesTableUpdateCompanionBuilder,
+      (
+        ArticleNote,
+        BaseReferences<_$AppDatabase, $ArticleNotesTable, ArticleNote>,
+      ),
+      ArticleNote,
+      PrefetchHooks Function()
     >;
 typedef $$StudySessionsTableCreateCompanionBuilder =
     StudySessionsCompanion Function({
@@ -10636,6 +11065,8 @@ class $AppDatabaseManager {
       $$ArticlesTableTableManager(_db, _db.articles);
   $$BookmarksTableTableManager get bookmarks =>
       $$BookmarksTableTableManager(_db, _db.bookmarks);
+  $$ArticleNotesTableTableManager get articleNotes =>
+      $$ArticleNotesTableTableManager(_db, _db.articleNotes);
   $$StudySessionsTableTableManager get studySessions =>
       $$StudySessionsTableTableManager(_db, _db.studySessions);
   $$QuizSessionsTableTableManager get quizSessions =>

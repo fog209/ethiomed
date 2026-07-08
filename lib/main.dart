@@ -19,6 +19,7 @@ import 'core/database/app_database.dart';
 import 'core/screens/database_recovery_screen.dart';
 import 'core/services/security_service.dart';
 import 'core/theme/app_theme.dart';
+import 'core/theme/theme_mode_provider.dart';
 import 'features/admin/presentation/admin_dashboard_screen.dart';
 import 'features/articles/presentation/article_detail_screen.dart';
 import 'features/articles/presentation/article_search_screen.dart';
@@ -126,7 +127,26 @@ void main() async {
     _supabaseInitialized = false;
   }
 
-  runApp(const ProviderScope(child: WardReadyApp()));
+  final prefs = await SharedPreferences.getInstance();
+
+  runApp(
+    ProviderScope(
+      overrides: [
+        themeModeProvider.overrideWith(
+          (ref) {
+            final savedIndex = prefs.getInt('themeMode');
+            if (savedIndex == null ||
+                savedIndex < 0 ||
+                savedIndex >= ThemeMode.values.length) {
+              return ThemeMode.dark;
+            }
+            return ThemeMode.values[savedIndex];
+          },
+        ),
+      ],
+      child: const WardReadyApp(),
+    ),
+  );
 }
 
 bool _isAtLoginOrSubscription(String location) {
@@ -330,11 +350,13 @@ final _router = GoRouter(
   ],
 );
 
-class WardReadyApp extends StatelessWidget {
+class WardReadyApp extends ConsumerWidget {
   const WardReadyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeMode = ref.watch(themeModeProvider);
+
     if (kReleaseMode && _tampered) {
       return const _SecurityAlertScreen();
     }
@@ -354,7 +376,8 @@ class WardReadyApp extends StatelessWidget {
         routerConfig: _router,
         title: 'WardReady',
         debugShowCheckedModeBanner: false,
-        themeMode: ThemeMode.dark,
+        themeMode: themeMode,
+        theme: lightTheme,
         darkTheme: darkTheme,
       ),
     );

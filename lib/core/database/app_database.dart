@@ -66,6 +66,15 @@ class Bookmarks extends Table {
   TextColumn get articleId => text().references(Articles, #id)();
 }
 
+class ArticleNotes extends Table {
+  TextColumn get articleId => text()();
+  TextColumn get noteText => text().withDefault(const Constant(''))();
+  DateTimeColumn get updatedAt => dateTime().clientDefault(DateTime.now)();
+
+  @override
+  Set<Column> get primaryKey => {articleId};
+}
+
 class StudySessions extends Table {
    DateTimeColumn get date => dateTime()();
    IntColumn get articlesViewedCount =>
@@ -232,10 +241,11 @@ class CaseProgress extends Table {
 }
 
 @DriftDatabase(
-   tables: [
-     Articles,
-     Bookmarks,
-     StudySessions,
+    tables: [
+      Articles,
+      Bookmarks,
+      ArticleNotes,
+      StudySessions,
      QuizSessions,
      QuizQuestions,
      QuizTable,
@@ -250,8 +260,8 @@ class CaseProgress extends Table {
  class AppDatabase extends _$AppDatabase {
    AppDatabase() : super(_openConnection());
 
-   @override
-   int get schemaVersion => 17;
+    @override
+    int get schemaVersion => 18;
 
   Future<void> _runMigrationStep(
     String name,
@@ -520,9 +530,12 @@ if (!columnNames.contains('exam_source')) {
                 ''');
               });
             }
+            if (from < 18) {
+              await _runMigrationStep('create article notes table', () => m.createTable(articleNotes));
+            }
           },
-       );
-     }
+        );
+      }
 
   Future<void> recordArticleView() async {
     await _ensureStudySessionsTable();
@@ -753,6 +766,35 @@ if (!columnNames.contains('quiz_correct')) {
 
   /// Returns distinct non-null subcategories under [parentCategory], sorted
   /// alphabetically. Used by SubcategoryScreen to build its list dynamically.
+  /// Returns the private note saved for [articleId], or null if none.
+  Future<ArticleNote?> getNoteForArticle(String articleId) async {
+    return (select(articleNotes)
+          ..where((t) => t.articleId.equals(articleId)))
+        .getSingleOrNull();
+  }
+
+  /// Saves (upserts) a private note for [articleId]. An empty note deletes it.
+  Future<void> saveArticleNote(String articleId, String noteText) async {
+    if (noteText.trim().isEmpty) {
+      await deleteArticleNote(articleId);
+      return;
+    }
+    await into(articleNotes).insertOnConflictUpdate(
+      ArticleNotesCompanion.insert(
+        articleId: articleId,
+        noteText: Value(noteText),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
+
+  /// Removes the private note for [articleId].
+  Future<void> deleteArticleNote(String articleId) async {
+    await (delete(articleNotes)
+          ..where((t) => t.articleId.equals(articleId)))
+        .go();
+  }
+
   Future<List<String>> fetchSubcategories(String parentCategory) async {
     final rows = await customSelect(
       '''

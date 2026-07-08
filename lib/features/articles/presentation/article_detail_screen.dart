@@ -12,7 +12,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/database/app_database.dart';
 import '../../../features/articles/article_providers.dart';
-import '../../../features/articles/presentation/article_comments_section.dart';
+import '../../../features/articles/presentation/article_notes_section.dart';
 import '../../../features/content/data/content_flag_service.dart';
 import '../../../features/content/presentation/content_flag_widget.dart';
 import '../../../features/progress/category_progress_provider.dart';
@@ -355,12 +355,12 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
                borderRadius: BorderRadius.circular(20),
              ),
              child: Text(
-               article.category?.toUpperCase() ?? 'GENERAL',
-               style: TextStyle(
-                 color: theme.colorScheme.onSecondary,
-                 fontWeight: FontWeight.bold,
-                 fontSize: 12,
-               ),
+              article.category?.toUpperCase() ?? 'GENERAL',
+              style: TextStyle(
+                color: theme.colorScheme.secondary,
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+              ),
              ),
            ),
 
@@ -428,7 +428,7 @@ if (pastExamInfo == null || !pastExamInfo.isHighYield) {
 
           const SizedBox(height: 40),
 
-          DiscussionSection(articleId: article.id),
+          ArticleNotesSection(articleId: article.id),
         ],
       ),
     );

@@ -119,50 +119,49 @@ return progressAsyncValue.when(
                  context.push('/article-list/${Uri.encodeComponent(name)}'),
            );
          },
-         child: Card(
-           elevation: 4,
-           shape: RoundedRectangleBorder(
-             borderRadius: BorderRadius.circular(15),
-           ),
-           child: Column(
-             mainAxisSize: MainAxisSize.min,
-             children: [
-               SizedBox(
-                 height: 95,
-                 child: Column(
-                   mainAxisAlignment: MainAxisAlignment.center,
-                   children: [
-                     Icon(icon, size: 40, color: theme.colorScheme.secondary),
-                     const SizedBox(height: 10),
-                     Text(
-                       name,
-                       textAlign: TextAlign.center,
-                       style: TextStyle(
-                         fontWeight: FontWeight.bold,
-                         color: theme.colorScheme.onSurface,
-                       ),
-                     ),
-                     const SizedBox(height: 6),
-                     Text(
-                       '${_categoryProgressRead(progress)}/${_categoryProgressTotal(progress)}',
-                       style: TextStyle(
-                         color: theme.colorScheme.onSurface,
-                         fontSize: 12,
-                         fontWeight: FontWeight.w600,
-                       ),
-                     ),
-                   ],
-                 ),
-               ),
-               LinearProgressIndicator(
-                 minHeight: 3,
-                 backgroundColor: theme.colorScheme.surface.withValues(alpha: 0.2),
-                 color: theme.colorScheme.primary,
-                 value: _categoryProgressValue(progress),
-               ),
-             ],
-           ),
-         ),
+          child: Card(
+            elevation: 4,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(icon, size: 40, color: theme.colorScheme.secondary),
+                  const SizedBox(height: 10),
+                  Text(
+                    name,
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: theme.colorScheme.onSurface,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    '${_categoryProgressRead(progress)}/${_categoryProgressTotal(progress)}',
+                    style: TextStyle(
+                      color: theme.colorScheme.onSurface,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  LinearProgressIndicator(
+                    minHeight: 3,
+                    backgroundColor: theme.colorScheme.surface.withValues(alpha: 0.2),
+                    color: theme.colorScheme.primary,
+                    value: _categoryProgressValue(progress),
+                  ),
+                ],
+              ),
+            ),
+          ),
        ),
       loading: () => const SizedBox.shrink(),
       error: (error, stack) => Card(
