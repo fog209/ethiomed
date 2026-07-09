@@ -20,13 +20,10 @@ class AppConfig {
         {'name': 'Dermatology', 'icon': Icons.face},
         {'name': 'Ophthalmology', 'icon': Icons.remove_red_eye},
         {'name': 'ENT', 'icon': Icons.hearing},
-        {'name': 'Pharmacology', 'icon': Icons.medication},
         {'name': 'Radiology', 'icon': Icons.medical_services},
         {'name': 'Emergency Medicine', 'icon': Icons.emergency},
         {'name': 'Orthopedics', 'icon': Icons.accessibility},
-        {'name': 'Anesthesiology', 'icon': Icons.airline_seat_flat},
-        {'name': 'Public Health and Epidemiology', 'icon': Icons.public},
-        {'name': 'Forensic Medicine', 'icon': Icons.gavel},
+        {'name': 'Hematology', 'icon': Icons.bloodtype},
       ];
 
   static const List<Map<String, Object?>> preclinicalCategories =
@@ -36,6 +33,7 @@ class AppConfig {
         {'name': 'Biochemistry', 'icon': Icons.science},
         {'name': 'Pathology', 'icon': Icons.local_hospital_outlined},
         {'name': 'Anatomy', 'icon': Icons.accessibility_new},
+        {'name': 'Pharmacology', 'icon': Icons.medication},
       ];
 
   /// Canonical mapping of a subspecialty (legacy flat category) to the parent
@@ -44,8 +42,10 @@ class AppConfig {
   /// `migrateCategoryToParentCategory()`. Keep all legacy→parent mappings here
   /// ONLY; do not duplicate this map elsewhere.
   ///
-  /// Cardiology, Neurology, and Nephrology are subspecialties of Internal
-  /// Medicine (not top-level categories).
+  /// Cardiology, Neurology, Nephrology, Pulmonology, Infectious
+  /// Diseases, Gastroenterology, and Endocrinology are subspecialties
+  /// of Internal Medicine (not top-level categories). Hematology is a
+  /// separate top-level clinical category (not under Internal Medicine).
   static const Map<String, String> categoryToParent = {
     'Cardiology': 'Internal Medicine',
     'Neurology': 'Internal Medicine',

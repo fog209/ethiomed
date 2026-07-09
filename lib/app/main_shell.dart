@@ -16,6 +16,7 @@ import '../../../features/settings/presentation/settings_screen.dart';
 import '../../../features/subscription/data/subscription_repository.dart';
 import 'nav_provider.dart';
 import '../../../features/home/presentation/categories_screen.dart';
+import '../../../features/home/presentation/home_screen.dart';
 
 class MainShell extends ConsumerStatefulWidget {
   const MainShell({super.key});
@@ -71,14 +72,15 @@ class _MainShellState extends ConsumerState<MainShell> {
     final isOnline = ref.watch(connectivityProvider);
     final serverUnreachable = ref.watch(serverUnreachableProvider);
 
-    // IndexedStack has 6 children: Library, Search, Saved, Quiz, Progress, Settings
+    // IndexedStack has 7 children: Home, Library, Search, Saved, Quiz, Progress, Settings
     final List<Widget> screens = [
-      const CategoriesScreen(), // 0 - Library
-      const ArticleSearchScreen(), // 1
-      const BookmarksScreen(), // 2
-      const QuizScreen(), // 3
-      const ProgressScreen(), // 4
-      const SettingsScreen(), // 5
+      const HomeScreen(), // 0 - Home
+      const CategoriesScreen(), // 1 - Library
+      const ArticleSearchScreen(), // 2
+      const BookmarksScreen(), // 3
+      const QuizScreen(), // 4
+      const ProgressScreen(), // 5
+      const SettingsScreen(), // 6
     ];
 
     return Scaffold(
@@ -98,9 +100,8 @@ class _MainShellState extends ConsumerState<MainShell> {
           ref.read(sessionTimeoutProvider.notifier).resetTimer();
         },
         type: BottomNavigationBarType.fixed,
-        selectedItemColor: Theme.of(context).colorScheme.primary,
-        unselectedItemColor: Theme.of(context).colorScheme.onSurfaceVariant,
         items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(icon: Icon(Icons.grid_view), label: 'Library'),
           BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
           BottomNavigationBarItem(icon: Icon(Icons.bookmark), label: 'Saved'),

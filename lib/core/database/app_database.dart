@@ -1072,6 +1072,72 @@ if (!columnNames.contains('quiz_correct')) {
     final day = DateTime(date.year, date.month, date.day);
     return day.toIso8601String().substring(0, 10);
   }
+
+  /// Returns the [limit] most recently opened articles (distinct by article
+  /// id, most-recent first) from the [view_history] table. Used by the
+  /// Home tab's "Recently Read" section. Joins [articles] so a full
+  /// [ArticleLocal] can be reconstructed for navigation.
+  Future<List<RecentlyReadArticle>> fetchRecentlyRead(int limit) async {
+    await _ensureViewHistoryTable();
+    final rows = await customSelect(
+      '''
+      SELECT a.id AS id, a.title AS title, a.category AS category,
+             a.subcategory AS subcategory, a.content AS content,
+             a.image_url AS image_url, a.video_url AS video_url,
+             a.parent_category AS parent_category,
+             a.is_high_yield AS is_high_yield, MAX(vh.viewed_at) AS viewed_at
+      FROM view_history vh
+      JOIN articles a ON a.id = vh.article_id
+      GROUP BY vh.article_id
+      ORDER BY viewed_at DESC
+      LIMIT ?
+      ''',
+      variables: [Variable<int>(limit)],
+    ).get();
+
+    return [
+      for (final r in rows)
+        RecentlyReadArticle(
+          id: r.read<String>('id'),
+          title: r.read<String>('title'),
+          category: r.readNullable<String>('category'),
+          subcategory: r.readNullable<String>('subcategory'),
+          content: r.readNullable<String>('content'),
+          imageUrl: r.readNullable<String>('image_url'),
+          videoUrl: r.readNullable<String>('video_url'),
+          parentCategory: r.readNullable<String>('parent_category'),
+          isHighYield: r.read<bool>('is_high_yield'),
+        ),
+    ];
+  }
+}
+
+/// A single recently-opened article entry, derived from the
+/// [view_history] table (most-recent first). Carries just enough
+/// fields to render a tile and reconstruct an [ArticleLocal] for
+/// navigation to the article detail screen.
+class RecentlyReadArticle {
+  const RecentlyReadArticle({
+    required this.id,
+    required this.title,
+    this.category,
+    this.subcategory,
+    this.content,
+    this.imageUrl,
+    this.videoUrl,
+    this.parentCategory,
+    this.isHighYield = false,
+  });
+
+  final String id;
+  final String title;
+  final String? category;
+  final String? subcategory;
+  final String? content;
+  final String? imageUrl;
+  final String? videoUrl;
+  final String? parentCategory;
+  final bool isHighYield;
 }
 
 /// Per-category read progress, returned by

@@ -7,6 +7,16 @@ final highYieldModeProvider = StateProvider<bool>((ref) => false);
 
 final subcategoryFilterProvider = StateProvider<String?>((ref) => null);
 
+/// Last [limit] distinct articles the user opened, most-recent first.
+/// Backed by the [view_history] table. Used by the Home tab's
+/// "Recently Read" section.
+final recentlyReadProvider = FutureProvider<List<RecentlyReadArticle>>(
+  (ref) {
+    final db = ref.watch(databaseProvider);
+    return db.fetchRecentlyRead(7);
+  },
+);
+
 final articleByIdProvider =
     FutureProvider.autoDispose.family<ArticleLocal?, String>((ref, id) {
   final db = ref.watch(databaseProvider);

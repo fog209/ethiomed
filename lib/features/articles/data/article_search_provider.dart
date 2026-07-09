@@ -97,12 +97,19 @@ class ArticleSearchController extends StateNotifier<ArticleSearchState> {
 
   final ArticleSearchRepository _repository;
   Timer? _debounceTimer;
+  // Monotonic token guarding against stale async searches overwriting a
+  // newer state. Without this, de-selecting a category (which
+  // fires a fresh search) can be clobbered by the previously
+  // in-flight search completing last — leaving the chip visually
+  // selected. See item 6 (search sticky-tab deselection bug).
+  int _searchRequestId = 0;
 
   void updateQuery(String query) {
     _debounceTimer?.cancel();
     final trimmedQuery = query.trim();
 
     _debounceTimer = Timer(_searchDebounceDuration, () {
+      final requestId = ++_searchRequestId;
       state = state.copyWith(
         query: trimmedQuery,
         results: const <ArticleLocal>[],
@@ -110,12 +117,13 @@ class ArticleSearchController extends StateNotifier<ArticleSearchState> {
         status: ArticleSearchStatus.loading,
         message: null,
       );
-      unawaited(_runSearch(trimmedQuery, state.category));
+      unawaited(_runSearch(trimmedQuery, state.category, requestId: requestId));
     });
   }
 
-void updateCategory(String? category, {String? subcategory}) {
+  void updateCategory(String? category, {String? subcategory}) {
     _debounceTimer?.cancel();
+    final requestId = ++_searchRequestId;
     state = state.copyWith(
       category: category,
       results: const <ArticleLocal>[],
@@ -123,10 +131,15 @@ void updateCategory(String? category, {String? subcategory}) {
       status: ArticleSearchStatus.loading,
       message: null,
     );
-    unawaited(_runSearch(state.query, category, subcategory: subcategory));
+    unawaited(_runSearch(state.query, category, subcategory: subcategory, requestId: requestId));
   }
 
-  Future<void> _runSearch(String query, String? category, {String? subcategory}) async {
+  Future<void> _runSearch(
+    String query,
+    String? category, {
+    required int requestId,
+    String? subcategory,
+  }) async {
     try {
       final searchResult = await _repository.searchArticles(
         query: query,
@@ -134,6 +147,13 @@ void updateCategory(String? category, {String? subcategory}) {
       );
 
       if (!mounted) {
+        return;
+      }
+
+      // Discard results from a superseded (stale) search so a
+      // newer de-select/query can't be overwritten by an older
+      // in-flight request completing after it.
+      if (requestId != _searchRequestId) {
         return;
       }
 
@@ -148,6 +168,11 @@ void updateCategory(String? category, {String? subcategory}) {
       );
     } catch (error) {
       if (!mounted) {
+        return;
+      }
+
+      // Discard errors from a superseded (stale) search too.
+      if (requestId != _searchRequestId) {
         return;
       }
 

@@ -26,7 +26,6 @@ class TaxonomyConfig {
       'Infectious Diseases',
       'Gastroenterology',
       'Endocrinology',
-      'Hematology',
     ],
     // Pending confirmed curriculum lists — render flat for now.
     'Pediatrics': <String>[],

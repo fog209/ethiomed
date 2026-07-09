@@ -180,6 +180,9 @@ const SizedBox(height: 16),
                   ),
                 ElevatedButton(
                   onPressed: authState.isLoading ? null : _submit,
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: Theme.of(context).colorScheme.secondary,
+                  ),
                   child: authState.isLoading
                       ? const SizedBox(
                           height: 22,

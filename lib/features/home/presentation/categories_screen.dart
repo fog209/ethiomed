@@ -10,7 +10,6 @@ import '../../../core/config/app_config.dart';
 import '../../../core/config/taxonomy_config.dart';
 import '../../../core/database/app_database.dart';
 import '../../../core/providers/sync_state_provider.dart';
-import '../../../features/flashcards/flashcard_provider.dart';
 import '../../../features/progress/category_progress_provider.dart';
 import '../../../features/progress/streak_notifier.dart';
 import '../../../features/progress/weekly_stats_provider.dart';
@@ -248,10 +247,6 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                   error: (_, _) => const SizedBox.shrink(),
                 ),
                 _buildReviewMistakesCard(),
-                _buildCalculatorsCard(),
-                _buildCasesCard(),
-                _buildFlashcardsCard(),
-                _buildExamModeCard(),
                 streak.when(
                   data: _buildStudyStatsRow,
                   loading: _buildStudyStatsLoadingRow,
@@ -317,9 +312,8 @@ todayPlanAsync.when(
     final categories = AppConfig.clinicalCategories.take(6).toList();
 
     return SliverGrid(
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        childAspectRatio: 1.1,
+      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+        maxCrossAxisExtent: 150,
         crossAxisSpacing: 15,
         mainAxisSpacing: 15,
       ),
@@ -363,9 +357,8 @@ todayPlanAsync.when(
 
   Widget _buildCategorySliverGrid(List<Map<String, Object?>> categories) {
     return SliverGrid(
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        childAspectRatio: 1.1,
+      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+        maxCrossAxisExtent: 150,
         crossAxisSpacing: 15,
         mainAxisSpacing: 15,
       ),
@@ -555,238 +548,6 @@ todayPlanAsync.when(
     } else {
       return '${difference.inDays} days ago';
     }
-  }
-
-  Widget _buildCalculatorsCard() {
-    final theme = Theme.of(context);
-    return Card(
-      margin: const EdgeInsets.only(bottom: 16),
-      color: theme.colorScheme.secondaryContainer,
-      child: InkWell(
-        onTap: () => context.push('/calculators'),
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              Icon(
-                Icons.calculate,
-                color: theme.colorScheme.secondary,
-                size: 32,
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Clinical Calculators',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: theme.colorScheme.onSecondaryContainer,
-                        fontSize: 16,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Quick medical calculations',
-                      style: TextStyle(
-                        color: theme.colorScheme.onSecondaryContainer,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(
-                Icons.arrow_forward_ios,
-                color: theme.colorScheme.onSecondaryContainer,
-                size: 16,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCasesCard() {
-    final theme = Theme.of(context);
-    return Card(
-      margin: const EdgeInsets.only(bottom: 16),
-      color: theme.colorScheme.secondaryContainer,
-      child: InkWell(
-        onTap: () => context.push('/cases'),
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              Icon(
-                Icons.medical_services,
-                color: theme.colorScheme.secondary,
-                size: 32,
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Clinical Cases',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: theme.colorScheme.onSecondaryContainer,
-                        fontSize: 16,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Case-based learning scenarios',
-                      style: TextStyle(
-                        color: theme.colorScheme.onSecondaryContainer,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(
-                Icons.arrow_forward_ios,
-                color: theme.colorScheme.onSecondaryContainer,
-                size: 16,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildExamModeCard() {
-    final theme = Theme.of(context);
-    return Card(
-      margin: const EdgeInsets.only(bottom: 16),
-      color: theme.colorScheme.secondaryContainer,
-      child: InkWell(
-        onTap: () => context.push('/exam-setup'),
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              Icon(
-                Icons.assignment_turned_in,
-                color: theme.colorScheme.secondary,
-                size: 32,
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'EHPLE Exam Mode',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: theme.colorScheme.onSecondaryContainer,
-                        fontSize: 16,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '200 questions · Timed · EHPLE-weighted',
-                      style: TextStyle(
-                        color: theme.colorScheme.onSecondaryContainer,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(
-                Icons.arrow_forward_ios,
-                color: theme.colorScheme.onSecondaryContainer,
-                size: 16,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFlashcardsCard() {
-    final theme = Theme.of(context);
-    final dueCardsAsync = ref.watch(flashcardDueProvider(null));
-
-    return Card(
-      margin: const EdgeInsets.only(bottom: 16),
-      color: theme.colorScheme.secondaryContainer,
-      child: InkWell(
-        onTap: () => context.push('/flashcards'),
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              Icon(
-                Icons.style,
-                color: theme.colorScheme.secondary,
-                size: 32,
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Flashcards',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: theme.colorScheme.onSecondaryContainer,
-                        fontSize: 16,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-dueCardsAsync.when(
-                       data: (cards) => Text(
-                         cards.isEmpty
-                             ? 'Anki-style spaced repetition'
-                             : '${cards.length} card${cards.length != 1 ? 's' : ''} due',
-                         style: TextStyle(
-                           color: theme.colorScheme.onSecondaryContainer,
-                           fontSize: 14,
-                         ),
-                       ),
-                       loading: () => Text(
-                         'Loading...',
-                         style: TextStyle(
-                           color: theme.colorScheme.onSecondaryContainer,
-                           fontSize: 14,
-                         ),
-                       ),
-                       error: (_, _) => Text(
-                         'Flashcards unavailable',
-                         style: TextStyle(
-                           color: theme.colorScheme.onSecondaryContainer,
-                           fontSize: 14,
-                         ),
-                       ),
-                     ),
-                  ],
-                ),
-              ),
-              Icon(
-                Icons.arrow_forward_ios,
-                color: theme.colorScheme.onSecondaryContainer,
-                size: 16,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 
   Widget _buildTodaysPlanCard(TodayPlanData plan) {
