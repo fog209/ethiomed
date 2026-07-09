@@ -63,13 +63,14 @@ Future<List<ArticleLocal>> fetchAndSyncArticles() async {
                    parentCategory: Value(article.parentCategory.isNotEmpty
                        ? article.parentCategory
                        : null),
-                   subcategory: Value(
-                       article.subcategory.isNotEmpty ? article.subcategory : null),
-                   content: Value(jsonEncode(article.content ?? const <String, dynamic>{})),
-                   imageUrl: Value(article.imageUrl),
-                   videoUrl: Value(article.videoUrl),
-                   isHighYield: Value(article.isHighYield),
-                 ),
+                    subcategory: Value(
+                        article.subcategory.isNotEmpty ? article.subcategory : null),
+                    categoryPath: Value(jsonEncode(article.category)),
+                    content: Value(jsonEncode(article.content ?? const <String, dynamic>{})),
+                    imageUrl: Value(article.imageUrl),
+                    videoUrl: Value(article.videoUrl),
+                    isHighYield: Value(article.isHighYield),
+                  ),
                );
          }
        });

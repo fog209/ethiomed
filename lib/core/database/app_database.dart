@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:drift/drift.dart';
@@ -32,6 +33,7 @@ class Articles extends Table {
   TextColumn get subcategory => text().nullable()();
   BoolColumn get isHighYield => boolean().withDefault(const Constant(false))();
   TextColumn get parentCategory => text().nullable()();
+  TextColumn get categoryPath => text().nullable()();
   @override
   Set<Column> get primaryKey => {id};
 }
@@ -261,7 +263,7 @@ class CaseProgress extends Table {
    AppDatabase() : super(_openConnection());
 
     @override
-    int get schemaVersion => 18;
+    int get schemaVersion => 19;
 
   Future<void> _runMigrationStep(
     String name,
@@ -273,6 +275,51 @@ class CaseProgress extends Table {
       debugPrint('Migration step failed: $name: $e');
       setMigrationError('Migration step failed: $name');
     }
+  }
+
+  static const Map<String, String> _flatCategoryToParent = {
+    'Cardiology': 'Internal Medicine',
+    'Pulmonology': 'Internal Medicine',
+    'Infectious Diseases': 'Internal Medicine',
+    'Neonatology': 'Pediatrics',
+    'Developmental Milestones': 'Pediatrics',
+    'Obstetrics': 'OB/GYN',
+    'Gynecology': 'OB/GYN',
+    'Neurology': 'Internal Medicine',
+    'Nephrology': 'Internal Medicine',
+  };
+
+  /// Derives the nested taxonomy (parent, optional sub, JSON path) from a flat
+  /// category string, for use when backfilling local rows. Defensive against a
+  /// value that was already stored as a JSON array.
+  ({String parent, String? sub, String path}) _deriveTaxonomy(
+    String? flatCategory,
+  ) {
+    final raw = (flatCategory ?? '').trim();
+    if (raw.isEmpty) {
+      return (parent: 'General', sub: null, path: jsonEncode(['General']));
+    }
+    if (raw.startsWith('[')) {
+      try {
+        final decoded = jsonDecode(raw);
+        if (decoded is List && decoded.isNotEmpty) {
+          final list = decoded.map((e) => e.toString()).toList();
+          return (
+            parent: list.first,
+            sub: list.length > 1 ? list[1] : null,
+            path: jsonEncode(list),
+          );
+        }
+      } catch (_) {
+        // Fall through to plain-string handling below.
+      }
+    }
+    final parent = _flatCategoryToParent[raw];
+    if (parent != null) {
+      return (parent: parent, sub: raw, path: jsonEncode([parent, raw]));
+    }
+    // Unknown value: treat as a top-level parent category with no subspecialty.
+    return (parent: raw, sub: null, path: jsonEncode([raw]));
   }
 
   /// Migrates existing flat categories to their parent categories.
@@ -532,6 +579,35 @@ if (!columnNames.contains('exam_source')) {
             }
             if (from < 18) {
               await _runMigrationStep('create article notes table', () => m.createTable(articleNotes));
+            }
+            if (from < 19) {
+              await _runMigrationStep('backfill article taxonomy columns', () async {
+                final tableName = articles.actualTableName;
+                final rows = await customSelect(
+                  'SELECT id, category FROM $tableName WHERE category_path IS NULL',
+                ).get();
+                for (final row in rows) {
+                  final id = row.read<String>('id');
+                  final flat = row.read<String?>('category');
+                  final taxonomy = _deriveTaxonomy(flat);
+                  await customSelect(
+                    'UPDATE $tableName '
+                    'SET parent_category = ?, subcategory = ?, category_path = ? '
+                    'WHERE id = ?',
+                    variables: [
+                      Variable(taxonomy.parent),
+                      Variable(taxonomy.sub),
+                      Variable(taxonomy.path),
+                      Variable(id),
+                    ],
+                  ).get();
+                }
+              });
+              // Re-affirm parent mapping for known legacy flat categories.
+              await _runMigrationStep(
+                'migrate legacy flat categories to parent',
+                () => migrateCategoryToParentCategory(),
+              );
             }
           },
         );

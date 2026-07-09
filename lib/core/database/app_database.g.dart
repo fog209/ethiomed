@@ -108,6 +108,17 @@ class $ArticlesTable extends Articles
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _categoryPathMeta = const VerificationMeta(
+    'categoryPath',
+  );
+  @override
+  late final GeneratedColumn<String> categoryPath = GeneratedColumn<String>(
+    'category_path',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -119,6 +130,7 @@ class $ArticlesTable extends Articles
     subcategory,
     isHighYield,
     parentCategory,
+    categoryPath,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -196,6 +208,15 @@ class $ArticlesTable extends Articles
         ),
       );
     }
+    if (data.containsKey('category_path')) {
+      context.handle(
+        _categoryPathMeta,
+        categoryPath.isAcceptableOrUnknown(
+          data['category_path']!,
+          _categoryPathMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -241,6 +262,10 @@ class $ArticlesTable extends Articles
         DriftSqlType.string,
         data['${effectivePrefix}parent_category'],
       ),
+      categoryPath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}category_path'],
+      ),
     );
   }
 
@@ -260,6 +285,7 @@ class ArticleLocal extends DataClass implements Insertable<ArticleLocal> {
   final String? subcategory;
   final bool isHighYield;
   final String? parentCategory;
+  final String? categoryPath;
   const ArticleLocal({
     required this.id,
     required this.title,
@@ -270,6 +296,7 @@ class ArticleLocal extends DataClass implements Insertable<ArticleLocal> {
     this.subcategory,
     required this.isHighYield,
     this.parentCategory,
+    this.categoryPath,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -294,6 +321,9 @@ class ArticleLocal extends DataClass implements Insertable<ArticleLocal> {
     map['is_high_yield'] = Variable<bool>(isHighYield);
     if (!nullToAbsent || parentCategory != null) {
       map['parent_category'] = Variable<String>(parentCategory);
+    }
+    if (!nullToAbsent || categoryPath != null) {
+      map['category_path'] = Variable<String>(categoryPath);
     }
     return map;
   }
@@ -321,6 +351,9 @@ class ArticleLocal extends DataClass implements Insertable<ArticleLocal> {
       parentCategory: parentCategory == null && nullToAbsent
           ? const Value.absent()
           : Value(parentCategory),
+      categoryPath: categoryPath == null && nullToAbsent
+          ? const Value.absent()
+          : Value(categoryPath),
     );
   }
 
@@ -339,6 +372,7 @@ class ArticleLocal extends DataClass implements Insertable<ArticleLocal> {
       subcategory: serializer.fromJson<String?>(json['subcategory']),
       isHighYield: serializer.fromJson<bool>(json['isHighYield']),
       parentCategory: serializer.fromJson<String?>(json['parentCategory']),
+      categoryPath: serializer.fromJson<String?>(json['categoryPath']),
     );
   }
   @override
@@ -354,6 +388,7 @@ class ArticleLocal extends DataClass implements Insertable<ArticleLocal> {
       'subcategory': serializer.toJson<String?>(subcategory),
       'isHighYield': serializer.toJson<bool>(isHighYield),
       'parentCategory': serializer.toJson<String?>(parentCategory),
+      'categoryPath': serializer.toJson<String?>(categoryPath),
     };
   }
 
@@ -367,6 +402,7 @@ class ArticleLocal extends DataClass implements Insertable<ArticleLocal> {
     Value<String?> subcategory = const Value.absent(),
     bool? isHighYield,
     Value<String?> parentCategory = const Value.absent(),
+    Value<String?> categoryPath = const Value.absent(),
   }) => ArticleLocal(
     id: id ?? this.id,
     title: title ?? this.title,
@@ -379,6 +415,7 @@ class ArticleLocal extends DataClass implements Insertable<ArticleLocal> {
     parentCategory: parentCategory.present
         ? parentCategory.value
         : this.parentCategory,
+    categoryPath: categoryPath.present ? categoryPath.value : this.categoryPath,
   );
   ArticleLocal copyWithCompanion(ArticlesCompanion data) {
     return ArticleLocal(
@@ -397,6 +434,9 @@ class ArticleLocal extends DataClass implements Insertable<ArticleLocal> {
       parentCategory: data.parentCategory.present
           ? data.parentCategory.value
           : this.parentCategory,
+      categoryPath: data.categoryPath.present
+          ? data.categoryPath.value
+          : this.categoryPath,
     );
   }
 
@@ -411,7 +451,8 @@ class ArticleLocal extends DataClass implements Insertable<ArticleLocal> {
           ..write('videoUrl: $videoUrl, ')
           ..write('subcategory: $subcategory, ')
           ..write('isHighYield: $isHighYield, ')
-          ..write('parentCategory: $parentCategory')
+          ..write('parentCategory: $parentCategory, ')
+          ..write('categoryPath: $categoryPath')
           ..write(')'))
         .toString();
   }
@@ -427,6 +468,7 @@ class ArticleLocal extends DataClass implements Insertable<ArticleLocal> {
     subcategory,
     isHighYield,
     parentCategory,
+    categoryPath,
   );
   @override
   bool operator ==(Object other) =>
@@ -440,7 +482,8 @@ class ArticleLocal extends DataClass implements Insertable<ArticleLocal> {
           other.videoUrl == this.videoUrl &&
           other.subcategory == this.subcategory &&
           other.isHighYield == this.isHighYield &&
-          other.parentCategory == this.parentCategory);
+          other.parentCategory == this.parentCategory &&
+          other.categoryPath == this.categoryPath);
 }
 
 class ArticlesCompanion extends UpdateCompanion<ArticleLocal> {
@@ -453,6 +496,7 @@ class ArticlesCompanion extends UpdateCompanion<ArticleLocal> {
   final Value<String?> subcategory;
   final Value<bool> isHighYield;
   final Value<String?> parentCategory;
+  final Value<String?> categoryPath;
   final Value<int> rowid;
   const ArticlesCompanion({
     this.id = const Value.absent(),
@@ -464,6 +508,7 @@ class ArticlesCompanion extends UpdateCompanion<ArticleLocal> {
     this.subcategory = const Value.absent(),
     this.isHighYield = const Value.absent(),
     this.parentCategory = const Value.absent(),
+    this.categoryPath = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   ArticlesCompanion.insert({
@@ -476,6 +521,7 @@ class ArticlesCompanion extends UpdateCompanion<ArticleLocal> {
     this.subcategory = const Value.absent(),
     this.isHighYield = const Value.absent(),
     this.parentCategory = const Value.absent(),
+    this.categoryPath = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        title = Value(title);
@@ -489,6 +535,7 @@ class ArticlesCompanion extends UpdateCompanion<ArticleLocal> {
     Expression<String>? subcategory,
     Expression<bool>? isHighYield,
     Expression<String>? parentCategory,
+    Expression<String>? categoryPath,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -501,6 +548,7 @@ class ArticlesCompanion extends UpdateCompanion<ArticleLocal> {
       if (subcategory != null) 'subcategory': subcategory,
       if (isHighYield != null) 'is_high_yield': isHighYield,
       if (parentCategory != null) 'parent_category': parentCategory,
+      if (categoryPath != null) 'category_path': categoryPath,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -515,6 +563,7 @@ class ArticlesCompanion extends UpdateCompanion<ArticleLocal> {
     Value<String?>? subcategory,
     Value<bool>? isHighYield,
     Value<String?>? parentCategory,
+    Value<String?>? categoryPath,
     Value<int>? rowid,
   }) {
     return ArticlesCompanion(
@@ -527,6 +576,7 @@ class ArticlesCompanion extends UpdateCompanion<ArticleLocal> {
       subcategory: subcategory ?? this.subcategory,
       isHighYield: isHighYield ?? this.isHighYield,
       parentCategory: parentCategory ?? this.parentCategory,
+      categoryPath: categoryPath ?? this.categoryPath,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -561,6 +611,9 @@ class ArticlesCompanion extends UpdateCompanion<ArticleLocal> {
     if (parentCategory.present) {
       map['parent_category'] = Variable<String>(parentCategory.value);
     }
+    if (categoryPath.present) {
+      map['category_path'] = Variable<String>(categoryPath.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -579,6 +632,7 @@ class ArticlesCompanion extends UpdateCompanion<ArticleLocal> {
           ..write('subcategory: $subcategory, ')
           ..write('isHighYield: $isHighYield, ')
           ..write('parentCategory: $parentCategory, ')
+          ..write('categoryPath: $categoryPath, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -6977,6 +7031,7 @@ typedef $$ArticlesTableCreateCompanionBuilder =
       Value<String?> subcategory,
       Value<bool> isHighYield,
       Value<String?> parentCategory,
+      Value<String?> categoryPath,
       Value<int> rowid,
     });
 typedef $$ArticlesTableUpdateCompanionBuilder =
@@ -6990,6 +7045,7 @@ typedef $$ArticlesTableUpdateCompanionBuilder =
       Value<String?> subcategory,
       Value<bool> isHighYield,
       Value<String?> parentCategory,
+      Value<String?> categoryPath,
       Value<int> rowid,
     });
 
@@ -7067,6 +7123,11 @@ class $$ArticlesTableFilterComposer
 
   ColumnFilters<String> get parentCategory => $composableBuilder(
     column: $table.parentCategory,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get categoryPath => $composableBuilder(
+    column: $table.categoryPath,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -7149,6 +7210,11 @@ class $$ArticlesTableOrderingComposer
     column: $table.parentCategory,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get categoryPath => $composableBuilder(
+    column: $table.categoryPath,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$ArticlesTableAnnotationComposer
@@ -7190,6 +7256,11 @@ class $$ArticlesTableAnnotationComposer
 
   GeneratedColumn<String> get parentCategory => $composableBuilder(
     column: $table.parentCategory,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get categoryPath => $composableBuilder(
+    column: $table.categoryPath,
     builder: (column) => column,
   );
 
@@ -7256,6 +7327,7 @@ class $$ArticlesTableTableManager
                 Value<String?> subcategory = const Value.absent(),
                 Value<bool> isHighYield = const Value.absent(),
                 Value<String?> parentCategory = const Value.absent(),
+                Value<String?> categoryPath = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ArticlesCompanion(
                 id: id,
@@ -7267,6 +7339,7 @@ class $$ArticlesTableTableManager
                 subcategory: subcategory,
                 isHighYield: isHighYield,
                 parentCategory: parentCategory,
+                categoryPath: categoryPath,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -7280,6 +7353,7 @@ class $$ArticlesTableTableManager
                 Value<String?> subcategory = const Value.absent(),
                 Value<bool> isHighYield = const Value.absent(),
                 Value<String?> parentCategory = const Value.absent(),
+                Value<String?> categoryPath = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ArticlesCompanion.insert(
                 id: id,
@@ -7291,6 +7365,7 @@ class $$ArticlesTableTableManager
                 subcategory: subcategory,
                 isHighYield: isHighYield,
                 parentCategory: parentCategory,
+                categoryPath: categoryPath,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
