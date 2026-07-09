@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 
+import '../../../../core/config/app_config.dart';
+
 class Article {
   final String id;
   final String title;
@@ -109,16 +111,7 @@ class Article {
     if (sub != null && sub.isNotEmpty) {
       return [cat, sub];
     }
-    final categoryToParent = <String, String>{
-      'Cardiology': 'Internal Medicine',
-      'Pulmonology': 'Internal Medicine',
-      'Infectious Diseases': 'Internal Medicine',
-      'Neonatology': 'Pediatrics',
-      'Developmental Milestones': 'Pediatrics',
-      'Obstetrics': 'OB/GYN',
-      'Gynecology': 'OB/GYN',
-    };
-    final parent = categoryToParent[cat];
+    final parent = AppConfig.categoryToParent[cat];
     if (parent != null) {
       return [parent, cat];
     }

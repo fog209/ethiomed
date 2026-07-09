@@ -8,6 +8,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
+import '../config/app_config.dart';
+
 part 'app_database.g.dart';
 
 class MigrationErrorStore {
@@ -277,21 +279,10 @@ class CaseProgress extends Table {
     }
   }
 
-  static const Map<String, String> _flatCategoryToParent = {
-    'Cardiology': 'Internal Medicine',
-    'Pulmonology': 'Internal Medicine',
-    'Infectious Diseases': 'Internal Medicine',
-    'Neonatology': 'Pediatrics',
-    'Developmental Milestones': 'Pediatrics',
-    'Obstetrics': 'OB/GYN',
-    'Gynecology': 'OB/GYN',
-    'Neurology': 'Internal Medicine',
-    'Nephrology': 'Internal Medicine',
-  };
-
   /// Derives the nested taxonomy (parent, optional sub, JSON path) from a flat
   /// category string, for use when backfilling local rows. Defensive against a
-  /// value that was already stored as a JSON array.
+  /// value that was already stored as a JSON array. Uses the single canonical
+  /// [AppConfig.categoryToParent] map.
   ({String parent, String? sub, String path}) _deriveTaxonomy(
     String? flatCategory,
   ) {
@@ -314,7 +305,7 @@ class CaseProgress extends Table {
         // Fall through to plain-string handling below.
       }
     }
-    final parent = _flatCategoryToParent[raw];
+    final parent = AppConfig.categoryToParent[raw];
     if (parent != null) {
       return (parent: parent, sub: raw, path: jsonEncode([parent, raw]));
     }
@@ -323,19 +314,9 @@ class CaseProgress extends Table {
   }
 
   /// Migrates existing flat categories to their parent categories.
-  /// Call during version 14 migration or via sync process.
+  /// Uses the single canonical [AppConfig.categoryToParent] map.
   Future<void> migrateCategoryToParentCategory() async {
-    final categoryToParent = <String, String>{
-      'Cardiology': 'Internal Medicine',
-      'Pulmonology': 'Internal Medicine',
-      'Infectious Diseases': 'Internal Medicine',
-      'Neonatology': 'Pediatrics',
-      'Developmental Milestones': 'Pediatrics',
-      'Obstetrics': 'OB/GYN',
-      'Gynecology': 'OB/GYN',
-    };
-
-    for (final entry in categoryToParent.entries) {
+    for (final entry in AppConfig.categoryToParent.entries) {
       final category = entry.key;
       final parentCategory = entry.value;
       await customSelect(

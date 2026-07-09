@@ -42,4 +42,36 @@ class AppConfig {
         {'name': 'Pathology', 'icon': Icons.local_hospital_outlined},
         {'name': 'Anatomy', 'icon': Icons.accessibility_new},
       ];
+
+  /// Canonical mapping of a subspecialty (legacy flat category) to the parent
+  /// category it belongs to. This is the SINGLE source of truth — used by
+  /// [Article.fromJson], the Drift migration backfill, and
+  /// `migrateCategoryToParentCategory()`. Keep all legacy→parent mappings here
+  /// ONLY; do not duplicate this map elsewhere.
+  ///
+  /// Cardiology, Neurology, and Nephrology are subspecialties of Internal
+  /// Medicine (not top-level categories).
+  static const Map<String, String> categoryToParent = {
+    'Cardiology': 'Internal Medicine',
+    'Neurology': 'Internal Medicine',
+    'Nephrology': 'Internal Medicine',
+    'Pulmonology': 'Internal Medicine',
+    'Infectious Diseases': 'Internal Medicine',
+    'Gastroenterology': 'Internal Medicine',
+    'Endocrinology': 'Internal Medicine',
+    'Neonatology': 'Pediatrics',
+    'Developmental Milestones': 'Pediatrics',
+    'Obstetrics': 'OB/GYN',
+    'Gynecology': 'OB/GYN',
+  };
+
+  /// Subspecialties nested under each parent category, derived from
+  /// [categoryToParent] so there is exactly one mapping to maintain.
+  static Map<String, List<String>> get subspecialtiesByParent {
+    final map = <String, List<String>>{};
+    for (final entry in categoryToParent.entries) {
+      map.putIfAbsent(entry.value, () => <String>[]).add(entry.key);
+    }
+    return map;
+  }
 }
