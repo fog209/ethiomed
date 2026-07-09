@@ -3,16 +3,31 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shimmer/shimmer.dart';
 
+import '../../../core/config/app_config.dart';
 import '../../../core/database/app_database.dart';
 import '../../../core/widgets/empty_state.dart';
 
 // ── Providers ────────────────────────────────────────────────────────────────
 
-/// Fetches distinct subcategories for the given parent category from Drift.
+/// Fetches the subspecialties for the given parent category. Combines the
+/// config-derived taxonomy ([AppConfig.subspecialtiesByParent]) with the
+/// subcategories that actually have articles in Drift, so configured
+/// subspecialties are listed even when zero articles exist for them yet.
+/// Config order is preserved; any DB-only extras are appended.
 final subcategoriesForParentProvider =
     FutureProvider.family<List<String>, String>((ref, parentCategory) async {
   final db = ref.watch(databaseProvider);
-  return db.fetchSubcategories(parentCategory);
+  final dbSubs = await db.fetchSubcategories(parentCategory);
+  final configSubs = AppConfig.subspecialtiesByParent[parentCategory] ?? [];
+  final seen = <String>{};
+  final merged = <String>[];
+  for (final s in configSubs) {
+    if (seen.add(s)) merged.add(s);
+  }
+  for (final s in dbSubs) {
+    if (seen.add(s)) merged.add(s);
+  }
+  return merged;
 });
 
 /// Holds the current in-screen search query (scoped to SubcategoryScreen use).

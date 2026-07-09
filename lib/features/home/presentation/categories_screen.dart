@@ -101,24 +101,13 @@ class _CategoryTile extends ConsumerWidget {
 
 return progressAsyncValue.when(
        data: (progress) => InkWell(
-         onTap: () {
-           final hasSubsAsync = ref.read(
-             categoryHasSubcategoriesProvider(name),
-           );
-           hasSubsAsync.when(
-             data: (hasSubs) {
-               if (hasSubs) {
-                 context.push('/subcategories/${Uri.encodeComponent(name)}');
-               } else {
-                 context.push('/article-list/${Uri.encodeComponent(name)}');
-               }
-             },
-             loading: () =>
-                 context.push('/article-list/${Uri.encodeComponent(name)}'),
-             error: (_, _) =>
-                 context.push('/article-list/${Uri.encodeComponent(name)}'),
-           );
-         },
+        onTap: () {
+          if (AppConfig.subspecialtiesByParent.containsKey(name)) {
+            context.push('/subcategories/${Uri.encodeComponent(name)}');
+          } else {
+            context.push('/article-list/${Uri.encodeComponent(name)}');
+          }
+        },
           child: Card(
             elevation: 4,
             shape: RoundedRectangleBorder(
@@ -278,7 +267,7 @@ todayPlanAsync.when(
             SliverToBoxAdapter(
               child: _buildSectionHeader('Clinical'),
             ),
-            _buildCategorySliverGrid(AppConfig.clinicalCategories),
+            _buildCategorySliverGrid(AppConfig.topLevelClinicalCategories),
             const SliverToBoxAdapter(
               child: SizedBox(height: 24),
             ),

@@ -74,4 +74,15 @@ class AppConfig {
     }
     return map;
   }
+
+  /// Top-level (parent) clinical categories to render in the Library grid.
+  /// Subspecialties listed in [categoryToParent] are excluded so they appear
+  /// as drill-down children of their parent instead of top-level tiles.
+  static List<Map<String, Object?>> get topLevelClinicalCategories {
+    final subspecialtyKeys = categoryToParent.keys.toSet();
+    return [
+      for (final cat in clinicalCategories)
+        if (!subspecialtyKeys.contains(cat['name']?.toString() ?? '')) cat,
+    ];
+  }
 }
