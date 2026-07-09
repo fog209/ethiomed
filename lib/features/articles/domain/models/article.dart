@@ -85,6 +85,26 @@ class Article {
     );
   }
 
+  /// Serializes back to the canonical nested shape.
+  ///
+  /// `category` is always emitted as a JSON array (the path), which is exactly
+  /// the array form `fromJson` accepts. The denormalized `subcategory` is
+  /// included for backward-compat with older consumers that read a flat
+  /// `subcategory` field. Round-trips with [fromJson] for 1-, 2-, and 3+-level
+  /// paths as well as legacy string rows.
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'category': category,
+      'content': content ?? const <String, dynamic>{},
+      'image_url': imageUrl,
+      'video_url': videoUrl,
+      'is_high_yield': isHighYield,
+      'subcategory': subcategory,
+    };
+  }
+
   static List<String> _mapOldCategory(String cat, String? sub) {
     if (sub != null && sub.isNotEmpty) {
       return [cat, sub];
