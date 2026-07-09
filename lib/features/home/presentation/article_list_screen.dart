@@ -189,7 +189,7 @@ class _ArticleListScreenState extends ConsumerState<ArticleListScreen> {
           ),
         ],
       ),
-      body: subcategories == null || subcategories.isEmpty
+      body: subcategories.isEmpty
           ? articleListWidget
           : Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,

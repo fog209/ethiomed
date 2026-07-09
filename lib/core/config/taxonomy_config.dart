@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 /// Per-specialty taxonomy definition for the Library tab.
 ///
 /// Each top-level specialty MAY declare its own ordered list of child
