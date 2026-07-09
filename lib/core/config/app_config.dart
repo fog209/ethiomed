@@ -13,11 +13,6 @@ class AppConfig {
   static const List<Map<String, Object?>> clinicalCategories =
       <Map<String, Object?>>[
         {'name': internalMedicineCategory, 'icon': Icons.medical_services},
-        {'name': 'Pulmonology', 'icon': Icons.air},
-        {'name': 'Infectious Diseases', 'icon': Icons.bug_report},
-        {'name': 'Gastroenterology', 'icon': Icons.restaurant},
-        {'name': 'Endocrinology', 'icon': Icons.monitor_weight},
-        {'name': 'Hematology', 'icon': Icons.bloodtype},
         {'name': 'OB/GYN', 'icon': Icons.pregnant_woman},
         {'name': 'Pediatrics', 'icon': Icons.child_care},
         {'name': 'General Surgery', 'icon': Icons.medical_services},

@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../../../core/config/app_config.dart';
+import '../../../core/config/taxonomy_config.dart';
 import '../../../core/database/app_database.dart';
 import '../../../core/providers/sync_state_provider.dart';
 import '../../../features/flashcards/flashcard_provider.dart';
@@ -102,7 +103,7 @@ class _CategoryTile extends ConsumerWidget {
 return progressAsyncValue.when(
        data: (progress) => InkWell(
         onTap: () {
-          if (AppConfig.subspecialtiesByParent.containsKey(name)) {
+          if (TaxonomyConfig.hasChildren(name)) {
             context.push('/subcategories/${Uri.encodeComponent(name)}');
           } else {
             context.push('/article-list/${Uri.encodeComponent(name)}');

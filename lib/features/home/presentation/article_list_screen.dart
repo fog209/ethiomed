@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shimmer/shimmer.dart';
 
+import '../../../core/config/taxonomy_config.dart';
 import '../../../core/database/app_database.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../articles/article_providers.dart';
@@ -18,10 +19,6 @@ final articleLoadedArticlesProvider = StateProvider<List<ArticleLocal>>(
 final articleHasMoreProvider = StateProvider<bool>((ref) => true);
 final articleIsLoadingMoreProvider = StateProvider<bool>((ref) => false);
 final articleCurrentCategoryProvider = StateProvider<String?>((ref) => null);
-const Map<String, List<String>> subcategoriesByCategory = {
-  'Internal Medicine': ['Cardiology', 'Neurology', 'Nephrology'],
-  'Pediatrics': ['Neonatology', 'Nutrition', 'Emergency', 'Infectious'],
-};
 
 class ArticleListScreen extends ConsumerStatefulWidget {
   final String category;
@@ -115,7 +112,7 @@ class _ArticleListScreenState extends ConsumerState<ArticleListScreen> {
     final loadedArticles = ref.watch(articleLoadedArticlesProvider);
     final isLoadingMore = ref.watch(articleIsLoadingMoreProvider);
     final hasMore = ref.watch(articleHasMoreProvider);
-    final subcategories = subcategoriesByCategory[widget.category];
+    final subcategories = TaxonomyConfig.childrenOf(widget.category);
     final selectedSubcategory = ref.watch(subcategoryFilterProvider);
     final totalArticlesAsync = ref.watch(
       articlesCountInCategoryAndSubcategoryProvider(
