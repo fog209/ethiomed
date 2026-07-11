@@ -205,7 +205,7 @@ class SettingsScreen extends ConsumerWidget {
         leading: Icon(Icons.feedback, color: primaryColor),
         title: const Text('Support & Feedback'),
         subtitle: const Text('Send us your questions and suggestions'),
-        onTap: () => throw Exception('Manual Test Crash'),
+        onTap: _openAdminTelegram,
       ),
       const Divider(),
       Padding(
