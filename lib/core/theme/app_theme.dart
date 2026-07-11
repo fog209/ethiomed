@@ -28,7 +28,7 @@ final ThemeData darkTheme = ThemeData(
   bottomNavigationBarTheme: const BottomNavigationBarThemeData(
     backgroundColor: Color(0xFF0A0C16),
     selectedItemColor: Color(0xFFF9A825),
-    unselectedItemColor: Color(0xFF4A5080),
+    unselectedItemColor: Color(0xFF9FA8DA),
   ),
   cardTheme: const CardThemeData(
     color: Color(0xFF151829),
