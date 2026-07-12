@@ -39,7 +39,7 @@ class _ExamDateSetupScreenState extends ConsumerState<ExamDateSetupScreen> {
       initialDate: initialDate,
       firstDate: now,
       lastDate: DateTime(now.year + 3),
-      helpText: 'Select your EHPLE exam date',
+      helpText: 'Select your COC exam date',
     );
     if (picked != null) {
       setState(() {
@@ -76,7 +76,7 @@ class _ExamDateSetupScreenState extends ConsumerState<ExamDateSetupScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'EHPLE Exam Countdown',
+              'COC Exam Countdown',
               style: TextStyle(
                 color: theme.colorScheme.onSurface,
                 fontSize: 24,

@@ -58,7 +58,7 @@ class _ExamSetupScreenState extends ConsumerState<ExamSetupScreen> {
     final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('EHPLE Exam Setup'),
+        title: const Text('COC Exam Setup'),
         backgroundColor: theme.colorScheme.surface,
         foregroundColor: theme.colorScheme.onSurface,
       ),

@@ -99,7 +99,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       _OnboardSlide(
                         icon: Icons.quiz,
                         iconColor: gold,
-                        title: 'EHPLE Exam Practice',
+                        title: 'COC Exam Practice',
                         description:
                             '2,000+ MCQs with spaced repetition. Know what you know.',
                       ),

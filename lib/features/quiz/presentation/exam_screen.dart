@@ -68,7 +68,7 @@ class _ExamScreenState extends ConsumerState<ExamScreen> {
     if (isLoading) {
       return Scaffold(
         appBar: AppBar(
-          title: const Text('EHPLE Exam'),
+          title: const Text('COC Exam'),
           backgroundColor: theme.colorScheme.surface,
           foregroundColor: theme.colorScheme.onSurface,
         ),
@@ -89,7 +89,7 @@ class _ExamScreenState extends ConsumerState<ExamScreen> {
     if (questions.isEmpty) {
       return Scaffold(
         appBar: AppBar(
-          title: const Text('EHPLE Exam'),
+          title: const Text('COC Exam'),
           backgroundColor: theme.colorScheme.surface,
           foregroundColor: theme.colorScheme.onSurface,
           leading: CloseButton(onPressed: () {
@@ -112,7 +112,7 @@ class _ExamScreenState extends ConsumerState<ExamScreen> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('EHPLE Exam'),
+          title: const Text('COC Exam'),
           backgroundColor: theme.colorScheme.surface,
           foregroundColor: theme.colorScheme.onSurface,
           leading: CloseButton(onPressed: () {
