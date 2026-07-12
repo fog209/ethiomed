@@ -4,19 +4,26 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/errors/app_exception.dart';
+import '../../../main.dart' show supabaseInitializedProvider;
 
 class SubscriptionRepository {
-  final SupabaseClient _supabase;
+  final SupabaseClient? _supabase;
   final FlutterSecureStorage _secureStorage;
 
   SubscriptionRepository(this._supabase, {FlutterSecureStorage? secureStorage})
     : _secureStorage = secureStorage ?? const FlutterSecureStorage();
 
+  bool get _isAvailable => _supabase != null;
+
   static const String _lastSubCheckTimestampKey = 'last_sub_check_timestamp';
   static const Duration _gracePeriod = Duration(days: 30);
 
   Future<bool> checkSubscriptionStatus() async {
-    final user = _supabase.auth.currentUser;
+    if (!_isAvailable) {
+      // Offline mode: no subscription check possible, default to false
+      return false;
+    }
+    final user = _supabase!.auth.currentUser;
     if (user == null) return false;
 
     try {
@@ -115,9 +122,13 @@ class SubscriptionRepository {
   }
 }
 
-final subscriptionRepositoryProvider = Provider(
-  (ref) => SubscriptionRepository(Supabase.instance.client),
-);
+final subscriptionRepositoryProvider = Provider((ref) {
+  final isReady = ref.watch(supabaseInitializedProvider);
+  if (!isReady) {
+    return SubscriptionRepository(null);
+  }
+  return SubscriptionRepository(Supabase.instance.client);
+});
 
 final isSubscribedProvider = FutureProvider<bool>((ref) async {
   final repo = ref.watch(subscriptionRepositoryProvider);

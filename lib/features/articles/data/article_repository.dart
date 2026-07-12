@@ -14,13 +14,14 @@ import '../../../core/errors/error_exceptions.dart';
 import '../../../core/providers/connectivity_notifier.dart';
 import '../../../core/providers/sync_state_provider.dart';
 import '../../../core/services/postgrest_status_helper.dart';
+import '../../../main.dart' show supabaseInitializedProvider;
 import '../article_providers.dart';
 import '../domain/models/article.dart' as model;
 
 const int _articlesPageSize = 20;
 
 class ArticleRepository {
-  final SupabaseClient _supabase;
+  final SupabaseClient? _supabase;
   final AppDatabase _db;
   final VoidCallback _onServerUnreachable;
   final VoidCallback _onRateLimited;
@@ -38,7 +39,14 @@ class ArticleRepository {
     this._onSuccessfulSync,
   );
 
-Future<List<ArticleLocal>> fetchAndSyncArticles() async {
+  Future<List<ArticleLocal>> fetchAndSyncArticles() async {
+    // If Supabase not initialized, return local articles only (offline mode)
+    if (_supabase == null) {
+      debugPrint(
+        'ArticleRepository: Supabase not initialized — returning cached articles.',
+      );
+      return _db.select(_db.articles).get();
+    }
     // TODO: Implement rate limiter check - if user pulls more than 50 articles in 1 minute,
     // pause sync and show rate limit warning to prevent content scraping abuse.
     try {
@@ -50,32 +58,39 @@ Future<List<ArticleLocal>> fetchAndSyncArticles() async {
           .toList(growable: false);
 
       await _db.transaction(() async {
-         for (final article in remoteArticles) {
-           await _db
-               .into(_db.articles)
-               .insertOnConflictUpdate(
-                 ArticlesCompanion.insert(
-                   id: article.id,
-                   title: article.title,
-                   category: Value(article.subcategory.isNotEmpty
-                       ? article.subcategory
-                       : article.parentCategory),
-                   parentCategory: Value(article.parentCategory.isNotEmpty
-                       ? article.parentCategory
-                       : null),
-                    subcategory: Value(
-                        article.subcategory.isNotEmpty ? article.subcategory : null),
-                    categoryPath: Value(jsonEncode(article.category)),
-                    content: Value(jsonEncode(article.content ?? const <String, dynamic>{})),
-                    imageUrl: Value(article.imageUrl),
-                    videoUrl: Value(article.videoUrl),
-                    isHighYield: Value(article.isHighYield),
+        for (final article in remoteArticles) {
+          await _db
+              .into(_db.articles)
+              .insertOnConflictUpdate(
+                ArticlesCompanion.insert(
+                  id: article.id,
+                  title: article.title,
+                  category: Value(
+                    article.subcategory.isNotEmpty
+                        ? article.subcategory
+                        : article.parentCategory,
                   ),
-               );
-         }
-       });
+                  parentCategory: Value(
+                    article.parentCategory.isNotEmpty
+                        ? article.parentCategory
+                        : null,
+                  ),
+                  subcategory: Value(
+                    article.subcategory.isNotEmpty ? article.subcategory : null,
+                  ),
+                  categoryPath: Value(jsonEncode(article.category)),
+                  content: Value(
+                    jsonEncode(article.content ?? const <String, dynamic>{}),
+                  ),
+                  imageUrl: Value(article.imageUrl),
+                  videoUrl: Value(article.videoUrl),
+                  isHighYield: Value(article.isHighYield),
+                ),
+              );
+        }
+      });
 
-       _onSuccessfulSync();
+      _onSuccessfulSync();
     } on PostgrestException catch (e) {
       final status = postgrestStatus(e);
       if (status == 401) {
@@ -139,7 +154,9 @@ Future<List<ArticleLocal>> fetchAndSyncArticles() async {
       ..orderBy([(table) => OrderingTerm.asc(table.title)]);
 
     if (parentCategory != null && parentCategory.trim().isNotEmpty) {
-      query.where((table) => table.parentCategory.equals(parentCategory.trim()));
+      query.where(
+        (table) => table.parentCategory.equals(parentCategory.trim()),
+      );
     } else if (category != null && category.trim().isNotEmpty) {
       query.where((table) => table.category.equals(category.trim()));
     }
@@ -173,7 +190,9 @@ Future<List<ArticleLocal>> fetchAndSyncArticles() async {
       ..orderBy([(table) => OrderingTerm.asc(table.title)]);
 
     if (parentCategory != null && parentCategory.trim().isNotEmpty) {
-      query.where((table) => table.parentCategory.equals(parentCategory.trim()));
+      query.where(
+        (table) => table.parentCategory.equals(parentCategory.trim()),
+      );
     } else if (category.trim().isNotEmpty) {
       query.where((table) => table.category.equals(category.trim()));
     }
@@ -186,13 +205,19 @@ Future<List<ArticleLocal>> fetchAndSyncArticles() async {
       query.where((table) => table.isHighYield.equals(true));
     }
 
+    debugPrint(
+      'WATCH_ARTICLES_PAGED parentCategory="$parentCategory" '
+      'category="$category" subcategory="$subcategory" '
+      'highYieldOnly=$highYieldOnly',
+    );
+
     return (query
           ..orderBy([(table) => OrderingTerm.asc(table.title)])
           ..limit(limit, offset: offset < 0 ? 0 : offset))
         .watch();
   }
 
-Future<int> countArticlesInCategory(
+  Future<int> countArticlesInCategory(
     String category, {
     String? subcategory,
     String? parentCategory,
@@ -203,17 +228,17 @@ Future<int> countArticlesInCategory(
           where: (table) {
             final parentCategoryFilter =
                 parentCategory == null || parentCategory.trim().isEmpty
-                    ? null
-                    : table.parentCategory.equals(parentCategory.trim());
+                ? null
+                : table.parentCategory.equals(parentCategory.trim());
             final categoryFilter =
                 (parentCategory == null || parentCategory.trim().isEmpty) &&
-                        category.trim().isNotEmpty
-                    ? table.category.equals(category.trim())
-                    : null;
+                    category.trim().isNotEmpty
+                ? table.category.equals(category.trim())
+                : null;
             final subcategoryFilter =
                 subcategory == null || subcategory.trim().isEmpty
-                    ? null
-                    : table.subcategory.equals(subcategory.trim());
+                ? null
+                : table.subcategory.equals(subcategory.trim());
             final highYieldFilter = highYieldOnly
                 ? table.isHighYield.equals(true)
                 : null;
@@ -241,7 +266,9 @@ Future<int> countArticlesInCategory(
       ..orderBy([(table) => OrderingTerm.asc(table.title)]);
 
     if (parentCategory != null && parentCategory.trim().isNotEmpty) {
-      query.where((table) => table.parentCategory.equals(parentCategory.trim()));
+      query.where(
+        (table) => table.parentCategory.equals(parentCategory.trim()),
+      );
     } else if (category.trim().isNotEmpty) {
       query.where((table) => table.category.equals(category.trim()));
     }
@@ -254,10 +281,11 @@ Future<int> countArticlesInCategory(
       query.where((table) => table.isHighYield.equals(true));
     }
 
-    final result = (query
-          ..orderBy([(table) => OrderingTerm.asc(table.title)])
-          ..limit(_articlesPageSize, offset: offset))
-        .get();
+    final result =
+        (query
+              ..orderBy([(table) => OrderingTerm.asc(table.title)])
+              ..limit(_articlesPageSize, offset: offset))
+            .get();
 
     return result;
   }
@@ -272,9 +300,7 @@ Future<int> countArticlesInCategory(
   }
 
   Future<List<HighYieldArticle>> getHighYieldArticles() async {
-    final rows = await _db
-        .customSelect(
-          '''
+    final rows = await _db.customSelect('''
           SELECT article_id, COUNT(*) as exam_count,
                  GROUP_CONCAT(DISTINCT exam_year) as years,
                  GROUP_CONCAT(DISTINCT exam_source) as sources
@@ -282,36 +308,56 @@ Future<int> countArticlesInCategory(
           WHERE source_type = 'past_exam'
           GROUP BY article_id
           HAVING COUNT(*) >= 2
-          ''',
-        )
-        .get();
+          ''').get();
 
-    return rows.map((row) {
-      final yearsStr = row.read<String?>('years');
-      final years = yearsStr != null
-          ? yearsStr
-              .split(',')
-              .map((y) => int.tryParse(y.trim()))
-              .whereType<int>()
-              .toList(growable: false)
-          : const <int>[];
+    return rows
+        .map((row) {
+          final yearsStr = row.read<String?>('years');
+          final years = yearsStr != null
+              ? yearsStr
+                    .split(',')
+                    .map((y) => int.tryParse(y.trim()))
+                    .whereType<int>()
+                    .toList(growable: false)
+              : const <int>[];
 
-      final sourcesStr = row.read<String?>('sources');
-      final sources = sourcesStr != null
-          ? sourcesStr.split(',').toList(growable: false)
-          : const <String>[];
+          final sourcesStr = row.read<String?>('sources');
+          final sources = sourcesStr != null
+              ? sourcesStr.split(',').toList(growable: false)
+              : const <String>[];
 
-      return (
-        articleId: row.read<String>('article_id'),
-        examCount: row.read<int>('exam_count'),
-        years: years,
-        sources: sources,
-      );
-    }).toList(growable: false);
+          return (
+            articleId: row.read<String>('article_id'),
+            examCount: row.read<int>('exam_count'),
+            years: years,
+            sources: sources,
+          );
+        })
+        .toList(growable: false);
   }
 }
 
 final articleRepositoryProvider = Provider<ArticleRepository>((ref) {
+  final isReady = ref.watch(supabaseInitializedProvider);
+  if (!isReady) {
+    // Offline mode - return repo with null supabase client
+    return ArticleRepository(
+      null,
+      ref.watch(databaseProvider),
+      () {
+        ref.read(connectivityProvider.notifier).markOffline();
+        ref.read(syncStateProvider.notifier).setServerUnreachable();
+        ref.read(serverUnreachableProvider.notifier).markUnreachable();
+      },
+      () => ref.read(syncStateProvider.notifier).setRateLimited(),
+      () => ref.read(syncStateProvider.notifier).markSyncIncomplete(),
+      () => ref.read(syncStateProvider.notifier).setDiskFull(),
+      () {
+        ref.read(syncStateProvider.notifier).setSuccessfulSync();
+        ref.read(serverUnreachableProvider.notifier).markReachable();
+      },
+    );
+  }
   return ArticleRepository(
     Supabase.instance.client,
     ref.watch(databaseProvider),
@@ -369,8 +415,14 @@ class ArticlePageQuery {
   }
 
   @override
-  int get hashCode =>
-      Object.hash(limit, offset, category, subcategory, parentCategory, requestId);
+  int get hashCode => Object.hash(
+    limit,
+    offset,
+    category,
+    subcategory,
+    parentCategory,
+    requestId,
+  );
 }
 
 final paginatedArticlesProvider =
@@ -399,7 +451,11 @@ final articlesCountInCategoryProvider = FutureProvider.family<int, String>((
 });
 
 class ArticleCountQuery {
-  const ArticleCountQuery({required this.category, this.subcategory, this.parentCategory});
+  const ArticleCountQuery({
+    required this.category,
+    this.subcategory,
+    this.parentCategory,
+  });
 
   final String category;
   final String? subcategory;
@@ -512,7 +568,9 @@ class ArticleListController extends StateNotifier<ArticleListState> {
     }
 
     final shouldReset =
-        state.category != category || state.subcategory != subcategory || state.parentCategory != parentCategory;
+        state.category != category ||
+        state.subcategory != subcategory ||
+        state.parentCategory != parentCategory;
     final nextPage = shouldReset ? 1 : state.currentPage + 1;
 
     state = state.copyWith(
@@ -536,14 +594,21 @@ class ArticleListController extends StateNotifier<ArticleListState> {
         highYieldOnly: highYieldOnly,
       );
 
-      debugPrint('ArticleListController: Loaded ${pageArticles.length} articles for category="$category", parentCategory="$parentCategory"');
+      debugPrint(
+        'ArticleListController: Loaded ${pageArticles.length} articles for category="$category", parentCategory="$parentCategory", subcategory="$subcategory"',
+      );
+      debugPrint(
+        'ArticleListController TITLES subcategory="$subcategory": ${pageArticles.map((a) => a.title).join(' | ')}',
+      );
 
       if (!mounted) {
         return;
       }
 
       final previousArticles =
-          state.category == category && state.subcategory == subcategory && state.parentCategory == parentCategory
+          state.category == category &&
+              state.subcategory == subcategory &&
+              state.parentCategory == parentCategory
           ? state.articles
           : const <ArticleLocal>[];
       final combinedArticles = <ArticleLocal>[
