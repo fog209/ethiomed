@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -71,7 +72,9 @@ class SystemHealthScreen extends ConsumerWidget {
                   backgroundColor: theme.colorScheme.errorContainer,
                 ),
                 onPressed: () {
-                  FirebaseCrashlytics.instance.crash();
+                  if (kDebugMode) {
+                    FirebaseCrashlytics.instance.crash();
+                  }
                 },
                 child: const Text('Simulate Crash (Debug Only)'),
               ),
