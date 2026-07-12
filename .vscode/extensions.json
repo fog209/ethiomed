@@ -1,6 +1,7 @@
 {
     "recommendations": [
         "sst-dev.opencode",
-        "blackboxapp.blackbox"
+        "blackboxapp.blackbox",
+        "saoudrizwan.claude-dev"
     ]
 }
