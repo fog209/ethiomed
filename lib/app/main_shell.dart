@@ -8,10 +8,11 @@ import '../../../core/providers/connectivity_notifier.dart';
 import '../../../core/providers/session_timeout_provider.dart';
 import '../../../core/widgets/offline_banner.dart';
 import '../../../features/articles/data/article_repository.dart';
+import '../../../features/auth/data/auth_service.dart';
+import '../../../features/articles/data/content_update_service.dart';
 import '../../../features/articles/presentation/article_search_screen.dart';
 import '../../../features/bookmarks/presentation/bookmarks_screen.dart';
 import '../../../features/quiz/quiz_screen.dart';
-import '../../../features/progress/progress_screen.dart';
 import '../../../features/settings/presentation/settings_screen.dart';
 import '../../../features/subscription/data/subscription_repository.dart';
 import 'nav_provider.dart';
@@ -33,6 +34,9 @@ class _MainShellState extends ConsumerState<MainShell> {
   void initState() {
     super.initState();
     ref.read(sessionTimeoutProvider.notifier).resetTimer();
+    Future.microtask(
+      () => ref.read(contentUpdateServiceProvider).checkForUpdates(),
+    );
 
     // Periodic subscription check every 30 minutes (Part 4-A)
     _subscriptionTimer = Timer.periodic(const Duration(minutes: 30), (_) async {
@@ -46,6 +50,13 @@ class _MainShellState extends ConsumerState<MainShell> {
       } catch (e) {
         debugPrint('Periodic subscription check failed: $e');
         // Never throw - just log and skip
+      }
+      // Account-sharing cap: refresh this device's session heartbeat
+      // (updates last_seen_at) and prune over-cap / stale rows.
+      try {
+        await ref.read(authServiceProvider).refreshSessionHeartbeat();
+      } catch (e) {
+        debugPrint('Session heartbeat failed: $e');
       }
     });
   }
@@ -71,16 +82,16 @@ class _MainShellState extends ConsumerState<MainShell> {
     final selectedIndex = ref.watch(bottomNavIndexProvider);
     final isOnline = ref.watch(connectivityProvider);
     final serverUnreachable = ref.watch(serverUnreachableProvider);
+    final hasContentUpdate = ref.watch(contentUpdateAvailableProvider);
 
-    // IndexedStack has 7 children: Home, Library, Search, Saved, Quiz, Progress, Settings
+    // IndexedStack has 6 children: Home, Library, Search, Saved, Quiz, Settings
     final List<Widget> screens = [
       const HomeScreen(), // 0 - Home
       const CategoriesScreen(), // 1 - Library
       const ArticleSearchScreen(), // 2
       const BookmarksScreen(), // 3
       const QuizScreen(), // 4
-      const ProgressScreen(), // 5
-      const SettingsScreen(), // 6
+      const SettingsScreen(), // 5
     ];
 
     return Scaffold(
@@ -96,18 +107,28 @@ class _MainShellState extends ConsumerState<MainShell> {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: selectedIndex,
         onTap: (index) {
+          if (index == 1) {
+            ref.read(contentUpdateServiceProvider).markSeen();
+          }
           ref.read(bottomNavIndexProvider.notifier).state = index;
           ref.read(sessionTimeoutProvider.notifier).resetTimer();
         },
         type: BottomNavigationBarType.fixed,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.grid_view), label: 'Library'),
-          BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
-          BottomNavigationBarItem(icon: Icon(Icons.bookmark), label: 'Saved'),
-          BottomNavigationBarItem(icon: Icon(Icons.quiz), label: 'Quiz'),
-          BottomNavigationBarItem(icon: Icon(Icons.bar_chart_outlined), label: 'Progress'),
-          BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Settings'),
+        items: [
+          const BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+          BottomNavigationBarItem(
+            icon: hasContentUpdate
+                ? const Badge(
+                    isLabelVisible: true,
+                    child: Icon(Icons.grid_view),
+                  )
+                : const Icon(Icons.grid_view),
+            label: 'Library',
+          ),
+          const BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
+          const BottomNavigationBarItem(icon: Icon(Icons.bookmark), label: 'Saved'),
+          const BottomNavigationBarItem(icon: Icon(Icons.quiz), label: 'Quiz'),
+          const BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Settings'),
         ],
       ),
     );

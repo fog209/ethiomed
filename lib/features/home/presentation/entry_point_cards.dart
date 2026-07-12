@@ -42,9 +42,23 @@ class ExamModeEntryCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return _EntryCard(
       icon: Icons.assignment_turned_in,
-      title: 'EHPLE Exam Mode',
-      subtitle: '200 questions · Timed · EHPLE-weighted',
+      title: 'COC Exam Mode',
+      subtitle: '200 questions · Timed · COC-weighted',
       onTap: () => context.push('/exam-setup'),
+    );
+  }
+}
+
+class ProgressEntryCard extends ConsumerWidget {
+  const ProgressEntryCard({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return _EntryCard(
+      icon: Icons.bar_chart,
+      title: 'Progress',
+      subtitle: 'Streaks, heatmap & category stats',
+      onTap: () => context.push('/progress'),
     );
   }
 }

@@ -131,15 +131,6 @@ return progressAsyncValue.when(
                       color: theme.colorScheme.onSurface,
                     ),
                   ),
-                  const SizedBox(height: 6),
-                  Text(
-                    '${_categoryProgressRead(progress)}/${_categoryProgressTotal(progress)}',
-                    style: TextStyle(
-                      color: theme.colorScheme.onSurface,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
                   const SizedBox(height: 8),
                   LinearProgressIndicator(
                     minHeight: 3,
@@ -215,7 +206,6 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
         for (final cat in AppConfig.preclinicalCategories) {
           ref.invalidate(categoryProgressProvider(cat['name'] as String));
         }
-        ref.invalidate(categoryProgressProvider('General'));
       }));
     }
   }
@@ -271,9 +261,6 @@ todayPlanAsync.when(
               child: _buildSectionHeader('Preclinical'),
             ),
             _buildCategorySliverGrid(AppConfig.preclinicalCategories),
-            SliverToBoxAdapter(
-              child: _buildFallbackGeneralTile(),
-            ),
             const SliverToBoxAdapter(
               child: SizedBox(height: 80),
             ),
@@ -299,7 +286,6 @@ todayPlanAsync.when(
               for (final cat in AppConfig.preclinicalCategories) {
                 ref.invalidate(categoryProgressProvider(cat['name'] as String));
               }
-              ref.invalidate(categoryProgressProvider('General'));
             }),
           );
         },
@@ -774,10 +760,4 @@ const SizedBox(width: 8),
     );
   }
 
-  Widget _buildFallbackGeneralTile() {
-    return Padding(
-      padding: const EdgeInsets.only(top: 16),
-      child: const _CategoryTile(name: 'General', icon: Icons.folder),
-    );
-  }
 }

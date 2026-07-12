@@ -38,6 +38,7 @@ import 'features/quiz/presentation/exam_results_screen.dart';
 import 'features/quiz/presentation/exam_screen.dart';
 import 'features/quiz/presentation/exam_setup_screen.dart';
 import 'features/quiz/quiz_screen.dart';
+import 'features/progress/progress_screen.dart';
 import 'features/settings/presentation/system_health_screen.dart';
 import 'features/subscription/presentation/paywall_screen.dart';
 import 'features/subscription/data/subscription_repository.dart';
@@ -291,6 +292,10 @@ final _router = GoRouter(
     GoRoute(
       path: '/quiz',
       builder: (context, state) => const QuizScreen(),
+    ),
+    GoRoute(
+      path: '/progress',
+      builder: (context, state) => const ProgressScreen(),
     ),
     GoRoute(
       path: '/exam-setup',
