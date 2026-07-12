@@ -274,16 +274,15 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
           ),
           ContentFlagWidget(contentType: ContentType.article, contentId: article.id),
           StreamBuilder<List<Bookmark>>(
-            stream: (db.select(
-              db.bookmarks,
-            )..where((t) => t.articleId.equals(article.id))).watch(),
+            stream: (db.select(db.bookmarks)
+                  ..where((t) => t.articleId.equals(article.id)))
+                .watch(),
             builder: (context, snapshot) {
               if (snapshot.hasError) {
                 return const Center(
                   child: Text('Something went wrong. Pull down to retry.'),
                 );
               }
-
               final bookmarkList = snapshot.data;
               final isBookmarked =
                   bookmarkList != null && bookmarkList.isNotEmpty;
@@ -293,20 +292,19 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
                 ),
                 onPressed: () async {
                   if (isBookmarked) {
-                    await (db.delete(
-                      db.bookmarks,
-                    )..where((t) => t.articleId.equals(article.id))).go();
+                    await (db.delete(db.bookmarks)
+                          ..where((t) => t.articleId.equals(article.id)))
+                        .go();
                   } else {
                     await db
                         .into(db.bookmarks)
-                        .insert(
-                          BookmarksCompanion.insert(articleId: article.id),
-                        );
+                        .insert(BookmarksCompanion.insert(articleId: article.id));
                   }
                 },
               );
             },
           ),
+          _buildLearntButton(db, article.id),
         ],
       ),
       body: _buildBody(article, weakFields, highYieldMode, sections, imageUrl, videoUrl),
@@ -335,6 +333,8 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
                 borderRadius: BorderRadius.circular(12),
                 child: CachedNetworkImage(
                   imageUrl: imageUrl,
+                  memCacheWidth: 1280,
+                  memCacheHeight: 1280,
                   placeholder: (context, url) => _buildImagePlaceholder(),
                   errorWidget: (context, url, error) => Container(
                     color: theme.colorScheme.surfaceContainerHighest,
@@ -431,6 +431,39 @@ if (pastExamInfo == null || !pastExamInfo.isHighYield) {
           ArticleNotesSection(articleId: article.id),
         ],
       ),
+    );
+  }
+
+  Widget _buildLearntButton(AppDatabase db, String articleId) {
+    return StreamBuilder<List<LearntData>>(
+      stream: (db.select(db.learnt)
+            ..where((t) => t.articleId.equals(articleId)))
+          .watch(),
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return const SizedBox.shrink();
+        }
+        final learntList = snapshot.data;
+        final isLearnt = learntList != null && learntList.isNotEmpty;
+        return IconButton(
+          tooltip: 'Mark as learnt',
+          color: isLearnt ? Theme.of(context).colorScheme.secondary : null,
+          icon: Icon(
+            isLearnt ? Icons.school : Icons.school_outlined,
+          ),
+          onPressed: () async {
+            if (isLearnt) {
+              await (db.delete(db.learnt)
+                    ..where((t) => t.articleId.equals(articleId)))
+                  .go();
+            } else {
+              await db
+                  .into(db.learnt)
+                  .insert(LearntCompanion.insert(articleId: articleId));
+            }
+          },
+        );
+      },
     );
   }
 
