@@ -836,6 +836,202 @@ class BookmarksCompanion extends UpdateCompanion<Bookmark> {
   }
 }
 
+class $LearntTable extends Learnt with TableInfo<$LearntTable, LearntData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LearntTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _articleIdMeta = const VerificationMeta(
+    'articleId',
+  );
+  @override
+  late final GeneratedColumn<String> articleId = GeneratedColumn<String>(
+    'article_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES articles (id)',
+    ),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, articleId];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'learnt';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<LearntData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('article_id')) {
+      context.handle(
+        _articleIdMeta,
+        articleId.isAcceptableOrUnknown(data['article_id']!, _articleIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_articleIdMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  LearntData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LearntData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      articleId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}article_id'],
+      )!,
+    );
+  }
+
+  @override
+  $LearntTable createAlias(String alias) {
+    return $LearntTable(attachedDatabase, alias);
+  }
+}
+
+class LearntData extends DataClass implements Insertable<LearntData> {
+  final int id;
+  final String articleId;
+  const LearntData({required this.id, required this.articleId});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['article_id'] = Variable<String>(articleId);
+    return map;
+  }
+
+  LearntCompanion toCompanion(bool nullToAbsent) {
+    return LearntCompanion(id: Value(id), articleId: Value(articleId));
+  }
+
+  factory LearntData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LearntData(
+      id: serializer.fromJson<int>(json['id']),
+      articleId: serializer.fromJson<String>(json['articleId']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'articleId': serializer.toJson<String>(articleId),
+    };
+  }
+
+  LearntData copyWith({int? id, String? articleId}) =>
+      LearntData(id: id ?? this.id, articleId: articleId ?? this.articleId);
+  LearntData copyWithCompanion(LearntCompanion data) {
+    return LearntData(
+      id: data.id.present ? data.id.value : this.id,
+      articleId: data.articleId.present ? data.articleId.value : this.articleId,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LearntData(')
+          ..write('id: $id, ')
+          ..write('articleId: $articleId')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, articleId);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LearntData &&
+          other.id == this.id &&
+          other.articleId == this.articleId);
+}
+
+class LearntCompanion extends UpdateCompanion<LearntData> {
+  final Value<int> id;
+  final Value<String> articleId;
+  const LearntCompanion({
+    this.id = const Value.absent(),
+    this.articleId = const Value.absent(),
+  });
+  LearntCompanion.insert({
+    this.id = const Value.absent(),
+    required String articleId,
+  }) : articleId = Value(articleId);
+  static Insertable<LearntData> custom({
+    Expression<int>? id,
+    Expression<String>? articleId,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (articleId != null) 'article_id': articleId,
+    });
+  }
+
+  LearntCompanion copyWith({Value<int>? id, Value<String>? articleId}) {
+    return LearntCompanion(
+      id: id ?? this.id,
+      articleId: articleId ?? this.articleId,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (articleId.present) {
+      map['article_id'] = Variable<String>(articleId.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LearntCompanion(')
+          ..write('id: $id, ')
+          ..write('articleId: $articleId')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $ArticleNotesTable extends ArticleNotes
     with TableInfo<$ArticleNotesTable, ArticleNote> {
   @override
@@ -6972,6 +7168,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $ArticlesTable articles = $ArticlesTable(this);
   late final $BookmarksTable bookmarks = $BookmarksTable(this);
+  late final $LearntTable learnt = $LearntTable(this);
   late final $ArticleNotesTable articleNotes = $ArticleNotesTable(this);
   late final $StudySessionsTable studySessions = $StudySessionsTable(this);
   late final $QuizSessionsTable quizSessions = $QuizSessionsTable(this);
@@ -7003,6 +7200,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   List<DatabaseSchemaEntity> get allSchemaEntities => [
     articles,
     bookmarks,
+    learnt,
     articleNotes,
     studySessions,
     quizSessions,
@@ -7066,6 +7264,25 @@ final class $$ArticlesTableReferences
     ).filter((f) => f.articleId.id.sqlEquals($_itemColumn<String>('id')!));
 
     final cache = $_typedResult.readTableOrNull(_bookmarksRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$LearntTable, List<LearntData>> _learntRefsTable(
+    _$AppDatabase db,
+  ) => MultiTypedResultKey.fromTable(
+    db.learnt,
+    aliasName: $_aliasNameGenerator(db.articles.id, db.learnt.articleId),
+  );
+
+  $$LearntTableProcessedTableManager get learntRefs {
+    final manager = $$LearntTableTableManager(
+      $_db,
+      $_db.learnt,
+    ).filter((f) => f.articleId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_learntRefsTable($_db));
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: cache),
     );
@@ -7147,6 +7364,31 @@ class $$ArticlesTableFilterComposer
           }) => $$BookmarksTableFilterComposer(
             $db: $db,
             $table: $db.bookmarks,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> learntRefs(
+    Expression<bool> Function($$LearntTableFilterComposer f) f,
+  ) {
+    final $$LearntTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.learnt,
+      getReferencedColumn: (t) => t.articleId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$LearntTableFilterComposer(
+            $db: $db,
+            $table: $db.learnt,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -7288,6 +7530,31 @@ class $$ArticlesTableAnnotationComposer
     );
     return f(composer);
   }
+
+  Expression<T> learntRefs<T extends Object>(
+    Expression<T> Function($$LearntTableAnnotationComposer a) f,
+  ) {
+    final $$LearntTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.learnt,
+      getReferencedColumn: (t) => t.articleId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$LearntTableAnnotationComposer(
+            $db: $db,
+            $table: $db.learnt,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$ArticlesTableTableManager
@@ -7303,7 +7570,7 @@ class $$ArticlesTableTableManager
           $$ArticlesTableUpdateCompanionBuilder,
           (ArticleLocal, $$ArticlesTableReferences),
           ArticleLocal,
-          PrefetchHooks Function({bool bookmarksRefs})
+          PrefetchHooks Function({bool bookmarksRefs, bool learntRefs})
         > {
   $$ArticlesTableTableManager(_$AppDatabase db, $ArticlesTable table)
     : super(
@@ -7376,10 +7643,13 @@ class $$ArticlesTableTableManager
                 ),
               )
               .toList(),
-          prefetchHooksCallback: ({bookmarksRefs = false}) {
+          prefetchHooksCallback: ({bookmarksRefs = false, learntRefs = false}) {
             return PrefetchHooks(
               db: db,
-              explicitlyWatchedTables: [if (bookmarksRefs) db.bookmarks],
+              explicitlyWatchedTables: [
+                if (bookmarksRefs) db.bookmarks,
+                if (learntRefs) db.learnt,
+              ],
               addJoins: null,
               getPrefetchedDataCallback: (items) async {
                 return [
@@ -7397,6 +7667,21 @@ class $$ArticlesTableTableManager
                         table,
                         p0,
                       ).bookmarksRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) =>
+                          referencedItems.where((e) => e.articleId == item.id),
+                      typedResults: items,
+                    ),
+                  if (learntRefs)
+                    await $_getPrefetchedData<
+                      ArticleLocal,
+                      $ArticlesTable,
+                      LearntData
+                    >(
+                      currentTable: table,
+                      referencedTable: $$ArticlesTableReferences
+                          ._learntRefsTable(db),
+                      managerFromTypedResult: (p0) =>
+                          $$ArticlesTableReferences(db, table, p0).learntRefs,
                       referencedItemsForCurrentItem: (item, referencedItems) =>
                           referencedItems.where((e) => e.articleId == item.id),
                       typedResults: items,
@@ -7421,7 +7706,7 @@ typedef $$ArticlesTableProcessedTableManager =
       $$ArticlesTableUpdateCompanionBuilder,
       (ArticleLocal, $$ArticlesTableReferences),
       ArticleLocal,
-      PrefetchHooks Function({bool bookmarksRefs})
+      PrefetchHooks Function({bool bookmarksRefs, bool learntRefs})
     >;
 typedef $$BookmarksTableCreateCompanionBuilder =
     BookmarksCompanion Function({Value<int> id, required String articleId});
@@ -7665,6 +7950,246 @@ typedef $$BookmarksTableProcessedTableManager =
       $$BookmarksTableUpdateCompanionBuilder,
       (Bookmark, $$BookmarksTableReferences),
       Bookmark,
+      PrefetchHooks Function({bool articleId})
+    >;
+typedef $$LearntTableCreateCompanionBuilder =
+    LearntCompanion Function({Value<int> id, required String articleId});
+typedef $$LearntTableUpdateCompanionBuilder =
+    LearntCompanion Function({Value<int> id, Value<String> articleId});
+
+final class $$LearntTableReferences
+    extends BaseReferences<_$AppDatabase, $LearntTable, LearntData> {
+  $$LearntTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $ArticlesTable _articleIdTable(_$AppDatabase db) => db.articles
+      .createAlias($_aliasNameGenerator(db.learnt.articleId, db.articles.id));
+
+  $$ArticlesTableProcessedTableManager get articleId {
+    final $_column = $_itemColumn<String>('article_id')!;
+
+    final manager = $$ArticlesTableTableManager(
+      $_db,
+      $_db.articles,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_articleIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$LearntTableFilterComposer
+    extends Composer<_$AppDatabase, $LearntTable> {
+  $$LearntTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$ArticlesTableFilterComposer get articleId {
+    final $$ArticlesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.articleId,
+      referencedTable: $db.articles,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ArticlesTableFilterComposer(
+            $db: $db,
+            $table: $db.articles,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$LearntTableOrderingComposer
+    extends Composer<_$AppDatabase, $LearntTable> {
+  $$LearntTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$ArticlesTableOrderingComposer get articleId {
+    final $$ArticlesTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.articleId,
+      referencedTable: $db.articles,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ArticlesTableOrderingComposer(
+            $db: $db,
+            $table: $db.articles,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$LearntTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LearntTable> {
+  $$LearntTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  $$ArticlesTableAnnotationComposer get articleId {
+    final $$ArticlesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.articleId,
+      referencedTable: $db.articles,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ArticlesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.articles,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$LearntTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $LearntTable,
+          LearntData,
+          $$LearntTableFilterComposer,
+          $$LearntTableOrderingComposer,
+          $$LearntTableAnnotationComposer,
+          $$LearntTableCreateCompanionBuilder,
+          $$LearntTableUpdateCompanionBuilder,
+          (LearntData, $$LearntTableReferences),
+          LearntData,
+          PrefetchHooks Function({bool articleId})
+        > {
+  $$LearntTableTableManager(_$AppDatabase db, $LearntTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LearntTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$LearntTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$LearntTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> articleId = const Value.absent(),
+              }) => LearntCompanion(id: id, articleId: articleId),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String articleId,
+              }) => LearntCompanion.insert(id: id, articleId: articleId),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) =>
+                    (e.readTable(table), $$LearntTableReferences(db, table, e)),
+              )
+              .toList(),
+          prefetchHooksCallback: ({articleId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (articleId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.articleId,
+                                referencedTable: $$LearntTableReferences
+                                    ._articleIdTable(db),
+                                referencedColumn: $$LearntTableReferences
+                                    ._articleIdTable(db)
+                                    .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$LearntTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $LearntTable,
+      LearntData,
+      $$LearntTableFilterComposer,
+      $$LearntTableOrderingComposer,
+      $$LearntTableAnnotationComposer,
+      $$LearntTableCreateCompanionBuilder,
+      $$LearntTableUpdateCompanionBuilder,
+      (LearntData, $$LearntTableReferences),
+      LearntData,
       PrefetchHooks Function({bool articleId})
     >;
 typedef $$ArticleNotesTableCreateCompanionBuilder =
@@ -11140,6 +11665,8 @@ class $AppDatabaseManager {
       $$ArticlesTableTableManager(_db, _db.articles);
   $$BookmarksTableTableManager get bookmarks =>
       $$BookmarksTableTableManager(_db, _db.bookmarks);
+  $$LearntTableTableManager get learnt =>
+      $$LearntTableTableManager(_db, _db.learnt);
   $$ArticleNotesTableTableManager get articleNotes =>
       $$ArticleNotesTableTableManager(_db, _db.articleNotes);
   $$StudySessionsTableTableManager get studySessions =>

@@ -70,6 +70,13 @@ class Bookmarks extends Table {
   TextColumn get articleId => text().references(Articles, #id)();
 }
 
+/// Mirrors [Bookmarks] (articleId PK reference, no schema duplication).
+/// Tracks articles the user has marked as "Learnt".
+class Learnt extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get articleId => text().references(Articles, #id)();
+}
+
 class ArticleNotes extends Table {
   TextColumn get articleId => text()();
   TextColumn get noteText => text().withDefault(const Constant(''))();
@@ -248,6 +255,7 @@ class CaseProgress extends Table {
     tables: [
       Articles,
       Bookmarks,
+      Learnt,
       ArticleNotes,
       StudySessions,
      QuizSessions,
@@ -265,7 +273,7 @@ class CaseProgress extends Table {
    AppDatabase() : super(_openConnection());
 
     @override
-    int get schemaVersion => 19;
+    int get schemaVersion => 20;
 
   Future<void> _runMigrationStep(
     String name,
@@ -560,6 +568,12 @@ if (!columnNames.contains('exam_source')) {
             }
             if (from < 18) {
               await _runMigrationStep('create article notes table', () => m.createTable(articleNotes));
+            }
+            if (from < 20) {
+              await _runMigrationStep(
+                'create learnt table',
+                () => m.createTable(learnt),
+              );
             }
             if (from < 19) {
               await _runMigrationStep('backfill article taxonomy columns', () async {
