@@ -65,7 +65,24 @@ class _ArticleListScreenState extends ConsumerState<ArticleListScreen> {
   void _resetPagination({bool resetSubcategory = true}) {
     ref.read(articleCurrentCategoryProvider.notifier).state = widget.category;
     if (resetSubcategory) {
-      ref.read(subcategoryFilterProvider.notifier).state = null;
+      // When arriving at a specific subspecialty (parentCategory set and
+      // different from the route's category), scope the list to that
+      // subspecialty by default. Otherwise (the "View All" entry where
+      // category == parentCategory) default to "All" (null). Without this,
+      // leaf subspecialty screens fell back to subcategory=null, which filtered
+      // only on parentCategory and leaked every parent article into every
+      // subspecialty view.
+      final isSpecificSubcategory = widget.parentCategory != null &&
+          widget.parentCategory!.isNotEmpty &&
+          widget.category != widget.parentCategory;
+      ref.read(subcategoryFilterProvider.notifier).state =
+          isSpecificSubcategory ? widget.category : null;
+      debugPrint(
+        'RESET_PAGINATION category="${widget.category}" '
+        'parentCategory="${widget.parentCategory}" '
+        'isSpecificSubcategory=$isSpecificSubcategory '
+        'subcategoryFilter="${isSpecificSubcategory ? widget.category : null}"',
+      );
     }
     ref.read(articleRequestIdProvider.notifier).state =
         ref.read(articleRequestIdProvider) + 1;

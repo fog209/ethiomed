@@ -25,10 +25,39 @@ class TaxonomyConfig {
       'Gastroenterology',
       'Endocrinology',
     ],
-    // Pending confirmed curriculum lists — render flat for now.
-    'Pediatrics': <String>[],
-    'OB/GYN': <String>[],
-    'ENT': <String>[],
+    'Pediatrics': <String>[
+      'Neonatology',
+      'Growth, Development & Nutrition',
+      'Pediatric Infectious Diseases',
+      'Pediatric Pulmonology',
+      'Pediatric Cardiology',
+      'Pediatric Gastroenterology',
+      'Pediatric Nephrology & Urology',
+      'Pediatric Hematology & Oncology',
+      'Pediatric Neurology',
+      'Pediatric Endocrinology',
+      'Immunization & Preventive Care',
+      'Genetic, Congenital & Metabolic Disorders',
+    ],
+    'OB/GYN': <String>[
+      'Antenatal Care & Normal Pregnancy',
+      'Normal Labor & Delivery',
+      'Abnormal Labor & Delivery',
+      'High-Risk Pregnancy & Obstetric Complications',
+      'Postpartum Care',
+      'Menstrual Disorders',
+      'Family Planning & Contraception',
+      'Reproductive Infections',
+      'Reproductive Endocrinology & Infertility',
+      'Gynecologic Oncology & Benign Masses',
+    ],
+    'ENT': <String>[
+      'Basic Anatomy & Physiology',
+      'Ear & Hearing (Otology)',
+      'Nose & Sinuses (Rhinology)',
+      'Throat, Larynx & Voice',
+      'Head & Neck Masses',
+    ],
   };
 
   /// Returns the direct children of [specialty], or an empty list if it has
