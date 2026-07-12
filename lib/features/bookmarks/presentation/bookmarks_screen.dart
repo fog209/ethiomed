@@ -111,7 +111,12 @@ class BookmarksScreen extends ConsumerWidget {
 
             return ListTile(
               leading: Icon(icon, color: Theme.of(context).colorScheme.secondary),
-              title: Text(article.title),
+              title: Text(
+                article.title,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.secondary,
+                ),
+              ),
               onTap: () => context.push('/article-detail', extra: article),
             );
           },
