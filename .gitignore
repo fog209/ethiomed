@@ -74,3 +74,10 @@ android/key.properties
 # Firebase config (contains sensitive project IDs)
 # Note: google-services.json is not currently used - Firebase is optional
 # android/app/google-services.json
+
+# Build artifacts (do not commit release APKs/AABs)
+*.apk
+*.aab
+
+# Kilo agent scratch/plans
+.kilo/plans/
