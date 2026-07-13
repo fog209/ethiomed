@@ -8,8 +8,8 @@ class PaywallScreen extends ConsumerWidget {
   const PaywallScreen({super.key});
 
   // CHANGE THIS TO YOUR REAL TELEBIRR NUMBER
-  static const String telebirrNumber = "0911223344"; 
-  static const String telegramAdmin = "https://t.me/WardReadyAdmin";
+  static const String telebirrNumber = "0983313922";
+  static const String telegramAdmin = "https://t.me/thyk07";
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
