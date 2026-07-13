@@ -85,10 +85,13 @@ class AdminRepository {
 
   Future<void> activateUser(String userId) async {
     try {
-      final expiry = DateTime.now()
-          .toUtc()
-          .add(const Duration(days: 365))
-          .toIso8601String();
+      final now = DateTime.now().toUtc();
+      final totalMonths = now.month - 1 + 4;
+      final year = now.year + totalMonths ~/ 12;
+      final month = totalMonths % 12 + 1;
+      final lastDay = DateTime.utc(year, month + 1, 0).day;
+      final day = now.day > lastDay ? lastDay : now.day;
+      final expiry = DateTime.utc(year, month, day).toIso8601String();
       await _supabase.from('subscriptions').upsert({
         'user_id': userId,
         'is_active': true,
