@@ -2,7 +2,7 @@
 
 ```sql
 -- WardReady — Supabase Schema Snapshot
--- Last updated: 2026-06-19
+-- Last updated: 2026-07-15
 -- Update this file whenever you run DDL in the Supabase SQL Editor.
 -- KiloCode reads this to understand the DB without you explaining it.
 
@@ -101,10 +101,12 @@ CREATE INDEX idx_articles_updated_at ON articles(updated_at);
 -- RETIRED — do not use:
 -- "Cardiology" | "Neurology" | "Nephrology"
 
--- CLINICAL CONTENT SCHEMA (10 fields in jsonb):
+-- CLINICAL CONTENT SCHEMA (16 fields in jsonb, per ArticleContent model
+-- in lib/features/articles/models/article_model.dart):
 -- definition, epidemiology, etiology, pathophysiology,
 -- clinicalFeatures, diagnosis, treatment, complications,
--- ethiopianContext, mnemonics
+-- ethiopianContext, mnemonics, redFlags, approach,
+-- contraindications, dontMiss, clinicalPearls, examTraps
 
 -- ─────────────────────────────────────────────────────────────
 -- QUESTIONS (Phase 3 — F1 MCQ Practice Mode)
@@ -134,7 +136,38 @@ CREATE INDEX idx_questions_category ON questions(category);
 CREATE INDEX idx_questions_article  ON questions(article_id);
 
 -- ─────────────────────────────────────────────────────────────
--- CASES (deferred to v1.1)
+-- FLASHCARDS
+-- ─────────────────────────────────────────────────────────────
+
+-- Remote source table for spaced-repetition flashcards. Synced to the
+-- local Drift `flashcard_table` by QuizRepository.syncFlashcards()
+-- (lib/features/quiz/quiz_repository.dart). Columns (per
+-- _flashcardFromJson in that file):
+--   id, deck_name, front_text, back_text, source_article_id
+--
+-- RLS: SELECT is gated on an active subscription. Verified this session
+-- from pg_policies — table `flashcards`, cmd SELECT, roles {authenticated},
+-- qual: has_active_subscription(). Unsubscribed users are DENIED
+-- (PostgrestException surfaced in-app), NOT served an empty set.
+--
+-- ALTER TABLE flashcards ENABLE ROW LEVEL SECURITY;
+-- CREATE POLICY "Subscribed users read flashcards"
+--   ON flashcards FOR SELECT TO authenticated
+--   USING (has_active_subscription());
+--
+-- NOTE: the local Drift table is named `flashcard_table` (app_database.dart).
+-- That name does NOT exist as a remote Supabase table; the remote table
+-- queried by the app is `flashcards` (see SUPABASE_SECURITY.sql).
+
+-- ─────────────────────────────────────────────────────────────
+-- CASES
+-- CASES
+-- NOTE: Implemented locally in Drift as a 4-table schema
+-- (ClinicalCases, CaseStages, CaseOptions, CaseProgress) in
+-- lib/core/database/app_database.dart. NOT the single flat `cases`
+-- table sketched below, and NOT yet mirrored to a remote Supabase
+-- table. The commented block below is the original v1.1 sketch and is
+-- superseded — kept only for historical reference.
 -- ─────────────────────────────────────────────────────────────
 
 -- CREATE TABLE cases (

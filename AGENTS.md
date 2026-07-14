@@ -9,6 +9,9 @@ instruction for THAT task wins — but these rules apply by default.
 ## Identity
 - App name: WardReady. NEVER "EthioMed" (old name, retired — if you see
   it anywhere, flag it, don't silently rename in scope-creep).
+  (Exception: the Dart package `name:` in pubspec.yaml is still
+  `ethiomed` for historical reasons and is NOT safe to rename — it's an
+  internal identifier, not the product name. Leave it.)
 - applicationId: com.wardready.app
 - Offline-first Flutter Android APK. Medical education for Ethiopian
   health science students (EHPLE exam prep).
@@ -25,9 +28,11 @@ Exact pubspec.yaml packages — do not add, remove, or suggest alternatives:
 supabase_flutter, drift, sqlite3_flutter_libs, path_provider,
 flutter_secure_storage, flutter_riverpod, riverpod_annotation, dio,
 cached_network_image, shimmer, flutter_markdown, google_fonts,
-url_launcher, shared_preferences, package_info_plus, go_router,
-flutter_local_notifications, build_runner (dev), drift_dev (dev),
-riverpod_generator (dev)
+url_launcher, shared_preferences, go_router,
+flutter_local_notifications, share_plus, timezone, sqlite3, path,
+firebase_core, firebase_crashlytics, build_runner (dev),
+drift_dev (dev), riverpod_generator (dev), riverpod_lint (dev),
+flutter_lints (dev)
 
 If a task seems to need a new package: STOP and ask instead of adding
 it. This is the single most important rule in this file.
@@ -49,9 +54,11 @@ it. This is the single most important rule in this file.
 - Never use `print()`. `debugPrint()` only.
 - Never use `setState()` for business logic. Riverpod only.
   `setState()` is allowed only for purely local widget animation state.
-- Never add Firebase. Never add Sentry or any crash-reporting package
-  without an explicit go-ahead (it's a known gap, but the package
-  decision is the human's to make, not yours).
+- Firebase is present but scoped to crash reporting ONLY
+  (firebase_core + firebase_crashlytics, initialized in lib/main.dart).
+  Do NOT expand Firebase usage (no Analytics, Auth, Firestore, Messaging,
+  Remote Config, etc.) without an explicit go-ahead. Never add Sentry or
+  any additional crash-reporting package.
 - Never use `!` unless the value is provably non-null. Use `?.` / `??`.
 
 ## Database (Drift)
@@ -111,20 +118,21 @@ settings, theme toggle, session timeout, local notifications, admin
 dashboard, retry-wrong-answers, today's-plan card, read-time estimate,
 android:label fix, POST_NOTIFICATIONS permission, allowBackup=false,
 Proguard rules for Drift R8, edge-to-edge inset handling,
-secondaryContainer in darkTheme.
+secondaryContainer in darkTheme, Firebase Crashlytics crash reporting.
 
 ## Things explicitly NOT to start without a human go-ahead in that task
 Certificate pinning, accessibility audit, light theme customization,
 GitHub Actions CI, Play Store assets, privacy policy public hosting,
-crash reporting/Sentry, drug reference lookup, clinical calculators,
+drug reference lookup, clinical calculators,
 Amharic UI, weekly performance summary, outbox/sync queue, Impeller
 renderer + shader precompilation, SM-2 isolate offloading (blocked
 anyway by the "never modify spaced_repetition_service.dart" rule),
 token key rename ("ethiomed_" prefix in auth_service.dart).
 
 ## Things that will never be built — don't propose these
-A profession selector (Medicine only, by design). Firebase. Chapa,
-Stripe, or Play Billing (Telebirr only, manual activation).
+A profession selector (Medicine only, by design). Additional Firebase
+services beyond Crashlytics. Chapa, Stripe, or Play Billing (Telebirr
+only, manual activation).
 
 ## Release signing key & backups
 - Upload keystore backup location: <FILL IN>  (add the safe storage location where `android/app/upload-keystore.jks` is backed up)
