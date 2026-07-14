@@ -126,6 +126,12 @@ token key rename ("ethiomed_" prefix in auth_service.dart).
 A profession selector (Medicine only, by design). Firebase. Chapa,
 Stripe, or Play Billing (Telebirr only, manual activation).
 
+## Release signing key & backups
+- Upload keystore backup location: <FILL IN>  (add the safe storage location where `android/app/upload-keystore.jks` is backed up)
+- The upload keystore (`android/app/upload-keystore.jks`) and `android/key.properties` are gitignored and MUST NOT be committed.
+- If the upload keystore is lost, Google Play App Signing can issue an upload-key reset; keep the Play Console recovery info safe.
+- Supabase managed DB backups (daily + Point-in-Time Recovery) and Supabase project settings are dashboard-only and are NOT captured in this repo — verify them manually in the Supabase dashboard (Project Settings → Database → Backups).
+
 ## Working style
 - One task at a time. Don't bundle unrelated fixes into one commit.
 - Don't summarize a plan as if it's done — actually make the change,
