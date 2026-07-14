@@ -364,6 +364,12 @@ class QuizRepository {
       });
 
       return flashcards.length;
+    } on PostgrestException catch (e) {
+      // Permission denied / RLS rejection / network — do NOT treat as
+      // "0 new cards". Rethrow so the caller can show a real error
+      // instead of a misleading "items updated" success message.
+      debugPrint('Sync flashcards error (permission/network): ${e.message}');
+      rethrow;
     } catch (e) {
       debugPrint('Sync flashcards error: $e');
       return 0;

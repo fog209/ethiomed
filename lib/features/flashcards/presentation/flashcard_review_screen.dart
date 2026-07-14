@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/database/app_database.dart';
 import '../../../core/services/security_service.dart';
@@ -61,6 +62,15 @@ class _FlashcardReviewScreenState extends ConsumerState<FlashcardReviewScreen> {
       try {
         final flashcardsCount = await repository.syncFlashcards();
         totalUpdated += flashcardsCount;
+      } on PostgrestException catch (e) {
+        debugPrint('Flashcards sync failed: ${e.message}');
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Flashcard sync failed: ${e.message}'),
+            ),
+          );
+        }
       } catch (e) {
         debugPrint('Flashcards sync failed: $e');
       }
