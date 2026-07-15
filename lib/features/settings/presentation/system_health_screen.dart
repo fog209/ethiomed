@@ -67,17 +67,16 @@ class SystemHealthScreen extends ConsumerWidget {
                 onPressed: () => _exportDiagnosticLog(data, context),
               ),
               const SizedBox(height: 16),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: theme.colorScheme.errorContainer,
-                ),
-                onPressed: () {
-                  if (kDebugMode) {
+              if (kDebugMode)
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: theme.colorScheme.errorContainer,
+                  ),
+                  onPressed: () {
                     FirebaseCrashlytics.instance.crash();
-                  }
-                },
-                child: const Text('Simulate Crash (Debug Only)'),
-              ),
+                  },
+                  child: const Text('Simulate Crash (Debug Only)'),
+                ),
             ],
           );
         },
