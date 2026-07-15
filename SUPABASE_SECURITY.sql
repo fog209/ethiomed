@@ -2,7 +2,7 @@
 
 -- Enable Row Level Security for all content tables
 ALTER TABLE articles ENABLE ROW LEVEL SECURITY;
-ALTER TABLE quiz_table ENABLE ROW LEVEL SECURITY;
+ALTER TABLE questions ENABLE ROW LEVEL SECURITY;
 -- NOTE: the remote flashcards table is named `flashcards` (NOT
 -- `flashcard_table`, which is the LOCAL Drift table). Flashcards use a
 -- subscription-gated SELECT policy, NOT the anon-select pattern below.
@@ -21,17 +21,17 @@ FOR UPDATE TO anon USING (false);
 CREATE POLICY IF NOT EXISTS "articles_anon_delete_block" ON articles
 FOR DELETE TO anon USING (false);
 
--- Policy for quiz_table: allow anon SELECT only
-CREATE POLICY IF NOT EXISTS "quiz_anon_select" ON quiz_table
+-- Policy for questions: allow anon SELECT only
+CREATE POLICY IF NOT EXISTS "quiz_anon_select" ON questions
 FOR SELECT TO anon USING (true);
 
-CREATE POLICY IF NOT EXISTS "quiz_anon_insert_block" ON quiz_table
+CREATE POLICY IF NOT EXISTS "quiz_anon_insert_block" ON questions
 FOR INSERT TO anon USING (false);
 
-CREATE POLICY IF NOT EXISTS "quiz_anon_update_block" ON quiz_table
+CREATE POLICY IF NOT EXISTS "quiz_anon_update_block" ON questions
 FOR UPDATE TO anon USING (false);
 
-CREATE POLICY IF NOT EXISTS "quiz_anon_delete_block" ON quiz_table
+CREATE POLICY IF NOT EXISTS "quiz_anon_delete_block" ON questions
 FOR DELETE TO anon USING (false);
 
 -- (removed) flashcard_table anon policies — that table does not exist in
