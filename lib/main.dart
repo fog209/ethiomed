@@ -200,6 +200,13 @@ final _router = GoRouter(
             .catchError((_) => null);
         final isAdmin = profile?['is_admin'] == true;
 
+        // Admin-only route: block non-admins at the router level, matching
+        // the strictness of the login/subscription gate. RLS also limits
+        // data exposure, but the screen must not be reachable by non-admins.
+        if (location == '/admin' && !isAdmin) {
+          return '/home';
+        }
+
         if (isAdmin) {
           if (location == '/') return '/home';
           return null;
