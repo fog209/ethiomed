@@ -94,7 +94,6 @@ class AdminRepository {
       final expiry = DateTime.utc(year, month, day).toIso8601String();
       await _supabase.from('subscriptions').upsert({
         'user_id': userId,
-        'is_active': true,
         'status': 'active',
         'expiry_date': expiry,
         'activated_at': DateTime.now().toUtc().toIso8601String(),
