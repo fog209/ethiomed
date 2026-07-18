@@ -37,6 +37,12 @@ class _MainShellState extends ConsumerState<MainShell> {
     Future.microtask(
       () => ref.read(contentUpdateServiceProvider).checkForUpdates(),
     );
+    // Pull the (small) section registry once at launch so the article
+    // renderer can look up icon/label/order for section keys without an
+    // app update. Full-pull by design — no badge/diff logic.
+    Future.microtask(
+      () => ref.read(contentUpdateServiceProvider).syncSectionRegistry(),
+    );
 
     // Periodic subscription check every 30 minutes (Part 4-A)
     _subscriptionTimer = Timer.periodic(const Duration(minutes: 30), (_) async {

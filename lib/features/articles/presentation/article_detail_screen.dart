@@ -2,16 +2,22 @@ import 'dart:convert';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:drift/drift.dart' show Variable;
+// ignore_for_file: depend_on_referenced_packages
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:markdown/markdown.dart' as md;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../features/articles/presentation/article_markdown_helpers.dart';
+
 import '../../../core/database/app_database.dart';
 import '../../../features/articles/article_providers.dart';
+import '../../../features/articles/data/content_update_service.dart';
+import '../../../features/articles/models/article_model.dart';
 import '../../../features/articles/presentation/article_notes_section.dart';
 import '../../../features/content/data/content_flag_service.dart';
 import '../../../features/content/presentation/content_flag_widget.dart';
@@ -88,18 +94,6 @@ final _medicalTerms = <String>{
   'esrd',
 };
 
-class _ClinicalSectionConfig {
-  const _ClinicalSectionConfig({
-    required this.title,
-    required this.icon,
-    this.initiallyExpanded = false,
-  });
-
-  final String title;
-  final IconData icon;
-  final bool initiallyExpanded;
-}
-
 class ArticleDetailScreen extends ConsumerStatefulWidget {
   final ArticleLocal? article;
   final String? articleId;
@@ -114,6 +108,7 @@ class ArticleDetailScreen extends ConsumerStatefulWidget {
 
 class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
   bool _showLowYieldSections = false;
+  bool _filterHighYieldBody = false;
   final ScrollController _scrollController = ScrollController();
 
   @override
@@ -246,12 +241,12 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
     final weakFieldsAsync = ref.watch(weakFieldsProvider(article.id));
     final weakFields = weakFieldsAsync.value ?? const <String>{};
     final highYieldMode = ref.watch(highYieldModeProvider);
-    final sections = _decodeSections(article.content);
+    final articleContent = _decodeSections(article.content);
     final imageUrl = article.imageUrl;
     final videoUrl = article.videoUrl;
 
     final theme = Theme.of(context);
-    if (sections.isEmpty) {
+    if (articleContent.sections.isEmpty) {
       return _buildEmptyArticleFallback(context);
     }
 
@@ -271,6 +266,24 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
             onPressed: () =>
                 ref.read(highYieldModeProvider.notifier).state = !highYieldMode,
             icon: Icon(highYieldMode ? Icons.bolt : Icons.bolt_outlined),
+          ),
+          Tooltip(
+            message: 'Hide Strong-tier bullets within sections',
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text('HY'),
+                Switch(
+                  value: _filterHighYieldBody,
+                  activeColor: theme.colorScheme.secondary,
+                  onChanged: (value) {
+                    setState(() {
+                      _filterHighYieldBody = value;
+                    });
+                  },
+                ),
+              ],
+            ),
           ),
           ContentFlagWidget(contentType: ContentType.article, contentId: article.id),
           StreamBuilder<List<Bookmark>>(
@@ -307,7 +320,7 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
           _buildLearntButton(db, article.id),
         ],
       ),
-      body: _buildBody(article, weakFields, highYieldMode, sections, imageUrl, videoUrl),
+      body: _buildBody(article, weakFields, highYieldMode, articleContent, imageUrl, videoUrl),
     );
   }
 
@@ -315,7 +328,7 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
     ArticleLocal article,
     Set<String> weakFields,
     bool highYieldMode,
-    Map<String, Object?> sections,
+    ArticleContent articleContent,
     String? imageUrl,
     String? videoUrl,
   ) {
@@ -402,7 +415,12 @@ if (pastExamInfo == null || !pastExamInfo.isHighYield) {
              );
            }),
 
-           ..._buildClinicalSections(sections, weakFields, highYieldMode),
+           ..._buildClinicalSections(
+            articleContent,
+            weakFields,
+            highYieldMode,
+            category: article.category,
+          ),
 
           const SizedBox(height: 20),
 
@@ -550,134 +568,214 @@ if (pastExamInfo == null || !pastExamInfo.isHighYield) {
 
   static const _lowYieldFields = <String>{'definition', 'epidemiology'};
 
-static const _clinicalSections = <String, _ClinicalSectionConfig>{
-    'definition': _ClinicalSectionConfig(
-      title: '📝 Definition',
-      icon: Icons.info_outline,
-    ),
-    'epidemiology': _ClinicalSectionConfig(
-      title: '🌍 Epidemiology',
-      icon: Icons.public,
-    ),
-    'etiology': _ClinicalSectionConfig(
-      title: '🧬 Etiology',
-      icon: Icons.biotech,
-    ),
-    'pathophysiology': _ClinicalSectionConfig(
-      title: '🔬 Pathophysiology',
-      icon: Icons.psychology_outlined,
-    ),
-    'clinicalFeatures': _ClinicalSectionConfig(
-      title: '🩺 Clinical Features',
-      icon: Icons.list_alt,
-    ),
-    'redFlags': _ClinicalSectionConfig(
-      title: '🚩 Red Flags',
-      icon: Icons.warning_rounded,
-      initiallyExpanded: true,
-    ),
-    'approach': _ClinicalSectionConfig(
-      title: '🧭 Approach',
-      icon: Icons.format_list_numbered,
-      initiallyExpanded: true,
-    ),
-    'diagnosis': _ClinicalSectionConfig(
-      title: '🔎 Diagnosis',
-      icon: Icons.search,
-    ),
-    'treatment': _ClinicalSectionConfig(
-      title: '💊 Treatment',
-      icon: Icons.medication,
-    ),
-    'contraindications': _ClinicalSectionConfig(
-      title: '🛑 Contraindications',
-      icon: Icons.report_problem_outlined,
-    ),
-    'dontMiss': _ClinicalSectionConfig(
-      title: "🚨 Don't Miss",
-      icon: Icons.priority_high,
-    ),
-    'complications': _ClinicalSectionConfig(
-      title: '⚠️ Complications',
-      icon: Icons.warning_amber_rounded,
-    ),
-    'clinicalPearls': _ClinicalSectionConfig(
-      title: '💡 Clinical Pearls',
-      icon: Icons.lightbulb_outline,
-    ),
-    'ethiopianContext': _ClinicalSectionConfig(
-      title: '🇪🇹 Ethiopian Clinical Pearl',
-      icon: Icons.local_hospital_outlined,
-      initiallyExpanded: true,
-    ),
-    'mnemonics': _ClinicalSectionConfig(
-      title: '🧠 Mnemonics',
-      icon: Icons.auto_awesome_mosaic_outlined,
-    ),
-    'examTraps': _ClinicalSectionConfig(
-      title: '📋 Exam Traps',
-      icon: Icons.help_outline,
-    ),
+  /// Maps the Supabase `section_registry.icon_name` string (and the legacy
+  /// `_ClinicalSectionConfig.icon`) to a Flutter [IconData]. Unknown names fall
+  /// back to [Icons.article_outlined] (see [_resolveSectionMeta]). Extend this
+  /// with one line whenever a genuinely new field gets a real icon — the part
+  /// that actually matters (label/order) is already dynamic from the registry.
+  static const Map<String, IconData> _iconByName = {
+    'info_outline': Icons.info_outline,
+    'public': Icons.public,
+    'biotech': Icons.biotech,
+    'psychology_outlined': Icons.psychology_outlined,
+    'list_alt': Icons.list_alt,
+    'warning_rounded': Icons.warning_rounded,
+    'format_list_numbered': Icons.format_list_numbered,
+    'search': Icons.search,
+    'medication': Icons.medication,
+    'report_problem_outlined': Icons.report_problem_outlined,
+    'priority_high': Icons.priority_high,
+    'warning_amber_rounded': Icons.warning_amber_rounded,
+    'lightbulb_outline': Icons.lightbulb_outline,
+    'local_hospital_outlined': Icons.local_hospital_outlined,
+    'auto_awesome_mosaic_outlined': Icons.auto_awesome_mosaic_outlined,
+    'help_outline': Icons.help_outline,
   };
 
-  List<Widget> _buildClinicalSections(
-    Map<String, Object?> sections,
-    Set<String> weakFields,
-    bool highYieldMode,
-  ) {
-    return _clinicalSectionOrder
-        .map((key) {
-          final config = _clinicalSections[key];
-          if (config == null) {
-            return null;
-          }
+  /// In-code fallback labels/icons for the 16 existing keys, used when the
+  /// local `section_registry` cache is empty (offline / not yet synced). Mirrors
+  /// the seed in `supabase/migrations/0002_section_registry.sql` so existing
+  /// content renders identically without the registry present.
+  static const Map<String, String> _fallbackLabels = {
+    'definition': '📝 Definition',
+    'epidemiology': '🌍 Epidemiology',
+    'etiology': '🧬 Etiology',
+    'pathophysiology': '🔬 Pathophysiology',
+    'clinicalFeatures': '🩺 Clinical Features',
+    'redFlags': '🚩 Red Flags',
+    'approach': '🧭 Approach',
+    'diagnosis': '🔎 Diagnosis',
+    'treatment': '💊 Treatment',
+    'contraindications': '🛑 Contraindications',
+    'dontMiss': "🚨 Don't Miss",
+    'complications': '⚠️ Complications',
+    'clinicalPearls': '💡 Clinical Pearls',
+    'ethiopianContext': '🇪🇹 Ethiopian Clinical Pearl',
+    'mnemonics': '🧠 Mnemonics',
+    'examTraps': '📋 Exam Traps',
+  };
 
-          final isLowYield = _lowYieldFields.contains(key);
-          if (highYieldMode && isLowYield && !_showLowYieldSections) {
-            if (key == 'definition') {
-              return _buildShowLowYieldButton();
-            }
-            return null;
-          }
+  static const Map<String, String> _fallbackIconNames = {
+    'definition': 'info_outline',
+    'epidemiology': 'public',
+    'etiology': 'biotech',
+    'pathophysiology': 'psychology_outlined',
+    'clinicalFeatures': 'list_alt',
+    'redFlags': 'warning_rounded',
+    'approach': 'format_list_numbered',
+    'diagnosis': 'search',
+    'treatment': 'medication',
+    'contraindications': 'report_problem_outlined',
+    'dontMiss': 'priority_high',
+    'complications': 'warning_amber_rounded',
+    'clinicalPearls': 'lightbulb_outline',
+    'ethiopianContext': 'local_hospital_outlined',
+    'mnemonics': 'auto_awesome_mosaic_outlined',
+    'examTraps': 'help_outline',
+  };
 
-          final content = _markdownContent(sections[key]);
-          if (content == null) {
-            return null;
-          }
-
-final isWeak =
-               weakFields.contains(key) &&
-               !_nonHighlightableWeakFields.contains(key);
-           final isHighYield = highYieldMode && _highYieldFields.contains(key);
-           final isMediumYield =
-               highYieldMode && _mediumYieldFields.contains(key);
-           final isEthiopianContext = key == 'ethiopianContext';
-           final initiallyExpanded = highYieldMode && isHighYield
-               ? true
-               : isMediumYield
-                   ? false
-                   : config.initiallyExpanded;
-final theme = Theme.of(context);
-           final borderColor = isHighYield ? theme.colorScheme.secondary : theme.colorScheme.outline;
-           final borderWidth = isHighYield ? 3.0 : 4.0;
-           final backgroundColor = isEthiopianContext
-               ? const Color(0xFFE8F5E9)
-               : theme.colorScheme.surfaceContainerHighest;
-
-          return _buildMarkdownExpansionTile(
-            title: config.title,
-            content: content,
-            icon: config.icon,
-            initiallyExpanded: initiallyExpanded,
-            backgroundColor: backgroundColor,
-            borderColor: borderColor,
-            borderWidth: borderWidth,
-            isWeak: isWeak,
-          );
-        })
-        .whereType<Widget>()
-        .toList(growable: false);
+  /// Humanizes a camelCase key into a title-case label (e.g. `theWardScenario`
+  /// → "The Ward Scenario"). Used as the label fallback for a genuinely new
+  /// section key that has no registry entry yet.
+  static String _humanizeKey(String key) {
+    final spaced = key.replaceAllMapped(
+      RegExp(r'(?<=[a-z])[A-Z]'),
+      (m) => ' ${m[0]}',
+    );
+    final trimmed = spaced.trim();
+    if (trimmed.isEmpty) return key;
+    return trimmed[0].toUpperCase() + trimmed.substring(1);
   }
+
+  /// Resolves display metadata for a section [key].
+  ///
+  /// Priority:
+  /// 1. Local `section_registry` cache entry (from Supabase) that is enabled,
+  ///    with a per-category label override (when [category] matches one in the
+  ///    registry entry's `category_label_overrides`).
+  /// 2. In-code fallback (known 16 keys) — keeps existing content identical
+  ///    when the registry hasn't synced yet.
+  /// 3. Unknown key: humanized label, default order, default icon. This is the
+  ///    "dynamic for the future" guarantee — a new field renders reasonably
+  ///    before anyone touches app code.
+  ({String label, String? iconName, int order, bool initiallyExpanded})
+      _resolveSectionMeta(String key, {String? category}) {
+    final registry = ref.read(sectionRegistryProvider)[key];
+    if (registry != null && registry.enabled) {
+      final overrides = registry.parsedCategoryLabelOverrides;
+      final overrideLabel =
+          category != null && overrides != null ? overrides[category] : null;
+      return (
+        label: overrideLabel ?? registry.label,
+        iconName: registry.iconName,
+        order: registry.displayOrder,
+        initiallyExpanded: _defaultExpandedFor(key),
+      );
+    }
+
+    if (_fallbackLabels.containsKey(key)) {
+      return (
+        label: _fallbackLabels[key]!,
+        iconName: _fallbackIconNames[key],
+        order: _clinicalSectionOrder.indexOf(key),
+        initiallyExpanded: _defaultExpandedFor(key),
+      );
+    }
+
+    return (
+      label: _humanizeKey(key),
+      iconName: null,
+      order: 999,
+      initiallyExpanded: _defaultExpandedFor(key),
+    );
+  }
+
+  /// Preserves the existing per-section "expanded by default" behavior: red
+  /// flags, approach, and Ethiopian context start expanded.
+  bool _defaultExpandedFor(String key) =>
+      key == 'redFlags' || key == 'approach' || key == 'ethiopianContext';
+
+  List<Widget> _buildClinicalSections(
+    ArticleContent articleContent,
+    Set<String> weakFields,
+    bool highYieldMode, {
+    String? category,
+  }) {
+    final theme = Theme.of(context);
+
+    // Resolve metadata + sort: registry order first (including fallback order
+    // for known keys), unknown keys (order 999) appended in array order.
+    final resolved = articleContent.sections.map((section) {
+      final meta = _resolveSectionMeta(section.key, category: category);
+      return (section: section, meta: meta);
+    }).toList();
+
+    resolved.sort((a, b) {
+      final orderDiff = a.meta.order.compareTo(b.meta.order);
+      if (orderDiff != 0) return orderDiff;
+      // Stable secondary sort by original array position.
+      return articleContent.sections
+          .indexOf(a.section)
+          .compareTo(articleContent.sections.indexOf(b.section));
+    });
+
+    final widgets = <Widget>[];
+    for (final item in resolved) {
+      final key = item.section.key;
+      final meta = item.meta;
+
+      final isLowYield = _lowYieldFields.contains(key);
+      if (highYieldMode && isLowYield && !_showLowYieldSections) {
+        if (key == 'definition') {
+          widgets.add(_buildShowLowYieldButton());
+        }
+        continue;
+      }
+
+      final rawBody = _filterHighYieldBody
+          ? applyHighYieldFilter(item.section.body)
+          : item.section.body;
+      final content = _markdownContent(rawBody);
+      if (content == null) {
+        continue;
+      }
+
+      final isWeak = weakFields.contains(key) &&
+          !_nonHighlightableWeakFields.contains(key);
+      final isHighYield = highYieldMode && _highYieldFields.contains(key);
+      final isMediumYield = highYieldMode && _mediumYieldFields.contains(key);
+      final isEthiopianContext = key == 'ethiopianContext';
+      final initiallyExpanded = highYieldMode && isHighYield
+          ? true
+          : isMediumYield
+              ? false
+              : meta.initiallyExpanded;
+      final borderColor = isHighYield
+          ? theme.colorScheme.secondary
+          : theme.colorScheme.outline;
+      final borderWidth = isHighYield ? 3.0 : 4.0;
+      final backgroundColor = isEthiopianContext
+          ? const Color(0xFFE8F5E9)
+          : theme.colorScheme.surfaceContainerHighest;
+      final icon = _iconByName[meta.iconName] ?? Icons.article_outlined;
+
+      widgets.add(
+        _buildMarkdownExpansionTile(
+          title: meta.label,
+          content: content,
+          icon: icon,
+          initiallyExpanded: initiallyExpanded,
+          backgroundColor: backgroundColor,
+          borderColor: borderColor,
+          borderWidth: borderWidth,
+          isWeak: isWeak,
+        ),
+      );
+    }
+
+    return widgets;
+  }
+
 
 Widget _buildShowLowYieldButton() {
     final theme = Theme.of(context);
@@ -809,6 +907,13 @@ Padding(
               padding: const EdgeInsets.all(16.0),
               child: MarkdownBody(
                 data: linkedContent,
+                extensionSet: md.ExtensionSet.gitHubWeb,
+                builders: <String, MarkdownElementBuilder>{
+                  'table': ScrollableTableBuilder(
+                    zebraA: theme.colorScheme.surfaceContainerHighest,
+                    zebraB: theme.colorScheme.surface,
+                  ),
+                },
                 styleSheet: MarkdownStyleSheet.fromTheme(theme).copyWith(
                   p: TextStyle(color: Theme.of(context).colorScheme.onSurface),
                   a: TextStyle(
@@ -889,21 +994,21 @@ Padding(
     }
   }
 
-  Map<String, Object?> _decodeSections(String? encodedContent) {
+  ArticleContent _decodeSections(String? encodedContent) {
     if (encodedContent == null || encodedContent.trim().isEmpty) {
-      return const <String, Object?>{};
+      return const ArticleContent();
     }
 
     try {
       final decoded = jsonDecode(encodedContent);
       if (decoded is Map<String, dynamic>) {
-        return decoded.map((key, value) => MapEntry(key, value));
+        return ArticleContent.fromJson(decoded);
       }
     } catch (error) {
       debugPrint('Unable to decode article content: $error');
     }
 
-    return const <String, Object?>{};
+    return const ArticleContent();
   }
 
   String? _markdownContent(Object? value) {

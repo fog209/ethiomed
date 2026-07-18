@@ -101,12 +101,16 @@ CREATE INDEX idx_articles_updated_at ON articles(updated_at);
 -- RETIRED — do not use:
 -- "Cardiology" | "Neurology" | "Nephrology"
 
--- CLINICAL CONTENT SCHEMA (16 fields in jsonb, per ArticleContent model
--- in lib/features/articles/models/article_model.dart):
--- definition, epidemiology, etiology, pathophysiology,
--- clinicalFeatures, diagnosis, treatment, complications,
--- ethiopianContext, mnemonics, redFlags, approach,
--- contraindications, dontMiss, clinicalPearls, examTraps
+-- CLINICAL CONTENT SCHEMA (jsonb, per ArticleContent model in
+-- lib/features/articles/models/article_model.dart). Migrated in Phase 4 to
+-- the dynamic sections shape:
+--   { "schemaVersion": 2,
+--     "sections": [ { "key": "<fieldKey>", "body": "<markdown>" }, ... ] }
+-- Section keys are resolved at render time via the section_registry table
+-- (see 0002_section_registry.sql) plus in-code fallbacks; the 16 known keys
+-- are: definition, epidemiology, etiology, pathophysiology, clinicalFeatures,
+-- diagnosis, treatment, complications, ethiopianContext, mnemonics, redFlags,
+-- approach, contraindications, dontMiss, clinicalPearls, examTraps.
 
 -- ─────────────────────────────────────────────────────────────
 -- QUESTIONS (Phase 3 — F1 MCQ Practice Mode)

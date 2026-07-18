@@ -40,6 +40,28 @@ class Articles extends Table {
   Set<Column> get primaryKey => {id};
 }
 
+/// Local cache of the Supabase `section_registry` table. Provides icon/label/
+/// display-order metadata for article content section keys so a brand-new
+/// section type can be rendered without an app update. Synced in full on app
+/// launch via [ContentUpdateService.syncSectionRegistry].
+@DataClassName('SectionRegistryEntry')
+class SectionRegistry extends Table {
+  TextColumn get key => text()();
+  TextColumn get label => text()();
+  TextColumn get iconName => text().nullable()();
+  IntColumn get displayOrder => integer().withDefault(const Constant(999))();
+  TextColumn get appliesTo => text().nullable()();
+  BoolColumn get enabled => boolean().withDefault(const Constant(true))();
+
+  /// Per-category label overrides, stored as a JSON object string
+  /// (e.g. `{"Anatomy":"Contents & Relationships"}`), keyed by the exact
+  /// category strings in [AppConfig]. Null when no overrides exist.
+  TextColumn get categoryLabelOverrides => text().nullable()();
+
+  @override
+  Set<Column> get primaryKey => {key};
+}
+
 extension ArticleLocalExtensions on ArticleLocal {
   int get estimatedReadMinutes {
     final content = this.content;
@@ -251,9 +273,10 @@ class CaseProgress extends Table {
   Set<Column> get primaryKey => {id};
 }
 
-@DriftDatabase(
+  @DriftDatabase(
     tables: [
       Articles,
+      SectionRegistry,
       Bookmarks,
       Learnt,
       ArticleNotes,
@@ -273,7 +296,7 @@ class CaseProgress extends Table {
    AppDatabase() : super(_openConnection());
 
     @override
-    int get schemaVersion => 20;
+    int get schemaVersion => 21;
 
   Future<void> _runMigrationStep(
     String name,
@@ -573,6 +596,24 @@ if (!columnNames.contains('exam_source')) {
               await _runMigrationStep(
                 'create learnt table',
                 () => m.createTable(learnt),
+              );
+            }
+            if (from < 21) {
+              await _runMigrationStep(
+                'add section_registry category_label_overrides',
+                () async {
+                  final columns = await customSelect(
+                    'PRAGMA table_info(section_registry)',
+                  ).get();
+                  final columnNames =
+                      columns.map((row) => row.read<String>('name')).toSet();
+                  if (!columnNames.contains('category_label_overrides')) {
+                    await customStatement(
+                      'ALTER TABLE section_registry '
+                      'ADD COLUMN category_label_overrides TEXT',
+                    );
+                  }
+                },
               );
             }
             if (from < 19) {

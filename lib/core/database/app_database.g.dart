@@ -639,6 +639,500 @@ class ArticlesCompanion extends UpdateCompanion<ArticleLocal> {
   }
 }
 
+class $SectionRegistryTable extends SectionRegistry
+    with TableInfo<$SectionRegistryTable, SectionRegistryEntry> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SectionRegistryTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _keyMeta = const VerificationMeta('key');
+  @override
+  late final GeneratedColumn<String> key = GeneratedColumn<String>(
+    'key',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _labelMeta = const VerificationMeta('label');
+  @override
+  late final GeneratedColumn<String> label = GeneratedColumn<String>(
+    'label',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _iconNameMeta = const VerificationMeta(
+    'iconName',
+  );
+  @override
+  late final GeneratedColumn<String> iconName = GeneratedColumn<String>(
+    'icon_name',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _displayOrderMeta = const VerificationMeta(
+    'displayOrder',
+  );
+  @override
+  late final GeneratedColumn<int> displayOrder = GeneratedColumn<int>(
+    'display_order',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(999),
+  );
+  static const VerificationMeta _appliesToMeta = const VerificationMeta(
+    'appliesTo',
+  );
+  @override
+  late final GeneratedColumn<String> appliesTo = GeneratedColumn<String>(
+    'applies_to',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _enabledMeta = const VerificationMeta(
+    'enabled',
+  );
+  @override
+  late final GeneratedColumn<bool> enabled = GeneratedColumn<bool>(
+    'enabled',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("enabled" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  static const VerificationMeta _categoryLabelOverridesMeta =
+      const VerificationMeta('categoryLabelOverrides');
+  @override
+  late final GeneratedColumn<String> categoryLabelOverrides =
+      GeneratedColumn<String>(
+        'category_label_overrides',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  @override
+  List<GeneratedColumn> get $columns => [
+    key,
+    label,
+    iconName,
+    displayOrder,
+    appliesTo,
+    enabled,
+    categoryLabelOverrides,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'section_registry';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<SectionRegistryEntry> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('key')) {
+      context.handle(
+        _keyMeta,
+        key.isAcceptableOrUnknown(data['key']!, _keyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_keyMeta);
+    }
+    if (data.containsKey('label')) {
+      context.handle(
+        _labelMeta,
+        label.isAcceptableOrUnknown(data['label']!, _labelMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_labelMeta);
+    }
+    if (data.containsKey('icon_name')) {
+      context.handle(
+        _iconNameMeta,
+        iconName.isAcceptableOrUnknown(data['icon_name']!, _iconNameMeta),
+      );
+    }
+    if (data.containsKey('display_order')) {
+      context.handle(
+        _displayOrderMeta,
+        displayOrder.isAcceptableOrUnknown(
+          data['display_order']!,
+          _displayOrderMeta,
+        ),
+      );
+    }
+    if (data.containsKey('applies_to')) {
+      context.handle(
+        _appliesToMeta,
+        appliesTo.isAcceptableOrUnknown(data['applies_to']!, _appliesToMeta),
+      );
+    }
+    if (data.containsKey('enabled')) {
+      context.handle(
+        _enabledMeta,
+        enabled.isAcceptableOrUnknown(data['enabled']!, _enabledMeta),
+      );
+    }
+    if (data.containsKey('category_label_overrides')) {
+      context.handle(
+        _categoryLabelOverridesMeta,
+        categoryLabelOverrides.isAcceptableOrUnknown(
+          data['category_label_overrides']!,
+          _categoryLabelOverridesMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {key};
+  @override
+  SectionRegistryEntry map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SectionRegistryEntry(
+      key: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}key'],
+      )!,
+      label: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}label'],
+      )!,
+      iconName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}icon_name'],
+      ),
+      displayOrder: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}display_order'],
+      )!,
+      appliesTo: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}applies_to'],
+      ),
+      enabled: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}enabled'],
+      )!,
+      categoryLabelOverrides: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}category_label_overrides'],
+      ),
+    );
+  }
+
+  @override
+  $SectionRegistryTable createAlias(String alias) {
+    return $SectionRegistryTable(attachedDatabase, alias);
+  }
+}
+
+class SectionRegistryEntry extends DataClass
+    implements Insertable<SectionRegistryEntry> {
+  final String key;
+  final String label;
+  final String? iconName;
+  final int displayOrder;
+  final String? appliesTo;
+  final bool enabled;
+
+  /// Per-category label overrides, stored as a JSON object string
+  /// (e.g. `{"Anatomy":"Contents & Relationships"}`), keyed by the exact
+  /// category strings in [AppConfig]. Null when no overrides exist.
+  final String? categoryLabelOverrides;
+  const SectionRegistryEntry({
+    required this.key,
+    required this.label,
+    this.iconName,
+    required this.displayOrder,
+    this.appliesTo,
+    required this.enabled,
+    this.categoryLabelOverrides,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['key'] = Variable<String>(key);
+    map['label'] = Variable<String>(label);
+    if (!nullToAbsent || iconName != null) {
+      map['icon_name'] = Variable<String>(iconName);
+    }
+    map['display_order'] = Variable<int>(displayOrder);
+    if (!nullToAbsent || appliesTo != null) {
+      map['applies_to'] = Variable<String>(appliesTo);
+    }
+    map['enabled'] = Variable<bool>(enabled);
+    if (!nullToAbsent || categoryLabelOverrides != null) {
+      map['category_label_overrides'] = Variable<String>(
+        categoryLabelOverrides,
+      );
+    }
+    return map;
+  }
+
+  SectionRegistryCompanion toCompanion(bool nullToAbsent) {
+    return SectionRegistryCompanion(
+      key: Value(key),
+      label: Value(label),
+      iconName: iconName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(iconName),
+      displayOrder: Value(displayOrder),
+      appliesTo: appliesTo == null && nullToAbsent
+          ? const Value.absent()
+          : Value(appliesTo),
+      enabled: Value(enabled),
+      categoryLabelOverrides: categoryLabelOverrides == null && nullToAbsent
+          ? const Value.absent()
+          : Value(categoryLabelOverrides),
+    );
+  }
+
+  factory SectionRegistryEntry.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SectionRegistryEntry(
+      key: serializer.fromJson<String>(json['key']),
+      label: serializer.fromJson<String>(json['label']),
+      iconName: serializer.fromJson<String?>(json['iconName']),
+      displayOrder: serializer.fromJson<int>(json['displayOrder']),
+      appliesTo: serializer.fromJson<String?>(json['appliesTo']),
+      enabled: serializer.fromJson<bool>(json['enabled']),
+      categoryLabelOverrides: serializer.fromJson<String?>(
+        json['categoryLabelOverrides'],
+      ),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'key': serializer.toJson<String>(key),
+      'label': serializer.toJson<String>(label),
+      'iconName': serializer.toJson<String?>(iconName),
+      'displayOrder': serializer.toJson<int>(displayOrder),
+      'appliesTo': serializer.toJson<String?>(appliesTo),
+      'enabled': serializer.toJson<bool>(enabled),
+      'categoryLabelOverrides': serializer.toJson<String?>(
+        categoryLabelOverrides,
+      ),
+    };
+  }
+
+  SectionRegistryEntry copyWith({
+    String? key,
+    String? label,
+    Value<String?> iconName = const Value.absent(),
+    int? displayOrder,
+    Value<String?> appliesTo = const Value.absent(),
+    bool? enabled,
+    Value<String?> categoryLabelOverrides = const Value.absent(),
+  }) => SectionRegistryEntry(
+    key: key ?? this.key,
+    label: label ?? this.label,
+    iconName: iconName.present ? iconName.value : this.iconName,
+    displayOrder: displayOrder ?? this.displayOrder,
+    appliesTo: appliesTo.present ? appliesTo.value : this.appliesTo,
+    enabled: enabled ?? this.enabled,
+    categoryLabelOverrides: categoryLabelOverrides.present
+        ? categoryLabelOverrides.value
+        : this.categoryLabelOverrides,
+  );
+  SectionRegistryEntry copyWithCompanion(SectionRegistryCompanion data) {
+    return SectionRegistryEntry(
+      key: data.key.present ? data.key.value : this.key,
+      label: data.label.present ? data.label.value : this.label,
+      iconName: data.iconName.present ? data.iconName.value : this.iconName,
+      displayOrder: data.displayOrder.present
+          ? data.displayOrder.value
+          : this.displayOrder,
+      appliesTo: data.appliesTo.present ? data.appliesTo.value : this.appliesTo,
+      enabled: data.enabled.present ? data.enabled.value : this.enabled,
+      categoryLabelOverrides: data.categoryLabelOverrides.present
+          ? data.categoryLabelOverrides.value
+          : this.categoryLabelOverrides,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SectionRegistryEntry(')
+          ..write('key: $key, ')
+          ..write('label: $label, ')
+          ..write('iconName: $iconName, ')
+          ..write('displayOrder: $displayOrder, ')
+          ..write('appliesTo: $appliesTo, ')
+          ..write('enabled: $enabled, ')
+          ..write('categoryLabelOverrides: $categoryLabelOverrides')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    key,
+    label,
+    iconName,
+    displayOrder,
+    appliesTo,
+    enabled,
+    categoryLabelOverrides,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SectionRegistryEntry &&
+          other.key == this.key &&
+          other.label == this.label &&
+          other.iconName == this.iconName &&
+          other.displayOrder == this.displayOrder &&
+          other.appliesTo == this.appliesTo &&
+          other.enabled == this.enabled &&
+          other.categoryLabelOverrides == this.categoryLabelOverrides);
+}
+
+class SectionRegistryCompanion extends UpdateCompanion<SectionRegistryEntry> {
+  final Value<String> key;
+  final Value<String> label;
+  final Value<String?> iconName;
+  final Value<int> displayOrder;
+  final Value<String?> appliesTo;
+  final Value<bool> enabled;
+  final Value<String?> categoryLabelOverrides;
+  final Value<int> rowid;
+  const SectionRegistryCompanion({
+    this.key = const Value.absent(),
+    this.label = const Value.absent(),
+    this.iconName = const Value.absent(),
+    this.displayOrder = const Value.absent(),
+    this.appliesTo = const Value.absent(),
+    this.enabled = const Value.absent(),
+    this.categoryLabelOverrides = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  SectionRegistryCompanion.insert({
+    required String key,
+    required String label,
+    this.iconName = const Value.absent(),
+    this.displayOrder = const Value.absent(),
+    this.appliesTo = const Value.absent(),
+    this.enabled = const Value.absent(),
+    this.categoryLabelOverrides = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : key = Value(key),
+       label = Value(label);
+  static Insertable<SectionRegistryEntry> custom({
+    Expression<String>? key,
+    Expression<String>? label,
+    Expression<String>? iconName,
+    Expression<int>? displayOrder,
+    Expression<String>? appliesTo,
+    Expression<bool>? enabled,
+    Expression<String>? categoryLabelOverrides,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (key != null) 'key': key,
+      if (label != null) 'label': label,
+      if (iconName != null) 'icon_name': iconName,
+      if (displayOrder != null) 'display_order': displayOrder,
+      if (appliesTo != null) 'applies_to': appliesTo,
+      if (enabled != null) 'enabled': enabled,
+      if (categoryLabelOverrides != null)
+        'category_label_overrides': categoryLabelOverrides,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  SectionRegistryCompanion copyWith({
+    Value<String>? key,
+    Value<String>? label,
+    Value<String?>? iconName,
+    Value<int>? displayOrder,
+    Value<String?>? appliesTo,
+    Value<bool>? enabled,
+    Value<String?>? categoryLabelOverrides,
+    Value<int>? rowid,
+  }) {
+    return SectionRegistryCompanion(
+      key: key ?? this.key,
+      label: label ?? this.label,
+      iconName: iconName ?? this.iconName,
+      displayOrder: displayOrder ?? this.displayOrder,
+      appliesTo: appliesTo ?? this.appliesTo,
+      enabled: enabled ?? this.enabled,
+      categoryLabelOverrides:
+          categoryLabelOverrides ?? this.categoryLabelOverrides,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (key.present) {
+      map['key'] = Variable<String>(key.value);
+    }
+    if (label.present) {
+      map['label'] = Variable<String>(label.value);
+    }
+    if (iconName.present) {
+      map['icon_name'] = Variable<String>(iconName.value);
+    }
+    if (displayOrder.present) {
+      map['display_order'] = Variable<int>(displayOrder.value);
+    }
+    if (appliesTo.present) {
+      map['applies_to'] = Variable<String>(appliesTo.value);
+    }
+    if (enabled.present) {
+      map['enabled'] = Variable<bool>(enabled.value);
+    }
+    if (categoryLabelOverrides.present) {
+      map['category_label_overrides'] = Variable<String>(
+        categoryLabelOverrides.value,
+      );
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SectionRegistryCompanion(')
+          ..write('key: $key, ')
+          ..write('label: $label, ')
+          ..write('iconName: $iconName, ')
+          ..write('displayOrder: $displayOrder, ')
+          ..write('appliesTo: $appliesTo, ')
+          ..write('enabled: $enabled, ')
+          ..write('categoryLabelOverrides: $categoryLabelOverrides, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $BookmarksTable extends Bookmarks
     with TableInfo<$BookmarksTable, Bookmark> {
   @override
@@ -7167,6 +7661,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $ArticlesTable articles = $ArticlesTable(this);
+  late final $SectionRegistryTable sectionRegistry = $SectionRegistryTable(
+    this,
+  );
   late final $BookmarksTable bookmarks = $BookmarksTable(this);
   late final $LearntTable learnt = $LearntTable(this);
   late final $ArticleNotesTable articleNotes = $ArticleNotesTable(this);
@@ -7199,6 +7696,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities => [
     articles,
+    sectionRegistry,
     bookmarks,
     learnt,
     articleNotes,
@@ -7707,6 +8205,258 @@ typedef $$ArticlesTableProcessedTableManager =
       (ArticleLocal, $$ArticlesTableReferences),
       ArticleLocal,
       PrefetchHooks Function({bool bookmarksRefs, bool learntRefs})
+    >;
+typedef $$SectionRegistryTableCreateCompanionBuilder =
+    SectionRegistryCompanion Function({
+      required String key,
+      required String label,
+      Value<String?> iconName,
+      Value<int> displayOrder,
+      Value<String?> appliesTo,
+      Value<bool> enabled,
+      Value<String?> categoryLabelOverrides,
+      Value<int> rowid,
+    });
+typedef $$SectionRegistryTableUpdateCompanionBuilder =
+    SectionRegistryCompanion Function({
+      Value<String> key,
+      Value<String> label,
+      Value<String?> iconName,
+      Value<int> displayOrder,
+      Value<String?> appliesTo,
+      Value<bool> enabled,
+      Value<String?> categoryLabelOverrides,
+      Value<int> rowid,
+    });
+
+class $$SectionRegistryTableFilterComposer
+    extends Composer<_$AppDatabase, $SectionRegistryTable> {
+  $$SectionRegistryTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get key => $composableBuilder(
+    column: $table.key,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get label => $composableBuilder(
+    column: $table.label,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get iconName => $composableBuilder(
+    column: $table.iconName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get displayOrder => $composableBuilder(
+    column: $table.displayOrder,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get appliesTo => $composableBuilder(
+    column: $table.appliesTo,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get enabled => $composableBuilder(
+    column: $table.enabled,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get categoryLabelOverrides => $composableBuilder(
+    column: $table.categoryLabelOverrides,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$SectionRegistryTableOrderingComposer
+    extends Composer<_$AppDatabase, $SectionRegistryTable> {
+  $$SectionRegistryTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get key => $composableBuilder(
+    column: $table.key,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get label => $composableBuilder(
+    column: $table.label,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get iconName => $composableBuilder(
+    column: $table.iconName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get displayOrder => $composableBuilder(
+    column: $table.displayOrder,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get appliesTo => $composableBuilder(
+    column: $table.appliesTo,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get enabled => $composableBuilder(
+    column: $table.enabled,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get categoryLabelOverrides => $composableBuilder(
+    column: $table.categoryLabelOverrides,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$SectionRegistryTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SectionRegistryTable> {
+  $$SectionRegistryTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get key =>
+      $composableBuilder(column: $table.key, builder: (column) => column);
+
+  GeneratedColumn<String> get label =>
+      $composableBuilder(column: $table.label, builder: (column) => column);
+
+  GeneratedColumn<String> get iconName =>
+      $composableBuilder(column: $table.iconName, builder: (column) => column);
+
+  GeneratedColumn<int> get displayOrder => $composableBuilder(
+    column: $table.displayOrder,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get appliesTo =>
+      $composableBuilder(column: $table.appliesTo, builder: (column) => column);
+
+  GeneratedColumn<bool> get enabled =>
+      $composableBuilder(column: $table.enabled, builder: (column) => column);
+
+  GeneratedColumn<String> get categoryLabelOverrides => $composableBuilder(
+    column: $table.categoryLabelOverrides,
+    builder: (column) => column,
+  );
+}
+
+class $$SectionRegistryTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $SectionRegistryTable,
+          SectionRegistryEntry,
+          $$SectionRegistryTableFilterComposer,
+          $$SectionRegistryTableOrderingComposer,
+          $$SectionRegistryTableAnnotationComposer,
+          $$SectionRegistryTableCreateCompanionBuilder,
+          $$SectionRegistryTableUpdateCompanionBuilder,
+          (
+            SectionRegistryEntry,
+            BaseReferences<
+              _$AppDatabase,
+              $SectionRegistryTable,
+              SectionRegistryEntry
+            >,
+          ),
+          SectionRegistryEntry,
+          PrefetchHooks Function()
+        > {
+  $$SectionRegistryTableTableManager(
+    _$AppDatabase db,
+    $SectionRegistryTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SectionRegistryTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SectionRegistryTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SectionRegistryTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> key = const Value.absent(),
+                Value<String> label = const Value.absent(),
+                Value<String?> iconName = const Value.absent(),
+                Value<int> displayOrder = const Value.absent(),
+                Value<String?> appliesTo = const Value.absent(),
+                Value<bool> enabled = const Value.absent(),
+                Value<String?> categoryLabelOverrides = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => SectionRegistryCompanion(
+                key: key,
+                label: label,
+                iconName: iconName,
+                displayOrder: displayOrder,
+                appliesTo: appliesTo,
+                enabled: enabled,
+                categoryLabelOverrides: categoryLabelOverrides,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String key,
+                required String label,
+                Value<String?> iconName = const Value.absent(),
+                Value<int> displayOrder = const Value.absent(),
+                Value<String?> appliesTo = const Value.absent(),
+                Value<bool> enabled = const Value.absent(),
+                Value<String?> categoryLabelOverrides = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => SectionRegistryCompanion.insert(
+                key: key,
+                label: label,
+                iconName: iconName,
+                displayOrder: displayOrder,
+                appliesTo: appliesTo,
+                enabled: enabled,
+                categoryLabelOverrides: categoryLabelOverrides,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$SectionRegistryTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $SectionRegistryTable,
+      SectionRegistryEntry,
+      $$SectionRegistryTableFilterComposer,
+      $$SectionRegistryTableOrderingComposer,
+      $$SectionRegistryTableAnnotationComposer,
+      $$SectionRegistryTableCreateCompanionBuilder,
+      $$SectionRegistryTableUpdateCompanionBuilder,
+      (
+        SectionRegistryEntry,
+        BaseReferences<
+          _$AppDatabase,
+          $SectionRegistryTable,
+          SectionRegistryEntry
+        >,
+      ),
+      SectionRegistryEntry,
+      PrefetchHooks Function()
     >;
 typedef $$BookmarksTableCreateCompanionBuilder =
     BookmarksCompanion Function({Value<int> id, required String articleId});
@@ -11663,6 +12413,8 @@ class $AppDatabaseManager {
   $AppDatabaseManager(this._db);
   $$ArticlesTableTableManager get articles =>
       $$ArticlesTableTableManager(_db, _db.articles);
+  $$SectionRegistryTableTableManager get sectionRegistry =>
+      $$SectionRegistryTableTableManager(_db, _db.sectionRegistry);
   $$BookmarksTableTableManager get bookmarks =>
       $$BookmarksTableTableManager(_db, _db.bookmarks);
   $$LearntTableTableManager get learnt =>
