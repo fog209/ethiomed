@@ -71,7 +71,7 @@ class _ArticleSearchScreenState extends ConsumerState<ArticleSearchScreen> {
         backgroundColor: theme.colorScheme.surface,
         foregroundColor: primary,
         iconTheme: IconThemeData(color: primary),
-        title: TextField(
+          title: TextField(
           controller: _controller,
           autofocus: true,
           style: TextStyle(color: onSurface, fontSize: 18),
@@ -89,6 +89,14 @@ class _ArticleSearchScreenState extends ConsumerState<ArticleSearchScreen> {
             });
           },
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.travel_explore_outlined),
+            tooltip: 'Unified search',
+            onPressed: () => context.push('/spotlight',
+                extra: _controller.text.isNotEmpty ? _controller.text : null),
+          ),
+        ],
       ),
       body: Column(
         children: <Widget>[

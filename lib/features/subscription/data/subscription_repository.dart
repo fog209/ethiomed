@@ -54,7 +54,11 @@ class SubscriptionRepository {
       // Use server time, not the device clock, so a user who rolls back
       // their system clock cannot spoof an unexpired subscription.
       final now = await _fetchServerNow();
-      return expiryDate == null || expiryDate.isAfter(now);
+      return isSubscriptionActive(
+        status: status,
+        expiryDate: expiryDate,
+        now: now,
+      );
     } on PostgrestException catch (e) {
       debugPrint('Sub check error: ${e.message}');
       // If network failure, check grace period (Part 4-B)
@@ -145,6 +149,33 @@ class SubscriptionRepository {
 
     return DateTime.tryParse(text)?.toUtc();
   }
+}
+
+/// Pure, Supabase-free decision used by [SubscriptionRepository
+/// .checkSubscriptionStatus] to decide whether a subscription grants access.
+///
+/// Extracted as a free function so the read-path (paywall show/hide) logic can
+/// be unit-tested without a network/Supabase client. It mirrors the in-app
+/// rule exactly:
+///   - a non-`active` status denies access;
+///   - a null expiry (no expiry set) grants access;
+///   - an expiry in the future grants access;
+///   - an expiry in the past denies access.
+///
+/// The boundary (expiry == now) is treated as expired (not `isAfter`), so the
+/// paywall shows the instant a subscription lapses.
+bool isSubscriptionActive({
+  required String? status,
+  required DateTime? expiryDate,
+  required DateTime now,
+}) {
+  if (status != 'active') {
+    return false;
+  }
+  if (expiryDate == null) {
+    return true;
+  }
+  return expiryDate.isAfter(now);
 }
 
 final subscriptionRepositoryProvider = Provider((ref) {
