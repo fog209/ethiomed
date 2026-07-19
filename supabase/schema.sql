@@ -46,14 +46,20 @@ ALTER TABLE subscriptions ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Users see own subscription"
   ON subscriptions FOR SELECT USING (auth.uid() = user_id);
 
--- Admin policies — run Task 1 (Phase 3) to add these:
--- CREATE POLICY "Admins can view all subscriptions"
---   ON subscriptions FOR SELECT
---   USING (auth.uid() = user_id OR public.is_user_admin(auth.uid()));
--- CREATE POLICY "Admins can update all subscriptions"
---   ON subscriptions FOR UPDATE
+-- Admin policies (additive INSERT/UPDATE, admins only). Defined in
+-- migrations/0006_subscriptions_admin_rls.sql.
+-- CREATE POLICY "Admins can insert subscriptions"
+--   ON subscriptions FOR INSERT TO authenticated
+--   WITH CHECK (public.is_user_admin(auth.uid()));
+-- CREATE POLICY "Admins can update subscriptions"
+--   ON subscriptions FOR UPDATE TO authenticated
 --   USING (public.is_user_admin(auth.uid()))
 --   WITH CHECK (public.is_user_admin(auth.uid()));
+
+-- server_now(): authoritative Postgres time for anti-clock-spoof subscription
+-- checks (client compares expiry against this instead of device clock).
+-- Defined in migrations/0005_server_now_rpc.sql.
+-- CREATE OR REPLACE FUNCTION public.server_now() RETURNS timestamptz ...
 
 -- ─────────────────────────────────────────────────────────────
 -- ARTICLES
@@ -129,6 +135,7 @@ CREATE TABLE questions (
   category       text,
   difficulty     text DEFAULT 'medium', -- easy | medium | hard
   tested_field   text DEFAULT 'clinicalFeatures', -- for Learning Radar (35D)
+  attending_tip   text,                          -- optional "Attending Tip" pearl
   updated_at     timestamptz DEFAULT now()
 );
 
@@ -195,11 +202,10 @@ CREATE INDEX idx_questions_article  ON questions(article_id);
 -- ─────────────────────────────────────────────────────────────
 
 -- CREATE OR REPLACE FUNCTION public.is_user_admin(uid uuid)
--- RETURNS boolean LANGUAGE sql SECURITY DEFINER AS $$
---   SELECT EXISTS (
---     SELECT 1 FROM profiles WHERE id = uid AND student_type = 'admin'
---   );
+-- RETURNS boolean LANGUAGE sql SECURITY DEFINER SET search_path = public AS $$
+--   SELECT coalesce((SELECT is_admin FROM public.profiles WHERE id = uid), false);
 -- $$;
+-- (Active definition lives in migrations/0006_subscriptions_admin_rls.sql.)
 
 -- ─────────────────────────────────────────────────────────────
 -- USEFUL ADMIN QUERIES

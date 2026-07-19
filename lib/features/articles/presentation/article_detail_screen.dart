@@ -24,6 +24,7 @@ import '../../../features/content/presentation/content_flag_widget.dart';
 import '../../../features/progress/category_progress_provider.dart';
 import '../../../features/progress/streak_notifier.dart';
 import '../../../features/quiz/weakness_service.dart';
+import '../../../features/settings/reading_mode_provider.dart';
 
 final _medicalTerms = <String>{
   'acute',
@@ -702,6 +703,7 @@ if (pastExamInfo == null || !pastExamInfo.isHighYield) {
     String? category,
   }) {
     final theme = Theme.of(context);
+    final readingMode = ref.watch(readingModeProvider);
 
     // Resolve metadata + sort: registry order first (including fallback order
     // for known keys), unknown keys (order 999) appended in array order.
@@ -769,6 +771,7 @@ if (pastExamInfo == null || !pastExamInfo.isHighYield) {
           borderColor: borderColor,
           borderWidth: borderWidth,
           isWeak: isWeak,
+          readingMode: readingMode,
         ),
       );
     }
@@ -872,30 +875,41 @@ Widget _buildShowLowYieldButton() {
   }
 
 Widget _buildMarkdownExpansionTile({
-    required String title,
-    required String content,
-    required IconData icon,
-    required bool initiallyExpanded,
-    required Color backgroundColor,
-    required Color borderColor,
-    double borderWidth = 4.0,
-    bool isWeak = false,
-  }) {
-    final theme = Theme.of(context);
-    final linkedContent = _addMedicalTermLinks(content);
+  required String title,
+  required String content,
+  required IconData icon,
+  required bool initiallyExpanded,
+  required Color backgroundColor,
+  required Color borderColor,
+  required ReadingModeState readingMode,
+  double borderWidth = 4.0,
+  bool isWeak = false,
+}) {
+  final theme = Theme.of(context);
+  final linkedContent = _addMedicalTermLinks(content);
+
+  // Sepia toggle replaces the navy surface with a warm paper tone for
+  // lower-contrast, eye-friendly long-form reading.
+  final effectiveBackground = readingMode.sepia
+      ? const Color(0xFFF4ECD8)
+      : backgroundColor;
+
+  final textColor = readingMode.sepia
+      ? const Color(0xFF3B2F1E)
+      : theme.colorScheme.onSurface;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: backgroundColor,
+        color: effectiveBackground,
         borderRadius: BorderRadius.circular(8),
         border: Border(
           left: BorderSide(color: borderColor, width: borderWidth),
         ),
       ),
       child: ExpansionTile(
-        backgroundColor: backgroundColor,
-        collapsedBackgroundColor: backgroundColor,
+        backgroundColor: effectiveBackground,
+        collapsedBackgroundColor: effectiveBackground,
         initiallyExpanded: initiallyExpanded,
         leading: Icon(icon, color: theme.colorScheme.onSurface),
         title: isWeak ? _buildWeakSectionHeader(title) : Text(
@@ -913,9 +927,14 @@ Padding(
                     zebraA: theme.colorScheme.surfaceContainerHighest,
                     zebraB: theme.colorScheme.surface,
                   ),
+                  'a': MedicalTermLinkBuilder(onTapLink: _handleLinkTap),
                 },
                 styleSheet: MarkdownStyleSheet.fromTheme(theme).copyWith(
-                  p: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                  p: TextStyle(
+                    color: textColor,
+                    fontSize: 16 * readingMode.fontScale,
+                    height: readingMode.lineHeight,
+                  ),
                   a: TextStyle(
                     color: theme.colorScheme.secondary,
                     decoration: TextDecoration.underline,

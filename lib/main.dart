@@ -16,6 +16,7 @@ import 'app/env.dart';
 import 'app/main_shell.dart';
 import 'core/config/app_config.dart';
 import 'core/database/app_database.dart';
+import 'core/env_guard.dart';
 import 'core/screens/database_recovery_screen.dart';
 import 'core/services/security_service.dart';
 import 'core/theme/app_theme.dart';
@@ -85,6 +86,20 @@ void main() async {
   }
 
   await Env.load();
+
+  // Fail loudly (in debug) on placeholder/missing credentials rather than
+  // silently degrading to offline mode. Release builds keep the offline
+  // fallback, so only assert here.
+  assert(
+    () {
+      validateEnvConfig(<String, String>{
+        'supabaseUrl': Env.supabaseUrl,
+        'supabaseAnonKey': Env.supabaseAnonKey,
+      });
+      return true;
+    }(),
+    'Environment configuration is invalid — see validateEnvConfig error.',
+  );
 
   bool firebaseInitialized = false;
   try {

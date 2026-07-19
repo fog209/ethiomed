@@ -429,6 +429,7 @@ class QuizRepository {
       sourceType: row.read<String?>('source_type') ?? 'original',
       examYear: row.read<int?>('exam_year'),
       examSource: row.read<String?>('exam_source'),
+      attendingTip: row.read<String?>('attending_tip'),
     );
   }
 
@@ -450,6 +451,7 @@ class QuizRepository {
       sourceType: Value(question.sourceType),
       examYear: Value(question.examYear),
       examSource: Value(question.examSource),
+      attendingTip: Value(question.attendingTip),
     );
   }
 
@@ -498,6 +500,7 @@ class QuizRepository {
       sourceType: _string(json['source_type']) ?? 'original',
       examYear: int.tryParse(json['exam_year']?.toString() ?? ''),
       examSource: _string(json['exam_source']),
+      attendingTip: _string(json['attending_tip']) ?? _string(json['attendingTip']),
     );
   }
 

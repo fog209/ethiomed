@@ -229,6 +229,48 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
               style: TextStyle(height: 1.5, color: theme.colorScheme.onSurface),
             ),
           ),
+          if (question.attendingTip != null &&
+              question.attendingTip!.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.secondaryContainer,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: theme.colorScheme.secondary),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.tips_and_updates,
+                        size: 18,
+                        color: theme.colorScheme.secondary,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Attending Tip',
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          color: theme.colorScheme.secondary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    question.attendingTip!,
+                    style: TextStyle(
+                      height: 1.5,
+                      color: theme.colorScheme.onSurface,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
           const SizedBox(height: 16),
 if (question.articleId.isNotEmpty)
               SizedBox(

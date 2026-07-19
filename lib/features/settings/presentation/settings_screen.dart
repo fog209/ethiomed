@@ -11,6 +11,7 @@ import '../../../core/services/error_logger_service.dart';
 import '../../../core/services/notification_service.dart';
 import '../../../core/theme/theme_mode_provider.dart';
 import '../../auth/data/auth_service.dart';
+import '../../settings/reading_mode_provider.dart';
 import '../../../main.dart' show currentAdminProfileProvider;
 import '../../flashcards/presentation/flashcard_stage_prompt_screen.dart';
 import '../../flashcards/flashcard_track_provider.dart';
@@ -110,6 +111,7 @@ class SettingsScreen extends ConsumerWidget {
           }
         },
       ),
+      _buildReadingModeSection(context, ref, primaryColor),
       ListTile(
         leading: Icon(Icons.school, color: primaryColor),
         title: const Text('Study stage'),
@@ -297,5 +299,81 @@ class SettingsScreen extends ConsumerWidget {
       );
     }
     return items;
+  }
+
+  Widget _buildReadingModeSection(
+    BuildContext context,
+    WidgetRef ref,
+    Color primaryColor,
+  ) {
+    final readingMode = ref.watch(readingModeProvider);
+    final theme = Theme.of(context);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+          child: Text(
+            'Reading Mode',
+            style: TextStyle(
+              color: theme.colorScheme.onSurfaceVariant,
+              fontSize: 13,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          child: Row(
+            children: [
+              const Icon(Icons.text_fields),
+              const SizedBox(width: 12),
+              const Expanded(child: Text('Font size')),
+              Text('${(readingMode.fontScale * 100).round()}%'),
+            ],
+          ),
+        ),
+        Slider(
+          value: readingMode.fontScale,
+          min: 0.8,
+          max: 1.6,
+          divisions: 8,
+          label: '${(readingMode.fontScale * 100).round()}%',
+          onChanged: (value) {
+            ref.read(readingModeProvider.notifier).setFontScale(value);
+          },
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          child: Row(
+            children: [
+              const Icon(Icons.format_line_spacing),
+              const SizedBox(width: 12),
+              const Expanded(child: Text('Line spacing')),
+              Text(readingMode.lineHeight.toStringAsFixed(1)),
+            ],
+          ),
+        ),
+        Slider(
+          value: readingMode.lineHeight,
+          min: 1.2,
+          max: 2.0,
+          divisions: 8,
+          label: readingMode.lineHeight.toStringAsFixed(1),
+          onChanged: (value) {
+            ref.read(readingModeProvider.notifier).setLineHeight(value);
+          },
+        ),
+        SwitchListTile(
+          value: readingMode.sepia,
+          title: const Text('Sepia (warm paper) background'),
+          secondary: Icon(Icons.auto_fix_high, color: primaryColor),
+          onChanged: (enabled) {
+            ref.read(readingModeProvider.notifier).setSepia(enabled);
+          },
+        ),
+      ],
+    );
   }
 }

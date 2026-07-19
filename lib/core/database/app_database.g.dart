@@ -2543,671 +2543,6 @@ class QuizSessionsCompanion extends UpdateCompanion<QuizSession> {
   }
 }
 
-class $QuizQuestionsTable extends QuizQuestions
-    with TableInfo<$QuizQuestionsTable, QuizQuestionLocal> {
-  @override
-  final GeneratedDatabase attachedDatabase;
-  final String? _alias;
-  $QuizQuestionsTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _idMeta = const VerificationMeta('id');
-  @override
-  late final GeneratedColumn<int> id = GeneratedColumn<int>(
-    'id',
-    aliasedName,
-    false,
-    hasAutoIncrement: true,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'PRIMARY KEY AUTOINCREMENT',
-    ),
-  );
-  static const VerificationMeta _articleIdMeta = const VerificationMeta(
-    'articleId',
-  );
-  @override
-  late final GeneratedColumn<String> articleId = GeneratedColumn<String>(
-    'article_id',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _stemMeta = const VerificationMeta('stem');
-  @override
-  late final GeneratedColumn<String> stem = GeneratedColumn<String>(
-    'stem',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _optionAMeta = const VerificationMeta(
-    'optionA',
-  );
-  @override
-  late final GeneratedColumn<String> optionA = GeneratedColumn<String>(
-    'option_a',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _optionBMeta = const VerificationMeta(
-    'optionB',
-  );
-  @override
-  late final GeneratedColumn<String> optionB = GeneratedColumn<String>(
-    'option_b',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _optionCMeta = const VerificationMeta(
-    'optionC',
-  );
-  @override
-  late final GeneratedColumn<String> optionC = GeneratedColumn<String>(
-    'option_c',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _optionDMeta = const VerificationMeta(
-    'optionD',
-  );
-  @override
-  late final GeneratedColumn<String> optionD = GeneratedColumn<String>(
-    'option_d',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _correctOptionMeta = const VerificationMeta(
-    'correctOption',
-  );
-  @override
-  late final GeneratedColumn<String> correctOption = GeneratedColumn<String>(
-    'correct_option',
-    aliasedName,
-    false,
-    additionalChecks: GeneratedColumn.checkTextLength(
-      minTextLength: 1,
-      maxTextLength: 1,
-    ),
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _explanationMeta = const VerificationMeta(
-    'explanation',
-  );
-  @override
-  late final GeneratedColumn<String> explanation = GeneratedColumn<String>(
-    'explanation',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _categoryMeta = const VerificationMeta(
-    'category',
-  );
-  @override
-  late final GeneratedColumn<String> category = GeneratedColumn<String>(
-    'category',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _difficultyMeta = const VerificationMeta(
-    'difficulty',
-  );
-  @override
-  late final GeneratedColumn<String> difficulty = GeneratedColumn<String>(
-    'difficulty',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-  );
-  @override
-  List<GeneratedColumn> get $columns => [
-    id,
-    articleId,
-    stem,
-    optionA,
-    optionB,
-    optionC,
-    optionD,
-    correctOption,
-    explanation,
-    category,
-    difficulty,
-  ];
-  @override
-  String get aliasedName => _alias ?? actualTableName;
-  @override
-  String get actualTableName => $name;
-  static const String $name = 'quiz_questions';
-  @override
-  VerificationContext validateIntegrity(
-    Insertable<QuizQuestionLocal> instance, {
-    bool isInserting = false,
-  }) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('id')) {
-      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
-    }
-    if (data.containsKey('article_id')) {
-      context.handle(
-        _articleIdMeta,
-        articleId.isAcceptableOrUnknown(data['article_id']!, _articleIdMeta),
-      );
-    }
-    if (data.containsKey('stem')) {
-      context.handle(
-        _stemMeta,
-        stem.isAcceptableOrUnknown(data['stem']!, _stemMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_stemMeta);
-    }
-    if (data.containsKey('option_a')) {
-      context.handle(
-        _optionAMeta,
-        optionA.isAcceptableOrUnknown(data['option_a']!, _optionAMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_optionAMeta);
-    }
-    if (data.containsKey('option_b')) {
-      context.handle(
-        _optionBMeta,
-        optionB.isAcceptableOrUnknown(data['option_b']!, _optionBMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_optionBMeta);
-    }
-    if (data.containsKey('option_c')) {
-      context.handle(
-        _optionCMeta,
-        optionC.isAcceptableOrUnknown(data['option_c']!, _optionCMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_optionCMeta);
-    }
-    if (data.containsKey('option_d')) {
-      context.handle(
-        _optionDMeta,
-        optionD.isAcceptableOrUnknown(data['option_d']!, _optionDMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_optionDMeta);
-    }
-    if (data.containsKey('correct_option')) {
-      context.handle(
-        _correctOptionMeta,
-        correctOption.isAcceptableOrUnknown(
-          data['correct_option']!,
-          _correctOptionMeta,
-        ),
-      );
-    } else if (isInserting) {
-      context.missing(_correctOptionMeta);
-    }
-    if (data.containsKey('explanation')) {
-      context.handle(
-        _explanationMeta,
-        explanation.isAcceptableOrUnknown(
-          data['explanation']!,
-          _explanationMeta,
-        ),
-      );
-    }
-    if (data.containsKey('category')) {
-      context.handle(
-        _categoryMeta,
-        category.isAcceptableOrUnknown(data['category']!, _categoryMeta),
-      );
-    }
-    if (data.containsKey('difficulty')) {
-      context.handle(
-        _difficultyMeta,
-        difficulty.isAcceptableOrUnknown(data['difficulty']!, _difficultyMeta),
-      );
-    }
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => {id};
-  @override
-  QuizQuestionLocal map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return QuizQuestionLocal(
-      id: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}id'],
-      )!,
-      articleId: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}article_id'],
-      ),
-      stem: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}stem'],
-      )!,
-      optionA: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}option_a'],
-      )!,
-      optionB: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}option_b'],
-      )!,
-      optionC: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}option_c'],
-      )!,
-      optionD: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}option_d'],
-      )!,
-      correctOption: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}correct_option'],
-      )!,
-      explanation: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}explanation'],
-      ),
-      category: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}category'],
-      ),
-      difficulty: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}difficulty'],
-      ),
-    );
-  }
-
-  @override
-  $QuizQuestionsTable createAlias(String alias) {
-    return $QuizQuestionsTable(attachedDatabase, alias);
-  }
-}
-
-class QuizQuestionLocal extends DataClass
-    implements Insertable<QuizQuestionLocal> {
-  final int id;
-  final String? articleId;
-  final String stem;
-  final String optionA;
-  final String optionB;
-  final String optionC;
-  final String optionD;
-  final String correctOption;
-  final String? explanation;
-  final String? category;
-  final String? difficulty;
-  const QuizQuestionLocal({
-    required this.id,
-    this.articleId,
-    required this.stem,
-    required this.optionA,
-    required this.optionB,
-    required this.optionC,
-    required this.optionD,
-    required this.correctOption,
-    this.explanation,
-    this.category,
-    this.difficulty,
-  });
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['id'] = Variable<int>(id);
-    if (!nullToAbsent || articleId != null) {
-      map['article_id'] = Variable<String>(articleId);
-    }
-    map['stem'] = Variable<String>(stem);
-    map['option_a'] = Variable<String>(optionA);
-    map['option_b'] = Variable<String>(optionB);
-    map['option_c'] = Variable<String>(optionC);
-    map['option_d'] = Variable<String>(optionD);
-    map['correct_option'] = Variable<String>(correctOption);
-    if (!nullToAbsent || explanation != null) {
-      map['explanation'] = Variable<String>(explanation);
-    }
-    if (!nullToAbsent || category != null) {
-      map['category'] = Variable<String>(category);
-    }
-    if (!nullToAbsent || difficulty != null) {
-      map['difficulty'] = Variable<String>(difficulty);
-    }
-    return map;
-  }
-
-  QuizQuestionsCompanion toCompanion(bool nullToAbsent) {
-    return QuizQuestionsCompanion(
-      id: Value(id),
-      articleId: articleId == null && nullToAbsent
-          ? const Value.absent()
-          : Value(articleId),
-      stem: Value(stem),
-      optionA: Value(optionA),
-      optionB: Value(optionB),
-      optionC: Value(optionC),
-      optionD: Value(optionD),
-      correctOption: Value(correctOption),
-      explanation: explanation == null && nullToAbsent
-          ? const Value.absent()
-          : Value(explanation),
-      category: category == null && nullToAbsent
-          ? const Value.absent()
-          : Value(category),
-      difficulty: difficulty == null && nullToAbsent
-          ? const Value.absent()
-          : Value(difficulty),
-    );
-  }
-
-  factory QuizQuestionLocal.fromJson(
-    Map<String, dynamic> json, {
-    ValueSerializer? serializer,
-  }) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return QuizQuestionLocal(
-      id: serializer.fromJson<int>(json['id']),
-      articleId: serializer.fromJson<String?>(json['articleId']),
-      stem: serializer.fromJson<String>(json['stem']),
-      optionA: serializer.fromJson<String>(json['optionA']),
-      optionB: serializer.fromJson<String>(json['optionB']),
-      optionC: serializer.fromJson<String>(json['optionC']),
-      optionD: serializer.fromJson<String>(json['optionD']),
-      correctOption: serializer.fromJson<String>(json['correctOption']),
-      explanation: serializer.fromJson<String?>(json['explanation']),
-      category: serializer.fromJson<String?>(json['category']),
-      difficulty: serializer.fromJson<String?>(json['difficulty']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'id': serializer.toJson<int>(id),
-      'articleId': serializer.toJson<String?>(articleId),
-      'stem': serializer.toJson<String>(stem),
-      'optionA': serializer.toJson<String>(optionA),
-      'optionB': serializer.toJson<String>(optionB),
-      'optionC': serializer.toJson<String>(optionC),
-      'optionD': serializer.toJson<String>(optionD),
-      'correctOption': serializer.toJson<String>(correctOption),
-      'explanation': serializer.toJson<String?>(explanation),
-      'category': serializer.toJson<String?>(category),
-      'difficulty': serializer.toJson<String?>(difficulty),
-    };
-  }
-
-  QuizQuestionLocal copyWith({
-    int? id,
-    Value<String?> articleId = const Value.absent(),
-    String? stem,
-    String? optionA,
-    String? optionB,
-    String? optionC,
-    String? optionD,
-    String? correctOption,
-    Value<String?> explanation = const Value.absent(),
-    Value<String?> category = const Value.absent(),
-    Value<String?> difficulty = const Value.absent(),
-  }) => QuizQuestionLocal(
-    id: id ?? this.id,
-    articleId: articleId.present ? articleId.value : this.articleId,
-    stem: stem ?? this.stem,
-    optionA: optionA ?? this.optionA,
-    optionB: optionB ?? this.optionB,
-    optionC: optionC ?? this.optionC,
-    optionD: optionD ?? this.optionD,
-    correctOption: correctOption ?? this.correctOption,
-    explanation: explanation.present ? explanation.value : this.explanation,
-    category: category.present ? category.value : this.category,
-    difficulty: difficulty.present ? difficulty.value : this.difficulty,
-  );
-  QuizQuestionLocal copyWithCompanion(QuizQuestionsCompanion data) {
-    return QuizQuestionLocal(
-      id: data.id.present ? data.id.value : this.id,
-      articleId: data.articleId.present ? data.articleId.value : this.articleId,
-      stem: data.stem.present ? data.stem.value : this.stem,
-      optionA: data.optionA.present ? data.optionA.value : this.optionA,
-      optionB: data.optionB.present ? data.optionB.value : this.optionB,
-      optionC: data.optionC.present ? data.optionC.value : this.optionC,
-      optionD: data.optionD.present ? data.optionD.value : this.optionD,
-      correctOption: data.correctOption.present
-          ? data.correctOption.value
-          : this.correctOption,
-      explanation: data.explanation.present
-          ? data.explanation.value
-          : this.explanation,
-      category: data.category.present ? data.category.value : this.category,
-      difficulty: data.difficulty.present
-          ? data.difficulty.value
-          : this.difficulty,
-    );
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('QuizQuestionLocal(')
-          ..write('id: $id, ')
-          ..write('articleId: $articleId, ')
-          ..write('stem: $stem, ')
-          ..write('optionA: $optionA, ')
-          ..write('optionB: $optionB, ')
-          ..write('optionC: $optionC, ')
-          ..write('optionD: $optionD, ')
-          ..write('correctOption: $correctOption, ')
-          ..write('explanation: $explanation, ')
-          ..write('category: $category, ')
-          ..write('difficulty: $difficulty')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => Object.hash(
-    id,
-    articleId,
-    stem,
-    optionA,
-    optionB,
-    optionC,
-    optionD,
-    correctOption,
-    explanation,
-    category,
-    difficulty,
-  );
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is QuizQuestionLocal &&
-          other.id == this.id &&
-          other.articleId == this.articleId &&
-          other.stem == this.stem &&
-          other.optionA == this.optionA &&
-          other.optionB == this.optionB &&
-          other.optionC == this.optionC &&
-          other.optionD == this.optionD &&
-          other.correctOption == this.correctOption &&
-          other.explanation == this.explanation &&
-          other.category == this.category &&
-          other.difficulty == this.difficulty);
-}
-
-class QuizQuestionsCompanion extends UpdateCompanion<QuizQuestionLocal> {
-  final Value<int> id;
-  final Value<String?> articleId;
-  final Value<String> stem;
-  final Value<String> optionA;
-  final Value<String> optionB;
-  final Value<String> optionC;
-  final Value<String> optionD;
-  final Value<String> correctOption;
-  final Value<String?> explanation;
-  final Value<String?> category;
-  final Value<String?> difficulty;
-  const QuizQuestionsCompanion({
-    this.id = const Value.absent(),
-    this.articleId = const Value.absent(),
-    this.stem = const Value.absent(),
-    this.optionA = const Value.absent(),
-    this.optionB = const Value.absent(),
-    this.optionC = const Value.absent(),
-    this.optionD = const Value.absent(),
-    this.correctOption = const Value.absent(),
-    this.explanation = const Value.absent(),
-    this.category = const Value.absent(),
-    this.difficulty = const Value.absent(),
-  });
-  QuizQuestionsCompanion.insert({
-    this.id = const Value.absent(),
-    this.articleId = const Value.absent(),
-    required String stem,
-    required String optionA,
-    required String optionB,
-    required String optionC,
-    required String optionD,
-    required String correctOption,
-    this.explanation = const Value.absent(),
-    this.category = const Value.absent(),
-    this.difficulty = const Value.absent(),
-  }) : stem = Value(stem),
-       optionA = Value(optionA),
-       optionB = Value(optionB),
-       optionC = Value(optionC),
-       optionD = Value(optionD),
-       correctOption = Value(correctOption);
-  static Insertable<QuizQuestionLocal> custom({
-    Expression<int>? id,
-    Expression<String>? articleId,
-    Expression<String>? stem,
-    Expression<String>? optionA,
-    Expression<String>? optionB,
-    Expression<String>? optionC,
-    Expression<String>? optionD,
-    Expression<String>? correctOption,
-    Expression<String>? explanation,
-    Expression<String>? category,
-    Expression<String>? difficulty,
-  }) {
-    return RawValuesInsertable({
-      if (id != null) 'id': id,
-      if (articleId != null) 'article_id': articleId,
-      if (stem != null) 'stem': stem,
-      if (optionA != null) 'option_a': optionA,
-      if (optionB != null) 'option_b': optionB,
-      if (optionC != null) 'option_c': optionC,
-      if (optionD != null) 'option_d': optionD,
-      if (correctOption != null) 'correct_option': correctOption,
-      if (explanation != null) 'explanation': explanation,
-      if (category != null) 'category': category,
-      if (difficulty != null) 'difficulty': difficulty,
-    });
-  }
-
-  QuizQuestionsCompanion copyWith({
-    Value<int>? id,
-    Value<String?>? articleId,
-    Value<String>? stem,
-    Value<String>? optionA,
-    Value<String>? optionB,
-    Value<String>? optionC,
-    Value<String>? optionD,
-    Value<String>? correctOption,
-    Value<String?>? explanation,
-    Value<String?>? category,
-    Value<String?>? difficulty,
-  }) {
-    return QuizQuestionsCompanion(
-      id: id ?? this.id,
-      articleId: articleId ?? this.articleId,
-      stem: stem ?? this.stem,
-      optionA: optionA ?? this.optionA,
-      optionB: optionB ?? this.optionB,
-      optionC: optionC ?? this.optionC,
-      optionD: optionD ?? this.optionD,
-      correctOption: correctOption ?? this.correctOption,
-      explanation: explanation ?? this.explanation,
-      category: category ?? this.category,
-      difficulty: difficulty ?? this.difficulty,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (id.present) {
-      map['id'] = Variable<int>(id.value);
-    }
-    if (articleId.present) {
-      map['article_id'] = Variable<String>(articleId.value);
-    }
-    if (stem.present) {
-      map['stem'] = Variable<String>(stem.value);
-    }
-    if (optionA.present) {
-      map['option_a'] = Variable<String>(optionA.value);
-    }
-    if (optionB.present) {
-      map['option_b'] = Variable<String>(optionB.value);
-    }
-    if (optionC.present) {
-      map['option_c'] = Variable<String>(optionC.value);
-    }
-    if (optionD.present) {
-      map['option_d'] = Variable<String>(optionD.value);
-    }
-    if (correctOption.present) {
-      map['correct_option'] = Variable<String>(correctOption.value);
-    }
-    if (explanation.present) {
-      map['explanation'] = Variable<String>(explanation.value);
-    }
-    if (category.present) {
-      map['category'] = Variable<String>(category.value);
-    }
-    if (difficulty.present) {
-      map['difficulty'] = Variable<String>(difficulty.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('QuizQuestionsCompanion(')
-          ..write('id: $id, ')
-          ..write('articleId: $articleId, ')
-          ..write('stem: $stem, ')
-          ..write('optionA: $optionA, ')
-          ..write('optionB: $optionB, ')
-          ..write('optionC: $optionC, ')
-          ..write('optionD: $optionD, ')
-          ..write('correctOption: $correctOption, ')
-          ..write('explanation: $explanation, ')
-          ..write('category: $category, ')
-          ..write('difficulty: $difficulty')
-          ..write(')'))
-        .toString();
-  }
-}
-
 class $QuizTableTable extends QuizTable
     with TableInfo<$QuizTableTable, QuizQuestionEntity> {
   @override
@@ -3499,6 +2834,17 @@ class $QuizTableTable extends QuizTable
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _attendingTipMeta = const VerificationMeta(
+    'attendingTip',
+  );
+  @override
+  late final GeneratedColumn<String> attendingTip = GeneratedColumn<String>(
+    'attending_tip',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -3526,6 +2872,7 @@ class $QuizTableTable extends QuizTable
     sourceType,
     examYear,
     examSource,
+    attendingTip,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -3727,6 +3074,15 @@ class $QuizTableTable extends QuizTable
         examSource.isAcceptableOrUnknown(data['exam_source']!, _examSourceMeta),
       );
     }
+    if (data.containsKey('attending_tip')) {
+      context.handle(
+        _attendingTipMeta,
+        attendingTip.isAcceptableOrUnknown(
+          data['attending_tip']!,
+          _attendingTipMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -3836,6 +3192,10 @@ class $QuizTableTable extends QuizTable
         DriftSqlType.string,
         data['${effectivePrefix}exam_source'],
       ),
+      attendingTip: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}attending_tip'],
+      ),
     );
   }
 
@@ -3882,6 +3242,11 @@ class QuizQuestionEntity extends DataClass
 
   /// Exam source description, e.g., "EHPLE October".
   final String? examSource;
+
+  /// Optional "Attending Tip" — a free-text clinical pearl shown after the
+  /// explanation. Mirrors the article dynamic-sections pattern: a single
+  /// optional text column synced from the Supabase `questions.attending_tip`.
+  final String? attendingTip;
   const QuizQuestionEntity({
     required this.id,
     required this.remoteId,
@@ -3908,6 +3273,7 @@ class QuizQuestionEntity extends DataClass
     this.sourceType,
     this.examYear,
     this.examSource,
+    this.attendingTip,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -3956,6 +3322,9 @@ class QuizQuestionEntity extends DataClass
     }
     if (!nullToAbsent || examSource != null) {
       map['exam_source'] = Variable<String>(examSource);
+    }
+    if (!nullToAbsent || attendingTip != null) {
+      map['attending_tip'] = Variable<String>(attendingTip);
     }
     return map;
   }
@@ -4007,6 +3376,9 @@ class QuizQuestionEntity extends DataClass
       examSource: examSource == null && nullToAbsent
           ? const Value.absent()
           : Value(examSource),
+      attendingTip: attendingTip == null && nullToAbsent
+          ? const Value.absent()
+          : Value(attendingTip),
     );
   }
 
@@ -4041,6 +3413,7 @@ class QuizQuestionEntity extends DataClass
       sourceType: serializer.fromJson<String?>(json['sourceType']),
       examYear: serializer.fromJson<int?>(json['examYear']),
       examSource: serializer.fromJson<String?>(json['examSource']),
+      attendingTip: serializer.fromJson<String?>(json['attendingTip']),
     );
   }
   @override
@@ -4072,6 +3445,7 @@ class QuizQuestionEntity extends DataClass
       'sourceType': serializer.toJson<String?>(sourceType),
       'examYear': serializer.toJson<int?>(examYear),
       'examSource': serializer.toJson<String?>(examSource),
+      'attendingTip': serializer.toJson<String?>(attendingTip),
     };
   }
 
@@ -4101,6 +3475,7 @@ class QuizQuestionEntity extends DataClass
     Value<String?> sourceType = const Value.absent(),
     Value<int?> examYear = const Value.absent(),
     Value<String?> examSource = const Value.absent(),
+    Value<String?> attendingTip = const Value.absent(),
   }) => QuizQuestionEntity(
     id: id ?? this.id,
     remoteId: remoteId ?? this.remoteId,
@@ -4131,6 +3506,7 @@ class QuizQuestionEntity extends DataClass
     sourceType: sourceType.present ? sourceType.value : this.sourceType,
     examYear: examYear.present ? examYear.value : this.examYear,
     examSource: examSource.present ? examSource.value : this.examSource,
+    attendingTip: attendingTip.present ? attendingTip.value : this.attendingTip,
   );
   QuizQuestionEntity copyWithCompanion(QuizTableCompanion data) {
     return QuizQuestionEntity(
@@ -4185,6 +3561,9 @@ class QuizQuestionEntity extends DataClass
       examSource: data.examSource.present
           ? data.examSource.value
           : this.examSource,
+      attendingTip: data.attendingTip.present
+          ? data.attendingTip.value
+          : this.attendingTip,
     );
   }
 
@@ -4215,7 +3594,8 @@ class QuizQuestionEntity extends DataClass
           ..write('parentCategory: $parentCategory, ')
           ..write('sourceType: $sourceType, ')
           ..write('examYear: $examYear, ')
-          ..write('examSource: $examSource')
+          ..write('examSource: $examSource, ')
+          ..write('attendingTip: $attendingTip')
           ..write(')'))
         .toString();
   }
@@ -4247,6 +3627,7 @@ class QuizQuestionEntity extends DataClass
     sourceType,
     examYear,
     examSource,
+    attendingTip,
   ]);
   @override
   bool operator ==(Object other) =>
@@ -4276,7 +3657,8 @@ class QuizQuestionEntity extends DataClass
           other.parentCategory == this.parentCategory &&
           other.sourceType == this.sourceType &&
           other.examYear == this.examYear &&
-          other.examSource == this.examSource);
+          other.examSource == this.examSource &&
+          other.attendingTip == this.attendingTip);
 }
 
 class QuizTableCompanion extends UpdateCompanion<QuizQuestionEntity> {
@@ -4305,6 +3687,7 @@ class QuizTableCompanion extends UpdateCompanion<QuizQuestionEntity> {
   final Value<String?> sourceType;
   final Value<int?> examYear;
   final Value<String?> examSource;
+  final Value<String?> attendingTip;
   const QuizTableCompanion({
     this.id = const Value.absent(),
     this.remoteId = const Value.absent(),
@@ -4331,6 +3714,7 @@ class QuizTableCompanion extends UpdateCompanion<QuizQuestionEntity> {
     this.sourceType = const Value.absent(),
     this.examYear = const Value.absent(),
     this.examSource = const Value.absent(),
+    this.attendingTip = const Value.absent(),
   });
   QuizTableCompanion.insert({
     this.id = const Value.absent(),
@@ -4358,6 +3742,7 @@ class QuizTableCompanion extends UpdateCompanion<QuizQuestionEntity> {
     this.sourceType = const Value.absent(),
     this.examYear = const Value.absent(),
     this.examSource = const Value.absent(),
+    this.attendingTip = const Value.absent(),
   }) : remoteId = Value(remoteId),
        articleId = Value(articleId),
        stem = Value(stem),
@@ -4394,6 +3779,7 @@ class QuizTableCompanion extends UpdateCompanion<QuizQuestionEntity> {
     Expression<String>? sourceType,
     Expression<int>? examYear,
     Expression<String>? examSource,
+    Expression<String>? attendingTip,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -4421,6 +3807,7 @@ class QuizTableCompanion extends UpdateCompanion<QuizQuestionEntity> {
       if (sourceType != null) 'source_type': sourceType,
       if (examYear != null) 'exam_year': examYear,
       if (examSource != null) 'exam_source': examSource,
+      if (attendingTip != null) 'attending_tip': attendingTip,
     });
   }
 
@@ -4450,6 +3837,7 @@ class QuizTableCompanion extends UpdateCompanion<QuizQuestionEntity> {
     Value<String?>? sourceType,
     Value<int?>? examYear,
     Value<String?>? examSource,
+    Value<String?>? attendingTip,
   }) {
     return QuizTableCompanion(
       id: id ?? this.id,
@@ -4477,6 +3865,7 @@ class QuizTableCompanion extends UpdateCompanion<QuizQuestionEntity> {
       sourceType: sourceType ?? this.sourceType,
       examYear: examYear ?? this.examYear,
       examSource: examSource ?? this.examSource,
+      attendingTip: attendingTip ?? this.attendingTip,
     );
   }
 
@@ -4558,6 +3947,9 @@ class QuizTableCompanion extends UpdateCompanion<QuizQuestionEntity> {
     if (examSource.present) {
       map['exam_source'] = Variable<String>(examSource.value);
     }
+    if (attendingTip.present) {
+      map['attending_tip'] = Variable<String>(attendingTip.value);
+    }
     return map;
   }
 
@@ -4588,7 +3980,8 @@ class QuizTableCompanion extends UpdateCompanion<QuizQuestionEntity> {
           ..write('parentCategory: $parentCategory, ')
           ..write('sourceType: $sourceType, ')
           ..write('examYear: $examYear, ')
-          ..write('examSource: $examSource')
+          ..write('examSource: $examSource, ')
+          ..write('attendingTip: $attendingTip')
           ..write(')'))
         .toString();
   }
@@ -7772,7 +7165,6 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $ArticleNotesTable articleNotes = $ArticleNotesTable(this);
   late final $StudySessionsTable studySessions = $StudySessionsTable(this);
   late final $QuizSessionsTable quizSessions = $QuizSessionsTable(this);
-  late final $QuizQuestionsTable quizQuestions = $QuizQuestionsTable(this);
   late final $QuizTableTable quizTable = $QuizTableTable(this);
   late final $FlashcardTableTable flashcardTable = $FlashcardTableTable(this);
   late final $ClinicalCasesTable clinicalCases = $ClinicalCasesTable(this);
@@ -7805,7 +7197,6 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     articleNotes,
     studySessions,
     quizSessions,
-    quizQuestions,
     quizTable,
     flashcardTable,
     clinicalCases,
@@ -9611,324 +9002,6 @@ typedef $$QuizSessionsTableProcessedTableManager =
       QuizSession,
       PrefetchHooks Function()
     >;
-typedef $$QuizQuestionsTableCreateCompanionBuilder =
-    QuizQuestionsCompanion Function({
-      Value<int> id,
-      Value<String?> articleId,
-      required String stem,
-      required String optionA,
-      required String optionB,
-      required String optionC,
-      required String optionD,
-      required String correctOption,
-      Value<String?> explanation,
-      Value<String?> category,
-      Value<String?> difficulty,
-    });
-typedef $$QuizQuestionsTableUpdateCompanionBuilder =
-    QuizQuestionsCompanion Function({
-      Value<int> id,
-      Value<String?> articleId,
-      Value<String> stem,
-      Value<String> optionA,
-      Value<String> optionB,
-      Value<String> optionC,
-      Value<String> optionD,
-      Value<String> correctOption,
-      Value<String?> explanation,
-      Value<String?> category,
-      Value<String?> difficulty,
-    });
-
-class $$QuizQuestionsTableFilterComposer
-    extends Composer<_$AppDatabase, $QuizQuestionsTable> {
-  $$QuizQuestionsTableFilterComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnFilters<int> get id => $composableBuilder(
-    column: $table.id,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get articleId => $composableBuilder(
-    column: $table.articleId,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get stem => $composableBuilder(
-    column: $table.stem,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get optionA => $composableBuilder(
-    column: $table.optionA,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get optionB => $composableBuilder(
-    column: $table.optionB,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get optionC => $composableBuilder(
-    column: $table.optionC,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get optionD => $composableBuilder(
-    column: $table.optionD,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get correctOption => $composableBuilder(
-    column: $table.correctOption,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get explanation => $composableBuilder(
-    column: $table.explanation,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get category => $composableBuilder(
-    column: $table.category,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get difficulty => $composableBuilder(
-    column: $table.difficulty,
-    builder: (column) => ColumnFilters(column),
-  );
-}
-
-class $$QuizQuestionsTableOrderingComposer
-    extends Composer<_$AppDatabase, $QuizQuestionsTable> {
-  $$QuizQuestionsTableOrderingComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnOrderings<int> get id => $composableBuilder(
-    column: $table.id,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get articleId => $composableBuilder(
-    column: $table.articleId,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get stem => $composableBuilder(
-    column: $table.stem,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get optionA => $composableBuilder(
-    column: $table.optionA,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get optionB => $composableBuilder(
-    column: $table.optionB,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get optionC => $composableBuilder(
-    column: $table.optionC,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get optionD => $composableBuilder(
-    column: $table.optionD,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get correctOption => $composableBuilder(
-    column: $table.correctOption,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get explanation => $composableBuilder(
-    column: $table.explanation,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get category => $composableBuilder(
-    column: $table.category,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get difficulty => $composableBuilder(
-    column: $table.difficulty,
-    builder: (column) => ColumnOrderings(column),
-  );
-}
-
-class $$QuizQuestionsTableAnnotationComposer
-    extends Composer<_$AppDatabase, $QuizQuestionsTable> {
-  $$QuizQuestionsTableAnnotationComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  GeneratedColumn<int> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => column);
-
-  GeneratedColumn<String> get articleId =>
-      $composableBuilder(column: $table.articleId, builder: (column) => column);
-
-  GeneratedColumn<String> get stem =>
-      $composableBuilder(column: $table.stem, builder: (column) => column);
-
-  GeneratedColumn<String> get optionA =>
-      $composableBuilder(column: $table.optionA, builder: (column) => column);
-
-  GeneratedColumn<String> get optionB =>
-      $composableBuilder(column: $table.optionB, builder: (column) => column);
-
-  GeneratedColumn<String> get optionC =>
-      $composableBuilder(column: $table.optionC, builder: (column) => column);
-
-  GeneratedColumn<String> get optionD =>
-      $composableBuilder(column: $table.optionD, builder: (column) => column);
-
-  GeneratedColumn<String> get correctOption => $composableBuilder(
-    column: $table.correctOption,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<String> get explanation => $composableBuilder(
-    column: $table.explanation,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<String> get category =>
-      $composableBuilder(column: $table.category, builder: (column) => column);
-
-  GeneratedColumn<String> get difficulty => $composableBuilder(
-    column: $table.difficulty,
-    builder: (column) => column,
-  );
-}
-
-class $$QuizQuestionsTableTableManager
-    extends
-        RootTableManager<
-          _$AppDatabase,
-          $QuizQuestionsTable,
-          QuizQuestionLocal,
-          $$QuizQuestionsTableFilterComposer,
-          $$QuizQuestionsTableOrderingComposer,
-          $$QuizQuestionsTableAnnotationComposer,
-          $$QuizQuestionsTableCreateCompanionBuilder,
-          $$QuizQuestionsTableUpdateCompanionBuilder,
-          (
-            QuizQuestionLocal,
-            BaseReferences<
-              _$AppDatabase,
-              $QuizQuestionsTable,
-              QuizQuestionLocal
-            >,
-          ),
-          QuizQuestionLocal,
-          PrefetchHooks Function()
-        > {
-  $$QuizQuestionsTableTableManager(_$AppDatabase db, $QuizQuestionsTable table)
-    : super(
-        TableManagerState(
-          db: db,
-          table: table,
-          createFilteringComposer: () =>
-              $$QuizQuestionsTableFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $$QuizQuestionsTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $$QuizQuestionsTableAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback:
-              ({
-                Value<int> id = const Value.absent(),
-                Value<String?> articleId = const Value.absent(),
-                Value<String> stem = const Value.absent(),
-                Value<String> optionA = const Value.absent(),
-                Value<String> optionB = const Value.absent(),
-                Value<String> optionC = const Value.absent(),
-                Value<String> optionD = const Value.absent(),
-                Value<String> correctOption = const Value.absent(),
-                Value<String?> explanation = const Value.absent(),
-                Value<String?> category = const Value.absent(),
-                Value<String?> difficulty = const Value.absent(),
-              }) => QuizQuestionsCompanion(
-                id: id,
-                articleId: articleId,
-                stem: stem,
-                optionA: optionA,
-                optionB: optionB,
-                optionC: optionC,
-                optionD: optionD,
-                correctOption: correctOption,
-                explanation: explanation,
-                category: category,
-                difficulty: difficulty,
-              ),
-          createCompanionCallback:
-              ({
-                Value<int> id = const Value.absent(),
-                Value<String?> articleId = const Value.absent(),
-                required String stem,
-                required String optionA,
-                required String optionB,
-                required String optionC,
-                required String optionD,
-                required String correctOption,
-                Value<String?> explanation = const Value.absent(),
-                Value<String?> category = const Value.absent(),
-                Value<String?> difficulty = const Value.absent(),
-              }) => QuizQuestionsCompanion.insert(
-                id: id,
-                articleId: articleId,
-                stem: stem,
-                optionA: optionA,
-                optionB: optionB,
-                optionC: optionC,
-                optionD: optionD,
-                correctOption: correctOption,
-                explanation: explanation,
-                category: category,
-                difficulty: difficulty,
-              ),
-          withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
-              .toList(),
-          prefetchHooksCallback: null,
-        ),
-      );
-}
-
-typedef $$QuizQuestionsTableProcessedTableManager =
-    ProcessedTableManager<
-      _$AppDatabase,
-      $QuizQuestionsTable,
-      QuizQuestionLocal,
-      $$QuizQuestionsTableFilterComposer,
-      $$QuizQuestionsTableOrderingComposer,
-      $$QuizQuestionsTableAnnotationComposer,
-      $$QuizQuestionsTableCreateCompanionBuilder,
-      $$QuizQuestionsTableUpdateCompanionBuilder,
-      (
-        QuizQuestionLocal,
-        BaseReferences<_$AppDatabase, $QuizQuestionsTable, QuizQuestionLocal>,
-      ),
-      QuizQuestionLocal,
-      PrefetchHooks Function()
-    >;
 typedef $$QuizTableTableCreateCompanionBuilder =
     QuizTableCompanion Function({
       Value<int> id,
@@ -9956,6 +9029,7 @@ typedef $$QuizTableTableCreateCompanionBuilder =
       Value<String?> sourceType,
       Value<int?> examYear,
       Value<String?> examSource,
+      Value<String?> attendingTip,
     });
 typedef $$QuizTableTableUpdateCompanionBuilder =
     QuizTableCompanion Function({
@@ -9984,6 +9058,7 @@ typedef $$QuizTableTableUpdateCompanionBuilder =
       Value<String?> sourceType,
       Value<int?> examYear,
       Value<String?> examSource,
+      Value<String?> attendingTip,
     });
 
 class $$QuizTableTableFilterComposer
@@ -10117,6 +9192,11 @@ class $$QuizTableTableFilterComposer
 
   ColumnFilters<String> get examSource => $composableBuilder(
     column: $table.examSource,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get attendingTip => $composableBuilder(
+    column: $table.attendingTip,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -10254,6 +9334,11 @@ class $$QuizTableTableOrderingComposer
     column: $table.examSource,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get attendingTip => $composableBuilder(
+    column: $table.attendingTip,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$QuizTableTableAnnotationComposer
@@ -10365,6 +9450,11 @@ class $$QuizTableTableAnnotationComposer
     column: $table.examSource,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get attendingTip => $composableBuilder(
+    column: $table.attendingTip,
+    builder: (column) => column,
+  );
 }
 
 class $$QuizTableTableTableManager
@@ -10423,6 +9513,7 @@ class $$QuizTableTableTableManager
                 Value<String?> sourceType = const Value.absent(),
                 Value<int?> examYear = const Value.absent(),
                 Value<String?> examSource = const Value.absent(),
+                Value<String?> attendingTip = const Value.absent(),
               }) => QuizTableCompanion(
                 id: id,
                 remoteId: remoteId,
@@ -10449,6 +9540,7 @@ class $$QuizTableTableTableManager
                 sourceType: sourceType,
                 examYear: examYear,
                 examSource: examSource,
+                attendingTip: attendingTip,
               ),
           createCompanionCallback:
               ({
@@ -10477,6 +9569,7 @@ class $$QuizTableTableTableManager
                 Value<String?> sourceType = const Value.absent(),
                 Value<int?> examYear = const Value.absent(),
                 Value<String?> examSource = const Value.absent(),
+                Value<String?> attendingTip = const Value.absent(),
               }) => QuizTableCompanion.insert(
                 id: id,
                 remoteId: remoteId,
@@ -10503,6 +9596,7 @@ class $$QuizTableTableTableManager
                 sourceType: sourceType,
                 examYear: examYear,
                 examSource: examSource,
+                attendingTip: attendingTip,
               ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
@@ -12566,8 +11660,6 @@ class $AppDatabaseManager {
       $$StudySessionsTableTableManager(_db, _db.studySessions);
   $$QuizSessionsTableTableManager get quizSessions =>
       $$QuizSessionsTableTableManager(_db, _db.quizSessions);
-  $$QuizQuestionsTableTableManager get quizQuestions =>
-      $$QuizQuestionsTableTableManager(_db, _db.quizQuestions);
   $$QuizTableTableTableManager get quizTable =>
       $$QuizTableTableTableManager(_db, _db.quizTable);
   $$FlashcardTableTableTableManager get flashcardTable =>

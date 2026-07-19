@@ -81,3 +81,6 @@ android/key.properties
 
 # Kilo agent scratch/plans
 .kilo/plans/
+
+# Obfuscated build debug symbols (uploaded as CI artifacts, not committed)
+build/symbols/

@@ -25,6 +25,7 @@ class HomeScreen extends ConsumerWidget {
           SliverToBoxAdapter(
             child: _buildSectionHeader(context, 'Quick Access'),
           ),
+          SliverToBoxAdapter(child: const DailyPearlCard()),
           SliverToBoxAdapter(child: const CalculatorsEntryCard()),
           SliverToBoxAdapter(child: const CasesEntryCard()),
           SliverToBoxAdapter(child: const FlashcardsEntryCard()),
