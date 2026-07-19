@@ -114,13 +114,13 @@ return progressAsyncValue.when(
               borderRadius: BorderRadius.circular(15),
             ),
             child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(icon, size: 40, color: theme.colorScheme.secondary),
-                  const SizedBox(height: 10),
+               padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 8),
+               child: Column(
+                 mainAxisAlignment: MainAxisAlignment.center,
+                 mainAxisSize: MainAxisSize.min,
+                 children: [
+                   Icon(icon, size: 40, color: theme.colorScheme.secondary),
+                   const SizedBox(height: 12),
                   Text(
                     name,
                     textAlign: TextAlign.center,
