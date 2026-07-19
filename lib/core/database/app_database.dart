@@ -179,8 +179,13 @@ class StudySessions extends Table {
 /// Exam year, e.g., 2022, 2023.
   IntColumn get examYear => integer().nullable()();
 
-/// Exam source description, e.g., "EHPLE October".
+  /// Exam source description, e.g., "EHPLE October".
   TextColumn get examSource => text().nullable()();
+
+  /// Optional "Attending Tip" — a free-text clinical pearl shown after the
+  /// explanation. Mirrors the article dynamic-sections pattern: a single
+  /// optional text column synced from the Supabase `questions.attending_tip`.
+  TextColumn get attendingTip => text().nullable()();
 }
 
 @TableIndex(name: 'idx_flashcard_deck', columns: {#deckName})
@@ -289,7 +294,7 @@ class CaseProgress extends Table {
    AppDatabase() : super(_openConnection());
 
     @override
-    int get schemaVersion => 23;
+    int get schemaVersion => 24;
 
   Future<void> _runMigrationStep(
     String name,
@@ -622,6 +627,23 @@ if (!columnNames.contains('exam_source')) {
                     await customStatement(
                       'ALTER TABLE section_registry '
                       'ADD COLUMN category_label_overrides TEXT',
+                    );
+                  }
+                },
+              );
+            }
+            if (from < 24) {
+              await _runMigrationStep(
+                'add quiz attending_tip column',
+                () async {
+                  final columns = await customSelect(
+                    'PRAGMA table_info(quiz_table)',
+                  ).get();
+                  final columnNames =
+                      columns.map((row) => row.read<String>('name')).toSet();
+                  if (!columnNames.contains('attending_tip')) {
+                    await customStatement(
+                      'ALTER TABLE quiz_table ADD COLUMN attending_tip TEXT',
                     );
                   }
                 },

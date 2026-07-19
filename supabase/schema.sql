@@ -135,6 +135,7 @@ CREATE TABLE questions (
   category       text,
   difficulty     text DEFAULT 'medium', -- easy | medium | hard
   tested_field   text DEFAULT 'clinicalFeatures', -- for Learning Radar (35D)
+  attending_tip   text,                          -- optional "Attending Tip" pearl
   updated_at     timestamptz DEFAULT now()
 );
 

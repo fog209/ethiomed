@@ -2834,6 +2834,17 @@ class $QuizTableTable extends QuizTable
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _attendingTipMeta = const VerificationMeta(
+    'attendingTip',
+  );
+  @override
+  late final GeneratedColumn<String> attendingTip = GeneratedColumn<String>(
+    'attending_tip',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -2861,6 +2872,7 @@ class $QuizTableTable extends QuizTable
     sourceType,
     examYear,
     examSource,
+    attendingTip,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -3062,6 +3074,15 @@ class $QuizTableTable extends QuizTable
         examSource.isAcceptableOrUnknown(data['exam_source']!, _examSourceMeta),
       );
     }
+    if (data.containsKey('attending_tip')) {
+      context.handle(
+        _attendingTipMeta,
+        attendingTip.isAcceptableOrUnknown(
+          data['attending_tip']!,
+          _attendingTipMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -3171,6 +3192,10 @@ class $QuizTableTable extends QuizTable
         DriftSqlType.string,
         data['${effectivePrefix}exam_source'],
       ),
+      attendingTip: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}attending_tip'],
+      ),
     );
   }
 
@@ -3217,6 +3242,11 @@ class QuizQuestionEntity extends DataClass
 
   /// Exam source description, e.g., "EHPLE October".
   final String? examSource;
+
+  /// Optional "Attending Tip" — a free-text clinical pearl shown after the
+  /// explanation. Mirrors the article dynamic-sections pattern: a single
+  /// optional text column synced from the Supabase `questions.attending_tip`.
+  final String? attendingTip;
   const QuizQuestionEntity({
     required this.id,
     required this.remoteId,
@@ -3243,6 +3273,7 @@ class QuizQuestionEntity extends DataClass
     this.sourceType,
     this.examYear,
     this.examSource,
+    this.attendingTip,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -3291,6 +3322,9 @@ class QuizQuestionEntity extends DataClass
     }
     if (!nullToAbsent || examSource != null) {
       map['exam_source'] = Variable<String>(examSource);
+    }
+    if (!nullToAbsent || attendingTip != null) {
+      map['attending_tip'] = Variable<String>(attendingTip);
     }
     return map;
   }
@@ -3342,6 +3376,9 @@ class QuizQuestionEntity extends DataClass
       examSource: examSource == null && nullToAbsent
           ? const Value.absent()
           : Value(examSource),
+      attendingTip: attendingTip == null && nullToAbsent
+          ? const Value.absent()
+          : Value(attendingTip),
     );
   }
 
@@ -3376,6 +3413,7 @@ class QuizQuestionEntity extends DataClass
       sourceType: serializer.fromJson<String?>(json['sourceType']),
       examYear: serializer.fromJson<int?>(json['examYear']),
       examSource: serializer.fromJson<String?>(json['examSource']),
+      attendingTip: serializer.fromJson<String?>(json['attendingTip']),
     );
   }
   @override
@@ -3407,6 +3445,7 @@ class QuizQuestionEntity extends DataClass
       'sourceType': serializer.toJson<String?>(sourceType),
       'examYear': serializer.toJson<int?>(examYear),
       'examSource': serializer.toJson<String?>(examSource),
+      'attendingTip': serializer.toJson<String?>(attendingTip),
     };
   }
 
@@ -3436,6 +3475,7 @@ class QuizQuestionEntity extends DataClass
     Value<String?> sourceType = const Value.absent(),
     Value<int?> examYear = const Value.absent(),
     Value<String?> examSource = const Value.absent(),
+    Value<String?> attendingTip = const Value.absent(),
   }) => QuizQuestionEntity(
     id: id ?? this.id,
     remoteId: remoteId ?? this.remoteId,
@@ -3466,6 +3506,7 @@ class QuizQuestionEntity extends DataClass
     sourceType: sourceType.present ? sourceType.value : this.sourceType,
     examYear: examYear.present ? examYear.value : this.examYear,
     examSource: examSource.present ? examSource.value : this.examSource,
+    attendingTip: attendingTip.present ? attendingTip.value : this.attendingTip,
   );
   QuizQuestionEntity copyWithCompanion(QuizTableCompanion data) {
     return QuizQuestionEntity(
@@ -3520,6 +3561,9 @@ class QuizQuestionEntity extends DataClass
       examSource: data.examSource.present
           ? data.examSource.value
           : this.examSource,
+      attendingTip: data.attendingTip.present
+          ? data.attendingTip.value
+          : this.attendingTip,
     );
   }
 
@@ -3550,7 +3594,8 @@ class QuizQuestionEntity extends DataClass
           ..write('parentCategory: $parentCategory, ')
           ..write('sourceType: $sourceType, ')
           ..write('examYear: $examYear, ')
-          ..write('examSource: $examSource')
+          ..write('examSource: $examSource, ')
+          ..write('attendingTip: $attendingTip')
           ..write(')'))
         .toString();
   }
@@ -3582,6 +3627,7 @@ class QuizQuestionEntity extends DataClass
     sourceType,
     examYear,
     examSource,
+    attendingTip,
   ]);
   @override
   bool operator ==(Object other) =>
@@ -3611,7 +3657,8 @@ class QuizQuestionEntity extends DataClass
           other.parentCategory == this.parentCategory &&
           other.sourceType == this.sourceType &&
           other.examYear == this.examYear &&
-          other.examSource == this.examSource);
+          other.examSource == this.examSource &&
+          other.attendingTip == this.attendingTip);
 }
 
 class QuizTableCompanion extends UpdateCompanion<QuizQuestionEntity> {
@@ -3640,6 +3687,7 @@ class QuizTableCompanion extends UpdateCompanion<QuizQuestionEntity> {
   final Value<String?> sourceType;
   final Value<int?> examYear;
   final Value<String?> examSource;
+  final Value<String?> attendingTip;
   const QuizTableCompanion({
     this.id = const Value.absent(),
     this.remoteId = const Value.absent(),
@@ -3666,6 +3714,7 @@ class QuizTableCompanion extends UpdateCompanion<QuizQuestionEntity> {
     this.sourceType = const Value.absent(),
     this.examYear = const Value.absent(),
     this.examSource = const Value.absent(),
+    this.attendingTip = const Value.absent(),
   });
   QuizTableCompanion.insert({
     this.id = const Value.absent(),
@@ -3693,6 +3742,7 @@ class QuizTableCompanion extends UpdateCompanion<QuizQuestionEntity> {
     this.sourceType = const Value.absent(),
     this.examYear = const Value.absent(),
     this.examSource = const Value.absent(),
+    this.attendingTip = const Value.absent(),
   }) : remoteId = Value(remoteId),
        articleId = Value(articleId),
        stem = Value(stem),
@@ -3729,6 +3779,7 @@ class QuizTableCompanion extends UpdateCompanion<QuizQuestionEntity> {
     Expression<String>? sourceType,
     Expression<int>? examYear,
     Expression<String>? examSource,
+    Expression<String>? attendingTip,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -3756,6 +3807,7 @@ class QuizTableCompanion extends UpdateCompanion<QuizQuestionEntity> {
       if (sourceType != null) 'source_type': sourceType,
       if (examYear != null) 'exam_year': examYear,
       if (examSource != null) 'exam_source': examSource,
+      if (attendingTip != null) 'attending_tip': attendingTip,
     });
   }
 
@@ -3785,6 +3837,7 @@ class QuizTableCompanion extends UpdateCompanion<QuizQuestionEntity> {
     Value<String?>? sourceType,
     Value<int?>? examYear,
     Value<String?>? examSource,
+    Value<String?>? attendingTip,
   }) {
     return QuizTableCompanion(
       id: id ?? this.id,
@@ -3812,6 +3865,7 @@ class QuizTableCompanion extends UpdateCompanion<QuizQuestionEntity> {
       sourceType: sourceType ?? this.sourceType,
       examYear: examYear ?? this.examYear,
       examSource: examSource ?? this.examSource,
+      attendingTip: attendingTip ?? this.attendingTip,
     );
   }
 
@@ -3893,6 +3947,9 @@ class QuizTableCompanion extends UpdateCompanion<QuizQuestionEntity> {
     if (examSource.present) {
       map['exam_source'] = Variable<String>(examSource.value);
     }
+    if (attendingTip.present) {
+      map['attending_tip'] = Variable<String>(attendingTip.value);
+    }
     return map;
   }
 
@@ -3923,7 +3980,8 @@ class QuizTableCompanion extends UpdateCompanion<QuizQuestionEntity> {
           ..write('parentCategory: $parentCategory, ')
           ..write('sourceType: $sourceType, ')
           ..write('examYear: $examYear, ')
-          ..write('examSource: $examSource')
+          ..write('examSource: $examSource, ')
+          ..write('attendingTip: $attendingTip')
           ..write(')'))
         .toString();
   }
@@ -8971,6 +9029,7 @@ typedef $$QuizTableTableCreateCompanionBuilder =
       Value<String?> sourceType,
       Value<int?> examYear,
       Value<String?> examSource,
+      Value<String?> attendingTip,
     });
 typedef $$QuizTableTableUpdateCompanionBuilder =
     QuizTableCompanion Function({
@@ -8999,6 +9058,7 @@ typedef $$QuizTableTableUpdateCompanionBuilder =
       Value<String?> sourceType,
       Value<int?> examYear,
       Value<String?> examSource,
+      Value<String?> attendingTip,
     });
 
 class $$QuizTableTableFilterComposer
@@ -9132,6 +9192,11 @@ class $$QuizTableTableFilterComposer
 
   ColumnFilters<String> get examSource => $composableBuilder(
     column: $table.examSource,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get attendingTip => $composableBuilder(
+    column: $table.attendingTip,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -9269,6 +9334,11 @@ class $$QuizTableTableOrderingComposer
     column: $table.examSource,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get attendingTip => $composableBuilder(
+    column: $table.attendingTip,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$QuizTableTableAnnotationComposer
@@ -9380,6 +9450,11 @@ class $$QuizTableTableAnnotationComposer
     column: $table.examSource,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get attendingTip => $composableBuilder(
+    column: $table.attendingTip,
+    builder: (column) => column,
+  );
 }
 
 class $$QuizTableTableTableManager
@@ -9438,6 +9513,7 @@ class $$QuizTableTableTableManager
                 Value<String?> sourceType = const Value.absent(),
                 Value<int?> examYear = const Value.absent(),
                 Value<String?> examSource = const Value.absent(),
+                Value<String?> attendingTip = const Value.absent(),
               }) => QuizTableCompanion(
                 id: id,
                 remoteId: remoteId,
@@ -9464,6 +9540,7 @@ class $$QuizTableTableTableManager
                 sourceType: sourceType,
                 examYear: examYear,
                 examSource: examSource,
+                attendingTip: attendingTip,
               ),
           createCompanionCallback:
               ({
@@ -9492,6 +9569,7 @@ class $$QuizTableTableTableManager
                 Value<String?> sourceType = const Value.absent(),
                 Value<int?> examYear = const Value.absent(),
                 Value<String?> examSource = const Value.absent(),
+                Value<String?> attendingTip = const Value.absent(),
               }) => QuizTableCompanion.insert(
                 id: id,
                 remoteId: remoteId,
@@ -9518,6 +9596,7 @@ class $$QuizTableTableTableManager
                 sourceType: sourceType,
                 examYear: examYear,
                 examSource: examSource,
+                attendingTip: attendingTip,
               ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
