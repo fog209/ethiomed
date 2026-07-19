@@ -927,6 +927,7 @@ Padding(
                     zebraA: theme.colorScheme.surfaceContainerHighest,
                     zebraB: theme.colorScheme.surface,
                   ),
+                  'a': MedicalTermLinkBuilder(onTapLink: _handleLinkTap),
                 },
                 styleSheet: MarkdownStyleSheet.fromTheme(theme).copyWith(
                   p: TextStyle(
