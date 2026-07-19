@@ -28,3 +28,39 @@ jobs:
 
       - name: Test
         run: flutter test
+
+  release_build:
+    name: Obfuscated release APK (symbols retained)
+    runs-on: ubuntu-latest
+    # Only build release artifacts on push to master; keep PR runs cheap.
+    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+    needs: analyze_and_test
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: '3.32.0'
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Resolve version
+        id: version
+        run: |
+          VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //' | tr -d ' ')
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Build obfuscated release APK with split debug info
+        run: flutter build apk --release --obfuscate --split-debug-info=build/symbols/${{ steps.version.outputs.version }}
+
+      - name: Upload debug symbols
+        uses: actions/upload-artifact@v4
+        with:
+          name: symbols-${{ steps.version.outputs.version }}
+          path: build/symbols/${{ steps.version.outputs.version }}
+          retention-days: 90
