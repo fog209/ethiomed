@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -103,4 +104,117 @@ class SecurityService {
   static String _bytesToHex(Uint8List bytes) {
     return bytes.map((b) => b.toRadixString(16).padLeft(2, '0')).join();
   }
+
+  /// ============================================================================
+  /// ROOT / EMULATOR DETECTION (DETECTION-ONLY — no enforcement)
+  /// ============================================================================
+  ///
+  /// These helpers surface environmental risk signals (rooted device, emulator,
+  /// or a known unlocked/debuggable build). They are intentionally NON-ENFORCING:
+  /// they collect signals and report them so UI/analytics can warn the user, but
+  /// they take NO blocking action (no sync disable, no exit, no tamper alert).
+  ///
+  /// Enforcement (e.g. gating sync or showing a hard warning) is out of scope for
+  /// this pass and must be wired up deliberately after an owner decision.
+
+  /// Lightweight, platform-level heuristics that do not need the native channel.
+  ///
+  /// Returns true when the current environment looks like an emulator/rooted
+  /// device based on [Platform] metadata alone. This is a fast, coarse signal
+  /// and will report false on real hardware.
+  bool detectEmulatorFromPlatform() {
+    if (!Platform.isAndroid && !Platform.isIOS) return false;
+    final fingerprint = Platform.isAndroid
+        ? (Platform.environment['ro.product.cpu.abi'] ?? '')
+        : '';
+    // Generic emulator ABIs / board names are a strong emulator tell.
+    final board = Platform.isAndroid
+        ? (Platform.environment['ro.product.board'] ?? '').toLowerCase()
+        : '';
+    final isEmulatorAbi =
+        fingerprint.contains('x86') || fingerprint.contains('emulator');
+    final isEmulatorBoard =
+        board.contains('goldfish') || board.contains('ranchu') || board.isEmpty;
+    return isEmulatorAbi || isEmulatorBoard;
+  }
+
+  /// Best-effort root detection via the native security channel.
+  ///
+  /// Returns null when the native handler is unavailable (e.g. on platforms
+  /// without the MethodChannel implementation yet, or in tests). A `true`
+  /// result means the native layer reported a root indicator; `false` means the
+  /// native layer explicitly reported no indicator. Detection only — the result
+  /// is reported, never acted upon here.
+  Future<bool?> detectRoot() async {
+    try {
+      final bool? result = await _channel.invokeMethod<bool>('isDeviceRooted');
+      return result;
+    } catch (e) {
+      debugPrint('Root detection unavailable: $e');
+      return null;
+    }
+  }
+
+  /// Best-effort emulator detection via the native security channel.
+  ///
+  /// Mirrors [detectRoot]: returns null when the native handler is unavailable
+  /// and otherwise reports the native layer's verdict. Detection only.
+  Future<bool?> detectEmulatorNative() async {
+    try {
+      final bool? result =
+          await _channel.invokeMethod<bool>('isEmulator');
+      return result;
+    } catch (e) {
+      debugPrint('Emulator detection unavailable: $e');
+      return null;
+    }
+  }
+
+  /// Aggregates all detection signals into a single report for UI/analytics.
+  ///
+  /// Does NOT block, disable, or alter any app behavior. Callers decide what
+  /// (if anything) to do with the result.
+  Future<EnvironmentRiskReport> scanEnvironment() async {
+    final root = await detectRoot();
+    final emulatorNative = await detectEmulatorNative();
+    final emulatorPlatform = detectEmulatorFromPlatform();
+    return EnvironmentRiskReport(
+      rootDetected: root,
+      emulatorDetectedNative: emulatorNative,
+      emulatorDetectedPlatform: emulatorPlatform,
+    );
+  }
+}
+
+/// Immutable, non-enforcing summary of environmental risk signals.
+///
+/// Every field is nullable: a null means "signal unavailable / not evaluated",
+/// which must NOT be treated as a positive or negative verdict by callers.
+class EnvironmentRiskReport {
+  const EnvironmentRiskReport({
+    this.rootDetected,
+    this.emulatorDetectedNative,
+    required this.emulatorDetectedPlatform,
+  });
+
+  /// True = native layer reported root indicators. Null = unavailable.
+  final bool? rootDetected;
+
+  /// True = native layer reported emulator. Null = unavailable.
+  final bool? emulatorDetectedNative;
+
+  /// True = platform metadata heuristically suggests an emulator.
+  final bool emulatorDetectedPlatform;
+
+  /// True only when at least one signal affirmatively indicates risk.
+  bool get hasAnySignal =>
+      rootDetected == true ||
+      emulatorDetectedNative == true ||
+      emulatorDetectedPlatform;
+
+  @override
+  String toString() =>
+      'EnvironmentRiskReport(root: $rootDetected, '
+      'emulatorNative: $emulatorDetectedNative, '
+      'emulatorPlatform: $emulatorDetectedPlatform)';
 }
