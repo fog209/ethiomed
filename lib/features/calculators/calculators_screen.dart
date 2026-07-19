@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'calculator_definitions.dart';
+
 class CalculatorsScreen extends ConsumerWidget {
   const CalculatorsScreen({super.key});
 
@@ -78,50 +80,152 @@ class CalculatorsScreen extends ConsumerWidget {
   }
 }
 
-class CalculatorDetailScreen extends StatelessWidget {
+class CalculatorDetailScreen extends ConsumerStatefulWidget {
   const CalculatorDetailScreen({super.key, required this.name});
 
   final String name;
 
   @override
+  ConsumerState<CalculatorDetailScreen> createState() =>
+      _CalculatorDetailScreenState();
+}
+
+class _CalculatorDetailScreenState extends ConsumerState<CalculatorDetailScreen> {
+  final Map<String, TextEditingController> _controllers = {};
+  final Map<String, bool> _boolValues = {};
+  String? _result;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    final def = findCalculatorDef(widget.name);
+    for (final field in def?.fields ?? const []) {
+      if (field.isBool) {
+        _boolValues[field.key] = false;
+      } else {
+        _controllers[field.key] = TextEditingController();
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    for (final c in _controllers.values) {
+      c.dispose();
+    }
+    super.dispose();
+  }
+
+  void _calculate() {
+    final def = findCalculatorDef(widget.name);
+    if (def == null) return;
+    setState(() {
+      _error = null;
+      _result = null;
+    });
+    final values = <String, dynamic>{};
+    try {
+      for (final field in def.fields) {
+        if (field.isBool) {
+          values[field.key] = _boolValues[field.key] ?? false;
+        } else if (field.isInt) {
+          values[field.key] = int.parse(_controllers[field.key]!.text.trim());
+        } else {
+          values[field.key] = _controllers[field.key]!.text.trim();
+        }
+      }
+      setState(() {
+        _result = def.compute(values);
+      });
+    } catch (e) {
+      setState(() {
+        _error = 'Check your inputs (numbers only).';
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final def = findCalculatorDef(widget.name);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(name),
+        title: Text(widget.name),
         backgroundColor: theme.colorScheme.surface,
         foregroundColor: theme.colorScheme.onSurface,
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.construction_outlined,
-              size: 72,
-              color: theme.colorScheme.secondary,
+      body: def == null
+          ? const Center(child: Text('Calculator not found.'))
+          : ListView(
+              padding: const EdgeInsets.all(16),
+              children: [
+                Text(
+                  def.description,
+                  style: TextStyle(
+                    color: theme.colorScheme.onSurfaceVariant,
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                for (final field in def.fields) ...[
+                  if (field.isBool)
+                    SwitchListTile(
+                      title: Text(field.label),
+                      value: _boolValues[field.key] ?? false,
+                      onChanged: (v) =>
+                          setState(() => _boolValues[field.key] = v),
+                    )
+                  else
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: TextField(
+                        controller: _controllers[field.key],
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          labelText: field.label,
+                          suffixText: field.unit,
+                          hintText: field.hint,
+                          border: const OutlineInputBorder(),
+                        ),
+                      ),
+                    ),
+                ],
+                const SizedBox(height: 8),
+                FilledButton.icon(
+                  onPressed: _calculate,
+                  icon: const Icon(Icons.calculate),
+                  label: const Text('Calculate'),
+                ),
+                const SizedBox(height: 16),
+                if (_error != null)
+                  Text(
+                    _error!,
+                    style: TextStyle(color: theme.colorScheme.error),
+                  ),
+                if (_result != null)
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.secondaryContainer,
+                      borderRadius: BorderRadius.circular(12),
+                      border:
+                          Border.all(color: theme.colorScheme.secondary),
+                    ),
+                    child: Text(
+                      _result!,
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: theme.colorScheme.onSurface,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+              ],
             ),
-            const SizedBox(height: 24),
-            Text(
-              'Coming Soon',
-              style: TextStyle(
-                color: theme.colorScheme.onSurface,
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              'This calculator will be available in a future update.',
-              style: TextStyle(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
     );
   }
 }
