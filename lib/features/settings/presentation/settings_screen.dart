@@ -15,6 +15,7 @@ import '../../settings/reading_mode_provider.dart';
 import '../../../main.dart' show currentAdminProfileProvider;
 import '../../flashcards/presentation/flashcard_stage_prompt_screen.dart';
 import '../../flashcards/flashcard_track_provider.dart';
+import 'content_reset_button.dart';
 
 class SettingsScreen extends ConsumerWidget {
   static const String _adminTelegramUrl = 'https://t.me/WardReadyAdmin';
@@ -298,6 +299,10 @@ class SettingsScreen extends ConsumerWidget {
         ),
       );
     }
+
+    items.add(const Divider());
+    items.add(const ContentResetButton());
+
     return items;
   }
 
