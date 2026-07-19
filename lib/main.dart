@@ -24,6 +24,7 @@ import 'core/theme/theme_mode_provider.dart';
 import 'features/admin/presentation/admin_dashboard_screen.dart';
 import 'features/articles/presentation/article_detail_screen.dart';
 import 'features/articles/presentation/article_search_screen.dart';
+import 'features/search/presentation/spotlight_search_screen.dart';
 import 'features/auth/presentation/login_screen.dart';
 import 'features/auth/presentation/signup_screen.dart';
 import 'features/calculators/calculators_screen.dart' show CalculatorsScreen, CalculatorDetailScreen;
@@ -41,6 +42,8 @@ import 'features/quiz/presentation/exam_setup_screen.dart';
 import 'features/quiz/quiz_screen.dart';
 import 'features/progress/progress_screen.dart';
 import 'features/settings/presentation/system_health_screen.dart';
+import 'features/settings/presentation/forced_update_gate.dart';
+import 'features/settings/presentation/forced_update_screen.dart';
 import 'features/subscription/presentation/paywall_screen.dart';
 import 'features/subscription/data/subscription_repository.dart';
 
@@ -177,6 +180,15 @@ final _router = GoRouter(
     final hasSeenDisclaimer = prefs.getBool('hasSeenDisclaimer') ?? false;
     final location = state.uri.path;
 
+    // 0. Forced-update gate — highest priority. An installed version below the
+    // hardcoded minimum ([kMinimumSupportedVersion]) blocks everything, even
+    // offline, by routing to the non-dismissible update screen. Computed
+    // synchronously from constants (no Provider/ref needed in the router).
+    if (isVersionUnsupported(kInstalledAppVersion, kMinimumSupportedVersion)) {
+      if (location != '/forced-update') return '/forced-update';
+      return null;
+    }
+
     // 1. Onboarding gate (only fires if not already on the onboarding route)
     if (!hasSeenOnboarding) {
       if (location != '/onboarding') return '/onboarding';
@@ -249,6 +261,10 @@ final _router = GoRouter(
       builder: (context, state) => const OnboardingScreen(),
     ),
     GoRoute(
+      path: '/forced-update',
+      builder: (context, state) => const ForcedUpdateScreen(),
+    ),
+    GoRoute(
       path: '/onboarding',
       builder: (context, state) => const OnboardingScreen(),
     ),
@@ -309,6 +325,13 @@ final _router = GoRouter(
       builder: (context, state) {
         final query = state.extra is String ? state.extra as String : null;
         return ArticleSearchScreen(initialQuery: query);
+      },
+    ),
+    GoRoute(
+      path: '/spotlight',
+      builder: (context, state) {
+        final query = state.extra is String ? state.extra as String : null;
+        return SpotlightSearchScreen(initialQuery: query);
       },
     ),
     GoRoute(
