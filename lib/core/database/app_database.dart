@@ -302,10 +302,15 @@ class CaseProgress extends Table {
    ],
  )
  class AppDatabase extends _$AppDatabase {
-   AppDatabase() : super(_openConnection());
+  AppDatabase() : super(_openConnection());
 
-    @override
-    int get schemaVersion => 22;
+  /// Test-only constructor: opens the database against a caller-supplied
+  /// executor (e.g. an in-memory [NativeDatabase]). Keeps the production
+  /// no-arg constructor unchanged.
+  AppDatabase.withExecutor(super.executor);
+
+  @override
+  int get schemaVersion => 22;
 
   Future<void> _runMigrationStep(
     String name,
@@ -894,6 +899,9 @@ if (!columnNames.contains('quiz_correct')) {
     );
   }
 
+  /// Returns distinct non-null subcategories under [parentCategory], sorted
+  /// alphabetically. Used by SubcategoryScreen to build its list dynamically.
+  /// Returns the private note saved for [articleId], or null if none.
   Future<int> countArticlesByCategory(String category) async {
     final rows = await customSelect(
       'SELECT COUNT(*) AS count FROM articles WHERE category = ?',
@@ -907,9 +915,6 @@ if (!columnNames.contains('quiz_correct')) {
     return rows.first.read<int>('count');
   }
 
-  /// Returns distinct non-null subcategories under [parentCategory], sorted
-  /// alphabetically. Used by SubcategoryScreen to build its list dynamically.
-  /// Returns the private note saved for [articleId], or null if none.
   Future<ArticleNote?> getNoteForArticle(String articleId) async {
     return (select(articleNotes)
           ..where((t) => t.articleId.equals(articleId)))
@@ -1010,18 +1015,16 @@ if (!columnNames.contains('quiz_correct')) {
 
   /// Loads per-category read progress in a single round-trip.
   ///
-  /// Replaces the previous 1 + 2N pattern (one query to list categories, then
-  /// [countArticlesByCategory] + [countReadArticlesByCategory] per category)
-  /// with one GROUP BY query. At 25 categories this collapses 51 round-trips
-  /// into 2 (this query plus the [view_history] ensure).
+  /// Uses one GROUP BY query (plus the [view_history] ensure) instead of the
+  /// previous 1 + 2N per-category round-trip pattern.
   ///
-  /// Semantics match the per-category methods exactly:
+  /// Semantics:
   /// - [CategoryProgressResult.total] = COUNT(DISTINCT a.id). The LEFT JOIN to
   ///   view_history fans out rows per article view, so DISTINCT on the article
   ///   id is required to reproduce COUNT(*) over the articles table.
   /// - [CategoryProgressResult.read] = COUNT(DISTINCT vh.article_id). Articles
   ///   with no view record contribute NULL article_ids, which COUNT DISTINCT
-  ///   ignores — identical to countReadArticlesByCategory.
+  ///   ignores.
   /// - LEFT JOIN preserves categories with zero reads (every category holding
   ///   at least one article still yields a row), matching the old behavior.
   Future<List<CategoryProgressResult>> loadCategoryProgressBatch() async {
