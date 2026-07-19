@@ -51,7 +51,10 @@ class SubscriptionRepository {
       }
 
       final expiryDate = _parseExpiryDate(sub['expiry_date']);
-      return expiryDate == null || expiryDate.isAfter(DateTime.now().toUtc());
+      // Use server time, not the device clock, so a user who rolls back
+      // their system clock cannot spoof an unexpired subscription.
+      final now = await _fetchServerNow();
+      return expiryDate == null || expiryDate.isAfter(now);
     } on PostgrestException catch (e) {
       debugPrint('Sub check error: ${e.message}');
       // If network failure, check grace period (Part 4-B)
@@ -76,6 +79,28 @@ class SubscriptionRepository {
         message.contains('timeout') ||
         message.contains('connection') ||
         message.contains('dio');
+  }
+
+  /// Fetches the current time from the Postgres server (via the `server_now`
+  /// RPC) so subscription expiry is evaluated against authoritative time
+  /// rather than the user's device clock. Falls back to device UTC time if
+  /// the RPC is unavailable or the request fails, so offline/expired-RPC
+  /// scenarios still degrade gracefully instead of throwing.
+  Future<DateTime> _fetchServerNow() async {
+    if (!_isAvailable) return DateTime.now().toUtc();
+    try {
+      final response = await _supabase!
+          .rpc('server_now')
+          .timeout(const Duration(seconds: 10));
+      if (response is String) {
+        final parsed = DateTime.tryParse(response);
+        if (parsed != null) return parsed.toUtc();
+      }
+      return DateTime.now().toUtc();
+    } catch (e) {
+      debugPrint('Server time fetch failed, using device time: $e');
+      return DateTime.now().toUtc();
+    }
   }
 
   Future<bool> _hasGracePeriod() async {

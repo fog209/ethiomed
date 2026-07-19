@@ -55,6 +55,11 @@ CREATE POLICY "Users see own subscription"
 --   USING (public.is_user_admin(auth.uid()))
 --   WITH CHECK (public.is_user_admin(auth.uid()));
 
+-- server_now(): authoritative Postgres time for anti-clock-spoof subscription
+-- checks (client compares expiry against this instead of device clock).
+-- Defined in migrations/0005_server_now_rpc.sql.
+-- CREATE OR REPLACE FUNCTION public.server_now() RETURNS timestamptz ...
+
 -- ─────────────────────────────────────────────────────────────
 -- ARTICLES
 -- ─────────────────────────────────────────────────────────────
