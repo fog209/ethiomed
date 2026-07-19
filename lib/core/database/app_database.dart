@@ -220,6 +220,15 @@ class FlashcardTable extends Table {
 
   /// Parent category for taxonomy synchronization.
   TextColumn get parentCategory => text().nullable()();
+
+  /// High-level track classification: 'clinical' | 'preclinical'.
+  /// Nullable until content is categorized.
+  TextColumn get track => text().nullable()();
+
+  /// Top-level category matching an AppConfig category string
+  /// (e.g. 'Internal Medicine', 'Pharmacology'). Nullable until content
+  /// is categorized.
+  TextColumn get category => text().nullable()();
 }
 
 class ClinicalCases extends Table {
@@ -296,7 +305,7 @@ class CaseProgress extends Table {
    AppDatabase() : super(_openConnection());
 
     @override
-    int get schemaVersion => 21;
+    int get schemaVersion => 22;
 
   Future<void> _runMigrationStep(
     String name,
@@ -611,6 +620,28 @@ if (!columnNames.contains('exam_source')) {
                     await customStatement(
                       'ALTER TABLE section_registry '
                       'ADD COLUMN category_label_overrides TEXT',
+                    );
+                  }
+                },
+              );
+            }
+            if (from < 22) {
+              await _runMigrationStep(
+                'add flashcards track and category columns',
+                () async {
+                  final columns = await customSelect(
+                    'PRAGMA table_info(flashcard_table)',
+                  ).get();
+                  final columnNames =
+                      columns.map((row) => row.read<String>('name')).toSet();
+                  if (!columnNames.contains('track')) {
+                    await customStatement(
+                      'ALTER TABLE flashcard_table ADD COLUMN track TEXT',
+                    );
+                  }
+                  if (!columnNames.contains('category')) {
+                    await customStatement(
+                      'ALTER TABLE flashcard_table ADD COLUMN category TEXT',
                     );
                   }
                 },

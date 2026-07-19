@@ -12,6 +12,8 @@ import '../../../core/services/notification_service.dart';
 import '../../../core/theme/theme_mode_provider.dart';
 import '../../auth/data/auth_service.dart';
 import '../../../main.dart' show currentAdminProfileProvider;
+import '../../flashcards/presentation/flashcard_stage_prompt_screen.dart';
+import '../../flashcards/flashcard_track_provider.dart';
 
 class SettingsScreen extends ConsumerWidget {
   static const String _adminTelegramUrl = 'https://t.me/WardReadyAdmin';
@@ -66,6 +68,14 @@ class SettingsScreen extends ConsumerWidget {
     final primaryColor = theme.colorScheme.primary;
     final onSurfaceVariant = theme.colorScheme.onSurfaceVariant;
 
+    final trackLabels = <String, String>{
+      flashcardTrackPreclinical: 'Preclinical years',
+      flashcardTrackClinical: 'Clinical rotations & internship',
+      flashcardTrackBoth: 'Everything',
+    };
+    final currentTrack = ref.watch(flashcardTrackProvider);
+    final currentTrackLabel = trackLabels[currentTrack] ?? 'Everything';
+
     final items = <Widget>[
       ListTile(
         leading: Icon(Icons.person, color: primaryColor),
@@ -98,6 +108,23 @@ class SettingsScreen extends ConsumerWidget {
           if (!context.mounted) {
             return;
           }
+        },
+      ),
+      ListTile(
+        leading: Icon(Icons.school, color: primaryColor),
+        title: const Text('Study stage'),
+        subtitle: Text(
+          'Flashcards tailored to: $currentTrackLabel\n'
+          'Changed your stage? Update it as you progress.',
+        ),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () {
+          // Reuse the warm stage picker as a "change stage" affordance.
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => const FlashcardStagePromptScreen(),
+            ),
+          );
         },
       ),
       if (migrationWarning != null)

@@ -4759,6 +4759,26 @@ class $FlashcardTableTable extends FlashcardTable
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _trackMeta = const VerificationMeta('track');
+  @override
+  late final GeneratedColumn<String> track = GeneratedColumn<String>(
+    'track',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _categoryMeta = const VerificationMeta(
+    'category',
+  );
+  @override
+  late final GeneratedColumn<String> category = GeneratedColumn<String>(
+    'category',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -4775,6 +4795,8 @@ class $FlashcardTableTable extends FlashcardTable
     createdAt,
     updatedAt,
     parentCategory,
+    track,
+    category,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -4887,6 +4909,18 @@ class $FlashcardTableTable extends FlashcardTable
         ),
       );
     }
+    if (data.containsKey('track')) {
+      context.handle(
+        _trackMeta,
+        track.isAcceptableOrUnknown(data['track']!, _trackMeta),
+      );
+    }
+    if (data.containsKey('category')) {
+      context.handle(
+        _categoryMeta,
+        category.isAcceptableOrUnknown(data['category']!, _categoryMeta),
+      );
+    }
     return context;
   }
 
@@ -4952,6 +4986,14 @@ class $FlashcardTableTable extends FlashcardTable
         DriftSqlType.string,
         data['${effectivePrefix}parent_category'],
       ),
+      track: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}track'],
+      ),
+      category: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}category'],
+      ),
     );
   }
 
@@ -4980,6 +5022,15 @@ class FlashcardEntity extends DataClass implements Insertable<FlashcardEntity> {
 
   /// Parent category for taxonomy synchronization.
   final String? parentCategory;
+
+  /// High-level track classification: 'clinical' | 'preclinical'.
+  /// Nullable until content is categorized.
+  final String? track;
+
+  /// Top-level category matching an AppConfig category string
+  /// (e.g. 'Internal Medicine', 'Pharmacology'). Nullable until content
+  /// is categorized.
+  final String? category;
   const FlashcardEntity({
     required this.id,
     this.remoteId,
@@ -4995,6 +5046,8 @@ class FlashcardEntity extends DataClass implements Insertable<FlashcardEntity> {
     required this.createdAt,
     this.updatedAt,
     this.parentCategory,
+    this.track,
+    this.category,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -5028,6 +5081,12 @@ class FlashcardEntity extends DataClass implements Insertable<FlashcardEntity> {
     }
     if (!nullToAbsent || parentCategory != null) {
       map['parent_category'] = Variable<String>(parentCategory);
+    }
+    if (!nullToAbsent || track != null) {
+      map['track'] = Variable<String>(track);
+    }
+    if (!nullToAbsent || category != null) {
+      map['category'] = Variable<String>(category);
     }
     return map;
   }
@@ -5064,6 +5123,12 @@ class FlashcardEntity extends DataClass implements Insertable<FlashcardEntity> {
       parentCategory: parentCategory == null && nullToAbsent
           ? const Value.absent()
           : Value(parentCategory),
+      track: track == null && nullToAbsent
+          ? const Value.absent()
+          : Value(track),
+      category: category == null && nullToAbsent
+          ? const Value.absent()
+          : Value(category),
     );
   }
 
@@ -5087,6 +5152,8 @@ class FlashcardEntity extends DataClass implements Insertable<FlashcardEntity> {
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime?>(json['updatedAt']),
       parentCategory: serializer.fromJson<String?>(json['parentCategory']),
+      track: serializer.fromJson<String?>(json['track']),
+      category: serializer.fromJson<String?>(json['category']),
     );
   }
   @override
@@ -5107,6 +5174,8 @@ class FlashcardEntity extends DataClass implements Insertable<FlashcardEntity> {
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime?>(updatedAt),
       'parentCategory': serializer.toJson<String?>(parentCategory),
+      'track': serializer.toJson<String?>(track),
+      'category': serializer.toJson<String?>(category),
     };
   }
 
@@ -5125,6 +5194,8 @@ class FlashcardEntity extends DataClass implements Insertable<FlashcardEntity> {
     DateTime? createdAt,
     Value<DateTime?> updatedAt = const Value.absent(),
     Value<String?> parentCategory = const Value.absent(),
+    Value<String?> track = const Value.absent(),
+    Value<String?> category = const Value.absent(),
   }) => FlashcardEntity(
     id: id ?? this.id,
     remoteId: remoteId.present ? remoteId.value : this.remoteId,
@@ -5144,6 +5215,8 @@ class FlashcardEntity extends DataClass implements Insertable<FlashcardEntity> {
     parentCategory: parentCategory.present
         ? parentCategory.value
         : this.parentCategory,
+    track: track.present ? track.value : this.track,
+    category: category.present ? category.value : this.category,
   );
   FlashcardEntity copyWithCompanion(FlashcardTableCompanion data) {
     return FlashcardEntity(
@@ -5171,6 +5244,8 @@ class FlashcardEntity extends DataClass implements Insertable<FlashcardEntity> {
       parentCategory: data.parentCategory.present
           ? data.parentCategory.value
           : this.parentCategory,
+      track: data.track.present ? data.track.value : this.track,
+      category: data.category.present ? data.category.value : this.category,
     );
   }
 
@@ -5190,7 +5265,9 @@ class FlashcardEntity extends DataClass implements Insertable<FlashcardEntity> {
           ..write('lastQuality: $lastQuality, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
-          ..write('parentCategory: $parentCategory')
+          ..write('parentCategory: $parentCategory, ')
+          ..write('track: $track, ')
+          ..write('category: $category')
           ..write(')'))
         .toString();
   }
@@ -5211,6 +5288,8 @@ class FlashcardEntity extends DataClass implements Insertable<FlashcardEntity> {
     createdAt,
     updatedAt,
     parentCategory,
+    track,
+    category,
   );
   @override
   bool operator ==(Object other) =>
@@ -5229,7 +5308,9 @@ class FlashcardEntity extends DataClass implements Insertable<FlashcardEntity> {
           other.lastQuality == this.lastQuality &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
-          other.parentCategory == this.parentCategory);
+          other.parentCategory == this.parentCategory &&
+          other.track == this.track &&
+          other.category == this.category);
 }
 
 class FlashcardTableCompanion extends UpdateCompanion<FlashcardEntity> {
@@ -5247,6 +5328,8 @@ class FlashcardTableCompanion extends UpdateCompanion<FlashcardEntity> {
   final Value<DateTime> createdAt;
   final Value<DateTime?> updatedAt;
   final Value<String?> parentCategory;
+  final Value<String?> track;
+  final Value<String?> category;
   const FlashcardTableCompanion({
     this.id = const Value.absent(),
     this.remoteId = const Value.absent(),
@@ -5262,6 +5345,8 @@ class FlashcardTableCompanion extends UpdateCompanion<FlashcardEntity> {
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.parentCategory = const Value.absent(),
+    this.track = const Value.absent(),
+    this.category = const Value.absent(),
   });
   FlashcardTableCompanion.insert({
     this.id = const Value.absent(),
@@ -5278,6 +5363,8 @@ class FlashcardTableCompanion extends UpdateCompanion<FlashcardEntity> {
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.parentCategory = const Value.absent(),
+    this.track = const Value.absent(),
+    this.category = const Value.absent(),
   }) : deckName = Value(deckName),
        frontText = Value(frontText),
        backText = Value(backText);
@@ -5296,6 +5383,8 @@ class FlashcardTableCompanion extends UpdateCompanion<FlashcardEntity> {
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
     Expression<String>? parentCategory,
+    Expression<String>? track,
+    Expression<String>? category,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -5312,6 +5401,8 @@ class FlashcardTableCompanion extends UpdateCompanion<FlashcardEntity> {
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (parentCategory != null) 'parent_category': parentCategory,
+      if (track != null) 'track': track,
+      if (category != null) 'category': category,
     });
   }
 
@@ -5330,6 +5421,8 @@ class FlashcardTableCompanion extends UpdateCompanion<FlashcardEntity> {
     Value<DateTime>? createdAt,
     Value<DateTime?>? updatedAt,
     Value<String?>? parentCategory,
+    Value<String?>? track,
+    Value<String?>? category,
   }) {
     return FlashcardTableCompanion(
       id: id ?? this.id,
@@ -5346,6 +5439,8 @@ class FlashcardTableCompanion extends UpdateCompanion<FlashcardEntity> {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       parentCategory: parentCategory ?? this.parentCategory,
+      track: track ?? this.track,
+      category: category ?? this.category,
     );
   }
 
@@ -5394,6 +5489,12 @@ class FlashcardTableCompanion extends UpdateCompanion<FlashcardEntity> {
     if (parentCategory.present) {
       map['parent_category'] = Variable<String>(parentCategory.value);
     }
+    if (track.present) {
+      map['track'] = Variable<String>(track.value);
+    }
+    if (category.present) {
+      map['category'] = Variable<String>(category.value);
+    }
     return map;
   }
 
@@ -5413,7 +5514,9 @@ class FlashcardTableCompanion extends UpdateCompanion<FlashcardEntity> {
           ..write('lastQuality: $lastQuality, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
-          ..write('parentCategory: $parentCategory')
+          ..write('parentCategory: $parentCategory, ')
+          ..write('track: $track, ')
+          ..write('category: $category')
           ..write(')'))
         .toString();
   }
@@ -10442,6 +10545,8 @@ typedef $$FlashcardTableTableCreateCompanionBuilder =
       Value<DateTime> createdAt,
       Value<DateTime?> updatedAt,
       Value<String?> parentCategory,
+      Value<String?> track,
+      Value<String?> category,
     });
 typedef $$FlashcardTableTableUpdateCompanionBuilder =
     FlashcardTableCompanion Function({
@@ -10459,6 +10564,8 @@ typedef $$FlashcardTableTableUpdateCompanionBuilder =
       Value<DateTime> createdAt,
       Value<DateTime?> updatedAt,
       Value<String?> parentCategory,
+      Value<String?> track,
+      Value<String?> category,
     });
 
 class $$FlashcardTableTableFilterComposer
@@ -10537,6 +10644,16 @@ class $$FlashcardTableTableFilterComposer
 
   ColumnFilters<String> get parentCategory => $composableBuilder(
     column: $table.parentCategory,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get track => $composableBuilder(
+    column: $table.track,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get category => $composableBuilder(
+    column: $table.category,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -10619,6 +10736,16 @@ class $$FlashcardTableTableOrderingComposer
     column: $table.parentCategory,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get track => $composableBuilder(
+    column: $table.track,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get category => $composableBuilder(
+    column: $table.category,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$FlashcardTableTableAnnotationComposer
@@ -10681,6 +10808,12 @@ class $$FlashcardTableTableAnnotationComposer
     column: $table.parentCategory,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get track =>
+      $composableBuilder(column: $table.track, builder: (column) => column);
+
+  GeneratedColumn<String> get category =>
+      $composableBuilder(column: $table.category, builder: (column) => column);
 }
 
 class $$FlashcardTableTableTableManager
@@ -10734,6 +10867,8 @@ class $$FlashcardTableTableTableManager
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime?> updatedAt = const Value.absent(),
                 Value<String?> parentCategory = const Value.absent(),
+                Value<String?> track = const Value.absent(),
+                Value<String?> category = const Value.absent(),
               }) => FlashcardTableCompanion(
                 id: id,
                 remoteId: remoteId,
@@ -10749,6 +10884,8 @@ class $$FlashcardTableTableTableManager
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 parentCategory: parentCategory,
+                track: track,
+                category: category,
               ),
           createCompanionCallback:
               ({
@@ -10766,6 +10903,8 @@ class $$FlashcardTableTableTableManager
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime?> updatedAt = const Value.absent(),
                 Value<String?> parentCategory = const Value.absent(),
+                Value<String?> track = const Value.absent(),
+                Value<String?> category = const Value.absent(),
               }) => FlashcardTableCompanion.insert(
                 id: id,
                 remoteId: remoteId,
@@ -10781,6 +10920,8 @@ class $$FlashcardTableTableTableManager
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 parentCategory: parentCategory,
+                track: track,
+                category: category,
               ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))

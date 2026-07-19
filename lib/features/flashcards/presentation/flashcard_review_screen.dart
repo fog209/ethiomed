@@ -11,6 +11,7 @@ import '../../../core/services/security_service.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../quiz/quiz_repository.dart';
 import '../flashcard_review_service.dart';
+import '../flashcard_track_provider.dart';
 
 class FlashcardReviewScreen extends ConsumerStatefulWidget {
   const FlashcardReviewScreen({super.key, this.deckName});
@@ -26,6 +27,14 @@ class _FlashcardReviewScreenState extends ConsumerState<FlashcardReviewScreen> {
   int currentIndex = 0;
   bool isRevealed = false;
   bool _isSyncing = false;
+
+  ({String? deckName, String? track}) get _queryArgs {
+    final track = ref.read(flashcardTrackProvider);
+    return (
+      deckName: widget.deckName,
+      track: (track == 'both') ? null : track,
+    );
+  }
 
   void _revealAnswer() {
     setState(() => isRevealed = true);
@@ -80,7 +89,7 @@ class _FlashcardReviewScreenState extends ConsumerState<FlashcardReviewScreen> {
         _isSyncing = false;
       });
 
-      ref.invalidate(_flashcardsProvider(widget.deckName));
+      ref.invalidate(_flashcardsProvider(_queryArgs));
 
       if (mounted) {
         ScaffoldMessenger.of(
@@ -134,7 +143,7 @@ class _FlashcardReviewScreenState extends ConsumerState<FlashcardReviewScreen> {
       final count = await importFlashcardsFromJson(db, cards);
       if (!mounted) return;
 
-      ref.invalidate(_flashcardsProvider(widget.deckName));
+      ref.invalidate(_flashcardsProvider(_queryArgs));
 
       if (mounted) {
         ScaffoldMessenger.of(
@@ -156,7 +165,7 @@ class _FlashcardReviewScreenState extends ConsumerState<FlashcardReviewScreen> {
 
     if (!mounted) return;
 
-    final allCards = ref.read(_flashcardsProvider(widget.deckName)).value ?? [];
+    final allCards = ref.read(_flashcardsProvider(_queryArgs)).value ?? [];
     if (currentIndex >= allCards.length - 1) {
       if (mounted) {
         context.pop();
@@ -180,7 +189,7 @@ class _FlashcardReviewScreenState extends ConsumerState<FlashcardReviewScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final asyncCards = ref.watch(_flashcardsProvider(widget.deckName));
+    final asyncCards = ref.watch(_flashcardsProvider(_queryArgs));
 
     return Scaffold(
       appBar: AppBar(
@@ -359,8 +368,9 @@ class _FlashcardReviewScreenState extends ConsumerState<FlashcardReviewScreen> {
   }
 }
 
-final _flashcardsProvider =
-    FutureProvider.family<List<FlashcardEntity>, String?>((ref, deckName) {
-      final service = ref.watch(flashcardReviewServiceProvider);
-      return service.getDueFlashcards(deckName);
-    });
+final _flashcardsProvider = FutureProvider.family<List<FlashcardEntity>,
+    ({String? deckName, String? track})>((ref, args) {
+  final service = ref.watch(flashcardReviewServiceProvider);
+  final track = (args.track == null || args.track == 'both') ? null : args.track;
+  return service.getDueFlashcards(args.deckName, track: track);
+});

@@ -27,7 +27,7 @@ import 'features/auth/presentation/login_screen.dart';
 import 'features/auth/presentation/signup_screen.dart';
 import 'features/calculators/calculators_screen.dart' show CalculatorsScreen, CalculatorDetailScreen;
 import 'features/cases/presentation/case_screen.dart';
-import 'features/flashcards/presentation/flashcard_review_screen.dart';
+import 'features/flashcards/presentation/flashcard_stage_prompt_screen.dart';
 import 'features/home/presentation/article_list_screen.dart';
 import 'features/home/presentation/subcategory_screen.dart';
 import 'features/legal/disclaimer_screen.dart';
@@ -318,7 +318,7 @@ final _router = GoRouter(
     ),
     GoRoute(
       path: '/flashcards',
-      builder: (context, state) => const FlashcardReviewScreen(),
+      builder: (context, state) => const FlashcardsGate(),
     ),
     GoRoute(
       path: '/calculators',

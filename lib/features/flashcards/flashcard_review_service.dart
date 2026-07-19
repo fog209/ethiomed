@@ -20,14 +20,31 @@ class FlashcardReviewService {
 
   final AppDatabase _db;
 
-  Future<List<FlashcardEntity>> getDueFlashcards(String? deckName) async {
+  Future<List<FlashcardEntity>> getDueFlashcards(
+    String? deckName, {
+    String? track,
+  }) async {
     final now = DateTime.now();
-    final whereClause = deckName == null || deckName.isEmpty
-        ? 'next_due_at IS NULL OR next_due_at <= ?'
-        : 'deck_name = ? AND (next_due_at IS NULL OR next_due_at <= ?)';
-    final variables = deckName == null || deckName.isEmpty
-        ? [Variable(now)]
-        : [Variable(deckName), Variable(now)];
+    final clauses = <String>[];
+    final variables = <Variable<Object>>[];
+
+    if (deckName == null || deckName.isEmpty) {
+      clauses.add('(next_due_at IS NULL OR next_due_at <= ?)');
+      variables.add(Variable(now));
+    } else {
+      clauses.add('deck_name = ? AND (next_due_at IS NULL OR next_due_at <= ?)');
+      variables.add(Variable(deckName));
+      variables.add(Variable(now));
+    }
+
+    // Track filter is additive. When null (no preference or 'both'), all rows
+    // match — including the currently-empty table and any null-track rows.
+    if (track != null && track.isNotEmpty) {
+      clauses.add('(track IS NULL OR track = ?)');
+      variables.add(Variable(track));
+    }
+
+    final whereClause = clauses.join(' AND ');
 
     final rows = await _db
         .customSelect(

@@ -1,0 +1,180 @@
+
+===== Clinical Problem Solving.apkg =====
+  produced cards: 58   dropped: 0
+
+===== MSB Pharm Flashcards.apkg =====
+  EXCLUDED (rule: error-message deck)
+
+===== Step 2 - MedicalArk v11.apkg =====
+  produced cards: 1657   dropped: 0
+
+===== Step 2 - Zanki Step 2 v11.apkg =====
+  produced cards: 1339   dropped: 0
+
+===== The DIP Deck - Divine Intervention Podcasts.apkg =====
+  produced cards: 19356   dropped: 2
+
+============================================================
+TOTAL CARDS PRODUCED: 22410
+TOTAL DROPPED: 3
+DUPLICATE-LIKE (same deck+front+back): 10423
+SHORT (<8 char front/back): 11
+
+DISTINCT DECKS: 129
+
+--- PER-DECK COUNTS ---
+    1657  Step 2::MedicalArk
+    1339  Step 2::Zanki Step 2
+    1258  The DIP Deck::Divine Intervention Podcasts::IM::nbme medicine shelf exam episode 32
+    1257  The DIP Deck::Divine Intervention Podcasts::IM::nbme medicine shelf exam episode 31
+     807  The DIP Deck::Divine Intervention Podcasts::Special Topics & Risk Factors::clutch genetic diseases
+     780  The DIP Deck::Divine Intervention Podcasts::Special Topics & Risk Factors::clutch pharm
+     760  The DIP Deck::Divine Intervention Podcasts::Special Topics & Risk Factors::clutch electrolyte
+     732  The DIP Deck::Divine Intervention Podcasts::OBGYN::High Yield OB Shelf Review 22
+     604  The DIP Deck::Divine Intervention Podcasts::Special Topics & Risk Factors::usmle military
+     494  The DIP Deck::Divine Intervention Podcasts::Emergency Medicine::nbme EM shelf infectious disease 183
+     458  The DIP Deck::Divine Intervention Podcasts::Special Topics & Risk Factors::the legendary pharmacology step 2 and 3 podcast
+     390  The DIP Deck::Divine Intervention Podcasts::IM::nbme medicine shelf exam episode 29
+     386  The DIP Deck::Divine Intervention Podcasts::Special Topics & Risk Factors::clutch cancer
+     373  The DIP Deck::Divine Intervention Podcasts::Cardiology with Divine::nbme EM shelf cardio concepts 181
+     351  The DIP Deck::Divine Intervention Podcasts::Special Topics & Risk Factors::nbme weird... must know
+     346  The DIP Deck::Divine Intervention Podcasts::Special Topics & Risk Factors::geriatrics
+     341  The DIP Deck::Divine Intervention Podcasts::Rapid Review Series::Peds 94, 95, 130
+     319  The DIP Deck::Divine Intervention Podcasts::2020 Changes::234 Medication & Transition Errors
+     317  The DIP Deck::Divine Intervention Podcasts::IM::usmle antibiotic guide
+     306  The DIP Deck::Divine Intervention Podcasts::IM::nbme medicine shelf exam episode 30
+     278  The DIP Deck::Divine Intervention Podcasts::Pediatrics::High Yield Peds Shelf Review 17
+     259  The DIP Deck::Divine Intervention Podcasts::Rapid Review Series::IM 119, 125, 126, & 128
+     243  The DIP Deck::Divine Intervention Podcasts::Special Topics & Risk Factors::next best step
+     240  The DIP Deck::Divine Intervention Podcasts::Special Topics & Risk Factors::transfusion reactions
+     231  The DIP Deck::Divine Intervention Podcasts::Cardiology with Divine::vasculitis
+     216  The DIP Deck::Divine Intervention Podcasts::IM::clutch micro
+     198  The DIP Deck::Divine Intervention Podcasts::Special Topics & Risk Factors::nephrotic and nephritic syndromes
+     197  The DIP Deck::Divine Intervention Podcasts::Special Topics & Risk Factors::high yield ARDS 286
+     196  The DIP Deck::Divine Intervention Podcasts::Special Topics & Risk Factors::clutch toxicology & drugs of abuse
+     196  The DIP Deck::Divine Intervention Podcasts::Special Topics & Risk Factors::usmle Dermatology
+     190  The DIP Deck::Divine Intervention Podcasts::Family Medicine::nbme family med shelf → asthma & COPD 217
+     187  The DIP Deck::Divine Intervention Podcasts::Special Topics & Risk Factors::risk factors - very high yield
+     187  The DIP Deck::Divine Intervention Podcasts::Family Medicine::nbme family med shelf → upper GI & Pancreas 213
+     185  The DIP Deck::Divine Intervention Podcasts::Cardiology with Divine::clutch heart failure
+     181  The DIP Deck::Divine Intervention Podcasts::IM::adrenal glands 191 & 192
+     154  The DIP Deck::Divine Intervention Podcasts::Pediatrics::Newborns 223
+     150  The DIP Deck::Divine Intervention Podcasts::Special Topics & Risk Factors::usmle Ophthalmology
+     147  The DIP Deck::Divine Intervention Podcasts::IM::nbme GI series 1 293
+     137  The DIP Deck::Divine Intervention Podcasts::Rapid Review Series::IM 134, 141, 159, & 174
+     135  The DIP Deck::Divine Intervention Podcasts::Family Medicine::nbme family med shelf → liver & biliary pathology 212
+     135  The DIP Deck::Divine Intervention Podcasts::Special Topics & Risk Factors::clutch incontinence
+     134  The DIP Deck::Divine Intervention Podcasts::Cardiology with Divine::the nbme & high output HF 273
+     132  The DIP Deck::Divine Intervention Podcasts::Special Topics & Risk Factors::clutch autoantibody
+     132  The DIP Deck::Divine Intervention Podcasts::Family Medicine::nbme family med shelf → psychiatry 209
+     131  The DIP Deck::Divine Intervention Podcasts::Special Topics & Risk Factors::the nbme & prostaglandins 279
+     128  The DIP Deck::Divine Intervention Podcasts::Special Topics & Risk Factors::clutch immunodeficiency
+     128  The DIP Deck::Divine Intervention Podcasts::Biostats & Ethics::floridly high yield social sciences 132
+     128  The DIP Deck::Divine Intervention Podcasts::Special Topics & Risk Factors::clutch CNS infections
+     128  The DIP Deck::Divine Intervention Podcasts::Family Medicine::nbme family med shelf → GI episode 214
+     123  The DIP Deck::Divine Intervention Podcasts::2020 Changes::228 Palliative Care
+     119  The DIP Deck::Divine Intervention Podcasts::Neurology::nbme neurology shelf exam 49 → highest yield
+     117  The DIP Deck::Divine Intervention Podcasts::2020 Changes::230 Quality & Safety
+     114  The DIP Deck::Divine Intervention Podcasts::Special Topics & Risk Factors::leukemias & lymphomas
+     113  The DIP Deck::Divine Intervention Podcasts::Neurology::nbme neurology shelf exam 19
+     109  The DIP Deck::Divine Intervention Podcasts::IM::pituitary & MEN syndromes 194
+     103  The DIP Deck::Divine Intervention Podcasts::Special Topics & Risk Factors::nbme ortho series - bone tumors
+     102  The DIP Deck::Divine Intervention Podcasts::Special Topics & Risk Factors::clutch TB 262
+      99  The DIP Deck::Divine Intervention Podcasts::Special Topics & Risk Factors::post exposure prophylaxis and the NBMEs 252
+      97  The DIP Deck::Divine Intervention Podcasts::Family Medicine::nbme family med shelf episode 206
+      96  The DIP Deck::Divine Intervention Podcasts::OBGYN::breast cancer 309
+      94  The DIP Deck::Divine Intervention Podcasts::Pediatrics::breast feeding & newborn jaundice 317
+      91  The DIP Deck::Divine Intervention Podcasts::IM::targeted Pulm Review for usmle step 2
+      90  The DIP Deck::Divine Intervention Podcasts::Special Topics & Risk Factors::blood oxygen content & the usmles
+      89  The DIP Deck::Divine Intervention Podcasts::Neurology::nbme neurology shelf exam 58
+      82  The DIP Deck::Divine Intervention Podcasts::Special Topics & Risk Factors::hiv & the usmle
+      81  The DIP Deck::Divine Intervention Podcasts::Cardiology with Divine::ekg recognition & management::Afib
+      79  The DIP Deck::Divine Intervention Podcasts::IM::nbme GI series 2 294
+      78  The DIP Deck::Divine Intervention Podcasts::Surgery::high yield trauma
+      78  The DIP Deck::Divine Intervention Podcasts::Special Topics & Risk Factors::risk factors and prognostic factors 282, 283
+      77  The DIP Deck::Divine Intervention Podcasts::OBGYN::the nbme & OBGYN risk factors
+      74  The DIP Deck::Divine Intervention Podcasts::Neurology::nbme neurology shelf exam 59
+      73  The DIP Deck::Divine Intervention Podcasts::Surgery::hematology for the surgery shelf exam
+      73  The DIP Deck::Divine Intervention Podcasts::OBGYN::the nbme and amenorrhea 278
+      69  The DIP Deck::Divine Intervention Podcasts::Special Topics & Risk Factors::hypertensive integrations
+      68  The DIP Deck::Divine Intervention Podcasts::Special Topics & Risk Factors::ventilators
+      68  The DIP Deck::Divine Intervention Podcasts::Neurology::nbme neurology shelf exam 46
+      67  The DIP Deck::Divine Intervention Podcasts::Special Topics & Risk Factors::the high yield vaccine podcast
+      64  The DIP Deck::Divine Intervention Podcasts::Special Topics & Risk Factors::high yield chromosomes
+      64  The DIP Deck::Divine Intervention Podcasts::Special Topics & Risk Factors::most important 97
+      63  The DIP Deck::Divine Intervention Podcasts::Neurology::nbme neurology shelf exam 48
+      61  The DIP Deck::Divine Intervention Podcasts::Special Topics & Risk Factors::clutch bilirubin
+      59  The DIP Deck::Divine Intervention Podcasts::IM::clutch pleural abnormalities & effusions 332
+      58  Clinical Problem Solving
+      58  The DIP Deck::Divine Intervention Podcasts::Cardiology with Divine::acls, arrhythmias, & high yield cardiac pharm
+      57  The DIP Deck::Divine Intervention Podcasts::Cardiology with Divine::ekg recognition & management::MI
+      56  The DIP Deck::Divine Intervention Podcasts::IM::Diabetes and the USMLE 1
+      55  The DIP Deck::Divine Intervention Podcasts::Neurology::nbme neurology shelf exam 45
+      55  The DIP Deck::Divine Intervention Podcasts::Cardiology with Divine::the nbme & cardiac valvular disorders
+      55  The DIP Deck::Divine Intervention Podcasts::IM::nbme GI series 4 298
+      54  The DIP Deck::Divine Intervention Podcasts::Emergency Medicine::nbme EM shelf endocrine emergencies 182
+      50  The DIP Deck::Divine Intervention Podcasts::Special Topics & Risk Factors::nbme & iron labs
+      48  The DIP Deck::Divine Intervention Podcasts::Cardiology with Divine::ekg recognition & management::Heart Blocks
+      48  The DIP Deck::Divine Intervention Podcasts::IM::clutch lung cancer 331
+      46  The DIP Deck::Divine Intervention Podcasts::Biostats & Ethics::bias in biostatistics 197
+      46  The DIP Deck::Divine Intervention Podcasts::IM::the high yield thyroid podcast
+      40  The DIP Deck::Divine Intervention Podcasts::IM::nbme GI series 3 295
+      36  The DIP Deck::Divine Intervention Podcasts::OBGYN::Breast
+      34  The DIP Deck::Divine Intervention Podcasts::IM::Diabetes and the USMLE 2
+      33  The DIP Deck::Divine Intervention Podcasts::Special Topics & Risk Factors::nbme acetylcholine
+      28  The DIP Deck::Divine Intervention Podcasts::IM::nbme GI series 5 318
+      27  The DIP Deck::Divine Intervention Podcasts::IM::nbme GI series 6 319
+      22  The DIP Deck::Divine Intervention Podcasts::IM::thyroid cancer 376
+      22  The DIP Deck::Divine Intervention Podcasts::IM::clutch hypercalcemia 348
+      20  The DIP Deck::Divine Intervention Podcasts::Cardiology with Divine::peds cardio & hemodynamic changes 326
+      20  The DIP Deck::Divine Intervention Podcasts::IM::clutch secondary HTN 360
+      19  The DIP Deck::Divine Intervention Podcasts::IM::clutch pulmonary HTN 353
+      19  The DIP Deck::Divine Intervention Podcasts::IM::clutch UTI 356
+      18  The DIP Deck::Divine Intervention Podcasts::Cardiology with Divine::starling forces and the nbme
+      17  The DIP Deck::Divine Intervention Podcasts::IM::HY Pulmonary Embolism 339
+      16  The DIP Deck::Divine Intervention Podcasts::Neurology::nbme neurology shelf exam 47
+      16  The DIP Deck::Divine Intervention Podcasts::Cardiology with Divine::ekg recognition & management::SVT
+      15  The DIP Deck::Divine Intervention Podcasts::Neurology::Incomplete Cord Syndromes::Brown Sequard Syndrome
+      14  The DIP Deck::Divine Intervention Podcasts::Neurology::Incomplete Cord Syndromes::Ventral Cord Syndrome
+      14  The DIP Deck::Divine Intervention Podcasts::Cardiology with Divine::ekg recognition & management::VTach
+      13  The DIP Deck::Divine Intervention Podcasts::IM::pressors & inotropes 333
+      11  The DIP Deck::Divine Intervention Podcasts::Cardiology with Divine::shock
+      10  The DIP Deck::Divine Intervention Podcasts::IM::Diabetes and the USMLE 3
+       9  The DIP Deck::Divine Intervention Podcasts::Neurology::Incomplete Cord Syndromes::Central Cord Syndrome
+       9  The DIP Deck::Divine Intervention Podcasts::Cardiology with Divine::ekg recognition & management::hyperkalemia
+       9  The DIP Deck::Divine Intervention Podcasts::Cardiology with Divine::ekg recognition & management::Pericarditis
+       9  The DIP Deck::Divine Intervention Podcasts::IM::clutch amyloidosis 367
+       8  The DIP Deck::Divine Intervention Podcasts::Biostats & Ethics::ethics 123
+       5  The DIP Deck::Divine Intervention Podcasts::Cardiology with Divine::ekg recognition & management::WPW
+       4  The DIP Deck::Divine Intervention Podcasts::Neurology::Incomplete Cord Syndromes::Dorsal Cord Syndrome
+       4  The DIP Deck::Divine Intervention Podcasts::Neurology::Incomplete Cord Syndromes::Conus Medullaris Syndrome
+       4  The DIP Deck::Divine Intervention Podcasts::Cardiology with Divine::ekg recognition & management::TCA Toxicity
+       3  The DIP Deck::Divine Intervention Podcasts::Special Topics & Risk Factors::water soluble vitamins & the usmle
+       3  The DIP Deck::Divine Intervention Podcasts::IM::clutch metabolic acidosis 321
+       1  The DIP Deck::Divine Intervention Podcasts::Neurology::Incomplete Cord Syndromes::Cauda Equina Syndrome
+
+--- DROPPED CARDS (sample, first 60) ---
+  [MSB Pharm Flashcards] -: file excluded
+  [The DIP Deck - Divine Intervention Podcasts] The DIP Deck::Divine Intervention Podcasts::Cardiology with Divine::ekg recognition & management::Heart Blocks: Image Occlusion model excluded
+  [The DIP Deck - Divine Intervention Podcasts] The DIP Deck::Divine Intervention Podcasts::Cardiology with Divine::ekg recognition & management::Heart Blocks: Image Occlusion model excluded
+--- NOTES / FLAGS (Phase 1) ---
+* MSB Pharm excluded (single Anki error-message note).
+* Image Occlusion note types excluded entirely (2 DIP cards dropped at model level).
+* 3 cards dropped total (2 IO + 0 empty-after-strip). No content was lost to
+  image-stripping in a way that left a blank card.
+* "Duplicate-like" pairs (10,423 by deck+front+back): predominantly GENUINE
+  duplicate notes present in the source decks (same Q/A authored twice), NOT
+  parser artifacts. Cloze expansion is correct (2-cloze note -> 2 cards).
+  Optional later dedup: DELETE FROM flashcards WHERE ... GROUP BY deck_name,
+  front_text, back_text HAVING count(*)>1. Not a blocker.
+* 40 cards have a front that is ONLY a cloze holder or hint (e.g. front "[...]"
+  -> back "A fib"). These are valid Anki cloze cards (whole note is a cloze). KEPT.
+* HTML cleaned: <b>/<i>/<u>/<div>/<br>/<img>/&nbsp; stripped to plain text with
+  line breaks preserved. Embedded <img> removed; any card blank after removal
+  would be dropped (none were).
+* PROVENANCE / LICENSING (non-blocking, add to legal checklist): Zanki,
+  AnKingOverhaul, and Divine Intervention (DIP) are widely-circulated COMMUNITY
+  decks with murky formal licensing (not strictly open-source; shared freely
+  within med-student communities). Worth a line item on the legal review
+  checklist. Does not block this import.
+* Total distinct decks: 129 (nested Parent::Child paths preserved verbatim).

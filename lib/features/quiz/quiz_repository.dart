@@ -356,6 +356,8 @@ class QuizRepository {
             sourceArticleId: Value(fc.sourceArticleId ?? ''),
             easeFactor: Value(fc.easeFactor),
             createdAt: Value(fc.createdAt),
+            track: Value(fc.track),
+            category: Value(fc.category),
           );
           await _db
               .into(_db.flashcardTable)
@@ -401,6 +403,8 @@ class QuizRepository {
       createdAt: DateTime.now(),
       updatedAt: null,
       parentCategory: null,
+      track: _string(json['track']),
+      category: _string(json['category']),
     );
   }
 

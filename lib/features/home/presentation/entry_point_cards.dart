@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../features/flashcards/flashcard_provider.dart';
+import '../../../features/flashcards/flashcard_track_provider.dart';
 
 /// Reusable "quick access" entry cards shown on the Home tab.
 /// Styling mirrors the legacy Library dashboard cards.
@@ -69,7 +70,10 @@ class FlashcardsEntryCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final dueCardsAsync = ref.watch(flashcardDueProvider(null));
+    final track = ref.watch(flashcardTrackProvider);
+    final dueCardsAsync = ref.watch(
+      flashcardDueProvider((deckName: null, track: track)),
+    );
 
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
