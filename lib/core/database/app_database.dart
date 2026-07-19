@@ -1276,7 +1276,15 @@ LazyDatabase _openConnection() {
   return LazyDatabase(() async {
     final dbFolder = await getApplicationDocumentsDirectory();
     final file = File(p.join(dbFolder.path, 'ethiomed.sqlite'));
-    return NativeDatabase(file);
+    return NativeDatabase(
+      file,
+      setup: (database) {
+        // WAL journal mode lets background sync writes and foreground reads
+        // proceed concurrently without "database is locked" errors. Runs once
+        // per connection open and does not touch migration/schema callbacks.
+        database.execute('PRAGMA journal_mode=WAL;');
+      },
+    );
   });
 }
 
