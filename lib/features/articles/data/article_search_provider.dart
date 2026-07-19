@@ -330,7 +330,13 @@ class ArticleSearchRepository {
       return await _searchWithMatchOnce(query, category: category, subcategory: subcategory);
     } on SqliteException catch (e) {
       if (_isFts5Corruption(e)) {
-        await _rebuildSearchIndex();
+        // Force a full re-index on corruption: drop the cached content
+        // signature so _ensureSearchIndex re-pulls article text rather than
+        // relying on FTS5's `rebuild` (which only rebuilds structure from
+        // existing, possibly broken rows).
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.remove('fts_last_content_signature');
+        await _ensureSearchIndex();
         return _searchWithMatchOnce(query, category: category, subcategory: subcategory);
       }
       rethrow;
@@ -473,12 +479,6 @@ class ArticleSearchRepository {
     }
   }
 
-  Future<void> _rebuildSearchIndex() async {
-    await _db.customStatement(
-      'INSERT INTO article_search_fts(article_search_fts) VALUES("rebuild")',
-    );
-  }
-
   bool _isFts5Corruption(SqliteException e) {
     final message = e.message.toLowerCase();
     return message.contains('fts5') || message.contains('malformed');
@@ -487,11 +487,22 @@ class ArticleSearchRepository {
   Future<void> _ensureSearchIndex() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final lastIndexedCount = prefs.getInt('fts_last_article_count') ?? -1;
+      final lastIndexedCount =
+          prefs.getInt('fts_last_article_count') ?? -1;
+      final lastContentSignature =
+          prefs.getString('fts_last_content_signature') ?? '';
       final currentArticleCount = await _getArticleCount();
+      final currentContentSignature = await _getContentSignature();
 
-      if (lastIndexedCount == currentArticleCount) {
-        return; // Already up to date — skip expensive rebuild check
+      // Rebuild only when the index is missing, the row count changed, OR the
+      // indexed content drifted (e.g. an article was edited during a content
+      // sync while the row count stayed the same). The previous count-only
+      // check missed the latter case and served stale search results.
+      final needsRebuild = lastIndexedCount != currentArticleCount ||
+          lastContentSignature != currentContentSignature;
+
+      if (!needsRebuild) {
+        return; // Already up to date — skip the expensive re-index.
       }
 
       await _db.customStatement('''
@@ -504,12 +515,6 @@ class ArticleSearchRepository {
           tokenize = 'unicode61 remove_diacritics 2'
         )
         ''');
-
-      final indexedCount = await _getIndexedCount();
-      if (indexedCount == currentArticleCount) {
-        await prefs.setInt('fts_last_article_count', currentArticleCount);
-        return;
-      }
 
       await _db.customStatement('DELETE FROM article_search_fts');
       final articles = await _db.select(_db.articles).get();
@@ -534,25 +539,35 @@ class ArticleSearchRepository {
       }
 
       await prefs.setInt('fts_last_article_count', currentArticleCount);
+      await prefs.setString(
+        'fts_last_content_signature',
+        currentContentSignature,
+      );
     } catch (error) {
       debugPrint('Unable to prepare article search index: $error');
       rethrow;
     }
   }
 
-  Future<int> _getIndexedCount() async {
+  /// A cheap, content-aware fingerprint of every article's searchable text.
+  ///
+  /// Aggregated in a single SQL pass (no per-row Dart work) so it stays cheap
+  /// to compute on every ensure call. Used to detect content drift that a
+  /// row-count comparison alone would miss.
+  Future<String> _getContentSignature() async {
     try {
-      final rows = await _db
-          .customSelect('SELECT count(*) AS count FROM article_search_fts')
-          .get();
-      if (rows.isEmpty) {
-        return 0;
-      }
-
-      return rows.first.read<int>('count');
+      final rows = await _db.customSelect('''
+        SELECT COALESCE(
+          SUM(length(title) + length(COALESCE(content, '')) + length(COALESCE(category, ''))),
+          0
+        ) AS signature
+        FROM articles
+      ''').get();
+      if (rows.isEmpty) return '0';
+      return rows.first.read<int>('signature').toString();
     } catch (error) {
-      debugPrint('Unable to read article search index count: $error');
-      return 0;
+      debugPrint('Unable to compute article content signature: $error');
+      return '';
     }
   }
 
