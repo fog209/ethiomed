@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+// Smoke test: a Material 3 app shell pumps and renders without throwing.
+// (Deliberately brand-neutral — the retired "EthioMed" name is the Dart
+// package id only; the product is WardReady.)
 void main() {
-  testWidgets('EthioMed branding renders in a Material 3 app shell', (
+  testWidgets('Material 3 app shell renders without throwing', (
     tester,
   ) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: true),
-        home: Scaffold(body: Center(child: Text('EthioMed'))),
+        home: const Scaffold(body: Center(child: Text('WardReady'))),
       ),
     );
 
-    expect(find.text('EthioMed'), findsOneWidget);
+    expect(find.text('WardReady'), findsOneWidget);
   });
 }
