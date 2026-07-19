@@ -142,24 +142,9 @@ class StudySessions extends Table {
     DateTimeColumn get answeredAt => dateTime().clientDefault(DateTime.now)();
   }
 
-  @DataClassName('QuizQuestionLocal')
-  class QuizQuestions extends Table {
-  IntColumn get id => integer().autoIncrement()();
-  TextColumn get articleId => text().nullable()();
-  TextColumn get stem => text()();
-  TextColumn get optionA => text()();
-  TextColumn get optionB => text()();
-  TextColumn get optionC => text()();
-  TextColumn get optionD => text()();
-  TextColumn get correctOption => text().withLength(min: 1, max: 1)();
-  TextColumn get explanation => text().nullable()();
-  TextColumn get category => text().nullable()();
-  TextColumn get difficulty => text().nullable()();
-}
-
-@TableIndex(name: 'idx_quiz_table_category', columns: {#category})
-@DataClassName('QuizQuestionEntity')
-class QuizTable extends Table {
+  @TableIndex(name: 'idx_quiz_table_category', columns: {#category})
+  @DataClassName('QuizQuestionEntity')
+  class QuizTable extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get remoteId => text().unique()();
   TextColumn get articleId => text()();
@@ -291,7 +276,6 @@ class CaseProgress extends Table {
       ArticleNotes,
       StudySessions,
      QuizSessions,
-     QuizQuestions,
      QuizTable,
      FlashcardTable,
      ClinicalCases,
@@ -305,7 +289,7 @@ class CaseProgress extends Table {
    AppDatabase() : super(_openConnection());
 
     @override
-    int get schemaVersion => 22;
+    int get schemaVersion => 23;
 
   Future<void> _runMigrationStep(
     String name,
@@ -379,15 +363,33 @@ class CaseProgress extends Table {
         }
         if (from < 3) {
           await _runMigrationStep(
-            'create quiz questions',
-            () => m.createTable(quizQuestions),
+            'create quiz questions (legacy, removed)',
+            () async {
+              await customStatement('''
+                CREATE TABLE IF NOT EXISTS quiz_questions (
+                  id INTEGER PRIMARY KEY AUTOINCREMENT,
+                  article_id TEXT,
+                  stem TEXT NOT NULL,
+                  option_a TEXT NOT NULL,
+                  option_b TEXT NOT NULL,
+                  option_c TEXT NOT NULL,
+                  option_d TEXT NOT NULL,
+                  correct_option TEXT NOT NULL,
+                  explanation TEXT,
+                  category TEXT,
+                  difficulty TEXT
+                )
+              ''');
+            },
           );
         }
         if (from < 4) {
           if (from >= 3) {
             await _runMigrationStep(
               'drop old quiz questions',
-              () => m.drop(quizQuestions),
+              () async {
+                await customStatement('DROP TABLE IF EXISTS quiz_questions');
+              },
             );
           }
           await _runMigrationStep(
@@ -622,6 +624,14 @@ if (!columnNames.contains('exam_source')) {
                       'ADD COLUMN category_label_overrides TEXT',
                     );
                   }
+                },
+              );
+            }
+            if (from < 23) {
+              await _runMigrationStep(
+                'drop dead quiz_questions table',
+                () async {
+                  await customStatement('DROP TABLE IF EXISTS quiz_questions');
                 },
               );
             }
@@ -1077,6 +1087,11 @@ if (!columnNames.contains('quiz_correct')) {
         'ALTER TABLE view_history ADD COLUMN viewed_at TEXT NOT NULL DEFAULT ""',
       );
     }
+
+    // Index for read-progress / per-article view aggregations.
+    await customStatement(
+      'CREATE INDEX IF NOT EXISTS idx_view_history_article_id ON view_history(article_id)',
+    );
   }
 
   Future<void> _ensureQuizTableSm2Columns() async {
@@ -1105,6 +1120,11 @@ if (!columnNames.contains('quiz_correct')) {
         updated_at INTEGER
       )
       ''');
+
+    // Index for due-card queries (SM-2 scheduling scans by next_due_at).
+    await customStatement(
+      'CREATE INDEX IF NOT EXISTS idx_quiz_next_due_at ON quiz_table(next_due_at)',
+    );
 
     final columns = await customSelect('PRAGMA table_info(quiz_table)').get();
     final columnNames = columns.map((row) => row.read<String>('name')).toSet();
