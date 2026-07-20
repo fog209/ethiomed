@@ -139,7 +139,7 @@ class UpdateManifest {
 /// The owner can override this per build via --dart-define=UPDATE_MANIFEST_URL
 /// without changing code. This is the single source the updater consults.
 const String kDefaultUpdateManifestUrl =
-    'https://raw.githubusercontent.com/WardReady/ethiomed/main/update.json';
+    'https://raw.githubusercontent.com/fog209/ethiomed/main/update.json';
 
 /// Returns the manifest URL, honoring a --dart-define override.
 String get updateManifestUrl {
