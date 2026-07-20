@@ -16,6 +16,8 @@ import '../../../main.dart' show currentAdminProfileProvider;
 import '../../flashcards/presentation/flashcard_stage_prompt_screen.dart';
 import '../../flashcards/flashcard_track_provider.dart';
 import 'content_reset_button.dart';
+import '../../settings/data/updater_provider.dart';
+import 'update_sheet.dart';
 
 class SettingsScreen extends ConsumerWidget {
   static const String _adminTelegramUrl = 'https://t.me/WardReadyAdmin';
@@ -113,6 +115,16 @@ class SettingsScreen extends ConsumerWidget {
         },
       ),
       _buildReadingModeSection(context, ref, primaryColor),
+      ListTile(
+        leading: Icon(Icons.system_update_alt, color: primaryColor),
+        title: const Text('Check for updates'),
+        subtitle: const Text('Download the latest WardReady APK in-app'),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () {
+          ref.read(updaterProvider.notifier).checkForUpdate(force: true);
+          showUpdateSheetIfNeeded(context, ref);
+        },
+      ),
       ListTile(
         leading: Icon(Icons.school, color: primaryColor),
         title: const Text('Study stage'),

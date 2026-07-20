@@ -2,7 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/providers/connectivity_notifier.dart';
 
-const String kCurrentAppVersion = '1.0.0';
+const String kCurrentAppVersion = '1.0.1-beta.1';
 
 final versionCheckProvider = FutureProvider<VersionCheckResult?>((ref) async {
   final connectivity = ref.watch(connectivityProvider);

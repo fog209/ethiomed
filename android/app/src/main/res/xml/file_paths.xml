@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <!-- Downloaded update APKs are stored under getFilesDir()/updates so the
+         system installer can read them via FileProvider without granting
+         broad external-storage access. -->
+    <files-path
+        name="updates"
+        path="updates/" />
+</paths>

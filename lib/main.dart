@@ -44,6 +44,7 @@ import 'features/progress/progress_screen.dart';
 import 'features/settings/presentation/system_health_screen.dart';
 import 'features/settings/presentation/forced_update_gate.dart';
 import 'features/settings/presentation/forced_update_screen.dart';
+import 'features/settings/data/updater_provider.dart';
 import 'features/subscription/presentation/paywall_screen.dart';
 import 'features/subscription/data/subscription_repository.dart';
 
@@ -410,6 +411,15 @@ class WardReadyApp extends ConsumerWidget {
     if (kReleaseMode && _tampered) {
       return const _SecurityAlertScreen();
     }
+
+    // Non-blocking, dismissible in-app update check on launch. Intentionally
+    // NOT wired into the forced-update gate: if an update is available the
+    // user gets a soft bottom-sheet they can ignore; the hard block (when the
+    // installed version is below kMinimumSupportedVersion) is owned
+    // exclusively by the /forced-update route. See updater_provider.dart.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(updaterProvider.notifier).checkForUpdate();
+    });
 
     final systemUiOverlayStyle = SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
