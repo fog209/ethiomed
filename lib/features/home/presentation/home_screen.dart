@@ -31,6 +31,7 @@ class HomeScreen extends ConsumerWidget {
           SliverToBoxAdapter(child: const FlashcardsEntryCard()),
           SliverToBoxAdapter(child: const ExamModeEntryCard()),
           SliverToBoxAdapter(child: const ProgressEntryCard()),
+          SliverToBoxAdapter(child: const DrugsEntryCard()),
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.only(top: 24, bottom: 8),

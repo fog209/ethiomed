@@ -156,6 +156,20 @@ class ProgressEntryCard extends ConsumerWidget {
   }
 }
 
+class DrugsEntryCard extends ConsumerWidget {
+  const DrugsEntryCard({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return _EntryCard(
+      icon: Icons.medication,
+      title: 'Drugs',
+      subtitle: 'Coming soon',
+      onTap: () => context.push('/drugs'),
+    );
+  }
+}
+
 class FlashcardsEntryCard extends ConsumerWidget {
   const FlashcardsEntryCard({super.key});
 

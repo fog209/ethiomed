@@ -29,6 +29,7 @@ import 'features/auth/presentation/login_screen.dart';
 import 'features/auth/presentation/signup_screen.dart';
 import 'features/calculators/calculators_screen.dart' show CalculatorsScreen, CalculatorDetailScreen;
 import 'features/cases/presentation/case_screen.dart';
+import 'features/drugs/presentation/drugs_screen.dart';
 import 'features/flashcards/presentation/flashcard_stage_prompt_screen.dart';
 import 'features/home/presentation/article_list_screen.dart';
 import 'features/home/presentation/subcategory_screen.dart';
@@ -372,6 +373,10 @@ final _router = GoRouter(
     GoRoute(
       path: '/cases',
       builder: (context, state) => const ClinicalCasesScreen(),
+    ),
+    GoRoute(
+      path: '/drugs',
+      builder: (context, state) => const DrugsScreen(),
     ),
     GoRoute(
       path: '/subscription',
