@@ -55,6 +55,7 @@ app.*.map.json
 **/*.keystorebuild/
 .dart_tool/
 android/.gradle/
+android/.kotlin/
 *.pavg
 
 # Supabase backups
