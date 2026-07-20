@@ -80,22 +80,23 @@ class FlashcardReviewService {
 
       await _db.customSelect(
         '''
-        UPDATE flashcard_table
-        SET
-          ease_factor = ?,
-          interval = ?,
-          repetitions = ?,
-          next_due_at = ?,
-          last_quality = ?
-        WHERE id = ?
+        INSERT INTO flashcard_progress
+          (content_id, ease_factor, interval, repetitions, next_due_at, last_quality)
+        VALUES (?, ?, ?, ?, ?, ?)
+        ON CONFLICT(content_id) DO UPDATE SET
+          ease_factor = excluded.ease_factor,
+          interval = excluded.interval,
+          repetitions = excluded.repetitions,
+          next_due_at = excluded.next_due_at,
+          last_quality = excluded.last_quality
         ''',
         variables: [
+          Variable(id),
           Variable(schedule.easeFactor),
           Variable(schedule.interval),
           Variable(schedule.repetitions),
           Variable(schedule.dueAt),
           Variable(quality),
-          Variable(id),
         ],
       ).get();
 
@@ -201,31 +202,30 @@ Future<int> importFlashcardsFromJson(
     return 0;
   }
 
-  return await db.transaction(() async {
-    var count = 0;
-    final now = DateTime.now();
+    return await db.transaction(() async {
+      var count = 0;
+      final now = DateTime.now();
 
-    for (final card in cards) {
-      await db.customStatement(
-        '''
-        INSERT INTO flashcard_table (
-          deck_name,
-          front_text,
-          back_text,
-          source_article_id,
-          ease_factor,
-          interval,
-          repetitions,
-          next_due_at,
-          last_quality,
-          created_at
-        ) VALUES (?, ?, ?, NULL, 2.5, 0, 0, ?, NULL, ?)
-        ''',
-        [card.deck.trim(), card.front.trim(), card.back.trim(), now, now],
-      );
-      count++;
-    }
+      for (final card in cards) {
+        final contentId = await db.customInsert(
+          'INSERT INTO flashcard_content '
+          '(deck_name, front_text, back_text, source_article_id, created_at) '
+          'VALUES (?, ?, ?, NULL, ?)',
+          variables: [
+            Variable<String>(card.deck.trim()),
+            Variable<String>(card.front.trim()),
+            Variable<String>(card.back.trim()),
+            Variable<DateTime>(now),
+          ],
+        );
+        await db.customStatement(
+          'INSERT OR IGNORE INTO flashcard_progress '
+          '(content_id, ease_factor) VALUES (?, 2.5)',
+          [contentId],
+        );
+        count++;
+      }
 
-    return count;
-  });
+      return count;
+    });
 }

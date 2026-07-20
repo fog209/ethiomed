@@ -2543,12 +2543,12 @@ class QuizSessionsCompanion extends UpdateCompanion<QuizSession> {
   }
 }
 
-class $QuizTableTable extends QuizTable
-    with TableInfo<$QuizTableTable, QuizQuestionEntity> {
+class $QuizContentTable extends QuizContent
+    with TableInfo<$QuizContentTable, QuizContentEntity> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $QuizTableTable(this.attachedDatabase, [this._alias]);
+  $QuizContentTable(this.attachedDatabase, [this._alias]);
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<int> id = GeneratedColumn<int>(
@@ -2699,86 +2699,6 @@ class $QuizTableTable extends QuizTable
     requiredDuringInsert: false,
     defaultValue: const Constant('clinicalFeatures'),
   );
-  static const VerificationMeta _wrongCountMeta = const VerificationMeta(
-    'wrongCount',
-  );
-  @override
-  late final GeneratedColumn<int> wrongCount = GeneratedColumn<int>(
-    'wrong_count',
-    aliasedName,
-    false,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    defaultValue: const Constant(0),
-  );
-  static const VerificationMeta _lastAttemptedAtMeta = const VerificationMeta(
-    'lastAttemptedAt',
-  );
-  @override
-  late final GeneratedColumn<DateTime> lastAttemptedAt =
-      GeneratedColumn<DateTime>(
-        'last_attempted_at',
-        aliasedName,
-        true,
-        type: DriftSqlType.dateTime,
-        requiredDuringInsert: false,
-      );
-  static const VerificationMeta _srIntervalMeta = const VerificationMeta(
-    'srInterval',
-  );
-  @override
-  late final GeneratedColumn<int> srInterval = GeneratedColumn<int>(
-    'sr_interval',
-    aliasedName,
-    true,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _repetitionsMeta = const VerificationMeta(
-    'repetitions',
-  );
-  @override
-  late final GeneratedColumn<int> repetitions = GeneratedColumn<int>(
-    'repetitions',
-    aliasedName,
-    true,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _nextDueAtMeta = const VerificationMeta(
-    'nextDueAt',
-  );
-  @override
-  late final GeneratedColumn<DateTime> nextDueAt = GeneratedColumn<DateTime>(
-    'next_due_at',
-    aliasedName,
-    true,
-    type: DriftSqlType.dateTime,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _easeFactorMeta = const VerificationMeta(
-    'easeFactor',
-  );
-  @override
-  late final GeneratedColumn<double> easeFactor = GeneratedColumn<double>(
-    'ease_factor',
-    aliasedName,
-    false,
-    type: DriftSqlType.double,
-    requiredDuringInsert: false,
-    defaultValue: const Constant(2.5),
-  );
-  static const VerificationMeta _lastQualityMeta = const VerificationMeta(
-    'lastQuality',
-  );
-  @override
-  late final GeneratedColumn<int> lastQuality = GeneratedColumn<int>(
-    'last_quality',
-    aliasedName,
-    true,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-  );
   static const VerificationMeta _updatedAtMeta = const VerificationMeta(
     'updatedAt',
   );
@@ -2860,13 +2780,6 @@ class $QuizTableTable extends QuizTable
     category,
     difficulty,
     testedField,
-    wrongCount,
-    lastAttemptedAt,
-    srInterval,
-    repetitions,
-    nextDueAt,
-    easeFactor,
-    lastQuality,
     updatedAt,
     parentCategory,
     sourceType,
@@ -2878,10 +2791,10 @@ class $QuizTableTable extends QuizTable
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
-  static const String $name = 'quiz_table';
+  static const String $name = 'quiz_content';
   @override
   VerificationContext validateIntegrity(
-    Insertable<QuizQuestionEntity> instance, {
+    Insertable<QuizContentEntity> instance, {
     bool isInserting = false,
   }) {
     final context = VerificationContext();
@@ -2990,57 +2903,6 @@ class $QuizTableTable extends QuizTable
         ),
       );
     }
-    if (data.containsKey('wrong_count')) {
-      context.handle(
-        _wrongCountMeta,
-        wrongCount.isAcceptableOrUnknown(data['wrong_count']!, _wrongCountMeta),
-      );
-    }
-    if (data.containsKey('last_attempted_at')) {
-      context.handle(
-        _lastAttemptedAtMeta,
-        lastAttemptedAt.isAcceptableOrUnknown(
-          data['last_attempted_at']!,
-          _lastAttemptedAtMeta,
-        ),
-      );
-    }
-    if (data.containsKey('sr_interval')) {
-      context.handle(
-        _srIntervalMeta,
-        srInterval.isAcceptableOrUnknown(data['sr_interval']!, _srIntervalMeta),
-      );
-    }
-    if (data.containsKey('repetitions')) {
-      context.handle(
-        _repetitionsMeta,
-        repetitions.isAcceptableOrUnknown(
-          data['repetitions']!,
-          _repetitionsMeta,
-        ),
-      );
-    }
-    if (data.containsKey('next_due_at')) {
-      context.handle(
-        _nextDueAtMeta,
-        nextDueAt.isAcceptableOrUnknown(data['next_due_at']!, _nextDueAtMeta),
-      );
-    }
-    if (data.containsKey('ease_factor')) {
-      context.handle(
-        _easeFactorMeta,
-        easeFactor.isAcceptableOrUnknown(data['ease_factor']!, _easeFactorMeta),
-      );
-    }
-    if (data.containsKey('last_quality')) {
-      context.handle(
-        _lastQualityMeta,
-        lastQuality.isAcceptableOrUnknown(
-          data['last_quality']!,
-          _lastQualityMeta,
-        ),
-      );
-    }
     if (data.containsKey('updated_at')) {
       context.handle(
         _updatedAtMeta,
@@ -3089,9 +2951,9 @@ class $QuizTableTable extends QuizTable
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  QuizQuestionEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
+  QuizContentEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return QuizQuestionEntity(
+    return QuizContentEntity(
       id: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}id'],
@@ -3144,34 +3006,6 @@ class $QuizTableTable extends QuizTable
         DriftSqlType.string,
         data['${effectivePrefix}tested_field'],
       )!,
-      wrongCount: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}wrong_count'],
-      )!,
-      lastAttemptedAt: attachedDatabase.typeMapping.read(
-        DriftSqlType.dateTime,
-        data['${effectivePrefix}last_attempted_at'],
-      ),
-      srInterval: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}sr_interval'],
-      ),
-      repetitions: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}repetitions'],
-      ),
-      nextDueAt: attachedDatabase.typeMapping.read(
-        DriftSqlType.dateTime,
-        data['${effectivePrefix}next_due_at'],
-      ),
-      easeFactor: attachedDatabase.typeMapping.read(
-        DriftSqlType.double,
-        data['${effectivePrefix}ease_factor'],
-      )!,
-      lastQuality: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}last_quality'],
-      ),
       updatedAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}updated_at'],
@@ -3200,13 +3034,13 @@ class $QuizTableTable extends QuizTable
   }
 
   @override
-  $QuizTableTable createAlias(String alias) {
-    return $QuizTableTable(attachedDatabase, alias);
+  $QuizContentTable createAlias(String alias) {
+    return $QuizContentTable(attachedDatabase, alias);
   }
 }
 
-class QuizQuestionEntity extends DataClass
-    implements Insertable<QuizQuestionEntity> {
+class QuizContentEntity extends DataClass
+    implements Insertable<QuizContentEntity> {
   final int id;
   final String remoteId;
   final String articleId;
@@ -3220,13 +3054,6 @@ class QuizQuestionEntity extends DataClass
   final String category;
   final String difficulty;
   final String testedField;
-  final int wrongCount;
-  final DateTime? lastAttemptedAt;
-  final int? srInterval;
-  final int? repetitions;
-  final DateTime? nextDueAt;
-  final double easeFactor;
-  final int? lastQuality;
 
   /// Mirror of Supabase `updated_at` used for incremental sync.
   final DateTime? updatedAt;
@@ -3247,7 +3074,7 @@ class QuizQuestionEntity extends DataClass
   /// explanation. Mirrors the article dynamic-sections pattern: a single
   /// optional text column synced from the Supabase `questions.attending_tip`.
   final String? attendingTip;
-  const QuizQuestionEntity({
+  const QuizContentEntity({
     required this.id,
     required this.remoteId,
     required this.articleId,
@@ -3261,13 +3088,6 @@ class QuizQuestionEntity extends DataClass
     required this.category,
     required this.difficulty,
     required this.testedField,
-    required this.wrongCount,
-    this.lastAttemptedAt,
-    this.srInterval,
-    this.repetitions,
-    this.nextDueAt,
-    required this.easeFactor,
-    this.lastQuality,
     this.updatedAt,
     this.parentCategory,
     this.sourceType,
@@ -3291,23 +3111,6 @@ class QuizQuestionEntity extends DataClass
     map['category'] = Variable<String>(category);
     map['difficulty'] = Variable<String>(difficulty);
     map['tested_field'] = Variable<String>(testedField);
-    map['wrong_count'] = Variable<int>(wrongCount);
-    if (!nullToAbsent || lastAttemptedAt != null) {
-      map['last_attempted_at'] = Variable<DateTime>(lastAttemptedAt);
-    }
-    if (!nullToAbsent || srInterval != null) {
-      map['sr_interval'] = Variable<int>(srInterval);
-    }
-    if (!nullToAbsent || repetitions != null) {
-      map['repetitions'] = Variable<int>(repetitions);
-    }
-    if (!nullToAbsent || nextDueAt != null) {
-      map['next_due_at'] = Variable<DateTime>(nextDueAt);
-    }
-    map['ease_factor'] = Variable<double>(easeFactor);
-    if (!nullToAbsent || lastQuality != null) {
-      map['last_quality'] = Variable<int>(lastQuality);
-    }
     if (!nullToAbsent || updatedAt != null) {
       map['updated_at'] = Variable<DateTime>(updatedAt);
     }
@@ -3329,8 +3132,8 @@ class QuizQuestionEntity extends DataClass
     return map;
   }
 
-  QuizTableCompanion toCompanion(bool nullToAbsent) {
-    return QuizTableCompanion(
+  QuizContentCompanion toCompanion(bool nullToAbsent) {
+    return QuizContentCompanion(
       id: Value(id),
       remoteId: Value(remoteId),
       articleId: Value(articleId),
@@ -3344,23 +3147,6 @@ class QuizQuestionEntity extends DataClass
       category: Value(category),
       difficulty: Value(difficulty),
       testedField: Value(testedField),
-      wrongCount: Value(wrongCount),
-      lastAttemptedAt: lastAttemptedAt == null && nullToAbsent
-          ? const Value.absent()
-          : Value(lastAttemptedAt),
-      srInterval: srInterval == null && nullToAbsent
-          ? const Value.absent()
-          : Value(srInterval),
-      repetitions: repetitions == null && nullToAbsent
-          ? const Value.absent()
-          : Value(repetitions),
-      nextDueAt: nextDueAt == null && nullToAbsent
-          ? const Value.absent()
-          : Value(nextDueAt),
-      easeFactor: Value(easeFactor),
-      lastQuality: lastQuality == null && nullToAbsent
-          ? const Value.absent()
-          : Value(lastQuality),
       updatedAt: updatedAt == null && nullToAbsent
           ? const Value.absent()
           : Value(updatedAt),
@@ -3382,12 +3168,12 @@ class QuizQuestionEntity extends DataClass
     );
   }
 
-  factory QuizQuestionEntity.fromJson(
+  factory QuizContentEntity.fromJson(
     Map<String, dynamic> json, {
     ValueSerializer? serializer,
   }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return QuizQuestionEntity(
+    return QuizContentEntity(
       id: serializer.fromJson<int>(json['id']),
       remoteId: serializer.fromJson<String>(json['remoteId']),
       articleId: serializer.fromJson<String>(json['articleId']),
@@ -3401,13 +3187,6 @@ class QuizQuestionEntity extends DataClass
       category: serializer.fromJson<String>(json['category']),
       difficulty: serializer.fromJson<String>(json['difficulty']),
       testedField: serializer.fromJson<String>(json['testedField']),
-      wrongCount: serializer.fromJson<int>(json['wrongCount']),
-      lastAttemptedAt: serializer.fromJson<DateTime?>(json['lastAttemptedAt']),
-      srInterval: serializer.fromJson<int?>(json['srInterval']),
-      repetitions: serializer.fromJson<int?>(json['repetitions']),
-      nextDueAt: serializer.fromJson<DateTime?>(json['nextDueAt']),
-      easeFactor: serializer.fromJson<double>(json['easeFactor']),
-      lastQuality: serializer.fromJson<int?>(json['lastQuality']),
       updatedAt: serializer.fromJson<DateTime?>(json['updatedAt']),
       parentCategory: serializer.fromJson<String?>(json['parentCategory']),
       sourceType: serializer.fromJson<String?>(json['sourceType']),
@@ -3433,13 +3212,6 @@ class QuizQuestionEntity extends DataClass
       'category': serializer.toJson<String>(category),
       'difficulty': serializer.toJson<String>(difficulty),
       'testedField': serializer.toJson<String>(testedField),
-      'wrongCount': serializer.toJson<int>(wrongCount),
-      'lastAttemptedAt': serializer.toJson<DateTime?>(lastAttemptedAt),
-      'srInterval': serializer.toJson<int?>(srInterval),
-      'repetitions': serializer.toJson<int?>(repetitions),
-      'nextDueAt': serializer.toJson<DateTime?>(nextDueAt),
-      'easeFactor': serializer.toJson<double>(easeFactor),
-      'lastQuality': serializer.toJson<int?>(lastQuality),
       'updatedAt': serializer.toJson<DateTime?>(updatedAt),
       'parentCategory': serializer.toJson<String?>(parentCategory),
       'sourceType': serializer.toJson<String?>(sourceType),
@@ -3449,7 +3221,7 @@ class QuizQuestionEntity extends DataClass
     };
   }
 
-  QuizQuestionEntity copyWith({
+  QuizContentEntity copyWith({
     int? id,
     String? remoteId,
     String? articleId,
@@ -3463,20 +3235,13 @@ class QuizQuestionEntity extends DataClass
     String? category,
     String? difficulty,
     String? testedField,
-    int? wrongCount,
-    Value<DateTime?> lastAttemptedAt = const Value.absent(),
-    Value<int?> srInterval = const Value.absent(),
-    Value<int?> repetitions = const Value.absent(),
-    Value<DateTime?> nextDueAt = const Value.absent(),
-    double? easeFactor,
-    Value<int?> lastQuality = const Value.absent(),
     Value<DateTime?> updatedAt = const Value.absent(),
     Value<String?> parentCategory = const Value.absent(),
     Value<String?> sourceType = const Value.absent(),
     Value<int?> examYear = const Value.absent(),
     Value<String?> examSource = const Value.absent(),
     Value<String?> attendingTip = const Value.absent(),
-  }) => QuizQuestionEntity(
+  }) => QuizContentEntity(
     id: id ?? this.id,
     remoteId: remoteId ?? this.remoteId,
     articleId: articleId ?? this.articleId,
@@ -3490,15 +3255,6 @@ class QuizQuestionEntity extends DataClass
     category: category ?? this.category,
     difficulty: difficulty ?? this.difficulty,
     testedField: testedField ?? this.testedField,
-    wrongCount: wrongCount ?? this.wrongCount,
-    lastAttemptedAt: lastAttemptedAt.present
-        ? lastAttemptedAt.value
-        : this.lastAttemptedAt,
-    srInterval: srInterval.present ? srInterval.value : this.srInterval,
-    repetitions: repetitions.present ? repetitions.value : this.repetitions,
-    nextDueAt: nextDueAt.present ? nextDueAt.value : this.nextDueAt,
-    easeFactor: easeFactor ?? this.easeFactor,
-    lastQuality: lastQuality.present ? lastQuality.value : this.lastQuality,
     updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
     parentCategory: parentCategory.present
         ? parentCategory.value
@@ -3508,8 +3264,8 @@ class QuizQuestionEntity extends DataClass
     examSource: examSource.present ? examSource.value : this.examSource,
     attendingTip: attendingTip.present ? attendingTip.value : this.attendingTip,
   );
-  QuizQuestionEntity copyWithCompanion(QuizTableCompanion data) {
-    return QuizQuestionEntity(
+  QuizContentEntity copyWithCompanion(QuizContentCompanion data) {
+    return QuizContentEntity(
       id: data.id.present ? data.id.value : this.id,
       remoteId: data.remoteId.present ? data.remoteId.value : this.remoteId,
       articleId: data.articleId.present ? data.articleId.value : this.articleId,
@@ -3531,25 +3287,6 @@ class QuizQuestionEntity extends DataClass
       testedField: data.testedField.present
           ? data.testedField.value
           : this.testedField,
-      wrongCount: data.wrongCount.present
-          ? data.wrongCount.value
-          : this.wrongCount,
-      lastAttemptedAt: data.lastAttemptedAt.present
-          ? data.lastAttemptedAt.value
-          : this.lastAttemptedAt,
-      srInterval: data.srInterval.present
-          ? data.srInterval.value
-          : this.srInterval,
-      repetitions: data.repetitions.present
-          ? data.repetitions.value
-          : this.repetitions,
-      nextDueAt: data.nextDueAt.present ? data.nextDueAt.value : this.nextDueAt,
-      easeFactor: data.easeFactor.present
-          ? data.easeFactor.value
-          : this.easeFactor,
-      lastQuality: data.lastQuality.present
-          ? data.lastQuality.value
-          : this.lastQuality,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       parentCategory: data.parentCategory.present
           ? data.parentCategory.value
@@ -3569,7 +3306,7 @@ class QuizQuestionEntity extends DataClass
 
   @override
   String toString() {
-    return (StringBuffer('QuizQuestionEntity(')
+    return (StringBuffer('QuizContentEntity(')
           ..write('id: $id, ')
           ..write('remoteId: $remoteId, ')
           ..write('articleId: $articleId, ')
@@ -3583,13 +3320,6 @@ class QuizQuestionEntity extends DataClass
           ..write('category: $category, ')
           ..write('difficulty: $difficulty, ')
           ..write('testedField: $testedField, ')
-          ..write('wrongCount: $wrongCount, ')
-          ..write('lastAttemptedAt: $lastAttemptedAt, ')
-          ..write('srInterval: $srInterval, ')
-          ..write('repetitions: $repetitions, ')
-          ..write('nextDueAt: $nextDueAt, ')
-          ..write('easeFactor: $easeFactor, ')
-          ..write('lastQuality: $lastQuality, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('parentCategory: $parentCategory, ')
           ..write('sourceType: $sourceType, ')
@@ -3601,7 +3331,7 @@ class QuizQuestionEntity extends DataClass
   }
 
   @override
-  int get hashCode => Object.hashAll([
+  int get hashCode => Object.hash(
     id,
     remoteId,
     articleId,
@@ -3615,24 +3345,17 @@ class QuizQuestionEntity extends DataClass
     category,
     difficulty,
     testedField,
-    wrongCount,
-    lastAttemptedAt,
-    srInterval,
-    repetitions,
-    nextDueAt,
-    easeFactor,
-    lastQuality,
     updatedAt,
     parentCategory,
     sourceType,
     examYear,
     examSource,
     attendingTip,
-  ]);
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is QuizQuestionEntity &&
+      (other is QuizContentEntity &&
           other.id == this.id &&
           other.remoteId == this.remoteId &&
           other.articleId == this.articleId &&
@@ -3646,13 +3369,6 @@ class QuizQuestionEntity extends DataClass
           other.category == this.category &&
           other.difficulty == this.difficulty &&
           other.testedField == this.testedField &&
-          other.wrongCount == this.wrongCount &&
-          other.lastAttemptedAt == this.lastAttemptedAt &&
-          other.srInterval == this.srInterval &&
-          other.repetitions == this.repetitions &&
-          other.nextDueAt == this.nextDueAt &&
-          other.easeFactor == this.easeFactor &&
-          other.lastQuality == this.lastQuality &&
           other.updatedAt == this.updatedAt &&
           other.parentCategory == this.parentCategory &&
           other.sourceType == this.sourceType &&
@@ -3661,7 +3377,7 @@ class QuizQuestionEntity extends DataClass
           other.attendingTip == this.attendingTip);
 }
 
-class QuizTableCompanion extends UpdateCompanion<QuizQuestionEntity> {
+class QuizContentCompanion extends UpdateCompanion<QuizContentEntity> {
   final Value<int> id;
   final Value<String> remoteId;
   final Value<String> articleId;
@@ -3675,20 +3391,13 @@ class QuizTableCompanion extends UpdateCompanion<QuizQuestionEntity> {
   final Value<String> category;
   final Value<String> difficulty;
   final Value<String> testedField;
-  final Value<int> wrongCount;
-  final Value<DateTime?> lastAttemptedAt;
-  final Value<int?> srInterval;
-  final Value<int?> repetitions;
-  final Value<DateTime?> nextDueAt;
-  final Value<double> easeFactor;
-  final Value<int?> lastQuality;
   final Value<DateTime?> updatedAt;
   final Value<String?> parentCategory;
   final Value<String?> sourceType;
   final Value<int?> examYear;
   final Value<String?> examSource;
   final Value<String?> attendingTip;
-  const QuizTableCompanion({
+  const QuizContentCompanion({
     this.id = const Value.absent(),
     this.remoteId = const Value.absent(),
     this.articleId = const Value.absent(),
@@ -3702,13 +3411,6 @@ class QuizTableCompanion extends UpdateCompanion<QuizQuestionEntity> {
     this.category = const Value.absent(),
     this.difficulty = const Value.absent(),
     this.testedField = const Value.absent(),
-    this.wrongCount = const Value.absent(),
-    this.lastAttemptedAt = const Value.absent(),
-    this.srInterval = const Value.absent(),
-    this.repetitions = const Value.absent(),
-    this.nextDueAt = const Value.absent(),
-    this.easeFactor = const Value.absent(),
-    this.lastQuality = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.parentCategory = const Value.absent(),
     this.sourceType = const Value.absent(),
@@ -3716,7 +3418,7 @@ class QuizTableCompanion extends UpdateCompanion<QuizQuestionEntity> {
     this.examSource = const Value.absent(),
     this.attendingTip = const Value.absent(),
   });
-  QuizTableCompanion.insert({
+  QuizContentCompanion.insert({
     this.id = const Value.absent(),
     required String remoteId,
     required String articleId,
@@ -3730,13 +3432,6 @@ class QuizTableCompanion extends UpdateCompanion<QuizQuestionEntity> {
     required String category,
     this.difficulty = const Value.absent(),
     this.testedField = const Value.absent(),
-    this.wrongCount = const Value.absent(),
-    this.lastAttemptedAt = const Value.absent(),
-    this.srInterval = const Value.absent(),
-    this.repetitions = const Value.absent(),
-    this.nextDueAt = const Value.absent(),
-    this.easeFactor = const Value.absent(),
-    this.lastQuality = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.parentCategory = const Value.absent(),
     this.sourceType = const Value.absent(),
@@ -3753,7 +3448,7 @@ class QuizTableCompanion extends UpdateCompanion<QuizQuestionEntity> {
        correctOption = Value(correctOption),
        explanation = Value(explanation),
        category = Value(category);
-  static Insertable<QuizQuestionEntity> custom({
+  static Insertable<QuizContentEntity> custom({
     Expression<int>? id,
     Expression<String>? remoteId,
     Expression<String>? articleId,
@@ -3767,13 +3462,6 @@ class QuizTableCompanion extends UpdateCompanion<QuizQuestionEntity> {
     Expression<String>? category,
     Expression<String>? difficulty,
     Expression<String>? testedField,
-    Expression<int>? wrongCount,
-    Expression<DateTime>? lastAttemptedAt,
-    Expression<int>? srInterval,
-    Expression<int>? repetitions,
-    Expression<DateTime>? nextDueAt,
-    Expression<double>? easeFactor,
-    Expression<int>? lastQuality,
     Expression<DateTime>? updatedAt,
     Expression<String>? parentCategory,
     Expression<String>? sourceType,
@@ -3795,13 +3483,6 @@ class QuizTableCompanion extends UpdateCompanion<QuizQuestionEntity> {
       if (category != null) 'category': category,
       if (difficulty != null) 'difficulty': difficulty,
       if (testedField != null) 'tested_field': testedField,
-      if (wrongCount != null) 'wrong_count': wrongCount,
-      if (lastAttemptedAt != null) 'last_attempted_at': lastAttemptedAt,
-      if (srInterval != null) 'sr_interval': srInterval,
-      if (repetitions != null) 'repetitions': repetitions,
-      if (nextDueAt != null) 'next_due_at': nextDueAt,
-      if (easeFactor != null) 'ease_factor': easeFactor,
-      if (lastQuality != null) 'last_quality': lastQuality,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (parentCategory != null) 'parent_category': parentCategory,
       if (sourceType != null) 'source_type': sourceType,
@@ -3811,7 +3492,7 @@ class QuizTableCompanion extends UpdateCompanion<QuizQuestionEntity> {
     });
   }
 
-  QuizTableCompanion copyWith({
+  QuizContentCompanion copyWith({
     Value<int>? id,
     Value<String>? remoteId,
     Value<String>? articleId,
@@ -3825,13 +3506,6 @@ class QuizTableCompanion extends UpdateCompanion<QuizQuestionEntity> {
     Value<String>? category,
     Value<String>? difficulty,
     Value<String>? testedField,
-    Value<int>? wrongCount,
-    Value<DateTime?>? lastAttemptedAt,
-    Value<int?>? srInterval,
-    Value<int?>? repetitions,
-    Value<DateTime?>? nextDueAt,
-    Value<double>? easeFactor,
-    Value<int?>? lastQuality,
     Value<DateTime?>? updatedAt,
     Value<String?>? parentCategory,
     Value<String?>? sourceType,
@@ -3839,7 +3513,7 @@ class QuizTableCompanion extends UpdateCompanion<QuizQuestionEntity> {
     Value<String?>? examSource,
     Value<String?>? attendingTip,
   }) {
-    return QuizTableCompanion(
+    return QuizContentCompanion(
       id: id ?? this.id,
       remoteId: remoteId ?? this.remoteId,
       articleId: articleId ?? this.articleId,
@@ -3853,13 +3527,6 @@ class QuizTableCompanion extends UpdateCompanion<QuizQuestionEntity> {
       category: category ?? this.category,
       difficulty: difficulty ?? this.difficulty,
       testedField: testedField ?? this.testedField,
-      wrongCount: wrongCount ?? this.wrongCount,
-      lastAttemptedAt: lastAttemptedAt ?? this.lastAttemptedAt,
-      srInterval: srInterval ?? this.srInterval,
-      repetitions: repetitions ?? this.repetitions,
-      nextDueAt: nextDueAt ?? this.nextDueAt,
-      easeFactor: easeFactor ?? this.easeFactor,
-      lastQuality: lastQuality ?? this.lastQuality,
       updatedAt: updatedAt ?? this.updatedAt,
       parentCategory: parentCategory ?? this.parentCategory,
       sourceType: sourceType ?? this.sourceType,
@@ -3911,27 +3578,6 @@ class QuizTableCompanion extends UpdateCompanion<QuizQuestionEntity> {
     if (testedField.present) {
       map['tested_field'] = Variable<String>(testedField.value);
     }
-    if (wrongCount.present) {
-      map['wrong_count'] = Variable<int>(wrongCount.value);
-    }
-    if (lastAttemptedAt.present) {
-      map['last_attempted_at'] = Variable<DateTime>(lastAttemptedAt.value);
-    }
-    if (srInterval.present) {
-      map['sr_interval'] = Variable<int>(srInterval.value);
-    }
-    if (repetitions.present) {
-      map['repetitions'] = Variable<int>(repetitions.value);
-    }
-    if (nextDueAt.present) {
-      map['next_due_at'] = Variable<DateTime>(nextDueAt.value);
-    }
-    if (easeFactor.present) {
-      map['ease_factor'] = Variable<double>(easeFactor.value);
-    }
-    if (lastQuality.present) {
-      map['last_quality'] = Variable<int>(lastQuality.value);
-    }
     if (updatedAt.present) {
       map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
@@ -3955,7 +3601,7 @@ class QuizTableCompanion extends UpdateCompanion<QuizQuestionEntity> {
 
   @override
   String toString() {
-    return (StringBuffer('QuizTableCompanion(')
+    return (StringBuffer('QuizContentCompanion(')
           ..write('id: $id, ')
           ..write('remoteId: $remoteId, ')
           ..write('articleId: $articleId, ')
@@ -3969,13 +3615,6 @@ class QuizTableCompanion extends UpdateCompanion<QuizQuestionEntity> {
           ..write('category: $category, ')
           ..write('difficulty: $difficulty, ')
           ..write('testedField: $testedField, ')
-          ..write('wrongCount: $wrongCount, ')
-          ..write('lastAttemptedAt: $lastAttemptedAt, ')
-          ..write('srInterval: $srInterval, ')
-          ..write('repetitions: $repetitions, ')
-          ..write('nextDueAt: $nextDueAt, ')
-          ..write('easeFactor: $easeFactor, ')
-          ..write('lastQuality: $lastQuality, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('parentCategory: $parentCategory, ')
           ..write('sourceType: $sourceType, ')
@@ -3987,12 +3626,549 @@ class QuizTableCompanion extends UpdateCompanion<QuizQuestionEntity> {
   }
 }
 
-class $FlashcardTableTable extends FlashcardTable
-    with TableInfo<$FlashcardTableTable, FlashcardEntity> {
+class $QuizProgressTable extends QuizProgress
+    with TableInfo<$QuizProgressTable, QuizProgressEntity> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $FlashcardTableTable(this.attachedDatabase, [this._alias]);
+  $QuizProgressTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _contentIdMeta = const VerificationMeta(
+    'contentId',
+  );
+  @override
+  late final GeneratedColumn<int> contentId = GeneratedColumn<int>(
+    'content_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES quiz_content (id)',
+    ),
+  );
+  static const VerificationMeta _easeFactorMeta = const VerificationMeta(
+    'easeFactor',
+  );
+  @override
+  late final GeneratedColumn<double> easeFactor = GeneratedColumn<double>(
+    'ease_factor',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(2.5),
+  );
+  static const VerificationMeta _srIntervalMeta = const VerificationMeta(
+    'srInterval',
+  );
+  @override
+  late final GeneratedColumn<int> srInterval = GeneratedColumn<int>(
+    'sr_interval',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _repetitionsMeta = const VerificationMeta(
+    'repetitions',
+  );
+  @override
+  late final GeneratedColumn<int> repetitions = GeneratedColumn<int>(
+    'repetitions',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _nextDueAtMeta = const VerificationMeta(
+    'nextDueAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> nextDueAt = GeneratedColumn<DateTime>(
+    'next_due_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _lastQualityMeta = const VerificationMeta(
+    'lastQuality',
+  );
+  @override
+  late final GeneratedColumn<int> lastQuality = GeneratedColumn<int>(
+    'last_quality',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _wrongCountMeta = const VerificationMeta(
+    'wrongCount',
+  );
+  @override
+  late final GeneratedColumn<int> wrongCount = GeneratedColumn<int>(
+    'wrong_count',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _lastAttemptedAtMeta = const VerificationMeta(
+    'lastAttemptedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> lastAttemptedAt =
+      GeneratedColumn<DateTime>(
+        'last_attempted_at',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
+  @override
+  List<GeneratedColumn> get $columns => [
+    contentId,
+    easeFactor,
+    srInterval,
+    repetitions,
+    nextDueAt,
+    lastQuality,
+    wrongCount,
+    lastAttemptedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'quiz_progress';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<QuizProgressEntity> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('content_id')) {
+      context.handle(
+        _contentIdMeta,
+        contentId.isAcceptableOrUnknown(data['content_id']!, _contentIdMeta),
+      );
+    }
+    if (data.containsKey('ease_factor')) {
+      context.handle(
+        _easeFactorMeta,
+        easeFactor.isAcceptableOrUnknown(data['ease_factor']!, _easeFactorMeta),
+      );
+    }
+    if (data.containsKey('sr_interval')) {
+      context.handle(
+        _srIntervalMeta,
+        srInterval.isAcceptableOrUnknown(data['sr_interval']!, _srIntervalMeta),
+      );
+    }
+    if (data.containsKey('repetitions')) {
+      context.handle(
+        _repetitionsMeta,
+        repetitions.isAcceptableOrUnknown(
+          data['repetitions']!,
+          _repetitionsMeta,
+        ),
+      );
+    }
+    if (data.containsKey('next_due_at')) {
+      context.handle(
+        _nextDueAtMeta,
+        nextDueAt.isAcceptableOrUnknown(data['next_due_at']!, _nextDueAtMeta),
+      );
+    }
+    if (data.containsKey('last_quality')) {
+      context.handle(
+        _lastQualityMeta,
+        lastQuality.isAcceptableOrUnknown(
+          data['last_quality']!,
+          _lastQualityMeta,
+        ),
+      );
+    }
+    if (data.containsKey('wrong_count')) {
+      context.handle(
+        _wrongCountMeta,
+        wrongCount.isAcceptableOrUnknown(data['wrong_count']!, _wrongCountMeta),
+      );
+    }
+    if (data.containsKey('last_attempted_at')) {
+      context.handle(
+        _lastAttemptedAtMeta,
+        lastAttemptedAt.isAcceptableOrUnknown(
+          data['last_attempted_at']!,
+          _lastAttemptedAtMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {contentId};
+  @override
+  QuizProgressEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return QuizProgressEntity(
+      contentId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}content_id'],
+      )!,
+      easeFactor: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}ease_factor'],
+      )!,
+      srInterval: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}sr_interval'],
+      ),
+      repetitions: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}repetitions'],
+      ),
+      nextDueAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}next_due_at'],
+      ),
+      lastQuality: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}last_quality'],
+      ),
+      wrongCount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}wrong_count'],
+      )!,
+      lastAttemptedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}last_attempted_at'],
+      ),
+    );
+  }
+
+  @override
+  $QuizProgressTable createAlias(String alias) {
+    return $QuizProgressTable(attachedDatabase, alias);
+  }
+}
+
+class QuizProgressEntity extends DataClass
+    implements Insertable<QuizProgressEntity> {
+  final int contentId;
+  final double easeFactor;
+  final int? srInterval;
+  final int? repetitions;
+  final DateTime? nextDueAt;
+  final int? lastQuality;
+
+  /// Wrong-answer tally (user progress, preserved across content re-sync).
+  final int wrongCount;
+
+  /// Last time the user attempted this question (user progress).
+  final DateTime? lastAttemptedAt;
+  const QuizProgressEntity({
+    required this.contentId,
+    required this.easeFactor,
+    this.srInterval,
+    this.repetitions,
+    this.nextDueAt,
+    this.lastQuality,
+    required this.wrongCount,
+    this.lastAttemptedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['content_id'] = Variable<int>(contentId);
+    map['ease_factor'] = Variable<double>(easeFactor);
+    if (!nullToAbsent || srInterval != null) {
+      map['sr_interval'] = Variable<int>(srInterval);
+    }
+    if (!nullToAbsent || repetitions != null) {
+      map['repetitions'] = Variable<int>(repetitions);
+    }
+    if (!nullToAbsent || nextDueAt != null) {
+      map['next_due_at'] = Variable<DateTime>(nextDueAt);
+    }
+    if (!nullToAbsent || lastQuality != null) {
+      map['last_quality'] = Variable<int>(lastQuality);
+    }
+    map['wrong_count'] = Variable<int>(wrongCount);
+    if (!nullToAbsent || lastAttemptedAt != null) {
+      map['last_attempted_at'] = Variable<DateTime>(lastAttemptedAt);
+    }
+    return map;
+  }
+
+  QuizProgressCompanion toCompanion(bool nullToAbsent) {
+    return QuizProgressCompanion(
+      contentId: Value(contentId),
+      easeFactor: Value(easeFactor),
+      srInterval: srInterval == null && nullToAbsent
+          ? const Value.absent()
+          : Value(srInterval),
+      repetitions: repetitions == null && nullToAbsent
+          ? const Value.absent()
+          : Value(repetitions),
+      nextDueAt: nextDueAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(nextDueAt),
+      lastQuality: lastQuality == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastQuality),
+      wrongCount: Value(wrongCount),
+      lastAttemptedAt: lastAttemptedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastAttemptedAt),
+    );
+  }
+
+  factory QuizProgressEntity.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return QuizProgressEntity(
+      contentId: serializer.fromJson<int>(json['contentId']),
+      easeFactor: serializer.fromJson<double>(json['easeFactor']),
+      srInterval: serializer.fromJson<int?>(json['srInterval']),
+      repetitions: serializer.fromJson<int?>(json['repetitions']),
+      nextDueAt: serializer.fromJson<DateTime?>(json['nextDueAt']),
+      lastQuality: serializer.fromJson<int?>(json['lastQuality']),
+      wrongCount: serializer.fromJson<int>(json['wrongCount']),
+      lastAttemptedAt: serializer.fromJson<DateTime?>(json['lastAttemptedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'contentId': serializer.toJson<int>(contentId),
+      'easeFactor': serializer.toJson<double>(easeFactor),
+      'srInterval': serializer.toJson<int?>(srInterval),
+      'repetitions': serializer.toJson<int?>(repetitions),
+      'nextDueAt': serializer.toJson<DateTime?>(nextDueAt),
+      'lastQuality': serializer.toJson<int?>(lastQuality),
+      'wrongCount': serializer.toJson<int>(wrongCount),
+      'lastAttemptedAt': serializer.toJson<DateTime?>(lastAttemptedAt),
+    };
+  }
+
+  QuizProgressEntity copyWith({
+    int? contentId,
+    double? easeFactor,
+    Value<int?> srInterval = const Value.absent(),
+    Value<int?> repetitions = const Value.absent(),
+    Value<DateTime?> nextDueAt = const Value.absent(),
+    Value<int?> lastQuality = const Value.absent(),
+    int? wrongCount,
+    Value<DateTime?> lastAttemptedAt = const Value.absent(),
+  }) => QuizProgressEntity(
+    contentId: contentId ?? this.contentId,
+    easeFactor: easeFactor ?? this.easeFactor,
+    srInterval: srInterval.present ? srInterval.value : this.srInterval,
+    repetitions: repetitions.present ? repetitions.value : this.repetitions,
+    nextDueAt: nextDueAt.present ? nextDueAt.value : this.nextDueAt,
+    lastQuality: lastQuality.present ? lastQuality.value : this.lastQuality,
+    wrongCount: wrongCount ?? this.wrongCount,
+    lastAttemptedAt: lastAttemptedAt.present
+        ? lastAttemptedAt.value
+        : this.lastAttemptedAt,
+  );
+  QuizProgressEntity copyWithCompanion(QuizProgressCompanion data) {
+    return QuizProgressEntity(
+      contentId: data.contentId.present ? data.contentId.value : this.contentId,
+      easeFactor: data.easeFactor.present
+          ? data.easeFactor.value
+          : this.easeFactor,
+      srInterval: data.srInterval.present
+          ? data.srInterval.value
+          : this.srInterval,
+      repetitions: data.repetitions.present
+          ? data.repetitions.value
+          : this.repetitions,
+      nextDueAt: data.nextDueAt.present ? data.nextDueAt.value : this.nextDueAt,
+      lastQuality: data.lastQuality.present
+          ? data.lastQuality.value
+          : this.lastQuality,
+      wrongCount: data.wrongCount.present
+          ? data.wrongCount.value
+          : this.wrongCount,
+      lastAttemptedAt: data.lastAttemptedAt.present
+          ? data.lastAttemptedAt.value
+          : this.lastAttemptedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('QuizProgressEntity(')
+          ..write('contentId: $contentId, ')
+          ..write('easeFactor: $easeFactor, ')
+          ..write('srInterval: $srInterval, ')
+          ..write('repetitions: $repetitions, ')
+          ..write('nextDueAt: $nextDueAt, ')
+          ..write('lastQuality: $lastQuality, ')
+          ..write('wrongCount: $wrongCount, ')
+          ..write('lastAttemptedAt: $lastAttemptedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    contentId,
+    easeFactor,
+    srInterval,
+    repetitions,
+    nextDueAt,
+    lastQuality,
+    wrongCount,
+    lastAttemptedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is QuizProgressEntity &&
+          other.contentId == this.contentId &&
+          other.easeFactor == this.easeFactor &&
+          other.srInterval == this.srInterval &&
+          other.repetitions == this.repetitions &&
+          other.nextDueAt == this.nextDueAt &&
+          other.lastQuality == this.lastQuality &&
+          other.wrongCount == this.wrongCount &&
+          other.lastAttemptedAt == this.lastAttemptedAt);
+}
+
+class QuizProgressCompanion extends UpdateCompanion<QuizProgressEntity> {
+  final Value<int> contentId;
+  final Value<double> easeFactor;
+  final Value<int?> srInterval;
+  final Value<int?> repetitions;
+  final Value<DateTime?> nextDueAt;
+  final Value<int?> lastQuality;
+  final Value<int> wrongCount;
+  final Value<DateTime?> lastAttemptedAt;
+  const QuizProgressCompanion({
+    this.contentId = const Value.absent(),
+    this.easeFactor = const Value.absent(),
+    this.srInterval = const Value.absent(),
+    this.repetitions = const Value.absent(),
+    this.nextDueAt = const Value.absent(),
+    this.lastQuality = const Value.absent(),
+    this.wrongCount = const Value.absent(),
+    this.lastAttemptedAt = const Value.absent(),
+  });
+  QuizProgressCompanion.insert({
+    this.contentId = const Value.absent(),
+    this.easeFactor = const Value.absent(),
+    this.srInterval = const Value.absent(),
+    this.repetitions = const Value.absent(),
+    this.nextDueAt = const Value.absent(),
+    this.lastQuality = const Value.absent(),
+    this.wrongCount = const Value.absent(),
+    this.lastAttemptedAt = const Value.absent(),
+  });
+  static Insertable<QuizProgressEntity> custom({
+    Expression<int>? contentId,
+    Expression<double>? easeFactor,
+    Expression<int>? srInterval,
+    Expression<int>? repetitions,
+    Expression<DateTime>? nextDueAt,
+    Expression<int>? lastQuality,
+    Expression<int>? wrongCount,
+    Expression<DateTime>? lastAttemptedAt,
+  }) {
+    return RawValuesInsertable({
+      if (contentId != null) 'content_id': contentId,
+      if (easeFactor != null) 'ease_factor': easeFactor,
+      if (srInterval != null) 'sr_interval': srInterval,
+      if (repetitions != null) 'repetitions': repetitions,
+      if (nextDueAt != null) 'next_due_at': nextDueAt,
+      if (lastQuality != null) 'last_quality': lastQuality,
+      if (wrongCount != null) 'wrong_count': wrongCount,
+      if (lastAttemptedAt != null) 'last_attempted_at': lastAttemptedAt,
+    });
+  }
+
+  QuizProgressCompanion copyWith({
+    Value<int>? contentId,
+    Value<double>? easeFactor,
+    Value<int?>? srInterval,
+    Value<int?>? repetitions,
+    Value<DateTime?>? nextDueAt,
+    Value<int?>? lastQuality,
+    Value<int>? wrongCount,
+    Value<DateTime?>? lastAttemptedAt,
+  }) {
+    return QuizProgressCompanion(
+      contentId: contentId ?? this.contentId,
+      easeFactor: easeFactor ?? this.easeFactor,
+      srInterval: srInterval ?? this.srInterval,
+      repetitions: repetitions ?? this.repetitions,
+      nextDueAt: nextDueAt ?? this.nextDueAt,
+      lastQuality: lastQuality ?? this.lastQuality,
+      wrongCount: wrongCount ?? this.wrongCount,
+      lastAttemptedAt: lastAttemptedAt ?? this.lastAttemptedAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (contentId.present) {
+      map['content_id'] = Variable<int>(contentId.value);
+    }
+    if (easeFactor.present) {
+      map['ease_factor'] = Variable<double>(easeFactor.value);
+    }
+    if (srInterval.present) {
+      map['sr_interval'] = Variable<int>(srInterval.value);
+    }
+    if (repetitions.present) {
+      map['repetitions'] = Variable<int>(repetitions.value);
+    }
+    if (nextDueAt.present) {
+      map['next_due_at'] = Variable<DateTime>(nextDueAt.value);
+    }
+    if (lastQuality.present) {
+      map['last_quality'] = Variable<int>(lastQuality.value);
+    }
+    if (wrongCount.present) {
+      map['wrong_count'] = Variable<int>(wrongCount.value);
+    }
+    if (lastAttemptedAt.present) {
+      map['last_attempted_at'] = Variable<DateTime>(lastAttemptedAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('QuizProgressCompanion(')
+          ..write('contentId: $contentId, ')
+          ..write('easeFactor: $easeFactor, ')
+          ..write('srInterval: $srInterval, ')
+          ..write('repetitions: $repetitions, ')
+          ..write('nextDueAt: $nextDueAt, ')
+          ..write('lastQuality: $lastQuality, ')
+          ..write('wrongCount: $wrongCount, ')
+          ..write('lastAttemptedAt: $lastAttemptedAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $FlashcardContentTable extends FlashcardContent
+    with TableInfo<$FlashcardContentTable, FlashcardContentEntity> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $FlashcardContentTable(this.attachedDatabase, [this._alias]);
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<int> id = GeneratedColumn<int>(
@@ -4062,62 +4238,6 @@ class $FlashcardTableTable extends FlashcardTable
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
-  static const VerificationMeta _easeFactorMeta = const VerificationMeta(
-    'easeFactor',
-  );
-  @override
-  late final GeneratedColumn<double> easeFactor = GeneratedColumn<double>(
-    'ease_factor',
-    aliasedName,
-    false,
-    type: DriftSqlType.double,
-    requiredDuringInsert: false,
-    defaultValue: const Constant(2.5),
-  );
-  static const VerificationMeta _intervalMeta = const VerificationMeta(
-    'interval',
-  );
-  @override
-  late final GeneratedColumn<int> interval = GeneratedColumn<int>(
-    'interval',
-    aliasedName,
-    true,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _repetitionsMeta = const VerificationMeta(
-    'repetitions',
-  );
-  @override
-  late final GeneratedColumn<int> repetitions = GeneratedColumn<int>(
-    'repetitions',
-    aliasedName,
-    true,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _nextDueAtMeta = const VerificationMeta(
-    'nextDueAt',
-  );
-  @override
-  late final GeneratedColumn<DateTime> nextDueAt = GeneratedColumn<DateTime>(
-    'next_due_at',
-    aliasedName,
-    true,
-    type: DriftSqlType.dateTime,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _lastQualityMeta = const VerificationMeta(
-    'lastQuality',
-  );
-  @override
-  late final GeneratedColumn<int> lastQuality = GeneratedColumn<int>(
-    'last_quality',
-    aliasedName,
-    true,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -4180,11 +4300,6 @@ class $FlashcardTableTable extends FlashcardTable
     frontText,
     backText,
     sourceArticleId,
-    easeFactor,
-    interval,
-    repetitions,
-    nextDueAt,
-    lastQuality,
     createdAt,
     updatedAt,
     parentCategory,
@@ -4195,10 +4310,10 @@ class $FlashcardTableTable extends FlashcardTable
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
-  static const String $name = 'flashcard_table';
+  static const String $name = 'flashcard_content';
   @override
   VerificationContext validateIntegrity(
-    Insertable<FlashcardEntity> instance, {
+    Insertable<FlashcardContentEntity> instance, {
     bool isInserting = false,
   }) {
     final context = VerificationContext();
@@ -4245,42 +4360,6 @@ class $FlashcardTableTable extends FlashcardTable
         ),
       );
     }
-    if (data.containsKey('ease_factor')) {
-      context.handle(
-        _easeFactorMeta,
-        easeFactor.isAcceptableOrUnknown(data['ease_factor']!, _easeFactorMeta),
-      );
-    }
-    if (data.containsKey('interval')) {
-      context.handle(
-        _intervalMeta,
-        interval.isAcceptableOrUnknown(data['interval']!, _intervalMeta),
-      );
-    }
-    if (data.containsKey('repetitions')) {
-      context.handle(
-        _repetitionsMeta,
-        repetitions.isAcceptableOrUnknown(
-          data['repetitions']!,
-          _repetitionsMeta,
-        ),
-      );
-    }
-    if (data.containsKey('next_due_at')) {
-      context.handle(
-        _nextDueAtMeta,
-        nextDueAt.isAcceptableOrUnknown(data['next_due_at']!, _nextDueAtMeta),
-      );
-    }
-    if (data.containsKey('last_quality')) {
-      context.handle(
-        _lastQualityMeta,
-        lastQuality.isAcceptableOrUnknown(
-          data['last_quality']!,
-          _lastQualityMeta,
-        ),
-      );
-    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -4320,9 +4399,9 @@ class $FlashcardTableTable extends FlashcardTable
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  FlashcardEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
+  FlashcardContentEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return FlashcardEntity(
+    return FlashcardContentEntity(
       id: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}id'],
@@ -4346,26 +4425,6 @@ class $FlashcardTableTable extends FlashcardTable
       sourceArticleId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}source_article_id'],
-      ),
-      easeFactor: attachedDatabase.typeMapping.read(
-        DriftSqlType.double,
-        data['${effectivePrefix}ease_factor'],
-      )!,
-      interval: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}interval'],
-      ),
-      repetitions: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}repetitions'],
-      ),
-      nextDueAt: attachedDatabase.typeMapping.read(
-        DriftSqlType.dateTime,
-        data['${effectivePrefix}next_due_at'],
-      ),
-      lastQuality: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}last_quality'],
       ),
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
@@ -4391,23 +4450,19 @@ class $FlashcardTableTable extends FlashcardTable
   }
 
   @override
-  $FlashcardTableTable createAlias(String alias) {
-    return $FlashcardTableTable(attachedDatabase, alias);
+  $FlashcardContentTable createAlias(String alias) {
+    return $FlashcardContentTable(attachedDatabase, alias);
   }
 }
 
-class FlashcardEntity extends DataClass implements Insertable<FlashcardEntity> {
+class FlashcardContentEntity extends DataClass
+    implements Insertable<FlashcardContentEntity> {
   final int id;
   final int? remoteId;
   final String deckName;
   final String frontText;
   final String backText;
   final String? sourceArticleId;
-  final double easeFactor;
-  final int? interval;
-  final int? repetitions;
-  final DateTime? nextDueAt;
-  final int? lastQuality;
   final DateTime createdAt;
 
   /// Mirror of Supabase `updated_at` used for incremental sync.
@@ -4417,25 +4472,17 @@ class FlashcardEntity extends DataClass implements Insertable<FlashcardEntity> {
   final String? parentCategory;
 
   /// High-level track classification: 'clinical' | 'preclinical'.
-  /// Nullable until content is categorized.
   final String? track;
 
-  /// Top-level category matching an AppConfig category string
-  /// (e.g. 'Internal Medicine', 'Pharmacology'). Nullable until content
-  /// is categorized.
+  /// Top-level category matching an AppConfig category string.
   final String? category;
-  const FlashcardEntity({
+  const FlashcardContentEntity({
     required this.id,
     this.remoteId,
     required this.deckName,
     required this.frontText,
     required this.backText,
     this.sourceArticleId,
-    required this.easeFactor,
-    this.interval,
-    this.repetitions,
-    this.nextDueAt,
-    this.lastQuality,
     required this.createdAt,
     this.updatedAt,
     this.parentCategory,
@@ -4455,19 +4502,6 @@ class FlashcardEntity extends DataClass implements Insertable<FlashcardEntity> {
     if (!nullToAbsent || sourceArticleId != null) {
       map['source_article_id'] = Variable<String>(sourceArticleId);
     }
-    map['ease_factor'] = Variable<double>(easeFactor);
-    if (!nullToAbsent || interval != null) {
-      map['interval'] = Variable<int>(interval);
-    }
-    if (!nullToAbsent || repetitions != null) {
-      map['repetitions'] = Variable<int>(repetitions);
-    }
-    if (!nullToAbsent || nextDueAt != null) {
-      map['next_due_at'] = Variable<DateTime>(nextDueAt);
-    }
-    if (!nullToAbsent || lastQuality != null) {
-      map['last_quality'] = Variable<int>(lastQuality);
-    }
     map['created_at'] = Variable<DateTime>(createdAt);
     if (!nullToAbsent || updatedAt != null) {
       map['updated_at'] = Variable<DateTime>(updatedAt);
@@ -4484,8 +4518,8 @@ class FlashcardEntity extends DataClass implements Insertable<FlashcardEntity> {
     return map;
   }
 
-  FlashcardTableCompanion toCompanion(bool nullToAbsent) {
-    return FlashcardTableCompanion(
+  FlashcardContentCompanion toCompanion(bool nullToAbsent) {
+    return FlashcardContentCompanion(
       id: Value(id),
       remoteId: remoteId == null && nullToAbsent
           ? const Value.absent()
@@ -4496,19 +4530,6 @@ class FlashcardEntity extends DataClass implements Insertable<FlashcardEntity> {
       sourceArticleId: sourceArticleId == null && nullToAbsent
           ? const Value.absent()
           : Value(sourceArticleId),
-      easeFactor: Value(easeFactor),
-      interval: interval == null && nullToAbsent
-          ? const Value.absent()
-          : Value(interval),
-      repetitions: repetitions == null && nullToAbsent
-          ? const Value.absent()
-          : Value(repetitions),
-      nextDueAt: nextDueAt == null && nullToAbsent
-          ? const Value.absent()
-          : Value(nextDueAt),
-      lastQuality: lastQuality == null && nullToAbsent
-          ? const Value.absent()
-          : Value(lastQuality),
       createdAt: Value(createdAt),
       updatedAt: updatedAt == null && nullToAbsent
           ? const Value.absent()
@@ -4525,23 +4546,18 @@ class FlashcardEntity extends DataClass implements Insertable<FlashcardEntity> {
     );
   }
 
-  factory FlashcardEntity.fromJson(
+  factory FlashcardContentEntity.fromJson(
     Map<String, dynamic> json, {
     ValueSerializer? serializer,
   }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return FlashcardEntity(
+    return FlashcardContentEntity(
       id: serializer.fromJson<int>(json['id']),
       remoteId: serializer.fromJson<int?>(json['remoteId']),
       deckName: serializer.fromJson<String>(json['deckName']),
       frontText: serializer.fromJson<String>(json['frontText']),
       backText: serializer.fromJson<String>(json['backText']),
       sourceArticleId: serializer.fromJson<String?>(json['sourceArticleId']),
-      easeFactor: serializer.fromJson<double>(json['easeFactor']),
-      interval: serializer.fromJson<int?>(json['interval']),
-      repetitions: serializer.fromJson<int?>(json['repetitions']),
-      nextDueAt: serializer.fromJson<DateTime?>(json['nextDueAt']),
-      lastQuality: serializer.fromJson<int?>(json['lastQuality']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime?>(json['updatedAt']),
       parentCategory: serializer.fromJson<String?>(json['parentCategory']),
@@ -4559,11 +4575,6 @@ class FlashcardEntity extends DataClass implements Insertable<FlashcardEntity> {
       'frontText': serializer.toJson<String>(frontText),
       'backText': serializer.toJson<String>(backText),
       'sourceArticleId': serializer.toJson<String?>(sourceArticleId),
-      'easeFactor': serializer.toJson<double>(easeFactor),
-      'interval': serializer.toJson<int?>(interval),
-      'repetitions': serializer.toJson<int?>(repetitions),
-      'nextDueAt': serializer.toJson<DateTime?>(nextDueAt),
-      'lastQuality': serializer.toJson<int?>(lastQuality),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime?>(updatedAt),
       'parentCategory': serializer.toJson<String?>(parentCategory),
@@ -4572,24 +4583,19 @@ class FlashcardEntity extends DataClass implements Insertable<FlashcardEntity> {
     };
   }
 
-  FlashcardEntity copyWith({
+  FlashcardContentEntity copyWith({
     int? id,
     Value<int?> remoteId = const Value.absent(),
     String? deckName,
     String? frontText,
     String? backText,
     Value<String?> sourceArticleId = const Value.absent(),
-    double? easeFactor,
-    Value<int?> interval = const Value.absent(),
-    Value<int?> repetitions = const Value.absent(),
-    Value<DateTime?> nextDueAt = const Value.absent(),
-    Value<int?> lastQuality = const Value.absent(),
     DateTime? createdAt,
     Value<DateTime?> updatedAt = const Value.absent(),
     Value<String?> parentCategory = const Value.absent(),
     Value<String?> track = const Value.absent(),
     Value<String?> category = const Value.absent(),
-  }) => FlashcardEntity(
+  }) => FlashcardContentEntity(
     id: id ?? this.id,
     remoteId: remoteId.present ? remoteId.value : this.remoteId,
     deckName: deckName ?? this.deckName,
@@ -4598,11 +4604,6 @@ class FlashcardEntity extends DataClass implements Insertable<FlashcardEntity> {
     sourceArticleId: sourceArticleId.present
         ? sourceArticleId.value
         : this.sourceArticleId,
-    easeFactor: easeFactor ?? this.easeFactor,
-    interval: interval.present ? interval.value : this.interval,
-    repetitions: repetitions.present ? repetitions.value : this.repetitions,
-    nextDueAt: nextDueAt.present ? nextDueAt.value : this.nextDueAt,
-    lastQuality: lastQuality.present ? lastQuality.value : this.lastQuality,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
     parentCategory: parentCategory.present
@@ -4611,8 +4612,8 @@ class FlashcardEntity extends DataClass implements Insertable<FlashcardEntity> {
     track: track.present ? track.value : this.track,
     category: category.present ? category.value : this.category,
   );
-  FlashcardEntity copyWithCompanion(FlashcardTableCompanion data) {
-    return FlashcardEntity(
+  FlashcardContentEntity copyWithCompanion(FlashcardContentCompanion data) {
+    return FlashcardContentEntity(
       id: data.id.present ? data.id.value : this.id,
       remoteId: data.remoteId.present ? data.remoteId.value : this.remoteId,
       deckName: data.deckName.present ? data.deckName.value : this.deckName,
@@ -4621,17 +4622,6 @@ class FlashcardEntity extends DataClass implements Insertable<FlashcardEntity> {
       sourceArticleId: data.sourceArticleId.present
           ? data.sourceArticleId.value
           : this.sourceArticleId,
-      easeFactor: data.easeFactor.present
-          ? data.easeFactor.value
-          : this.easeFactor,
-      interval: data.interval.present ? data.interval.value : this.interval,
-      repetitions: data.repetitions.present
-          ? data.repetitions.value
-          : this.repetitions,
-      nextDueAt: data.nextDueAt.present ? data.nextDueAt.value : this.nextDueAt,
-      lastQuality: data.lastQuality.present
-          ? data.lastQuality.value
-          : this.lastQuality,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       parentCategory: data.parentCategory.present
@@ -4644,18 +4634,13 @@ class FlashcardEntity extends DataClass implements Insertable<FlashcardEntity> {
 
   @override
   String toString() {
-    return (StringBuffer('FlashcardEntity(')
+    return (StringBuffer('FlashcardContentEntity(')
           ..write('id: $id, ')
           ..write('remoteId: $remoteId, ')
           ..write('deckName: $deckName, ')
           ..write('frontText: $frontText, ')
           ..write('backText: $backText, ')
           ..write('sourceArticleId: $sourceArticleId, ')
-          ..write('easeFactor: $easeFactor, ')
-          ..write('interval: $interval, ')
-          ..write('repetitions: $repetitions, ')
-          ..write('nextDueAt: $nextDueAt, ')
-          ..write('lastQuality: $lastQuality, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('parentCategory: $parentCategory, ')
@@ -4673,11 +4658,6 @@ class FlashcardEntity extends DataClass implements Insertable<FlashcardEntity> {
     frontText,
     backText,
     sourceArticleId,
-    easeFactor,
-    interval,
-    repetitions,
-    nextDueAt,
-    lastQuality,
     createdAt,
     updatedAt,
     parentCategory,
@@ -4687,18 +4667,13 @@ class FlashcardEntity extends DataClass implements Insertable<FlashcardEntity> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is FlashcardEntity &&
+      (other is FlashcardContentEntity &&
           other.id == this.id &&
           other.remoteId == this.remoteId &&
           other.deckName == this.deckName &&
           other.frontText == this.frontText &&
           other.backText == this.backText &&
           other.sourceArticleId == this.sourceArticleId &&
-          other.easeFactor == this.easeFactor &&
-          other.interval == this.interval &&
-          other.repetitions == this.repetitions &&
-          other.nextDueAt == this.nextDueAt &&
-          other.lastQuality == this.lastQuality &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
           other.parentCategory == this.parentCategory &&
@@ -4706,53 +4681,39 @@ class FlashcardEntity extends DataClass implements Insertable<FlashcardEntity> {
           other.category == this.category);
 }
 
-class FlashcardTableCompanion extends UpdateCompanion<FlashcardEntity> {
+class FlashcardContentCompanion
+    extends UpdateCompanion<FlashcardContentEntity> {
   final Value<int> id;
   final Value<int?> remoteId;
   final Value<String> deckName;
   final Value<String> frontText;
   final Value<String> backText;
   final Value<String?> sourceArticleId;
-  final Value<double> easeFactor;
-  final Value<int?> interval;
-  final Value<int?> repetitions;
-  final Value<DateTime?> nextDueAt;
-  final Value<int?> lastQuality;
   final Value<DateTime> createdAt;
   final Value<DateTime?> updatedAt;
   final Value<String?> parentCategory;
   final Value<String?> track;
   final Value<String?> category;
-  const FlashcardTableCompanion({
+  const FlashcardContentCompanion({
     this.id = const Value.absent(),
     this.remoteId = const Value.absent(),
     this.deckName = const Value.absent(),
     this.frontText = const Value.absent(),
     this.backText = const Value.absent(),
     this.sourceArticleId = const Value.absent(),
-    this.easeFactor = const Value.absent(),
-    this.interval = const Value.absent(),
-    this.repetitions = const Value.absent(),
-    this.nextDueAt = const Value.absent(),
-    this.lastQuality = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.parentCategory = const Value.absent(),
     this.track = const Value.absent(),
     this.category = const Value.absent(),
   });
-  FlashcardTableCompanion.insert({
+  FlashcardContentCompanion.insert({
     this.id = const Value.absent(),
     this.remoteId = const Value.absent(),
     required String deckName,
     required String frontText,
     required String backText,
     this.sourceArticleId = const Value.absent(),
-    this.easeFactor = const Value.absent(),
-    this.interval = const Value.absent(),
-    this.repetitions = const Value.absent(),
-    this.nextDueAt = const Value.absent(),
-    this.lastQuality = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.parentCategory = const Value.absent(),
@@ -4761,18 +4722,13 @@ class FlashcardTableCompanion extends UpdateCompanion<FlashcardEntity> {
   }) : deckName = Value(deckName),
        frontText = Value(frontText),
        backText = Value(backText);
-  static Insertable<FlashcardEntity> custom({
+  static Insertable<FlashcardContentEntity> custom({
     Expression<int>? id,
     Expression<int>? remoteId,
     Expression<String>? deckName,
     Expression<String>? frontText,
     Expression<String>? backText,
     Expression<String>? sourceArticleId,
-    Expression<double>? easeFactor,
-    Expression<int>? interval,
-    Expression<int>? repetitions,
-    Expression<DateTime>? nextDueAt,
-    Expression<int>? lastQuality,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
     Expression<String>? parentCategory,
@@ -4786,11 +4742,6 @@ class FlashcardTableCompanion extends UpdateCompanion<FlashcardEntity> {
       if (frontText != null) 'front_text': frontText,
       if (backText != null) 'back_text': backText,
       if (sourceArticleId != null) 'source_article_id': sourceArticleId,
-      if (easeFactor != null) 'ease_factor': easeFactor,
-      if (interval != null) 'interval': interval,
-      if (repetitions != null) 'repetitions': repetitions,
-      if (nextDueAt != null) 'next_due_at': nextDueAt,
-      if (lastQuality != null) 'last_quality': lastQuality,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (parentCategory != null) 'parent_category': parentCategory,
@@ -4799,36 +4750,26 @@ class FlashcardTableCompanion extends UpdateCompanion<FlashcardEntity> {
     });
   }
 
-  FlashcardTableCompanion copyWith({
+  FlashcardContentCompanion copyWith({
     Value<int>? id,
     Value<int?>? remoteId,
     Value<String>? deckName,
     Value<String>? frontText,
     Value<String>? backText,
     Value<String?>? sourceArticleId,
-    Value<double>? easeFactor,
-    Value<int?>? interval,
-    Value<int?>? repetitions,
-    Value<DateTime?>? nextDueAt,
-    Value<int?>? lastQuality,
     Value<DateTime>? createdAt,
     Value<DateTime?>? updatedAt,
     Value<String?>? parentCategory,
     Value<String?>? track,
     Value<String?>? category,
   }) {
-    return FlashcardTableCompanion(
+    return FlashcardContentCompanion(
       id: id ?? this.id,
       remoteId: remoteId ?? this.remoteId,
       deckName: deckName ?? this.deckName,
       frontText: frontText ?? this.frontText,
       backText: backText ?? this.backText,
       sourceArticleId: sourceArticleId ?? this.sourceArticleId,
-      easeFactor: easeFactor ?? this.easeFactor,
-      interval: interval ?? this.interval,
-      repetitions: repetitions ?? this.repetitions,
-      nextDueAt: nextDueAt ?? this.nextDueAt,
-      lastQuality: lastQuality ?? this.lastQuality,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       parentCategory: parentCategory ?? this.parentCategory,
@@ -4858,21 +4799,6 @@ class FlashcardTableCompanion extends UpdateCompanion<FlashcardEntity> {
     if (sourceArticleId.present) {
       map['source_article_id'] = Variable<String>(sourceArticleId.value);
     }
-    if (easeFactor.present) {
-      map['ease_factor'] = Variable<double>(easeFactor.value);
-    }
-    if (interval.present) {
-      map['interval'] = Variable<int>(interval.value);
-    }
-    if (repetitions.present) {
-      map['repetitions'] = Variable<int>(repetitions.value);
-    }
-    if (nextDueAt.present) {
-      map['next_due_at'] = Variable<DateTime>(nextDueAt.value);
-    }
-    if (lastQuality.present) {
-      map['last_quality'] = Variable<int>(lastQuality.value);
-    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -4893,23 +4819,448 @@ class FlashcardTableCompanion extends UpdateCompanion<FlashcardEntity> {
 
   @override
   String toString() {
-    return (StringBuffer('FlashcardTableCompanion(')
+    return (StringBuffer('FlashcardContentCompanion(')
           ..write('id: $id, ')
           ..write('remoteId: $remoteId, ')
           ..write('deckName: $deckName, ')
           ..write('frontText: $frontText, ')
           ..write('backText: $backText, ')
           ..write('sourceArticleId: $sourceArticleId, ')
-          ..write('easeFactor: $easeFactor, ')
-          ..write('interval: $interval, ')
-          ..write('repetitions: $repetitions, ')
-          ..write('nextDueAt: $nextDueAt, ')
-          ..write('lastQuality: $lastQuality, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('parentCategory: $parentCategory, ')
           ..write('track: $track, ')
           ..write('category: $category')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $FlashcardProgressTable extends FlashcardProgress
+    with TableInfo<$FlashcardProgressTable, FlashcardProgressEntity> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $FlashcardProgressTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _contentIdMeta = const VerificationMeta(
+    'contentId',
+  );
+  @override
+  late final GeneratedColumn<int> contentId = GeneratedColumn<int>(
+    'content_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES flashcard_content (id)',
+    ),
+  );
+  static const VerificationMeta _easeFactorMeta = const VerificationMeta(
+    'easeFactor',
+  );
+  @override
+  late final GeneratedColumn<double> easeFactor = GeneratedColumn<double>(
+    'ease_factor',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(2.5),
+  );
+  static const VerificationMeta _intervalMeta = const VerificationMeta(
+    'interval',
+  );
+  @override
+  late final GeneratedColumn<int> interval = GeneratedColumn<int>(
+    'interval',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _repetitionsMeta = const VerificationMeta(
+    'repetitions',
+  );
+  @override
+  late final GeneratedColumn<int> repetitions = GeneratedColumn<int>(
+    'repetitions',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _nextDueAtMeta = const VerificationMeta(
+    'nextDueAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> nextDueAt = GeneratedColumn<DateTime>(
+    'next_due_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _lastQualityMeta = const VerificationMeta(
+    'lastQuality',
+  );
+  @override
+  late final GeneratedColumn<int> lastQuality = GeneratedColumn<int>(
+    'last_quality',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    contentId,
+    easeFactor,
+    interval,
+    repetitions,
+    nextDueAt,
+    lastQuality,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'flashcard_progress';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<FlashcardProgressEntity> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('content_id')) {
+      context.handle(
+        _contentIdMeta,
+        contentId.isAcceptableOrUnknown(data['content_id']!, _contentIdMeta),
+      );
+    }
+    if (data.containsKey('ease_factor')) {
+      context.handle(
+        _easeFactorMeta,
+        easeFactor.isAcceptableOrUnknown(data['ease_factor']!, _easeFactorMeta),
+      );
+    }
+    if (data.containsKey('interval')) {
+      context.handle(
+        _intervalMeta,
+        interval.isAcceptableOrUnknown(data['interval']!, _intervalMeta),
+      );
+    }
+    if (data.containsKey('repetitions')) {
+      context.handle(
+        _repetitionsMeta,
+        repetitions.isAcceptableOrUnknown(
+          data['repetitions']!,
+          _repetitionsMeta,
+        ),
+      );
+    }
+    if (data.containsKey('next_due_at')) {
+      context.handle(
+        _nextDueAtMeta,
+        nextDueAt.isAcceptableOrUnknown(data['next_due_at']!, _nextDueAtMeta),
+      );
+    }
+    if (data.containsKey('last_quality')) {
+      context.handle(
+        _lastQualityMeta,
+        lastQuality.isAcceptableOrUnknown(
+          data['last_quality']!,
+          _lastQualityMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {contentId};
+  @override
+  FlashcardProgressEntity map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return FlashcardProgressEntity(
+      contentId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}content_id'],
+      )!,
+      easeFactor: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}ease_factor'],
+      )!,
+      interval: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}interval'],
+      ),
+      repetitions: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}repetitions'],
+      ),
+      nextDueAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}next_due_at'],
+      ),
+      lastQuality: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}last_quality'],
+      ),
+    );
+  }
+
+  @override
+  $FlashcardProgressTable createAlias(String alias) {
+    return $FlashcardProgressTable(attachedDatabase, alias);
+  }
+}
+
+class FlashcardProgressEntity extends DataClass
+    implements Insertable<FlashcardProgressEntity> {
+  final int contentId;
+  final double easeFactor;
+  final int? interval;
+  final int? repetitions;
+  final DateTime? nextDueAt;
+  final int? lastQuality;
+  const FlashcardProgressEntity({
+    required this.contentId,
+    required this.easeFactor,
+    this.interval,
+    this.repetitions,
+    this.nextDueAt,
+    this.lastQuality,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['content_id'] = Variable<int>(contentId);
+    map['ease_factor'] = Variable<double>(easeFactor);
+    if (!nullToAbsent || interval != null) {
+      map['interval'] = Variable<int>(interval);
+    }
+    if (!nullToAbsent || repetitions != null) {
+      map['repetitions'] = Variable<int>(repetitions);
+    }
+    if (!nullToAbsent || nextDueAt != null) {
+      map['next_due_at'] = Variable<DateTime>(nextDueAt);
+    }
+    if (!nullToAbsent || lastQuality != null) {
+      map['last_quality'] = Variable<int>(lastQuality);
+    }
+    return map;
+  }
+
+  FlashcardProgressCompanion toCompanion(bool nullToAbsent) {
+    return FlashcardProgressCompanion(
+      contentId: Value(contentId),
+      easeFactor: Value(easeFactor),
+      interval: interval == null && nullToAbsent
+          ? const Value.absent()
+          : Value(interval),
+      repetitions: repetitions == null && nullToAbsent
+          ? const Value.absent()
+          : Value(repetitions),
+      nextDueAt: nextDueAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(nextDueAt),
+      lastQuality: lastQuality == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastQuality),
+    );
+  }
+
+  factory FlashcardProgressEntity.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return FlashcardProgressEntity(
+      contentId: serializer.fromJson<int>(json['contentId']),
+      easeFactor: serializer.fromJson<double>(json['easeFactor']),
+      interval: serializer.fromJson<int?>(json['interval']),
+      repetitions: serializer.fromJson<int?>(json['repetitions']),
+      nextDueAt: serializer.fromJson<DateTime?>(json['nextDueAt']),
+      lastQuality: serializer.fromJson<int?>(json['lastQuality']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'contentId': serializer.toJson<int>(contentId),
+      'easeFactor': serializer.toJson<double>(easeFactor),
+      'interval': serializer.toJson<int?>(interval),
+      'repetitions': serializer.toJson<int?>(repetitions),
+      'nextDueAt': serializer.toJson<DateTime?>(nextDueAt),
+      'lastQuality': serializer.toJson<int?>(lastQuality),
+    };
+  }
+
+  FlashcardProgressEntity copyWith({
+    int? contentId,
+    double? easeFactor,
+    Value<int?> interval = const Value.absent(),
+    Value<int?> repetitions = const Value.absent(),
+    Value<DateTime?> nextDueAt = const Value.absent(),
+    Value<int?> lastQuality = const Value.absent(),
+  }) => FlashcardProgressEntity(
+    contentId: contentId ?? this.contentId,
+    easeFactor: easeFactor ?? this.easeFactor,
+    interval: interval.present ? interval.value : this.interval,
+    repetitions: repetitions.present ? repetitions.value : this.repetitions,
+    nextDueAt: nextDueAt.present ? nextDueAt.value : this.nextDueAt,
+    lastQuality: lastQuality.present ? lastQuality.value : this.lastQuality,
+  );
+  FlashcardProgressEntity copyWithCompanion(FlashcardProgressCompanion data) {
+    return FlashcardProgressEntity(
+      contentId: data.contentId.present ? data.contentId.value : this.contentId,
+      easeFactor: data.easeFactor.present
+          ? data.easeFactor.value
+          : this.easeFactor,
+      interval: data.interval.present ? data.interval.value : this.interval,
+      repetitions: data.repetitions.present
+          ? data.repetitions.value
+          : this.repetitions,
+      nextDueAt: data.nextDueAt.present ? data.nextDueAt.value : this.nextDueAt,
+      lastQuality: data.lastQuality.present
+          ? data.lastQuality.value
+          : this.lastQuality,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('FlashcardProgressEntity(')
+          ..write('contentId: $contentId, ')
+          ..write('easeFactor: $easeFactor, ')
+          ..write('interval: $interval, ')
+          ..write('repetitions: $repetitions, ')
+          ..write('nextDueAt: $nextDueAt, ')
+          ..write('lastQuality: $lastQuality')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    contentId,
+    easeFactor,
+    interval,
+    repetitions,
+    nextDueAt,
+    lastQuality,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is FlashcardProgressEntity &&
+          other.contentId == this.contentId &&
+          other.easeFactor == this.easeFactor &&
+          other.interval == this.interval &&
+          other.repetitions == this.repetitions &&
+          other.nextDueAt == this.nextDueAt &&
+          other.lastQuality == this.lastQuality);
+}
+
+class FlashcardProgressCompanion
+    extends UpdateCompanion<FlashcardProgressEntity> {
+  final Value<int> contentId;
+  final Value<double> easeFactor;
+  final Value<int?> interval;
+  final Value<int?> repetitions;
+  final Value<DateTime?> nextDueAt;
+  final Value<int?> lastQuality;
+  const FlashcardProgressCompanion({
+    this.contentId = const Value.absent(),
+    this.easeFactor = const Value.absent(),
+    this.interval = const Value.absent(),
+    this.repetitions = const Value.absent(),
+    this.nextDueAt = const Value.absent(),
+    this.lastQuality = const Value.absent(),
+  });
+  FlashcardProgressCompanion.insert({
+    this.contentId = const Value.absent(),
+    this.easeFactor = const Value.absent(),
+    this.interval = const Value.absent(),
+    this.repetitions = const Value.absent(),
+    this.nextDueAt = const Value.absent(),
+    this.lastQuality = const Value.absent(),
+  });
+  static Insertable<FlashcardProgressEntity> custom({
+    Expression<int>? contentId,
+    Expression<double>? easeFactor,
+    Expression<int>? interval,
+    Expression<int>? repetitions,
+    Expression<DateTime>? nextDueAt,
+    Expression<int>? lastQuality,
+  }) {
+    return RawValuesInsertable({
+      if (contentId != null) 'content_id': contentId,
+      if (easeFactor != null) 'ease_factor': easeFactor,
+      if (interval != null) 'interval': interval,
+      if (repetitions != null) 'repetitions': repetitions,
+      if (nextDueAt != null) 'next_due_at': nextDueAt,
+      if (lastQuality != null) 'last_quality': lastQuality,
+    });
+  }
+
+  FlashcardProgressCompanion copyWith({
+    Value<int>? contentId,
+    Value<double>? easeFactor,
+    Value<int?>? interval,
+    Value<int?>? repetitions,
+    Value<DateTime?>? nextDueAt,
+    Value<int?>? lastQuality,
+  }) {
+    return FlashcardProgressCompanion(
+      contentId: contentId ?? this.contentId,
+      easeFactor: easeFactor ?? this.easeFactor,
+      interval: interval ?? this.interval,
+      repetitions: repetitions ?? this.repetitions,
+      nextDueAt: nextDueAt ?? this.nextDueAt,
+      lastQuality: lastQuality ?? this.lastQuality,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (contentId.present) {
+      map['content_id'] = Variable<int>(contentId.value);
+    }
+    if (easeFactor.present) {
+      map['ease_factor'] = Variable<double>(easeFactor.value);
+    }
+    if (interval.present) {
+      map['interval'] = Variable<int>(interval.value);
+    }
+    if (repetitions.present) {
+      map['repetitions'] = Variable<int>(repetitions.value);
+    }
+    if (nextDueAt.present) {
+      map['next_due_at'] = Variable<DateTime>(nextDueAt.value);
+    }
+    if (lastQuality.present) {
+      map['last_quality'] = Variable<int>(lastQuality.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('FlashcardProgressCompanion(')
+          ..write('contentId: $contentId, ')
+          ..write('easeFactor: $easeFactor, ')
+          ..write('interval: $interval, ')
+          ..write('repetitions: $repetitions, ')
+          ..write('nextDueAt: $nextDueAt, ')
+          ..write('lastQuality: $lastQuality')
           ..write(')'))
         .toString();
   }
@@ -7221,25 +7572,30 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $ArticleNotesTable articleNotes = $ArticleNotesTable(this);
   late final $StudySessionsTable studySessions = $StudySessionsTable(this);
   late final $QuizSessionsTable quizSessions = $QuizSessionsTable(this);
-  late final $QuizTableTable quizTable = $QuizTableTable(this);
-  late final $FlashcardTableTable flashcardTable = $FlashcardTableTable(this);
+  late final $QuizContentTable quizContent = $QuizContentTable(this);
+  late final $QuizProgressTable quizProgress = $QuizProgressTable(this);
+  late final $FlashcardContentTable flashcardContent = $FlashcardContentTable(
+    this,
+  );
+  late final $FlashcardProgressTable flashcardProgress =
+      $FlashcardProgressTable(this);
   late final $ClinicalCasesTable clinicalCases = $ClinicalCasesTable(this);
   late final $CaseStagesTable caseStages = $CaseStagesTable(this);
   late final $CaseOptionsTable caseOptions = $CaseOptionsTable(this);
   late final $CaseProgressTable caseProgress = $CaseProgressTable(this);
   late final $QuizAttemptDetailsTable quizAttemptDetails =
       $QuizAttemptDetailsTable(this);
-  late final Index idxQuizTableCategory = Index(
-    'idx_quiz_table_category',
-    'CREATE INDEX idx_quiz_table_category ON quiz_table (category)',
+  late final Index idxQuizContentCategory = Index(
+    'idx_quiz_content_category',
+    'CREATE INDEX idx_quiz_content_category ON quiz_content (category)',
   );
-  late final Index idxFlashcardDeck = Index(
-    'idx_flashcard_deck',
-    'CREATE INDEX idx_flashcard_deck ON flashcard_table (deck_name)',
+  late final Index idxFlashcardContentDeck = Index(
+    'idx_flashcard_content_deck',
+    'CREATE INDEX idx_flashcard_content_deck ON flashcard_content (deck_name)',
   );
-  late final Index idxFlashcardDue = Index(
-    'idx_flashcard_due',
-    'CREATE INDEX idx_flashcard_due ON flashcard_table (next_due_at)',
+  late final Index idxFlashcardProgressDue = Index(
+    'idx_flashcard_progress_due',
+    'CREATE INDEX idx_flashcard_progress_due ON flashcard_progress (next_due_at)',
   );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
@@ -7253,16 +7609,18 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     articleNotes,
     studySessions,
     quizSessions,
-    quizTable,
-    flashcardTable,
+    quizContent,
+    quizProgress,
+    flashcardContent,
+    flashcardProgress,
     clinicalCases,
     caseStages,
     caseOptions,
     caseProgress,
     quizAttemptDetails,
-    idxQuizTableCategory,
-    idxFlashcardDeck,
-    idxFlashcardDue,
+    idxQuizContentCategory,
+    idxFlashcardContentDeck,
+    idxFlashcardProgressDue,
   ];
 }
 
@@ -9058,8 +9416,8 @@ typedef $$QuizSessionsTableProcessedTableManager =
       QuizSession,
       PrefetchHooks Function()
     >;
-typedef $$QuizTableTableCreateCompanionBuilder =
-    QuizTableCompanion Function({
+typedef $$QuizContentTableCreateCompanionBuilder =
+    QuizContentCompanion Function({
       Value<int> id,
       required String remoteId,
       required String articleId,
@@ -9073,13 +9431,6 @@ typedef $$QuizTableTableCreateCompanionBuilder =
       required String category,
       Value<String> difficulty,
       Value<String> testedField,
-      Value<int> wrongCount,
-      Value<DateTime?> lastAttemptedAt,
-      Value<int?> srInterval,
-      Value<int?> repetitions,
-      Value<DateTime?> nextDueAt,
-      Value<double> easeFactor,
-      Value<int?> lastQuality,
       Value<DateTime?> updatedAt,
       Value<String?> parentCategory,
       Value<String?> sourceType,
@@ -9087,8 +9438,8 @@ typedef $$QuizTableTableCreateCompanionBuilder =
       Value<String?> examSource,
       Value<String?> attendingTip,
     });
-typedef $$QuizTableTableUpdateCompanionBuilder =
-    QuizTableCompanion Function({
+typedef $$QuizContentTableUpdateCompanionBuilder =
+    QuizContentCompanion Function({
       Value<int> id,
       Value<String> remoteId,
       Value<String> articleId,
@@ -9102,13 +9453,6 @@ typedef $$QuizTableTableUpdateCompanionBuilder =
       Value<String> category,
       Value<String> difficulty,
       Value<String> testedField,
-      Value<int> wrongCount,
-      Value<DateTime?> lastAttemptedAt,
-      Value<int?> srInterval,
-      Value<int?> repetitions,
-      Value<DateTime?> nextDueAt,
-      Value<double> easeFactor,
-      Value<int?> lastQuality,
       Value<DateTime?> updatedAt,
       Value<String?> parentCategory,
       Value<String?> sourceType,
@@ -9117,9 +9461,36 @@ typedef $$QuizTableTableUpdateCompanionBuilder =
       Value<String?> attendingTip,
     });
 
-class $$QuizTableTableFilterComposer
-    extends Composer<_$AppDatabase, $QuizTableTable> {
-  $$QuizTableTableFilterComposer({
+final class $$QuizContentTableReferences
+    extends
+        BaseReferences<_$AppDatabase, $QuizContentTable, QuizContentEntity> {
+  $$QuizContentTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static MultiTypedResultKey<$QuizProgressTable, List<QuizProgressEntity>>
+  _quizProgressRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.quizProgress,
+    aliasName: $_aliasNameGenerator(
+      db.quizContent.id,
+      db.quizProgress.contentId,
+    ),
+  );
+
+  $$QuizProgressTableProcessedTableManager get quizProgressRefs {
+    final manager = $$QuizProgressTableTableManager(
+      $_db,
+      $_db.quizProgress,
+    ).filter((f) => f.contentId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_quizProgressRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$QuizContentTableFilterComposer
+    extends Composer<_$AppDatabase, $QuizContentTable> {
+  $$QuizContentTableFilterComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -9191,41 +9562,6 @@ class $$QuizTableTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<int> get wrongCount => $composableBuilder(
-    column: $table.wrongCount,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<DateTime> get lastAttemptedAt => $composableBuilder(
-    column: $table.lastAttemptedAt,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<int> get srInterval => $composableBuilder(
-    column: $table.srInterval,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<int> get repetitions => $composableBuilder(
-    column: $table.repetitions,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<DateTime> get nextDueAt => $composableBuilder(
-    column: $table.nextDueAt,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<double> get easeFactor => $composableBuilder(
-    column: $table.easeFactor,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<int> get lastQuality => $composableBuilder(
-    column: $table.lastQuality,
-    builder: (column) => ColumnFilters(column),
-  );
-
   ColumnFilters<DateTime> get updatedAt => $composableBuilder(
     column: $table.updatedAt,
     builder: (column) => ColumnFilters(column),
@@ -9255,11 +9591,36 @@ class $$QuizTableTableFilterComposer
     column: $table.attendingTip,
     builder: (column) => ColumnFilters(column),
   );
+
+  Expression<bool> quizProgressRefs(
+    Expression<bool> Function($$QuizProgressTableFilterComposer f) f,
+  ) {
+    final $$QuizProgressTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.quizProgress,
+      getReferencedColumn: (t) => t.contentId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$QuizProgressTableFilterComposer(
+            $db: $db,
+            $table: $db.quizProgress,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
-class $$QuizTableTableOrderingComposer
-    extends Composer<_$AppDatabase, $QuizTableTable> {
-  $$QuizTableTableOrderingComposer({
+class $$QuizContentTableOrderingComposer
+    extends Composer<_$AppDatabase, $QuizContentTable> {
+  $$QuizContentTableOrderingComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -9331,41 +9692,6 @@ class $$QuizTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<int> get wrongCount => $composableBuilder(
-    column: $table.wrongCount,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<DateTime> get lastAttemptedAt => $composableBuilder(
-    column: $table.lastAttemptedAt,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<int> get srInterval => $composableBuilder(
-    column: $table.srInterval,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<int> get repetitions => $composableBuilder(
-    column: $table.repetitions,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<DateTime> get nextDueAt => $composableBuilder(
-    column: $table.nextDueAt,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<double> get easeFactor => $composableBuilder(
-    column: $table.easeFactor,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<int> get lastQuality => $composableBuilder(
-    column: $table.lastQuality,
-    builder: (column) => ColumnOrderings(column),
-  );
-
   ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
     column: $table.updatedAt,
     builder: (column) => ColumnOrderings(column),
@@ -9397,9 +9723,9 @@ class $$QuizTableTableOrderingComposer
   );
 }
 
-class $$QuizTableTableAnnotationComposer
-    extends Composer<_$AppDatabase, $QuizTableTable> {
-  $$QuizTableTableAnnotationComposer({
+class $$QuizContentTableAnnotationComposer
+    extends Composer<_$AppDatabase, $QuizContentTable> {
+  $$QuizContentTableAnnotationComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -9453,39 +9779,6 @@ class $$QuizTableTableAnnotationComposer
     builder: (column) => column,
   );
 
-  GeneratedColumn<int> get wrongCount => $composableBuilder(
-    column: $table.wrongCount,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<DateTime> get lastAttemptedAt => $composableBuilder(
-    column: $table.lastAttemptedAt,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<int> get srInterval => $composableBuilder(
-    column: $table.srInterval,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<int> get repetitions => $composableBuilder(
-    column: $table.repetitions,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<DateTime> get nextDueAt =>
-      $composableBuilder(column: $table.nextDueAt, builder: (column) => column);
-
-  GeneratedColumn<double> get easeFactor => $composableBuilder(
-    column: $table.easeFactor,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<int> get lastQuality => $composableBuilder(
-    column: $table.lastQuality,
-    builder: (column) => column,
-  );
-
   GeneratedColumn<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
 
@@ -9511,37 +9804,59 @@ class $$QuizTableTableAnnotationComposer
     column: $table.attendingTip,
     builder: (column) => column,
   );
+
+  Expression<T> quizProgressRefs<T extends Object>(
+    Expression<T> Function($$QuizProgressTableAnnotationComposer a) f,
+  ) {
+    final $$QuizProgressTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.quizProgress,
+      getReferencedColumn: (t) => t.contentId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$QuizProgressTableAnnotationComposer(
+            $db: $db,
+            $table: $db.quizProgress,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
-class $$QuizTableTableTableManager
+class $$QuizContentTableTableManager
     extends
         RootTableManager<
           _$AppDatabase,
-          $QuizTableTable,
-          QuizQuestionEntity,
-          $$QuizTableTableFilterComposer,
-          $$QuizTableTableOrderingComposer,
-          $$QuizTableTableAnnotationComposer,
-          $$QuizTableTableCreateCompanionBuilder,
-          $$QuizTableTableUpdateCompanionBuilder,
-          (
-            QuizQuestionEntity,
-            BaseReferences<_$AppDatabase, $QuizTableTable, QuizQuestionEntity>,
-          ),
-          QuizQuestionEntity,
-          PrefetchHooks Function()
+          $QuizContentTable,
+          QuizContentEntity,
+          $$QuizContentTableFilterComposer,
+          $$QuizContentTableOrderingComposer,
+          $$QuizContentTableAnnotationComposer,
+          $$QuizContentTableCreateCompanionBuilder,
+          $$QuizContentTableUpdateCompanionBuilder,
+          (QuizContentEntity, $$QuizContentTableReferences),
+          QuizContentEntity,
+          PrefetchHooks Function({bool quizProgressRefs})
         > {
-  $$QuizTableTableTableManager(_$AppDatabase db, $QuizTableTable table)
+  $$QuizContentTableTableManager(_$AppDatabase db, $QuizContentTable table)
     : super(
         TableManagerState(
           db: db,
           table: table,
           createFilteringComposer: () =>
-              $$QuizTableTableFilterComposer($db: db, $table: table),
+              $$QuizContentTableFilterComposer($db: db, $table: table),
           createOrderingComposer: () =>
-              $$QuizTableTableOrderingComposer($db: db, $table: table),
+              $$QuizContentTableOrderingComposer($db: db, $table: table),
           createComputedFieldComposer: () =>
-              $$QuizTableTableAnnotationComposer($db: db, $table: table),
+              $$QuizContentTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
@@ -9557,20 +9872,13 @@ class $$QuizTableTableTableManager
                 Value<String> category = const Value.absent(),
                 Value<String> difficulty = const Value.absent(),
                 Value<String> testedField = const Value.absent(),
-                Value<int> wrongCount = const Value.absent(),
-                Value<DateTime?> lastAttemptedAt = const Value.absent(),
-                Value<int?> srInterval = const Value.absent(),
-                Value<int?> repetitions = const Value.absent(),
-                Value<DateTime?> nextDueAt = const Value.absent(),
-                Value<double> easeFactor = const Value.absent(),
-                Value<int?> lastQuality = const Value.absent(),
                 Value<DateTime?> updatedAt = const Value.absent(),
                 Value<String?> parentCategory = const Value.absent(),
                 Value<String?> sourceType = const Value.absent(),
                 Value<int?> examYear = const Value.absent(),
                 Value<String?> examSource = const Value.absent(),
                 Value<String?> attendingTip = const Value.absent(),
-              }) => QuizTableCompanion(
+              }) => QuizContentCompanion(
                 id: id,
                 remoteId: remoteId,
                 articleId: articleId,
@@ -9584,13 +9892,6 @@ class $$QuizTableTableTableManager
                 category: category,
                 difficulty: difficulty,
                 testedField: testedField,
-                wrongCount: wrongCount,
-                lastAttemptedAt: lastAttemptedAt,
-                srInterval: srInterval,
-                repetitions: repetitions,
-                nextDueAt: nextDueAt,
-                easeFactor: easeFactor,
-                lastQuality: lastQuality,
                 updatedAt: updatedAt,
                 parentCategory: parentCategory,
                 sourceType: sourceType,
@@ -9613,20 +9914,13 @@ class $$QuizTableTableTableManager
                 required String category,
                 Value<String> difficulty = const Value.absent(),
                 Value<String> testedField = const Value.absent(),
-                Value<int> wrongCount = const Value.absent(),
-                Value<DateTime?> lastAttemptedAt = const Value.absent(),
-                Value<int?> srInterval = const Value.absent(),
-                Value<int?> repetitions = const Value.absent(),
-                Value<DateTime?> nextDueAt = const Value.absent(),
-                Value<double> easeFactor = const Value.absent(),
-                Value<int?> lastQuality = const Value.absent(),
                 Value<DateTime?> updatedAt = const Value.absent(),
                 Value<String?> parentCategory = const Value.absent(),
                 Value<String?> sourceType = const Value.absent(),
                 Value<int?> examYear = const Value.absent(),
                 Value<String?> examSource = const Value.absent(),
                 Value<String?> attendingTip = const Value.absent(),
-              }) => QuizTableCompanion.insert(
+              }) => QuizContentCompanion.insert(
                 id: id,
                 remoteId: remoteId,
                 articleId: articleId,
@@ -9640,13 +9934,6 @@ class $$QuizTableTableTableManager
                 category: category,
                 difficulty: difficulty,
                 testedField: testedField,
-                wrongCount: wrongCount,
-                lastAttemptedAt: lastAttemptedAt,
-                srInterval: srInterval,
-                repetitions: repetitions,
-                nextDueAt: nextDueAt,
-                easeFactor: easeFactor,
-                lastQuality: lastQuality,
                 updatedAt: updatedAt,
                 parentCategory: parentCategory,
                 sourceType: sourceType,
@@ -9655,62 +9942,466 @@ class $$QuizTableTableTableManager
                 attendingTip: attendingTip,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$QuizContentTableReferences(db, table, e),
+                ),
+              )
               .toList(),
-          prefetchHooksCallback: null,
+          prefetchHooksCallback: ({quizProgressRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [if (quizProgressRefs) db.quizProgress],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (quizProgressRefs)
+                    await $_getPrefetchedData<
+                      QuizContentEntity,
+                      $QuizContentTable,
+                      QuizProgressEntity
+                    >(
+                      currentTable: table,
+                      referencedTable: $$QuizContentTableReferences
+                          ._quizProgressRefsTable(db),
+                      managerFromTypedResult: (p0) =>
+                          $$QuizContentTableReferences(
+                            db,
+                            table,
+                            p0,
+                          ).quizProgressRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) =>
+                          referencedItems.where((e) => e.contentId == item.id),
+                      typedResults: items,
+                    ),
+                ];
+              },
+            );
+          },
         ),
       );
 }
 
-typedef $$QuizTableTableProcessedTableManager =
+typedef $$QuizContentTableProcessedTableManager =
     ProcessedTableManager<
       _$AppDatabase,
-      $QuizTableTable,
-      QuizQuestionEntity,
-      $$QuizTableTableFilterComposer,
-      $$QuizTableTableOrderingComposer,
-      $$QuizTableTableAnnotationComposer,
-      $$QuizTableTableCreateCompanionBuilder,
-      $$QuizTableTableUpdateCompanionBuilder,
-      (
-        QuizQuestionEntity,
-        BaseReferences<_$AppDatabase, $QuizTableTable, QuizQuestionEntity>,
-      ),
-      QuizQuestionEntity,
-      PrefetchHooks Function()
+      $QuizContentTable,
+      QuizContentEntity,
+      $$QuizContentTableFilterComposer,
+      $$QuizContentTableOrderingComposer,
+      $$QuizContentTableAnnotationComposer,
+      $$QuizContentTableCreateCompanionBuilder,
+      $$QuizContentTableUpdateCompanionBuilder,
+      (QuizContentEntity, $$QuizContentTableReferences),
+      QuizContentEntity,
+      PrefetchHooks Function({bool quizProgressRefs})
     >;
-typedef $$FlashcardTableTableCreateCompanionBuilder =
-    FlashcardTableCompanion Function({
+typedef $$QuizProgressTableCreateCompanionBuilder =
+    QuizProgressCompanion Function({
+      Value<int> contentId,
+      Value<double> easeFactor,
+      Value<int?> srInterval,
+      Value<int?> repetitions,
+      Value<DateTime?> nextDueAt,
+      Value<int?> lastQuality,
+      Value<int> wrongCount,
+      Value<DateTime?> lastAttemptedAt,
+    });
+typedef $$QuizProgressTableUpdateCompanionBuilder =
+    QuizProgressCompanion Function({
+      Value<int> contentId,
+      Value<double> easeFactor,
+      Value<int?> srInterval,
+      Value<int?> repetitions,
+      Value<DateTime?> nextDueAt,
+      Value<int?> lastQuality,
+      Value<int> wrongCount,
+      Value<DateTime?> lastAttemptedAt,
+    });
+
+final class $$QuizProgressTableReferences
+    extends
+        BaseReferences<_$AppDatabase, $QuizProgressTable, QuizProgressEntity> {
+  $$QuizProgressTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $QuizContentTable _contentIdTable(_$AppDatabase db) =>
+      db.quizContent.createAlias(
+        $_aliasNameGenerator(db.quizProgress.contentId, db.quizContent.id),
+      );
+
+  $$QuizContentTableProcessedTableManager get contentId {
+    final $_column = $_itemColumn<int>('content_id')!;
+
+    final manager = $$QuizContentTableTableManager(
+      $_db,
+      $_db.quizContent,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_contentIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$QuizProgressTableFilterComposer
+    extends Composer<_$AppDatabase, $QuizProgressTable> {
+  $$QuizProgressTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<double> get easeFactor => $composableBuilder(
+    column: $table.easeFactor,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get srInterval => $composableBuilder(
+    column: $table.srInterval,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get repetitions => $composableBuilder(
+    column: $table.repetitions,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get nextDueAt => $composableBuilder(
+    column: $table.nextDueAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get lastQuality => $composableBuilder(
+    column: $table.lastQuality,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get wrongCount => $composableBuilder(
+    column: $table.wrongCount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get lastAttemptedAt => $composableBuilder(
+    column: $table.lastAttemptedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$QuizContentTableFilterComposer get contentId {
+    final $$QuizContentTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.contentId,
+      referencedTable: $db.quizContent,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$QuizContentTableFilterComposer(
+            $db: $db,
+            $table: $db.quizContent,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$QuizProgressTableOrderingComposer
+    extends Composer<_$AppDatabase, $QuizProgressTable> {
+  $$QuizProgressTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<double> get easeFactor => $composableBuilder(
+    column: $table.easeFactor,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get srInterval => $composableBuilder(
+    column: $table.srInterval,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get repetitions => $composableBuilder(
+    column: $table.repetitions,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get nextDueAt => $composableBuilder(
+    column: $table.nextDueAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get lastQuality => $composableBuilder(
+    column: $table.lastQuality,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get wrongCount => $composableBuilder(
+    column: $table.wrongCount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get lastAttemptedAt => $composableBuilder(
+    column: $table.lastAttemptedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$QuizContentTableOrderingComposer get contentId {
+    final $$QuizContentTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.contentId,
+      referencedTable: $db.quizContent,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$QuizContentTableOrderingComposer(
+            $db: $db,
+            $table: $db.quizContent,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$QuizProgressTableAnnotationComposer
+    extends Composer<_$AppDatabase, $QuizProgressTable> {
+  $$QuizProgressTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<double> get easeFactor => $composableBuilder(
+    column: $table.easeFactor,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get srInterval => $composableBuilder(
+    column: $table.srInterval,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get repetitions => $composableBuilder(
+    column: $table.repetitions,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get nextDueAt =>
+      $composableBuilder(column: $table.nextDueAt, builder: (column) => column);
+
+  GeneratedColumn<int> get lastQuality => $composableBuilder(
+    column: $table.lastQuality,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get wrongCount => $composableBuilder(
+    column: $table.wrongCount,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get lastAttemptedAt => $composableBuilder(
+    column: $table.lastAttemptedAt,
+    builder: (column) => column,
+  );
+
+  $$QuizContentTableAnnotationComposer get contentId {
+    final $$QuizContentTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.contentId,
+      referencedTable: $db.quizContent,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$QuizContentTableAnnotationComposer(
+            $db: $db,
+            $table: $db.quizContent,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$QuizProgressTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $QuizProgressTable,
+          QuizProgressEntity,
+          $$QuizProgressTableFilterComposer,
+          $$QuizProgressTableOrderingComposer,
+          $$QuizProgressTableAnnotationComposer,
+          $$QuizProgressTableCreateCompanionBuilder,
+          $$QuizProgressTableUpdateCompanionBuilder,
+          (QuizProgressEntity, $$QuizProgressTableReferences),
+          QuizProgressEntity,
+          PrefetchHooks Function({bool contentId})
+        > {
+  $$QuizProgressTableTableManager(_$AppDatabase db, $QuizProgressTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$QuizProgressTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$QuizProgressTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$QuizProgressTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> contentId = const Value.absent(),
+                Value<double> easeFactor = const Value.absent(),
+                Value<int?> srInterval = const Value.absent(),
+                Value<int?> repetitions = const Value.absent(),
+                Value<DateTime?> nextDueAt = const Value.absent(),
+                Value<int?> lastQuality = const Value.absent(),
+                Value<int> wrongCount = const Value.absent(),
+                Value<DateTime?> lastAttemptedAt = const Value.absent(),
+              }) => QuizProgressCompanion(
+                contentId: contentId,
+                easeFactor: easeFactor,
+                srInterval: srInterval,
+                repetitions: repetitions,
+                nextDueAt: nextDueAt,
+                lastQuality: lastQuality,
+                wrongCount: wrongCount,
+                lastAttemptedAt: lastAttemptedAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> contentId = const Value.absent(),
+                Value<double> easeFactor = const Value.absent(),
+                Value<int?> srInterval = const Value.absent(),
+                Value<int?> repetitions = const Value.absent(),
+                Value<DateTime?> nextDueAt = const Value.absent(),
+                Value<int?> lastQuality = const Value.absent(),
+                Value<int> wrongCount = const Value.absent(),
+                Value<DateTime?> lastAttemptedAt = const Value.absent(),
+              }) => QuizProgressCompanion.insert(
+                contentId: contentId,
+                easeFactor: easeFactor,
+                srInterval: srInterval,
+                repetitions: repetitions,
+                nextDueAt: nextDueAt,
+                lastQuality: lastQuality,
+                wrongCount: wrongCount,
+                lastAttemptedAt: lastAttemptedAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$QuizProgressTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({contentId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (contentId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.contentId,
+                                referencedTable: $$QuizProgressTableReferences
+                                    ._contentIdTable(db),
+                                referencedColumn: $$QuizProgressTableReferences
+                                    ._contentIdTable(db)
+                                    .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$QuizProgressTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $QuizProgressTable,
+      QuizProgressEntity,
+      $$QuizProgressTableFilterComposer,
+      $$QuizProgressTableOrderingComposer,
+      $$QuizProgressTableAnnotationComposer,
+      $$QuizProgressTableCreateCompanionBuilder,
+      $$QuizProgressTableUpdateCompanionBuilder,
+      (QuizProgressEntity, $$QuizProgressTableReferences),
+      QuizProgressEntity,
+      PrefetchHooks Function({bool contentId})
+    >;
+typedef $$FlashcardContentTableCreateCompanionBuilder =
+    FlashcardContentCompanion Function({
       Value<int> id,
       Value<int?> remoteId,
       required String deckName,
       required String frontText,
       required String backText,
       Value<String?> sourceArticleId,
-      Value<double> easeFactor,
-      Value<int?> interval,
-      Value<int?> repetitions,
-      Value<DateTime?> nextDueAt,
-      Value<int?> lastQuality,
       Value<DateTime> createdAt,
       Value<DateTime?> updatedAt,
       Value<String?> parentCategory,
       Value<String?> track,
       Value<String?> category,
     });
-typedef $$FlashcardTableTableUpdateCompanionBuilder =
-    FlashcardTableCompanion Function({
+typedef $$FlashcardContentTableUpdateCompanionBuilder =
+    FlashcardContentCompanion Function({
       Value<int> id,
       Value<int?> remoteId,
       Value<String> deckName,
       Value<String> frontText,
       Value<String> backText,
       Value<String?> sourceArticleId,
-      Value<double> easeFactor,
-      Value<int?> interval,
-      Value<int?> repetitions,
-      Value<DateTime?> nextDueAt,
-      Value<int?> lastQuality,
       Value<DateTime> createdAt,
       Value<DateTime?> updatedAt,
       Value<String?> parentCategory,
@@ -9718,9 +10409,50 @@ typedef $$FlashcardTableTableUpdateCompanionBuilder =
       Value<String?> category,
     });
 
-class $$FlashcardTableTableFilterComposer
-    extends Composer<_$AppDatabase, $FlashcardTableTable> {
-  $$FlashcardTableTableFilterComposer({
+final class $$FlashcardContentTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $FlashcardContentTable,
+          FlashcardContentEntity
+        > {
+  $$FlashcardContentTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static MultiTypedResultKey<
+    $FlashcardProgressTable,
+    List<FlashcardProgressEntity>
+  >
+  _flashcardProgressRefsTable(_$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.flashcardProgress,
+        aliasName: $_aliasNameGenerator(
+          db.flashcardContent.id,
+          db.flashcardProgress.contentId,
+        ),
+      );
+
+  $$FlashcardProgressTableProcessedTableManager get flashcardProgressRefs {
+    final manager = $$FlashcardProgressTableTableManager(
+      $_db,
+      $_db.flashcardProgress,
+    ).filter((f) => f.contentId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _flashcardProgressRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$FlashcardContentTableFilterComposer
+    extends Composer<_$AppDatabase, $FlashcardContentTable> {
+  $$FlashcardContentTableFilterComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -9757,31 +10489,6 @@ class $$FlashcardTableTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<double> get easeFactor => $composableBuilder(
-    column: $table.easeFactor,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<int> get interval => $composableBuilder(
-    column: $table.interval,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<int> get repetitions => $composableBuilder(
-    column: $table.repetitions,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<DateTime> get nextDueAt => $composableBuilder(
-    column: $table.nextDueAt,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<int> get lastQuality => $composableBuilder(
-    column: $table.lastQuality,
-    builder: (column) => ColumnFilters(column),
-  );
-
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnFilters(column),
@@ -9806,11 +10513,36 @@ class $$FlashcardTableTableFilterComposer
     column: $table.category,
     builder: (column) => ColumnFilters(column),
   );
+
+  Expression<bool> flashcardProgressRefs(
+    Expression<bool> Function($$FlashcardProgressTableFilterComposer f) f,
+  ) {
+    final $$FlashcardProgressTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.flashcardProgress,
+      getReferencedColumn: (t) => t.contentId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$FlashcardProgressTableFilterComposer(
+            $db: $db,
+            $table: $db.flashcardProgress,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
-class $$FlashcardTableTableOrderingComposer
-    extends Composer<_$AppDatabase, $FlashcardTableTable> {
-  $$FlashcardTableTableOrderingComposer({
+class $$FlashcardContentTableOrderingComposer
+    extends Composer<_$AppDatabase, $FlashcardContentTable> {
+  $$FlashcardContentTableOrderingComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -9847,31 +10579,6 @@ class $$FlashcardTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<double> get easeFactor => $composableBuilder(
-    column: $table.easeFactor,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<int> get interval => $composableBuilder(
-    column: $table.interval,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<int> get repetitions => $composableBuilder(
-    column: $table.repetitions,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<DateTime> get nextDueAt => $composableBuilder(
-    column: $table.nextDueAt,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<int> get lastQuality => $composableBuilder(
-    column: $table.lastQuality,
-    builder: (column) => ColumnOrderings(column),
-  );
-
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -9898,9 +10605,9 @@ class $$FlashcardTableTableOrderingComposer
   );
 }
 
-class $$FlashcardTableTableAnnotationComposer
-    extends Composer<_$AppDatabase, $FlashcardTableTable> {
-  $$FlashcardTableTableAnnotationComposer({
+class $$FlashcardContentTableAnnotationComposer
+    extends Composer<_$AppDatabase, $FlashcardContentTable> {
+  $$FlashcardContentTableAnnotationComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -9927,6 +10634,368 @@ class $$FlashcardTableTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get parentCategory => $composableBuilder(
+    column: $table.parentCategory,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get track =>
+      $composableBuilder(column: $table.track, builder: (column) => column);
+
+  GeneratedColumn<String> get category =>
+      $composableBuilder(column: $table.category, builder: (column) => column);
+
+  Expression<T> flashcardProgressRefs<T extends Object>(
+    Expression<T> Function($$FlashcardProgressTableAnnotationComposer a) f,
+  ) {
+    final $$FlashcardProgressTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.flashcardProgress,
+          getReferencedColumn: (t) => t.contentId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$FlashcardProgressTableAnnotationComposer(
+                $db: $db,
+                $table: $db.flashcardProgress,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+}
+
+class $$FlashcardContentTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $FlashcardContentTable,
+          FlashcardContentEntity,
+          $$FlashcardContentTableFilterComposer,
+          $$FlashcardContentTableOrderingComposer,
+          $$FlashcardContentTableAnnotationComposer,
+          $$FlashcardContentTableCreateCompanionBuilder,
+          $$FlashcardContentTableUpdateCompanionBuilder,
+          (FlashcardContentEntity, $$FlashcardContentTableReferences),
+          FlashcardContentEntity,
+          PrefetchHooks Function({bool flashcardProgressRefs})
+        > {
+  $$FlashcardContentTableTableManager(
+    _$AppDatabase db,
+    $FlashcardContentTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$FlashcardContentTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$FlashcardContentTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$FlashcardContentTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int?> remoteId = const Value.absent(),
+                Value<String> deckName = const Value.absent(),
+                Value<String> frontText = const Value.absent(),
+                Value<String> backText = const Value.absent(),
+                Value<String?> sourceArticleId = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime?> updatedAt = const Value.absent(),
+                Value<String?> parentCategory = const Value.absent(),
+                Value<String?> track = const Value.absent(),
+                Value<String?> category = const Value.absent(),
+              }) => FlashcardContentCompanion(
+                id: id,
+                remoteId: remoteId,
+                deckName: deckName,
+                frontText: frontText,
+                backText: backText,
+                sourceArticleId: sourceArticleId,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                parentCategory: parentCategory,
+                track: track,
+                category: category,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int?> remoteId = const Value.absent(),
+                required String deckName,
+                required String frontText,
+                required String backText,
+                Value<String?> sourceArticleId = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime?> updatedAt = const Value.absent(),
+                Value<String?> parentCategory = const Value.absent(),
+                Value<String?> track = const Value.absent(),
+                Value<String?> category = const Value.absent(),
+              }) => FlashcardContentCompanion.insert(
+                id: id,
+                remoteId: remoteId,
+                deckName: deckName,
+                frontText: frontText,
+                backText: backText,
+                sourceArticleId: sourceArticleId,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                parentCategory: parentCategory,
+                track: track,
+                category: category,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$FlashcardContentTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({flashcardProgressRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [
+                if (flashcardProgressRefs) db.flashcardProgress,
+              ],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (flashcardProgressRefs)
+                    await $_getPrefetchedData<
+                      FlashcardContentEntity,
+                      $FlashcardContentTable,
+                      FlashcardProgressEntity
+                    >(
+                      currentTable: table,
+                      referencedTable: $$FlashcardContentTableReferences
+                          ._flashcardProgressRefsTable(db),
+                      managerFromTypedResult: (p0) =>
+                          $$FlashcardContentTableReferences(
+                            db,
+                            table,
+                            p0,
+                          ).flashcardProgressRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) =>
+                          referencedItems.where((e) => e.contentId == item.id),
+                      typedResults: items,
+                    ),
+                ];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$FlashcardContentTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $FlashcardContentTable,
+      FlashcardContentEntity,
+      $$FlashcardContentTableFilterComposer,
+      $$FlashcardContentTableOrderingComposer,
+      $$FlashcardContentTableAnnotationComposer,
+      $$FlashcardContentTableCreateCompanionBuilder,
+      $$FlashcardContentTableUpdateCompanionBuilder,
+      (FlashcardContentEntity, $$FlashcardContentTableReferences),
+      FlashcardContentEntity,
+      PrefetchHooks Function({bool flashcardProgressRefs})
+    >;
+typedef $$FlashcardProgressTableCreateCompanionBuilder =
+    FlashcardProgressCompanion Function({
+      Value<int> contentId,
+      Value<double> easeFactor,
+      Value<int?> interval,
+      Value<int?> repetitions,
+      Value<DateTime?> nextDueAt,
+      Value<int?> lastQuality,
+    });
+typedef $$FlashcardProgressTableUpdateCompanionBuilder =
+    FlashcardProgressCompanion Function({
+      Value<int> contentId,
+      Value<double> easeFactor,
+      Value<int?> interval,
+      Value<int?> repetitions,
+      Value<DateTime?> nextDueAt,
+      Value<int?> lastQuality,
+    });
+
+final class $$FlashcardProgressTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $FlashcardProgressTable,
+          FlashcardProgressEntity
+        > {
+  $$FlashcardProgressTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $FlashcardContentTable _contentIdTable(_$AppDatabase db) =>
+      db.flashcardContent.createAlias(
+        $_aliasNameGenerator(
+          db.flashcardProgress.contentId,
+          db.flashcardContent.id,
+        ),
+      );
+
+  $$FlashcardContentTableProcessedTableManager get contentId {
+    final $_column = $_itemColumn<int>('content_id')!;
+
+    final manager = $$FlashcardContentTableTableManager(
+      $_db,
+      $_db.flashcardContent,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_contentIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$FlashcardProgressTableFilterComposer
+    extends Composer<_$AppDatabase, $FlashcardProgressTable> {
+  $$FlashcardProgressTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<double> get easeFactor => $composableBuilder(
+    column: $table.easeFactor,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get interval => $composableBuilder(
+    column: $table.interval,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get repetitions => $composableBuilder(
+    column: $table.repetitions,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get nextDueAt => $composableBuilder(
+    column: $table.nextDueAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get lastQuality => $composableBuilder(
+    column: $table.lastQuality,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$FlashcardContentTableFilterComposer get contentId {
+    final $$FlashcardContentTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.contentId,
+      referencedTable: $db.flashcardContent,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$FlashcardContentTableFilterComposer(
+            $db: $db,
+            $table: $db.flashcardContent,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$FlashcardProgressTableOrderingComposer
+    extends Composer<_$AppDatabase, $FlashcardProgressTable> {
+  $$FlashcardProgressTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<double> get easeFactor => $composableBuilder(
+    column: $table.easeFactor,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get interval => $composableBuilder(
+    column: $table.interval,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get repetitions => $composableBuilder(
+    column: $table.repetitions,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get nextDueAt => $composableBuilder(
+    column: $table.nextDueAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get lastQuality => $composableBuilder(
+    column: $table.lastQuality,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$FlashcardContentTableOrderingComposer get contentId {
+    final $$FlashcardContentTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.contentId,
+      referencedTable: $db.flashcardContent,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$FlashcardContentTableOrderingComposer(
+            $db: $db,
+            $table: $db.flashcardContent,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$FlashcardProgressTableAnnotationComposer
+    extends Composer<_$AppDatabase, $FlashcardProgressTable> {
+  $$FlashcardProgressTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
   GeneratedColumn<double> get easeFactor => $composableBuilder(
     column: $table.easeFactor,
     builder: (column) => column,
@@ -9948,155 +11017,161 @@ class $$FlashcardTableTableAnnotationComposer
     builder: (column) => column,
   );
 
-  GeneratedColumn<DateTime> get createdAt =>
-      $composableBuilder(column: $table.createdAt, builder: (column) => column);
-
-  GeneratedColumn<DateTime> get updatedAt =>
-      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
-
-  GeneratedColumn<String> get parentCategory => $composableBuilder(
-    column: $table.parentCategory,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<String> get track =>
-      $composableBuilder(column: $table.track, builder: (column) => column);
-
-  GeneratedColumn<String> get category =>
-      $composableBuilder(column: $table.category, builder: (column) => column);
+  $$FlashcardContentTableAnnotationComposer get contentId {
+    final $$FlashcardContentTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.contentId,
+      referencedTable: $db.flashcardContent,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$FlashcardContentTableAnnotationComposer(
+            $db: $db,
+            $table: $db.flashcardContent,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
-class $$FlashcardTableTableTableManager
+class $$FlashcardProgressTableTableManager
     extends
         RootTableManager<
           _$AppDatabase,
-          $FlashcardTableTable,
-          FlashcardEntity,
-          $$FlashcardTableTableFilterComposer,
-          $$FlashcardTableTableOrderingComposer,
-          $$FlashcardTableTableAnnotationComposer,
-          $$FlashcardTableTableCreateCompanionBuilder,
-          $$FlashcardTableTableUpdateCompanionBuilder,
-          (
-            FlashcardEntity,
-            BaseReferences<
-              _$AppDatabase,
-              $FlashcardTableTable,
-              FlashcardEntity
-            >,
-          ),
-          FlashcardEntity,
-          PrefetchHooks Function()
+          $FlashcardProgressTable,
+          FlashcardProgressEntity,
+          $$FlashcardProgressTableFilterComposer,
+          $$FlashcardProgressTableOrderingComposer,
+          $$FlashcardProgressTableAnnotationComposer,
+          $$FlashcardProgressTableCreateCompanionBuilder,
+          $$FlashcardProgressTableUpdateCompanionBuilder,
+          (FlashcardProgressEntity, $$FlashcardProgressTableReferences),
+          FlashcardProgressEntity,
+          PrefetchHooks Function({bool contentId})
         > {
-  $$FlashcardTableTableTableManager(
+  $$FlashcardProgressTableTableManager(
     _$AppDatabase db,
-    $FlashcardTableTable table,
+    $FlashcardProgressTable table,
   ) : super(
         TableManagerState(
           db: db,
           table: table,
           createFilteringComposer: () =>
-              $$FlashcardTableTableFilterComposer($db: db, $table: table),
+              $$FlashcardProgressTableFilterComposer($db: db, $table: table),
           createOrderingComposer: () =>
-              $$FlashcardTableTableOrderingComposer($db: db, $table: table),
+              $$FlashcardProgressTableOrderingComposer($db: db, $table: table),
           createComputedFieldComposer: () =>
-              $$FlashcardTableTableAnnotationComposer($db: db, $table: table),
+              $$FlashcardProgressTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
           updateCompanionCallback:
               ({
-                Value<int> id = const Value.absent(),
-                Value<int?> remoteId = const Value.absent(),
-                Value<String> deckName = const Value.absent(),
-                Value<String> frontText = const Value.absent(),
-                Value<String> backText = const Value.absent(),
-                Value<String?> sourceArticleId = const Value.absent(),
+                Value<int> contentId = const Value.absent(),
                 Value<double> easeFactor = const Value.absent(),
                 Value<int?> interval = const Value.absent(),
                 Value<int?> repetitions = const Value.absent(),
                 Value<DateTime?> nextDueAt = const Value.absent(),
                 Value<int?> lastQuality = const Value.absent(),
-                Value<DateTime> createdAt = const Value.absent(),
-                Value<DateTime?> updatedAt = const Value.absent(),
-                Value<String?> parentCategory = const Value.absent(),
-                Value<String?> track = const Value.absent(),
-                Value<String?> category = const Value.absent(),
-              }) => FlashcardTableCompanion(
-                id: id,
-                remoteId: remoteId,
-                deckName: deckName,
-                frontText: frontText,
-                backText: backText,
-                sourceArticleId: sourceArticleId,
+              }) => FlashcardProgressCompanion(
+                contentId: contentId,
                 easeFactor: easeFactor,
                 interval: interval,
                 repetitions: repetitions,
                 nextDueAt: nextDueAt,
                 lastQuality: lastQuality,
-                createdAt: createdAt,
-                updatedAt: updatedAt,
-                parentCategory: parentCategory,
-                track: track,
-                category: category,
               ),
           createCompanionCallback:
               ({
-                Value<int> id = const Value.absent(),
-                Value<int?> remoteId = const Value.absent(),
-                required String deckName,
-                required String frontText,
-                required String backText,
-                Value<String?> sourceArticleId = const Value.absent(),
+                Value<int> contentId = const Value.absent(),
                 Value<double> easeFactor = const Value.absent(),
                 Value<int?> interval = const Value.absent(),
                 Value<int?> repetitions = const Value.absent(),
                 Value<DateTime?> nextDueAt = const Value.absent(),
                 Value<int?> lastQuality = const Value.absent(),
-                Value<DateTime> createdAt = const Value.absent(),
-                Value<DateTime?> updatedAt = const Value.absent(),
-                Value<String?> parentCategory = const Value.absent(),
-                Value<String?> track = const Value.absent(),
-                Value<String?> category = const Value.absent(),
-              }) => FlashcardTableCompanion.insert(
-                id: id,
-                remoteId: remoteId,
-                deckName: deckName,
-                frontText: frontText,
-                backText: backText,
-                sourceArticleId: sourceArticleId,
+              }) => FlashcardProgressCompanion.insert(
+                contentId: contentId,
                 easeFactor: easeFactor,
                 interval: interval,
                 repetitions: repetitions,
                 nextDueAt: nextDueAt,
                 lastQuality: lastQuality,
-                createdAt: createdAt,
-                updatedAt: updatedAt,
-                parentCategory: parentCategory,
-                track: track,
-                category: category,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$FlashcardProgressTableReferences(db, table, e),
+                ),
+              )
               .toList(),
-          prefetchHooksCallback: null,
+          prefetchHooksCallback: ({contentId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (contentId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.contentId,
+                                referencedTable:
+                                    $$FlashcardProgressTableReferences
+                                        ._contentIdTable(db),
+                                referencedColumn:
+                                    $$FlashcardProgressTableReferences
+                                        ._contentIdTable(db)
+                                        .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
         ),
       );
 }
 
-typedef $$FlashcardTableTableProcessedTableManager =
+typedef $$FlashcardProgressTableProcessedTableManager =
     ProcessedTableManager<
       _$AppDatabase,
-      $FlashcardTableTable,
-      FlashcardEntity,
-      $$FlashcardTableTableFilterComposer,
-      $$FlashcardTableTableOrderingComposer,
-      $$FlashcardTableTableAnnotationComposer,
-      $$FlashcardTableTableCreateCompanionBuilder,
-      $$FlashcardTableTableUpdateCompanionBuilder,
-      (
-        FlashcardEntity,
-        BaseReferences<_$AppDatabase, $FlashcardTableTable, FlashcardEntity>,
-      ),
-      FlashcardEntity,
-      PrefetchHooks Function()
+      $FlashcardProgressTable,
+      FlashcardProgressEntity,
+      $$FlashcardProgressTableFilterComposer,
+      $$FlashcardProgressTableOrderingComposer,
+      $$FlashcardProgressTableAnnotationComposer,
+      $$FlashcardProgressTableCreateCompanionBuilder,
+      $$FlashcardProgressTableUpdateCompanionBuilder,
+      (FlashcardProgressEntity, $$FlashcardProgressTableReferences),
+      FlashcardProgressEntity,
+      PrefetchHooks Function({bool contentId})
     >;
 typedef $$ClinicalCasesTableCreateCompanionBuilder =
     ClinicalCasesCompanion Function({
@@ -11737,10 +12812,14 @@ class $AppDatabaseManager {
       $$StudySessionsTableTableManager(_db, _db.studySessions);
   $$QuizSessionsTableTableManager get quizSessions =>
       $$QuizSessionsTableTableManager(_db, _db.quizSessions);
-  $$QuizTableTableTableManager get quizTable =>
-      $$QuizTableTableTableManager(_db, _db.quizTable);
-  $$FlashcardTableTableTableManager get flashcardTable =>
-      $$FlashcardTableTableTableManager(_db, _db.flashcardTable);
+  $$QuizContentTableTableManager get quizContent =>
+      $$QuizContentTableTableManager(_db, _db.quizContent);
+  $$QuizProgressTableTableManager get quizProgress =>
+      $$QuizProgressTableTableManager(_db, _db.quizProgress);
+  $$FlashcardContentTableTableManager get flashcardContent =>
+      $$FlashcardContentTableTableManager(_db, _db.flashcardContent);
+  $$FlashcardProgressTableTableManager get flashcardProgress =>
+      $$FlashcardProgressTableTableManager(_db, _db.flashcardProgress);
   $$ClinicalCasesTableTableManager get clinicalCases =>
       $$ClinicalCasesTableTableManager(_db, _db.clinicalCases);
   $$CaseStagesTableTableManager get caseStages =>

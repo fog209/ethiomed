@@ -13,14 +13,21 @@ import '../../../core/database/app_database.dart';
 /// reference content with ZERO user/progress columns are eligible:
 ///   - `articles` — synced from Supabase `articles`, no user state.
 ///   - `section_registry` — synced from Supabase `section_registry`, no user state.
+///   - `quiz_content` — server-sourced quiz question text (stem, options,
+///     explanation, etc.), synced from Supabase `questions`. The user's SM-2
+///     scheduling state lives in the SEPARATE `quiz_progress` table, which is
+///     deliberately NOT in this list, so wiping `quiz_content` on re-sync
+///     preserves all spaced-repetition progress.
+///   - `flashcard_content` — server-sourced flashcard front/back text, synced
+///     from Supabase `flashcards`. User SM-2 state lives in `flashcard_progress`
+///     (excluded, preserved on re-sync).
 ///
 /// Intentionally EXCLUDED (would cause real data loss / violate the
 /// "never touch SM-2 / notes / saved" rule):
-///   - `quiz_table` / `flashcard_table` — these rows fuse server content AND
-///     the user's SM-2 scheduling state (sr_interval, repetitions, next_due_at,
-///     ease_factor, interval, last_quality) in the same columns. A content-only
-///     resync is NOT possible without a schema split (separate content vs
-///     SR-state tables). Backlog item — do NOT attempt in this batch.
+///   - `quiz_progress` / `flashcard_progress` — the user's SM-2 scheduling
+///     state (sr_interval, repetitions, next_due_at, ease_factor, interval,
+///     last_quality, wrong_count). Split out of the old fused `quiz_table` /
+///     `flashcard_table` rows so content re-sync can no longer wipe progress.
 ///   - `article_notes` (Notes), `bookmarks` (Saved), `learnt` — local
 ///     user-generated data.
 ///   - `study_sessions`, `quiz_sessions`, `quiz_attempt_details`, `view_history`
@@ -30,6 +37,8 @@ import '../../../core/database/app_database.dart';
 const List<String> kContentResetAllowlist = <String>[
   'articles',
   'section_registry',
+  'quiz_content',
+  'flashcard_content',
 ];
 
 /// Aggregate of what the reset touched, for reporting/telemetry.

@@ -142,9 +142,12 @@ class StudySessions extends Table {
     DateTimeColumn get answeredAt => dateTime().clientDefault(DateTime.now)();
   }
 
-  @TableIndex(name: 'idx_quiz_table_category', columns: {#category})
-  @DataClassName('QuizQuestionEntity')
-  class QuizTable extends Table {
+/// Server-sourced quiz content (question text). Safe to wipe / re-sync —
+/// the `Clear cache / Force re-sync` panic button targets THIS table. The
+/// user's SM-2 scheduling state lives in [QuizProgress] and is never cleared.
+@TableIndex(name: 'idx_quiz_content_category', columns: {#category})
+@DataClassName('QuizContentEntity')
+class QuizContent extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get remoteId => text().unique()();
   TextColumn get articleId => text()();
@@ -159,24 +162,17 @@ class StudySessions extends Table {
   TextColumn get difficulty => text().withDefault(const Constant('medium'))();
   TextColumn get testedField =>
       text().withDefault(const Constant('clinicalFeatures'))();
-  IntColumn get wrongCount => integer().withDefault(const Constant(0))();
-  DateTimeColumn get lastAttemptedAt => dateTime().nullable()();
-  IntColumn get srInterval => integer().nullable()();
-  IntColumn get repetitions => integer().nullable()();
-  DateTimeColumn get nextDueAt => dateTime().nullable()();
-  RealColumn get easeFactor => real().withDefault(const Constant(2.5))();
-  IntColumn get lastQuality => integer().nullable()();
 
-/// Mirror of Supabase `updated_at` used for incremental sync.
+  /// Mirror of Supabase `updated_at` used for incremental sync.
   DateTimeColumn get updatedAt => dateTime().nullable()();
 
-/// Parent category for taxonomy synchronization.
+  /// Parent category for taxonomy synchronization.
   TextColumn get parentCategory => text().nullable()();
 
-/// Source type: 'original' or 'past_exam'. Nullable; treat NULL as 'original'.
-   TextColumn get sourceType => text().nullable()();
+  /// Source type: 'original' or 'past_exam'. Nullable; treat NULL as 'original'.
+  TextColumn get sourceType => text().nullable()();
 
-/// Exam year, e.g., 2022, 2023.
+  /// Exam year, e.g., 2022, 2023.
   IntColumn get examYear => integer().nullable()();
 
   /// Exam source description, e.g., "EHPLE October".
@@ -188,21 +184,39 @@ class StudySessions extends Table {
   TextColumn get attendingTip => text().nullable()();
 }
 
-@TableIndex(name: 'idx_flashcard_deck', columns: {#deckName})
-@TableIndex(name: 'idx_flashcard_due', columns: {#nextDueAt})
-@DataClassName('FlashcardEntity')
-class FlashcardTable extends Table {
+/// User SM-2 scheduling state for a quiz question, joined to [QuizContent] by
+/// [contentId]. NEVER wiped by the clear-cache button — this is the user's
+/// spaced-repetition progress.
+@DataClassName('QuizProgressEntity')
+class QuizProgress extends Table {
+  IntColumn get contentId => integer().references(QuizContent, #id)();
+  RealColumn get easeFactor => real().withDefault(const Constant(2.5))();
+  IntColumn get srInterval => integer().nullable()();
+  IntColumn get repetitions => integer().nullable()();
+  DateTimeColumn get nextDueAt => dateTime().nullable()();
+  IntColumn get lastQuality => integer().nullable()();
+
+  /// Wrong-answer tally (user progress, preserved across content re-sync).
+  IntColumn get wrongCount => integer().withDefault(const Constant(0))();
+
+  /// Last time the user attempted this question (user progress).
+  DateTimeColumn get lastAttemptedAt => dateTime().nullable()();
+
+  @override
+  Set<Column> get primaryKey => {contentId};
+}
+
+/// Server-sourced flashcard content (front/back text). Safe to wipe / re-sync.
+/// The user's SM-2 scheduling state lives in [FlashcardProgress].
+@TableIndex(name: 'idx_flashcard_content_deck', columns: {#deckName})
+@DataClassName('FlashcardContentEntity')
+class FlashcardContent extends Table {
   IntColumn get id => integer().autoIncrement()();
   IntColumn get remoteId => integer().unique().nullable()();
   TextColumn get deckName => text()();
   TextColumn get frontText => text()();
   TextColumn get backText => text()();
   TextColumn get sourceArticleId => text().nullable()();
-  RealColumn get easeFactor => real().withDefault(const Constant(2.5))();
-  IntColumn get interval => integer().nullable()();
-  IntColumn get repetitions => integer().nullable()();
-  DateTimeColumn get nextDueAt => dateTime().nullable()();
-  IntColumn get lastQuality => integer().nullable()();
   DateTimeColumn get createdAt => dateTime().clientDefault(DateTime.now)();
 
   /// Mirror of Supabase `updated_at` used for incremental sync.
@@ -212,13 +226,26 @@ class FlashcardTable extends Table {
   TextColumn get parentCategory => text().nullable()();
 
   /// High-level track classification: 'clinical' | 'preclinical'.
-  /// Nullable until content is categorized.
   TextColumn get track => text().nullable()();
 
-  /// Top-level category matching an AppConfig category string
-  /// (e.g. 'Internal Medicine', 'Pharmacology'). Nullable until content
-  /// is categorized.
+  /// Top-level category matching an AppConfig category string.
   TextColumn get category => text().nullable()();
+}
+
+/// User SM-2 scheduling state for a flashcard, joined to [FlashcardContent] by
+/// [contentId]. NEVER wiped by the clear-cache button.
+@TableIndex(name: 'idx_flashcard_progress_due', columns: {#nextDueAt})
+@DataClassName('FlashcardProgressEntity')
+class FlashcardProgress extends Table {
+  IntColumn get contentId => integer().references(FlashcardContent, #id)();
+  RealColumn get easeFactor => real().withDefault(const Constant(2.5))();
+  IntColumn get interval => integer().nullable()();
+  IntColumn get repetitions => integer().nullable()();
+  DateTimeColumn get nextDueAt => dateTime().nullable()();
+  IntColumn get lastQuality => integer().nullable()();
+
+  @override
+  Set<Column> get primaryKey => {contentId};
 }
 
 class ClinicalCases extends Table {
@@ -281,15 +308,17 @@ class CaseProgress extends Table {
       Learnt,
       ArticleNotes,
       StudySessions,
-     QuizSessions,
-     QuizTable,
-     FlashcardTable,
-     ClinicalCases,
-     CaseStages,
-     CaseOptions,
-     CaseProgress,
-     QuizAttemptDetails,
-   ],
+      QuizSessions,
+      QuizContent,
+      QuizProgress,
+      FlashcardContent,
+      FlashcardProgress,
+      ClinicalCases,
+      CaseStages,
+      CaseOptions,
+      CaseProgress,
+      QuizAttemptDetails,
+    ],
  )
   class AppDatabase extends _$AppDatabase {
    AppDatabase() : super(_openConnection());
@@ -300,7 +329,7 @@ class CaseProgress extends Table {
   AppDatabase.withExecutor(super.executor);
 
     @override
-    int get schemaVersion => 25;
+    int get schemaVersion => 26;
 
   Future<void> _runMigrationStep(
     String name,
@@ -364,7 +393,10 @@ class CaseProgress extends Table {
   @override
   MigrationStrategy get migration {
     return MigrationStrategy(
-      onCreate: (m) async => await m.createAll(),
+      onCreate: (m) async {
+        await m.createAll();
+        await _createCompatibilityViews();
+      },
       onUpgrade: (m, from, to) async {
         if (from < 2) {
           await _runMigrationStep(
@@ -405,29 +437,44 @@ class CaseProgress extends Table {
           }
           await _runMigrationStep(
             'create quiz table',
-            () => m.createTable(quizTable),
+            () => customStatement('''
+              CREATE TABLE IF NOT EXISTS quiz_table (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                remote_id TEXT UNIQUE,
+                article_id TEXT NOT NULL,
+                stem TEXT NOT NULL,
+                option_a TEXT NOT NULL,
+                option_b TEXT NOT NULL,
+                option_c TEXT NOT NULL,
+                option_d TEXT NOT NULL,
+                correct_option TEXT NOT NULL,
+                explanation TEXT,
+                category TEXT NOT NULL,
+                difficulty TEXT NOT NULL DEFAULT 'medium',
+                tested_field TEXT NOT NULL DEFAULT 'clinicalFeatures',
+                wrong_count INTEGER NOT NULL DEFAULT 0,
+                last_attempted_at INTEGER
+              )
+            '''),
           );
         }
         if (from < 5) {
           await _runMigrationStep(
             'add quiz srInterval',
-            () => m.addColumn(
-              quizTable,
-              quizTable.srInterval as GeneratedColumn<Object>,
+            () => customStatement(
+              'ALTER TABLE quiz_table ADD COLUMN sr_interval INTEGER',
             ),
           );
           await _runMigrationStep(
             'add quiz repetitions',
-            () => m.addColumn(
-              quizTable,
-              quizTable.repetitions as GeneratedColumn<Object>,
+            () => customStatement(
+              'ALTER TABLE quiz_table ADD COLUMN repetitions INTEGER',
             ),
           );
           await _runMigrationStep(
             'add quiz nextDueAt',
-            () => m.addColumn(
-              quizTable,
-              quizTable.nextDueAt as GeneratedColumn<Object>,
+            () => customStatement(
+              'ALTER TABLE quiz_table ADD COLUMN next_due_at INTEGER',
             ),
           );
         }
@@ -482,22 +529,38 @@ class CaseProgress extends Table {
         if (from < 11) {
           await _runMigrationStep(
             'create flashcard table',
-            () => m.createTable(flashcardTable),
+            () => customStatement('''
+              CREATE TABLE IF NOT EXISTS flashcard_table (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                deck_name TEXT NOT NULL,
+                front_text TEXT NOT NULL,
+                back_text TEXT NOT NULL,
+                source_article_id TEXT,
+                ease_factor REAL,
+                interval INTEGER,
+                repetitions INTEGER,
+                next_due_at INTEGER,
+                last_quality INTEGER,
+                created_at INTEGER,
+                updated_at INTEGER,
+                parent_category TEXT
+              )
+            '''),
           );
         }
         if (from < 12) {
           await _runMigrationStep('add updated_at columns', () async {
-            await _addUpdatedAtColumnIfMissing(quizTable);
-            await _addUpdatedAtColumnIfMissing(flashcardTable);
+            await _addUpdatedAtColumnIfMissing('quiz_table');
+            await _addUpdatedAtColumnIfMissing('flashcard_table');
           });
         }
 
-if (from < 13) {
+ if (from < 13) {
           await _runMigrationStep(
             'add flashcard remote_id + updated_at + parent_category',
             () async {
               // remote_id (INTEGER)
-              final flashcardTableName = flashcardTable.actualTableName;
+              final flashcardTableName = 'flashcard_table';
               final columns = await customSelect(
                 'PRAGMA table_info($flashcardTableName)',
               ).get();
@@ -512,7 +575,7 @@ if (from < 13) {
               }
 
               // updated_at (may exist already, but safe to ensure)
-              await _addUpdatedAtColumnIfMissing(flashcardTable);
+              await _addUpdatedAtColumnIfMissing('flashcard_table');
 
               // parent_category
               if (!columnNames.contains('parent_category')) {
@@ -525,8 +588,8 @@ if (from < 13) {
 
           // Ensure quiz updated_at and parent_category exist for cursor sync.
           await _runMigrationStep('ensure quiz sync columns', () async {
-            await _addUpdatedAtColumnIfMissing(quizTable);
-            final quizTableName = quizTable.actualTableName;
+            await _addUpdatedAtColumnIfMissing('quiz_table');
+            final quizTableName = 'quiz_table';
             final columns = await customSelect(
               'PRAGMA table_info($quizTableName)',
             ).get();
@@ -601,7 +664,7 @@ if (!columnNames.contains('exam_source')) {
                   CREATE TABLE IF NOT EXISTS quiz_attempt_details (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     session_id INTEGER NOT NULL REFERENCES quiz_sessions(id),
-                    question_id INTEGER NOT NULL REFERENCES quiz_table(id),
+                    question_id INTEGER NOT NULL REFERENCES quiz_content(id),
                     selected_option TEXT,
                     is_correct INTEGER NOT NULL DEFAULT 0,
                     confidence_level INTEGER,
@@ -670,6 +733,74 @@ if (!columnNames.contains('exam_source')) {
                       'ADD COLUMN confidence_level INTEGER',
                     );
                   }
+                },
+              );
+            }
+            if (from < 26) {
+              await _runMigrationStep(
+                'split quiz/flashcard content from SR progress',
+                () async {
+                  // 1. Create the four split tables (idempotent).
+                  await m.createTable(quizContent);
+                  await m.createTable(quizProgress);
+                  await m.createTable(flashcardContent);
+                  await m.createTable(flashcardProgress);
+
+                  // 2. Only backfill + drop when the legacy fused tables exist
+                  //    (a fresh DB created at v26 already has the new tables).
+                  final legacy = await customSelect(
+                    "SELECT name FROM sqlite_master "
+                    "WHERE type = 'table' AND name = 'quiz_table'",
+                  ).get();
+
+                  if (legacy.isNotEmpty) {
+                    await customStatement('''
+                        INSERT OR IGNORE INTO quiz_content
+                          (id, remote_id, article_id, stem, option_a, option_b,
+                           option_c, option_d, correct_option, explanation, category,
+                           difficulty, tested_field, updated_at, parent_category,
+                           source_type, exam_year, exam_source, attending_tip)
+                        SELECT id, remote_id, article_id, stem, option_a, option_b,
+                           option_c, option_d, correct_option, explanation, category,
+                           difficulty, tested_field, updated_at, parent_category,
+                           source_type, exam_year, exam_source, attending_tip
+                        FROM quiz_table
+                      ''');
+                    await customStatement('''
+                      INSERT OR IGNORE INTO quiz_progress
+                        (content_id, ease_factor, sr_interval, repetitions,
+                         next_due_at, last_quality, wrong_count, last_attempted_at)
+                      SELECT id, COALESCE(ease_factor, 2.5), sr_interval, repetitions,
+                         next_due_at, last_quality, COALESCE(wrong_count, 0),
+                         last_attempted_at
+                      FROM quiz_table
+                    ''');
+                    await customStatement('''
+                      INSERT OR IGNORE INTO flashcard_content
+                        (id, remote_id, deck_name, front_text, back_text,
+                         source_article_id, created_at, updated_at, parent_category,
+                         track, category)
+                      SELECT id, remote_id, deck_name, front_text, back_text,
+                         source_article_id, COALESCE(created_at, 0), updated_at,
+                         parent_category, track, category
+                      FROM flashcard_table
+                    ''');
+                    await customStatement('''
+                      INSERT OR IGNORE INTO flashcard_progress
+                        (content_id, ease_factor, interval, repetitions,
+                         next_due_at, last_quality)
+                      SELECT id, COALESCE(ease_factor, 2.5), interval, repetitions,
+                         next_due_at, last_quality
+                      FROM flashcard_table
+                    ''');
+
+                    // 3. Drop the legacy fused tables and expose compatibility
+                    //    views so unchanged read paths keep working.
+                    await customStatement('DROP TABLE IF EXISTS quiz_table');
+                    await customStatement('DROP TABLE IF EXISTS flashcard_table');
+                  }
+
+                  await _createCompatibilityViews();
                 },
               );
             }
@@ -1235,9 +1366,8 @@ if (!columnNames.contains('quiz_correct')) {
     }
   }
 
-  Future<void> _addUpdatedAtColumnIfMissing(dynamic table) async {
+  Future<void> _addUpdatedAtColumnIfMissing(String tableName) async {
     // Use PRAGMA to detect column existence to keep migration step safe.
-    final tableName = table.actualTableName;
     final columns = await customSelect('PRAGMA table_info($tableName)').get();
     final columnNames = columns.map((row) => row.read<String>('name')).toSet();
 
@@ -1246,6 +1376,77 @@ if (!columnNames.contains('quiz_correct')) {
         'ALTER TABLE $tableName ADD COLUMN updated_at INTEGER',
       );
     }
+  }
+
+  /// Creates the `quiz_table` / `flashcard_table` read-only views that JOIN the
+  /// split content + progress tables. These let legacy read paths (analytics,
+  /// search, notifications, etc.) keep querying by the old table names while
+  /// the underlying storage is physically separated. Writes go to the base
+  /// tables directly (see quiz_repository / spaced_repetition_service /
+  /// flashcard_review_service).
+  Future<void> _createCompatibilityViews() async {
+    // Drop BOTH a physical table and a view before creating the view. A raw
+    // `DROP VIEW IF EXISTS` is a no-op against a physical table, which would
+    // make the subsequent `CREATE VIEW` throw "table already exists" when the
+    // compatibility name still belongs to a legacy fused table during upgrade.
+    await customStatement('DROP TABLE IF EXISTS quiz_table');
+    await customStatement('DROP VIEW IF EXISTS quiz_table');
+    await customStatement('DROP TABLE IF EXISTS flashcard_table');
+    await customStatement('DROP VIEW IF EXISTS flashcard_table');
+    await customStatement('''
+      CREATE VIEW quiz_table AS
+      SELECT
+        c.id AS id,
+        c.remote_id AS remote_id,
+        c.article_id AS article_id,
+        c.stem AS stem,
+        c.option_a AS option_a,
+        c.option_b AS option_b,
+        c.option_c AS option_c,
+        c.option_d AS option_d,
+        c.correct_option AS correct_option,
+        c.explanation AS explanation,
+        c.category AS category,
+        c.difficulty AS difficulty,
+        c.tested_field AS tested_field,
+        COALESCE(p.wrong_count, 0) AS wrong_count,
+        p.last_attempted_at AS last_attempted_at,
+        p.sr_interval AS sr_interval,
+        p.repetitions AS repetitions,
+        p.next_due_at AS next_due_at,
+        p.ease_factor AS ease_factor,
+        p.last_quality AS last_quality,
+        c.updated_at AS updated_at,
+        c.parent_category AS parent_category,
+        c.source_type AS source_type,
+        c.exam_year AS exam_year,
+        c.exam_source AS exam_source,
+        c.attending_tip AS attending_tip
+      FROM quiz_content c
+      LEFT JOIN quiz_progress p ON p.content_id = c.id
+    ''');
+    await customStatement('''
+      CREATE VIEW flashcard_table AS
+      SELECT
+        c.id AS id,
+        c.remote_id AS remote_id,
+        c.deck_name AS deck_name,
+        c.front_text AS front_text,
+        c.back_text AS back_text,
+        c.source_article_id AS source_article_id,
+        c.created_at AS created_at,
+        c.updated_at AS updated_at,
+        c.parent_category AS parent_category,
+        c.track AS track,
+        c.category AS category,
+        p.ease_factor AS ease_factor,
+        p.interval AS interval,
+        p.repetitions AS repetitions,
+        p.next_due_at AS next_due_at,
+        p.last_quality AS last_quality
+      FROM flashcard_content c
+      LEFT JOIN flashcard_progress p ON p.content_id = c.id
+    ''');
   }
 
   String _dateKey(DateTime date) {
@@ -1338,6 +1539,114 @@ class NoteWithArticle {
   final String noteText;
   final DateTime updatedAt;
   final String? articleTitle;
+}
+
+/// Plain data model for a quiz question. Carries BOTH server-sourced content
+/// fields and the user's local SM-2 state so existing call sites (which only
+/// ever dealt with the fused `quiz_table` row) keep working unchanged.
+///
+/// The underlying storage is split into [QuizContent] (server content, safe to
+/// wipe / re-sync) and [QuizProgress] (user SM-2 state, preserved), joined by
+/// `id` ↔ `QuizProgress.contentId`. The `quiz_table` view re-assembles these
+/// for read paths; writers target the base tables directly.
+class QuizQuestionEntity {
+  const QuizQuestionEntity({
+    required this.id,
+    required this.remoteId,
+    required this.articleId,
+    required this.stem,
+    required this.optionA,
+    required this.optionB,
+    required this.optionC,
+    required this.optionD,
+    required this.correctOption,
+    required this.explanation,
+    required this.category,
+    required this.difficulty,
+    required this.testedField,
+    this.wrongCount = 0,
+    this.lastAttemptedAt,
+    this.srInterval,
+    this.repetitions,
+    this.nextDueAt,
+    this.easeFactor = 2.5,
+    this.lastQuality,
+    this.updatedAt,
+    this.parentCategory,
+    this.sourceType,
+    this.examYear,
+    this.examSource,
+    this.attendingTip,
+  });
+
+  final int id;
+  final String remoteId;
+  final String articleId;
+  final String stem;
+  final String optionA;
+  final String optionB;
+  final String optionC;
+  final String optionD;
+  final String correctOption;
+  final String explanation;
+  final String category;
+  final String difficulty;
+  final String testedField;
+  final int wrongCount;
+  final DateTime? lastAttemptedAt;
+  final int? srInterval;
+  final int? repetitions;
+  final DateTime? nextDueAt;
+  final double easeFactor;
+  final int? lastQuality;
+  final DateTime? updatedAt;
+  final String? parentCategory;
+  final String? sourceType;
+  final int? examYear;
+  final String? examSource;
+  final String? attendingTip;
+}
+
+/// Plain data model for a flashcard (server content + local SM-2 state).
+/// Mirrors the [QuizQuestionEntity] split rationale: storage is
+/// [FlashcardContent] + [FlashcardProgress], re-assembled by the
+/// `flashcard_table` view for reads.
+class FlashcardEntity {
+  const FlashcardEntity({
+    required this.id,
+    required this.deckName,
+    required this.frontText,
+    required this.backText,
+    this.remoteId,
+    this.sourceArticleId,
+    this.easeFactor = 2.5,
+    this.interval,
+    this.repetitions,
+    this.nextDueAt,
+    this.lastQuality,
+    required this.createdAt,
+    this.updatedAt,
+    this.parentCategory,
+    this.track,
+    this.category,
+  });
+
+  final int id;
+  final int? remoteId;
+  final String deckName;
+  final String frontText;
+  final String backText;
+  final String? sourceArticleId;
+  final double easeFactor;
+  final int? interval;
+  final int? repetitions;
+  final DateTime? nextDueAt;
+  final int? lastQuality;
+  final DateTime createdAt;
+  final DateTime? updatedAt;
+  final String? parentCategory;
+  final String? track;
+  final String? category;
 }
 
 LazyDatabase _openConnection() {

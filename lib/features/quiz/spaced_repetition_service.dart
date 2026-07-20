@@ -8,6 +8,35 @@ import '../../../core/database/app_database.dart';
 import '../../../core/errors/app_exception.dart';
 import '../../../core/services/notification_service.dart';
 
+/// Joined SELECT that re-assembles a quiz question's content (quiz_content)
+/// with its user SM-2 state (quiz_progress). Used by every read path here so
+/// the split storage stays invisible to callers.
+const String _quizJoin = '''
+  SELECT
+    c.id AS id,
+    c.remote_id AS remote_id,
+    c.article_id AS article_id,
+    c.stem AS stem,
+    c.option_a AS option_a,
+    c.option_b AS option_b,
+    c.option_c AS option_c,
+    c.option_d AS option_d,
+    c.correct_option AS correct_option,
+    c.explanation AS explanation,
+    c.category AS category,
+    c.difficulty AS difficulty,
+    c.tested_field AS tested_field,
+    COALESCE(p.wrong_count, 0) AS wrong_count,
+    p.last_attempted_at AS last_attempted_at,
+    p.sr_interval AS sr_interval,
+    p.repetitions AS repetitions,
+    p.next_due_at AS next_due_at,
+    p.ease_factor AS ease_factor,
+    p.last_quality AS last_quality
+  FROM quiz_content c
+  LEFT JOIN quiz_progress p ON p.content_id = c.id
+''';
+
 class SpacedRepetitionReviewResult {
   const SpacedRepetitionReviewResult({
     required this.interval,
@@ -44,14 +73,13 @@ class SpacedRepetitionService {
       final rows = await _db
           .customSelect(
             '''
-            SELECT *
-            FROM quiz_table
-            WHERE category = ?
-              AND (next_due_at IS NULL OR next_due_at <= ?)
+            $_quizJoin
+            WHERE c.category = ?
+              AND (p.next_due_at IS NULL OR p.next_due_at <= ?)
             ORDER BY
-              CASE WHEN next_due_at IS NULL THEN 0 ELSE 1 END,
-              next_due_at ASC,
-              id ASC
+              CASE WHEN p.next_due_at IS NULL THEN 0 ELSE 1 END,
+              p.next_due_at ASC,
+              c.id ASC
             ''',
             variables: [Variable(category.trim()), Variable(now)],
           )
@@ -64,7 +92,7 @@ class SpacedRepetitionService {
     }
   }
 
-Future<SpacedRepetitionReviewResult> recordReview(int id, int quality) async {
+  Future<SpacedRepetitionReviewResult> recordReview(int id, int quality) async {
     try {
       return await _db.transaction(() async {
         final question = await _getQuestion(id);
@@ -72,7 +100,7 @@ Future<SpacedRepetitionReviewResult> recordReview(int id, int quality) async {
           throw AppException('Quiz question not found.');
         }
 
-final schedule = _calculateSchedule(
+        final schedule = _calculateSchedule(
           easeFactor: question.easeFactor,
           interval: question.srInterval ?? 0,
           repetitions: question.repetitions ?? 0,
@@ -83,21 +111,27 @@ final schedule = _calculateSchedule(
         final wrongCountDecrement = quality >= 3 && question.wrongCount > 0 ? 1 : 0;
         final newWrongCount = max(0, question.wrongCount - wrongCountDecrement);
 
+        // Persist SM-2 state to quiz_progress (joined by content id). UPSERT so
+        // a freshly-synced question that has never been reviewed still records
+        // its first review.
         await _db
             .customSelect(
               '''
-          UPDATE quiz_table
-          SET
-            ease_factor = ?,
-            sr_interval = ?,
-            repetitions = ?,
-            next_due_at = ?,
-            last_quality = ?,
-            wrong_count = ?,
-            last_attempted_at = ?
-          WHERE id = ?
+          INSERT INTO quiz_progress
+            (content_id, ease_factor, sr_interval, repetitions, next_due_at,
+             last_quality, wrong_count, last_attempted_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+          ON CONFLICT(content_id) DO UPDATE SET
+            ease_factor = excluded.ease_factor,
+            sr_interval = excluded.sr_interval,
+            repetitions = excluded.repetitions,
+            next_due_at = excluded.next_due_at,
+            last_quality = excluded.last_quality,
+            wrong_count = excluded.wrong_count,
+            last_attempted_at = excluded.last_attempted_at
           ''',
               variables: [
+                Variable(id),
                 Variable(schedule.easeFactor),
                 Variable(schedule.interval),
                 Variable(schedule.repetitions),
@@ -105,7 +139,6 @@ final schedule = _calculateSchedule(
                 Variable(quality),
                 Variable(newWrongCount),
                 Variable(DateTime.now()),
-                Variable(id),
               ],
             )
             .get();
@@ -138,7 +171,7 @@ final schedule = _calculateSchedule(
         .customSelect(
           '''
           SELECT COUNT(*) AS count
-          FROM quiz_table
+          FROM quiz_progress
           WHERE next_due_at IS NULL
              OR (next_due_at >= ? AND next_due_at < ?)
           ''',
@@ -150,10 +183,10 @@ final schedule = _calculateSchedule(
     return rows.single.read<int>('count');
   }
 
-  Future<_QuizQuestionSchedule?> _getQuestion(int id) async {
+  Future<QuizQuestionEntity?> _getQuestion(int id) async {
     final rows = await _db
         .customSelect(
-          'SELECT * FROM quiz_table WHERE id = ? LIMIT 1',
+          '$_quizJoin WHERE c.id = ? LIMIT 1',
           variables: [Variable(id)],
         )
         .get();
@@ -165,8 +198,8 @@ final schedule = _calculateSchedule(
     return _questionFromRow(rows.first);
   }
 
-  _QuizQuestionSchedule _questionFromRow(QueryRow row) {
-    return _QuizQuestionSchedule(
+  QuizQuestionEntity _questionFromRow(QueryRow row) {
+    return QuizQuestionEntity(
       id: row.read<int>('id'),
       remoteId: row.read<String>('remote_id'),
       articleId: row.read<String>('article_id'),
@@ -182,8 +215,11 @@ final schedule = _calculateSchedule(
       testedField: row.read<String?>('tested_field') ?? 'clinicalFeatures',
       wrongCount: row.read<int?>('wrong_count') ?? 0,
       lastAttemptedAt: row.read<DateTime?>('last_attempted_at'),
+      srInterval: row.read<int?>('sr_interval'),
+      repetitions: row.read<int?>('repetitions'),
+      nextDueAt: row.read<DateTime?>('next_due_at'),
       easeFactor: row.read<double?>('ease_factor') ?? 2.5,
-      repetitions: row.read<int?>('repetitions') ?? 0,
+      lastQuality: row.read<int?>('last_quality'),
     );
   }
 
@@ -228,25 +264,3 @@ final spacedRepetitionServiceProvider = Provider<SpacedRepetitionService>((
     notificationService: NotificationService(ref.watch(databaseProvider)),
   );
 });
-
-class _QuizQuestionSchedule extends QuizQuestionEntity {
-  const _QuizQuestionSchedule({
-    required super.id,
-    required super.remoteId,
-    required super.articleId,
-    required super.stem,
-    required super.optionA,
-    required super.optionB,
-    required super.optionC,
-    required super.optionD,
-    required super.correctOption,
-    required super.explanation,
-    required super.category,
-    required super.difficulty,
-    required super.testedField,
-    required super.wrongCount,
-    super.lastAttemptedAt,
-    required super.easeFactor,
-    required super.repetitions,
-  });
-}

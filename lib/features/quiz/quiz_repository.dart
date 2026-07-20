@@ -113,16 +113,23 @@ class QuizRepository {
     try {
       await _db.transaction(() async {
         for (final question in questions) {
-          final entity = _companionFromEntity(question);
-          await _db
-              .into(_db.quizTable)
+          final contentId = await _db
+              .into(_db.quizContent)
               .insert(
-                entity,
+                _companionFromEntity(question),
                 onConflict: DoUpdate(
-                  (_) => entity,
-                  target: [_db.quizTable.remoteId],
+                  (_) => _companionFromEntity(question),
+                  target: [_db.quizContent.remoteId],
                 ),
               );
+          // Preserve existing SM-2 progress; only seed a default row for
+          // brand-new content so first-review + due logic work. Never
+          // overwrite a user's spaced-repetition state on re-sync.
+          await _db.customStatement(
+            'INSERT OR IGNORE INTO quiz_progress (content_id, ease_factor) '
+            'VALUES (?, 2.5)',
+            [contentId],
+          );
         }
       });
     } on SqliteException catch (error) {
@@ -141,9 +148,14 @@ class QuizRepository {
   Future<List<QuizQuestionEntity>> getLocalQuestions(String category) async {
     final normalizedCategory = category.trim();
 
-    return (_db.select(
-      _db.quizTable,
-    )..where((table) => table.category.equals(normalizedCategory))).get();
+    final rows = await _db
+        .customSelect(
+          'SELECT * FROM quiz_table WHERE category = ?',
+          variables: [Variable(normalizedCategory)],
+        )
+        .get();
+
+    return rows.map(_questionFromRowSimple).toList(growable: false);
   }
 
   Future<List<QuizQuestionEntity>> getLocalQuestionsByIds(List<int> ids) async {
@@ -348,20 +360,39 @@ class QuizRepository {
 
       await _db.transaction(() async {
         for (final fc in flashcards) {
-          final companion = FlashcardTableCompanion.insert(
-            remoteId: Value(fc.remoteId ?? 0),
-            deckName: fc.deckName,
-            frontText: fc.frontText,
-            backText: fc.backText,
-            sourceArticleId: Value(fc.sourceArticleId ?? ''),
-            easeFactor: Value(fc.easeFactor),
-            createdAt: Value(fc.createdAt),
-            track: Value(fc.track),
-            category: Value(fc.category),
+          final contentId = await _db
+              .into(_db.flashcardContent)
+              .insert(
+                FlashcardContentCompanion.insert(
+                  remoteId: Value(fc.remoteId ?? 0),
+                  deckName: fc.deckName,
+                  frontText: fc.frontText,
+                  backText: fc.backText,
+                  sourceArticleId: Value(fc.sourceArticleId ?? ''),
+                  createdAt: Value(fc.createdAt),
+                  track: Value(fc.track),
+                  category: Value(fc.category),
+                ),
+                onConflict: DoUpdate(
+                  (_) => FlashcardContentCompanion.insert(
+                    remoteId: Value(fc.remoteId ?? 0),
+                    deckName: fc.deckName,
+                    frontText: fc.frontText,
+                    backText: fc.backText,
+                    sourceArticleId: Value(fc.sourceArticleId ?? ''),
+                    createdAt: Value(fc.createdAt),
+                    track: Value(fc.track),
+                    category: Value(fc.category),
+                  ),
+                  target: [_db.flashcardContent.remoteId],
+                ),
+              );
+          // Seed default SM-2 progress; never overwrite an existing row.
+          await _db.customStatement(
+            'INSERT OR IGNORE INTO flashcard_progress (content_id, ease_factor) '
+            'VALUES (?, 2.5)',
+            [contentId],
           );
-          await _db
-              .into(_db.flashcardTable)
-              .insert(companion, onConflict: DoUpdate((_) => companion));
         }
       });
 
@@ -433,9 +464,8 @@ class QuizRepository {
     );
   }
 
-  QuizTableCompanion _companionFromEntity(QuizQuestionEntity question) {
-    return QuizTableCompanion.insert(
-      id: const Value.absent(),
+  QuizContentCompanion _companionFromEntity(QuizQuestionEntity question) {
+    return QuizContentCompanion.insert(
       remoteId: question.remoteId,
       articleId: question.articleId,
       stem: question.stem,

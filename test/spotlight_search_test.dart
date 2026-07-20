@@ -26,16 +26,16 @@ void main() {
             content: const Value('inflammation of the myocardium'),
           ),
         );
-    await db.into(db.flashcardTable).insert(
-          FlashcardTableCompanion.insert(
+    await db.into(db.flashcardContent).insert(
+          FlashcardContentCompanion.insert(
             remoteId: const Value(1),
             deckName: 'Cardio',
             frontText: 'Myocarditis cause?',
             backText: 'Viral',
           ),
         );
-    await db.into(db.quizTable).insert(
-          QuizTableCompanion.insert(
+    await db.into(db.quizContent).insert(
+          QuizContentCompanion.insert(
             remoteId: 'q1',
             articleId: 'a1',
             stem: 'Myocarditis most common cause?',

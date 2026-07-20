@@ -9,8 +9,14 @@ Future<void> logDatabaseCounts() async {
   
   try {
     final articleCount = await (db.select(db.articles)..limit(10000)).get().then((list) => list.length);
-    final questionCount = await (db.select(db.quizTable)..limit(10000)).get().then((list) => list.length);
-    final flashcardCount = await (db.select(db.flashcardTable)..limit(10000)).get().then((list) => list.length);
+    final questionCount = await db
+        .customSelect('SELECT COUNT(*) AS c FROM quiz_content')
+        .get()
+        .then((r) => r.first.read<int>('c'));
+    final flashcardCount = await db
+        .customSelect('SELECT COUNT(*) AS c FROM flashcard_content')
+        .get()
+        .then((r) => r.first.read<int>('c'));
     
     if (!kReleaseMode) {
       debugPrint('=== DATABASE COUNTS ===');
