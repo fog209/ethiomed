@@ -267,6 +267,7 @@ class CaseProgress extends Table {
   IntColumn get totalDecisions => integer().withDefault(const Constant(0))();
   IntColumn get hintsUsed => integer().withDefault(const Constant(0))();
   BoolColumn get examMode => boolean().withDefault(const Constant(false))();
+  IntColumn get confidenceLevel => integer().nullable()();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -299,7 +300,7 @@ class CaseProgress extends Table {
   AppDatabase.withExecutor(super.executor);
 
     @override
-    int get schemaVersion => 24;
+    int get schemaVersion => 25;
 
   Future<void> _runMigrationStep(
     String name,
@@ -649,6 +650,24 @@ if (!columnNames.contains('exam_source')) {
                   if (!columnNames.contains('attending_tip')) {
                     await customStatement(
                       'ALTER TABLE quiz_table ADD COLUMN attending_tip TEXT',
+                    );
+                  }
+                },
+              );
+            }
+            if (from < 25) {
+              await _runMigrationStep(
+                'add case_progress confidence_level column',
+                () async {
+                  final columns = await customSelect(
+                    'PRAGMA table_info(case_progress)',
+                  ).get();
+                  final columnNames =
+                      columns.map((row) => row.read<String>('name')).toSet();
+                  if (!columnNames.contains('confidence_level')) {
+                    await customStatement(
+                      'ALTER TABLE case_progress '
+                      'ADD COLUMN confidence_level INTEGER',
                     );
                   }
                 },

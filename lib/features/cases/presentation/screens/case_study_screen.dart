@@ -18,6 +18,7 @@ class _CaseStudyScreenState extends ConsumerState<CaseStudyScreen> {
   int _correctDecisions = 0;
   int _totalDecisions = 0;
   bool _isCompleted = false;
+  int? _confidence;
 
   @override
   void initState() {
@@ -37,6 +38,7 @@ class _CaseStudyScreenState extends ConsumerState<CaseStudyScreen> {
         _currentStage = p.currentStage;
         _correctDecisions = p.correctDecisions;
         _totalDecisions = p.totalDecisions;
+        _confidence = p.confidenceLevel;
       });
     }
   }
@@ -50,6 +52,7 @@ class _CaseStudyScreenState extends ConsumerState<CaseStudyScreen> {
         currentStage: Value(_currentStage),
         correctDecisions: Value(_correctDecisions),
         totalDecisions: Value(_totalDecisions),
+        confidenceLevel: Value(_confidence),
       ),
       mode: InsertMode.insertOrReplace,
     );
@@ -104,31 +107,46 @@ class _CaseStudyScreenState extends ConsumerState<CaseStudyScreen> {
         foregroundColor: theme.colorScheme.onSurface,
       ),
       body: _isCompleted
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.check_circle,
-                    color: theme.colorScheme.secondary,
-                    size: 64,
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.check_circle,
+                        color: theme.colorScheme.secondary,
+                        size: 64,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Case Complete!',
+                        style: TextStyle(
+                          color: theme.colorScheme.onSurface,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        '$_correctDecisions/$_totalDecisions correct decisions',
+                        style:
+                            TextStyle(color: theme.colorScheme.onSurfaceVariant),
+                      ),
+                      const SizedBox(height: 24),
+                      Text(
+                        'How confident were you with this case?',
+                        style: TextStyle(color: theme.colorScheme.onSurface),
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          _buildConfidenceChip(theme, 1, 'Guessing'),
+                          _buildConfidenceChip(theme, 2, 'Somewhat Sure'),
+                          _buildConfidenceChip(theme, 3, 'Confident'),
+                        ],
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Case Complete!',
-                    style: TextStyle(
-                      color: theme.colorScheme.onSurface,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(
-                    '$_correctDecisions/$_totalDecisions correct decisions',
-                    style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
-                  ),
-                ],
-              ),
-            )
+                )
           : FutureBuilder<List<CaseStage>>(
               future: _loadStageData(db),
               builder: (context, snapshot) {
@@ -202,5 +220,28 @@ class _CaseStudyScreenState extends ConsumerState<CaseStudyScreen> {
           ..where((t) => t.stageId.equals(stageId)))
         .get();
     return rows;
+  }
+
+  Widget _buildConfidenceChip(ThemeData theme, int level, String label) {
+    final isSelected = _confidence == level;
+    return ChoiceChip(
+      label: Text(label),
+      selected: isSelected,
+      onSelected: isSelected
+          ? null
+          : (selected) {
+              if (selected && mounted) {
+                setState(() => _confidence = level);
+                _saveProgress();
+              }
+            },
+      backgroundColor: theme.colorScheme.surfaceContainerHighest,
+      selectedColor: theme.colorScheme.secondary,
+      labelStyle: TextStyle(
+        color: isSelected
+            ? theme.colorScheme.onSecondary
+            : theme.colorScheme.onSurface,
+      ),
+    );
   }
 }

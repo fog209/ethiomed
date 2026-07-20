@@ -6171,6 +6171,17 @@ class $CaseProgressTable extends CaseProgress
     ),
     defaultValue: const Constant(false),
   );
+  static const VerificationMeta _confidenceLevelMeta = const VerificationMeta(
+    'confidenceLevel',
+  );
+  @override
+  late final GeneratedColumn<int> confidenceLevel = GeneratedColumn<int>(
+    'confidence_level',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -6182,6 +6193,7 @@ class $CaseProgressTable extends CaseProgress
     totalDecisions,
     hintsUsed,
     examMode,
+    confidenceLevel,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -6262,6 +6274,15 @@ class $CaseProgressTable extends CaseProgress
         examMode.isAcceptableOrUnknown(data['exam_mode']!, _examModeMeta),
       );
     }
+    if (data.containsKey('confidence_level')) {
+      context.handle(
+        _confidenceLevelMeta,
+        confidenceLevel.isAcceptableOrUnknown(
+          data['confidence_level']!,
+          _confidenceLevelMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -6307,6 +6328,10 @@ class $CaseProgressTable extends CaseProgress
         DriftSqlType.bool,
         data['${effectivePrefix}exam_mode'],
       )!,
+      confidenceLevel: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}confidence_level'],
+      ),
     );
   }
 
@@ -6327,6 +6352,7 @@ class CaseProgressData extends DataClass
   final int totalDecisions;
   final int hintsUsed;
   final bool examMode;
+  final int? confidenceLevel;
   const CaseProgressData({
     required this.id,
     required this.caseId,
@@ -6337,6 +6363,7 @@ class CaseProgressData extends DataClass
     required this.totalDecisions,
     required this.hintsUsed,
     required this.examMode,
+    this.confidenceLevel,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -6352,6 +6379,9 @@ class CaseProgressData extends DataClass
     map['total_decisions'] = Variable<int>(totalDecisions);
     map['hints_used'] = Variable<int>(hintsUsed);
     map['exam_mode'] = Variable<bool>(examMode);
+    if (!nullToAbsent || confidenceLevel != null) {
+      map['confidence_level'] = Variable<int>(confidenceLevel);
+    }
     return map;
   }
 
@@ -6368,6 +6398,9 @@ class CaseProgressData extends DataClass
       totalDecisions: Value(totalDecisions),
       hintsUsed: Value(hintsUsed),
       examMode: Value(examMode),
+      confidenceLevel: confidenceLevel == null && nullToAbsent
+          ? const Value.absent()
+          : Value(confidenceLevel),
     );
   }
 
@@ -6386,6 +6419,7 @@ class CaseProgressData extends DataClass
       totalDecisions: serializer.fromJson<int>(json['totalDecisions']),
       hintsUsed: serializer.fromJson<int>(json['hintsUsed']),
       examMode: serializer.fromJson<bool>(json['examMode']),
+      confidenceLevel: serializer.fromJson<int?>(json['confidenceLevel']),
     );
   }
   @override
@@ -6401,6 +6435,7 @@ class CaseProgressData extends DataClass
       'totalDecisions': serializer.toJson<int>(totalDecisions),
       'hintsUsed': serializer.toJson<int>(hintsUsed),
       'examMode': serializer.toJson<bool>(examMode),
+      'confidenceLevel': serializer.toJson<int?>(confidenceLevel),
     };
   }
 
@@ -6414,6 +6449,7 @@ class CaseProgressData extends DataClass
     int? totalDecisions,
     int? hintsUsed,
     bool? examMode,
+    Value<int?> confidenceLevel = const Value.absent(),
   }) => CaseProgressData(
     id: id ?? this.id,
     caseId: caseId ?? this.caseId,
@@ -6424,6 +6460,9 @@ class CaseProgressData extends DataClass
     totalDecisions: totalDecisions ?? this.totalDecisions,
     hintsUsed: hintsUsed ?? this.hintsUsed,
     examMode: examMode ?? this.examMode,
+    confidenceLevel: confidenceLevel.present
+        ? confidenceLevel.value
+        : this.confidenceLevel,
   );
   CaseProgressData copyWithCompanion(CaseProgressCompanion data) {
     return CaseProgressData(
@@ -6444,6 +6483,9 @@ class CaseProgressData extends DataClass
           : this.totalDecisions,
       hintsUsed: data.hintsUsed.present ? data.hintsUsed.value : this.hintsUsed,
       examMode: data.examMode.present ? data.examMode.value : this.examMode,
+      confidenceLevel: data.confidenceLevel.present
+          ? data.confidenceLevel.value
+          : this.confidenceLevel,
     );
   }
 
@@ -6458,7 +6500,8 @@ class CaseProgressData extends DataClass
           ..write('correctDecisions: $correctDecisions, ')
           ..write('totalDecisions: $totalDecisions, ')
           ..write('hintsUsed: $hintsUsed, ')
-          ..write('examMode: $examMode')
+          ..write('examMode: $examMode, ')
+          ..write('confidenceLevel: $confidenceLevel')
           ..write(')'))
         .toString();
   }
@@ -6474,6 +6517,7 @@ class CaseProgressData extends DataClass
     totalDecisions,
     hintsUsed,
     examMode,
+    confidenceLevel,
   );
   @override
   bool operator ==(Object other) =>
@@ -6487,7 +6531,8 @@ class CaseProgressData extends DataClass
           other.correctDecisions == this.correctDecisions &&
           other.totalDecisions == this.totalDecisions &&
           other.hintsUsed == this.hintsUsed &&
-          other.examMode == this.examMode);
+          other.examMode == this.examMode &&
+          other.confidenceLevel == this.confidenceLevel);
 }
 
 class CaseProgressCompanion extends UpdateCompanion<CaseProgressData> {
@@ -6500,6 +6545,7 @@ class CaseProgressCompanion extends UpdateCompanion<CaseProgressData> {
   final Value<int> totalDecisions;
   final Value<int> hintsUsed;
   final Value<bool> examMode;
+  final Value<int?> confidenceLevel;
   const CaseProgressCompanion({
     this.id = const Value.absent(),
     this.caseId = const Value.absent(),
@@ -6510,6 +6556,7 @@ class CaseProgressCompanion extends UpdateCompanion<CaseProgressData> {
     this.totalDecisions = const Value.absent(),
     this.hintsUsed = const Value.absent(),
     this.examMode = const Value.absent(),
+    this.confidenceLevel = const Value.absent(),
   });
   CaseProgressCompanion.insert({
     this.id = const Value.absent(),
@@ -6521,6 +6568,7 @@ class CaseProgressCompanion extends UpdateCompanion<CaseProgressData> {
     this.totalDecisions = const Value.absent(),
     this.hintsUsed = const Value.absent(),
     this.examMode = const Value.absent(),
+    this.confidenceLevel = const Value.absent(),
   }) : caseId = Value(caseId),
        startedAt = Value(startedAt);
   static Insertable<CaseProgressData> custom({
@@ -6533,6 +6581,7 @@ class CaseProgressCompanion extends UpdateCompanion<CaseProgressData> {
     Expression<int>? totalDecisions,
     Expression<int>? hintsUsed,
     Expression<bool>? examMode,
+    Expression<int>? confidenceLevel,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -6544,6 +6593,7 @@ class CaseProgressCompanion extends UpdateCompanion<CaseProgressData> {
       if (totalDecisions != null) 'total_decisions': totalDecisions,
       if (hintsUsed != null) 'hints_used': hintsUsed,
       if (examMode != null) 'exam_mode': examMode,
+      if (confidenceLevel != null) 'confidence_level': confidenceLevel,
     });
   }
 
@@ -6557,6 +6607,7 @@ class CaseProgressCompanion extends UpdateCompanion<CaseProgressData> {
     Value<int>? totalDecisions,
     Value<int>? hintsUsed,
     Value<bool>? examMode,
+    Value<int?>? confidenceLevel,
   }) {
     return CaseProgressCompanion(
       id: id ?? this.id,
@@ -6568,6 +6619,7 @@ class CaseProgressCompanion extends UpdateCompanion<CaseProgressData> {
       totalDecisions: totalDecisions ?? this.totalDecisions,
       hintsUsed: hintsUsed ?? this.hintsUsed,
       examMode: examMode ?? this.examMode,
+      confidenceLevel: confidenceLevel ?? this.confidenceLevel,
     );
   }
 
@@ -6601,6 +6653,9 @@ class CaseProgressCompanion extends UpdateCompanion<CaseProgressData> {
     if (examMode.present) {
       map['exam_mode'] = Variable<bool>(examMode.value);
     }
+    if (confidenceLevel.present) {
+      map['confidence_level'] = Variable<int>(confidenceLevel.value);
+    }
     return map;
   }
 
@@ -6615,7 +6670,8 @@ class CaseProgressCompanion extends UpdateCompanion<CaseProgressData> {
           ..write('correctDecisions: $correctDecisions, ')
           ..write('totalDecisions: $totalDecisions, ')
           ..write('hintsUsed: $hintsUsed, ')
-          ..write('examMode: $examMode')
+          ..write('examMode: $examMode, ')
+          ..write('confidenceLevel: $confidenceLevel')
           ..write(')'))
         .toString();
   }
@@ -11101,6 +11157,7 @@ typedef $$CaseProgressTableCreateCompanionBuilder =
       Value<int> totalDecisions,
       Value<int> hintsUsed,
       Value<bool> examMode,
+      Value<int?> confidenceLevel,
     });
 typedef $$CaseProgressTableUpdateCompanionBuilder =
     CaseProgressCompanion Function({
@@ -11113,6 +11170,7 @@ typedef $$CaseProgressTableUpdateCompanionBuilder =
       Value<int> totalDecisions,
       Value<int> hintsUsed,
       Value<bool> examMode,
+      Value<int?> confidenceLevel,
     });
 
 class $$CaseProgressTableFilterComposer
@@ -11166,6 +11224,11 @@ class $$CaseProgressTableFilterComposer
 
   ColumnFilters<bool> get examMode => $composableBuilder(
     column: $table.examMode,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get confidenceLevel => $composableBuilder(
+    column: $table.confidenceLevel,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -11223,6 +11286,11 @@ class $$CaseProgressTableOrderingComposer
     column: $table.examMode,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<int> get confidenceLevel => $composableBuilder(
+    column: $table.confidenceLevel,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$CaseProgressTableAnnotationComposer
@@ -11268,6 +11336,11 @@ class $$CaseProgressTableAnnotationComposer
 
   GeneratedColumn<bool> get examMode =>
       $composableBuilder(column: $table.examMode, builder: (column) => column);
+
+  GeneratedColumn<int> get confidenceLevel => $composableBuilder(
+    column: $table.confidenceLevel,
+    builder: (column) => column,
+  );
 }
 
 class $$CaseProgressTableTableManager
@@ -11310,6 +11383,7 @@ class $$CaseProgressTableTableManager
                 Value<int> totalDecisions = const Value.absent(),
                 Value<int> hintsUsed = const Value.absent(),
                 Value<bool> examMode = const Value.absent(),
+                Value<int?> confidenceLevel = const Value.absent(),
               }) => CaseProgressCompanion(
                 id: id,
                 caseId: caseId,
@@ -11320,6 +11394,7 @@ class $$CaseProgressTableTableManager
                 totalDecisions: totalDecisions,
                 hintsUsed: hintsUsed,
                 examMode: examMode,
+                confidenceLevel: confidenceLevel,
               ),
           createCompanionCallback:
               ({
@@ -11332,6 +11407,7 @@ class $$CaseProgressTableTableManager
                 Value<int> totalDecisions = const Value.absent(),
                 Value<int> hintsUsed = const Value.absent(),
                 Value<bool> examMode = const Value.absent(),
+                Value<int?> confidenceLevel = const Value.absent(),
               }) => CaseProgressCompanion.insert(
                 id: id,
                 caseId: caseId,
@@ -11342,6 +11418,7 @@ class $$CaseProgressTableTableManager
                 totalDecisions: totalDecisions,
                 hintsUsed: hintsUsed,
                 examMode: examMode,
+                confidenceLevel: confidenceLevel,
               ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
