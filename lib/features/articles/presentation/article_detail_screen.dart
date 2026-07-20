@@ -4,7 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:drift/drift.dart' show Variable;
 // ignore_for_file: depend_on_referenced_packages
 import 'package:flutter/material.dart';
-import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:markdown/markdown.dart' as md;
@@ -923,10 +923,6 @@ Padding(
                 data: linkedContent,
                 extensionSet: md.ExtensionSet.gitHubWeb,
                 builders: <String, MarkdownElementBuilder>{
-                  'table': ScrollableTableBuilder(
-                    zebraA: theme.colorScheme.surfaceContainerHighest,
-                    zebraB: theme.colorScheme.surface,
-                  ),
                   'a': MedicalTermLinkBuilder(onTapLink: _handleLinkTap),
                 },
                 styleSheet: MarkdownStyleSheet.fromTheme(theme).copyWith(
@@ -939,6 +935,30 @@ Padding(
                     color: theme.colorScheme.secondary,
                     decoration: TextDecoration.underline,
                   ),
+                  tableColumnWidth: const IntrinsicColumnWidth(),
+                  tableBorder: TableBorder.all(
+                    color: theme.colorScheme.outline,
+                    width: 1,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  tableCellsPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  tableCellsDecoration: theme.brightness == Brightness.dark
+                      ? const BoxDecoration()
+                      : BoxDecoration(
+                          color: theme.colorScheme.surfaceContainerHighest,
+                        ),
+                  tableHeadCellsPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  tableHeadCellsDecoration: BoxDecoration(
+                    color: theme.colorScheme.surfaceContainerHighest,
+                  ),
+                  tableHead: const TextStyle(fontWeight: FontWeight.w700),
+                  tablePadding: const EdgeInsets.symmetric(vertical: 4),
                 ),
                 onTapLink: _handleLinkTap,
               ),
