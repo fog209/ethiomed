@@ -156,6 +156,34 @@ class ProgressEntryCard extends ConsumerWidget {
   }
 }
 
+class FlowchartsEntryCard extends ConsumerWidget {
+  const FlowchartsEntryCard({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return _EntryCard(
+      icon: Icons.account_tree,
+      title: 'Flowcharts',
+      subtitle: 'Visual references for key concepts',
+      onTap: () => context.push('/flowcharts'),
+    );
+  }
+}
+
+class LocalGuidelinesEntryCard extends ConsumerWidget {
+  const LocalGuidelinesEntryCard({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return _EntryCard(
+      icon: Icons.description,
+      title: 'Local Guidelines',
+      subtitle: 'Ethiopian guideline documents',
+      onTap: () => context.push('/local-guidelines'),
+    );
+  }
+}
+
 class FlashcardsEntryCard extends ConsumerWidget {
   const FlashcardsEntryCard({super.key});
 

@@ -41,6 +41,9 @@ import 'features/quiz/presentation/exam_screen.dart';
 import 'features/quiz/presentation/exam_setup_screen.dart';
 import 'features/quiz/quiz_screen.dart';
 import 'features/progress/progress_screen.dart';
+import 'features/reference/presentation/flowcharts_screen.dart';
+import 'features/reference/presentation/flowchart_viewer_screen.dart';
+import 'features/reference/presentation/local_guidelines_screen.dart';
 import 'features/settings/presentation/system_health_screen.dart';
 import 'features/settings/presentation/forced_update_gate.dart';
 import 'features/settings/presentation/forced_update_screen.dart';
@@ -362,6 +365,18 @@ final _router = GoRouter(
     GoRoute(
       path: '/calculators',
       builder: (context, state) => const CalculatorsScreen(),
+    ),
+    GoRoute(
+      path: '/flowcharts',
+      builder: (context, state) => const FlowchartsScreen(),
+    ),
+    GoRoute(
+      path: '/flowchart-viewer',
+      builder: (context, state) => const FlowchartViewerScreen(),
+    ),
+    GoRoute(
+      path: '/local-guidelines',
+      builder: (context, state) => const LocalGuidelinesScreen(),
     ),
     GoRoute(
       path: '/calculator-detail',
