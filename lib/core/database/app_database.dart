@@ -972,6 +972,36 @@ if (!columnNames.contains('quiz_correct')) {
         .getSingleOrNull();
   }
 
+  /// Returns every saved note joined with its article title, most-recently
+  /// edited first (matching the `updatedAt` ordering convention used
+  /// elsewhere). Uses a LEFT JOIN so orphaned notes (article deleted locally)
+  /// still surface, with a null [NoteWithArticle.articleTitle] the UI falls
+  /// back on. The `ArticleNotes` table stores only `articleId` (no
+  /// denormalized title), so the title is looked up against [articles].
+  Stream<List<NoteWithArticle>> watchAllNotes() {
+    return customSelect(
+      '''
+      SELECT an.article_id  AS article_id,
+             an.note_text   AS note_text,
+             an.updated_at  AS updated_at,
+             a.title        AS article_title
+      FROM article_notes an
+      LEFT JOIN articles a ON a.id = an.article_id
+      ORDER BY an.updated_at DESC
+      ''',
+      readsFrom: {articleNotes, articles},
+    ).watch().map((rows) {
+      return rows.map((row) {
+        return NoteWithArticle(
+          articleId: row.read<String>('article_id'),
+          noteText: row.read<String>('note_text'),
+          updatedAt: row.read<DateTime>('updated_at'),
+          articleTitle: row.readNullable<String>('article_title'),
+        );
+      }).toList();
+    });
+  }
+
   /// Saves (upserts) a private note for [articleId]. An empty note deletes it.
   Future<void> saveArticleNote(String articleId, String noteText) async {
     if (noteText.trim().isEmpty) {
@@ -1293,6 +1323,22 @@ class RecentlyReadArticle {
 /// Per-category read progress, returned by
 /// [AppDatabase.loadCategoryProgressBatch].
 typedef CategoryProgressResult = ({String category, int total, int read});
+
+/// A single saved note joined with its article's (denormalized-from-join)
+/// title. Returned by [AppDatabase.watchAllNotes].
+class NoteWithArticle {
+  const NoteWithArticle({
+    required this.articleId,
+    required this.noteText,
+    required this.updatedAt,
+    this.articleTitle,
+  });
+
+  final String articleId;
+  final String noteText;
+  final DateTime updatedAt;
+  final String? articleTitle;
+}
 
 LazyDatabase _openConnection() {
   return LazyDatabase(() async {

@@ -13,7 +13,7 @@ class BookmarksScreen extends ConsumerWidget {
     final db = ref.watch(databaseProvider);
 
     return DefaultTabController(
-      length: 2,
+      length: 3,
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Saved Articles'),
@@ -21,6 +21,7 @@ class BookmarksScreen extends ConsumerWidget {
             tabs: [
               Tab(text: 'Saved'),
               Tab(text: 'Learnt'),
+              Tab(text: 'Notes'),
             ],
           ),
         ),
@@ -28,6 +29,7 @@ class BookmarksScreen extends ConsumerWidget {
           children: [
             _buildSavedList(context, db),
             _buildLearntList(context, db),
+            _buildNotesList(context, db),
           ],
         ),
       ),
@@ -118,6 +120,101 @@ class BookmarksScreen extends ConsumerWidget {
                 ),
               ),
               onTap: () => context.push('/article-detail', extra: article),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildNotesList(BuildContext context, AppDatabase db) {
+    final notesStream = db.watchAllNotes();
+
+    return StreamBuilder<List<NoteWithArticle>>(
+      stream: notesStream,
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return const Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.error_outline, color: Colors.amber, size: 48),
+                SizedBox(height: 8),
+                Text(
+                  'Could not load notes.',
+                  style: TextStyle(color: Colors.white70),
+                ),
+              ],
+            ),
+          );
+        }
+
+        final notes = snapshot.data ?? [];
+        if (notes.isEmpty) {
+          return const EmptyState(
+            icon: Icons.note_alt_outlined,
+            title: 'No notes yet',
+            subtitle:
+                'Open any article and tap "My Notes" to start jotting.',
+          );
+        }
+
+        return ListView.builder(
+          itemCount: notes.length,
+          itemBuilder: (context, index) {
+            final note = notes[index];
+            final title = note.articleTitle ?? 'Unknown article';
+
+            return Card(
+              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.note_alt,
+                          color: Theme.of(context).colorScheme.secondary,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            title,
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onSurface,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      note.noteText,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface,
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton.icon(
+                        icon: const Icon(Icons.arrow_forward),
+                        label: const Text('Go to Article'),
+                        onPressed: () => context.push(
+                          '/article-detail',
+                          extra: <String, String?>{'id': note.articleId},
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             );
           },
         );
