@@ -6,6 +6,9 @@ import 'package:sqlite3/sqlite3.dart';
 final srcDir = r"C:\wr_work\wardready\apkg";
 final outJson = File(r"C:\Users\TestUser\ethiomed\scripts\apkg_flashcards_purged.json");
 
+final excludeFilenames = {'MSB Pharm Flashcards'};
+final excludeModelNames = {'Image Occlusion', 'Image Occlusion Enhanced'};
+
 final mediaPatterns = [
   '<img',
   'src=',
@@ -123,6 +126,9 @@ with open(sys.argv[2], "wb") as f:
       final m = modelMap[mid.toString()];
       if (m == null) continue;
 
+      final modelName = m['name'] as String;
+      if (excludeModelNames.contains(modelName)) continue;
+
       final deckName = deckNames[did.toString()] ?? 'Unknown';
       final fields = flds.split('\x1f');
 
@@ -204,6 +210,12 @@ void main() async {
       .toList();
 
   for (final apkgFile in apkgFiles) {
+    final baseName = apkgFile.uri.pathSegments.last.split('.').first;
+    if (excludeFilenames.contains(baseName)) {
+      print('Skipping excluded file: ${apkgFile.path}');
+      continue;
+    }
+    
     print('Processing: ${apkgFile.path}');
     final cards = await parseApkg(apkgFile.path);
 
