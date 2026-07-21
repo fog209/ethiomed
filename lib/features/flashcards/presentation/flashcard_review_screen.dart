@@ -9,6 +9,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/database/app_database.dart';
 import '../../../core/services/security_service.dart';
 import '../../../core/widgets/empty_state.dart';
+import '../../content/presentation/user_report_widget.dart';
 import '../../quiz/quiz_repository.dart';
 import '../flashcard_review_service.dart';
 import '../flashcard_track_provider.dart';
@@ -190,6 +191,9 @@ class _FlashcardReviewScreenState extends ConsumerState<FlashcardReviewScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final asyncCards = ref.watch(_flashcardsProvider(_queryArgs));
+    final cards = asyncCards.value ?? [];
+    final hasCards = asyncCards.hasValue && cards.isNotEmpty;
+    final currentCardId = hasCards ? cards[currentIndex].id.toString() : '';
 
     return Scaffold(
       appBar: AppBar(
@@ -224,6 +228,11 @@ class _FlashcardReviewScreenState extends ConsumerState<FlashcardReviewScreen> {
             tooltip: 'Import flashcards',
             onPressed: _importFlashcards,
           ),
+          if (hasCards)
+            UserReportWidget(
+              contentType: 'flashcard',
+              contentId: currentCardId,
+            ),
         ],
       ),
       body: SafeArea(

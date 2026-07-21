@@ -19,8 +19,7 @@ import '../../../features/articles/article_providers.dart';
 import '../../../features/articles/data/content_update_service.dart';
 import '../../../features/articles/models/article_model.dart';
 import '../../../features/articles/presentation/article_notes_section.dart';
-import '../../../features/content/data/content_flag_service.dart';
-import '../../../features/content/presentation/content_flag_widget.dart';
+import '../../../features/content/presentation/user_report_widget.dart';
 import '../../../features/progress/category_progress_provider.dart';
 import '../../../features/progress/streak_notifier.dart';
 import '../../../features/quiz/weakness_service.dart';
@@ -286,7 +285,7 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
               ],
             ),
           ),
-          ContentFlagWidget(contentType: ContentType.article, contentId: article.id),
+          UserReportWidget(contentType: 'article', contentId: article.id),
           StreamBuilder<List<Bookmark>>(
             stream: (db.select(db.bookmarks)
                   ..where((t) => t.articleId.equals(article.id)))
