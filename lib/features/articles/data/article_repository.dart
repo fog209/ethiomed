@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:dio/dio.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -14,41 +13,13 @@ import '../../../core/errors/app_exception.dart';
 import '../../../core/errors/error_exceptions.dart';
 import '../../../core/providers/connectivity_notifier.dart';
 import '../../../core/providers/sync_state_provider.dart';
+import '../../../core/services/network_config.dart';
 import '../../../core/services/postgrest_status_helper.dart';
 import '../../../main.dart' show supabaseInitializedProvider;
 import '../article_providers.dart';
 import '../domain/models/article.dart' as model;
 
 const _pageSize = 1000;
-
-Future<T> withNetworkRetry<T>(
-  Future<T> Function() request, {
-  int maxRetries = 3,
-  Duration baseDelay = const Duration(seconds: 2),
-}) async {
-  var attempt = 0;
-  while (true) {
-    try {
-      return await request();
-    } on SocketException {
-      if (attempt >= maxRetries) rethrow;
-      await Future.delayed(baseDelay * (1 << attempt));
-      attempt++;
-    } on DioException catch (e) {
-      final shouldRetry = (e.type == DioExceptionType.connectionTimeout ||
-              e.type == DioExceptionType.receiveTimeout ||
-              e.type == DioExceptionType.sendTimeout ||
-              (e.response?.statusCode != null &&
-                  e.response!.statusCode! >= 500 &&
-                  e.response!.statusCode! < 600)) &&
-          attempt < maxRetries;
-      if (!shouldRetry) rethrow;
-      await Future.delayed(baseDelay * (1 << attempt));
-      attempt++;
-    }
-  }
-}
-
 const int _articlesPageSize = 20;
 
 class ArticleRepository {

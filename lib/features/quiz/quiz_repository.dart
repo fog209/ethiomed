@@ -12,40 +12,13 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/errors/error_exceptions.dart';
 import '../../../core/providers/connectivity_notifier.dart';
 import '../../../core/providers/sync_state_provider.dart';
+import '../../../core/services/network_config.dart';
 import '../../../core/services/postgrest_status_helper.dart';
 import '../../../core/database/app_database.dart';
 import '../../../core/errors/app_exception.dart';
 import '../../../features/articles/domain/models/article.dart' as model;
 
 const _pageSize = 1000;
-
-Future<T> withNetworkRetry<T>(
-  Future<T> Function() request, {
-  int maxRetries = 3,
-  Duration baseDelay = const Duration(seconds: 2),
-}) async {
-  var attempt = 0;
-  while (true) {
-    try {
-      return await request();
-    } on SocketException {
-      if (attempt >= maxRetries) rethrow;
-      await Future.delayed(baseDelay * (1 << attempt));
-      attempt++;
-    } on DioException catch (e) {
-      final shouldRetry = (e.type == DioExceptionType.connectionTimeout ||
-              e.type == DioExceptionType.receiveTimeout ||
-              e.type == DioExceptionType.sendTimeout ||
-              (e.response?.statusCode != null &&
-                  e.response!.statusCode! >= 500 &&
-                  e.response!.statusCode! < 600)) &&
-          attempt < maxRetries;
-      if (!shouldRetry) rethrow;
-      await Future.delayed(baseDelay * (1 << attempt));
-      attempt++;
-    }
-  }
-}
 
 enum QuestionScope { all, newOnly, incorrectOnly }
 
