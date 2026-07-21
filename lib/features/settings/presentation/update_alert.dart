@@ -1,14 +1,45 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
+
 import '../../../core/providers/connectivity_notifier.dart';
 import 'version_checker.dart';
 
-class UpdateAlert extends ConsumerWidget {
+class UpdateAlert extends ConsumerStatefulWidget {
   const UpdateAlert({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<UpdateAlert> createState() => _UpdateAlertState();
+}
+
+class _UpdateAlertState extends ConsumerState<UpdateAlert> {
+  bool _installFailed = false;
+
+  Future<void> _launchDownload({required bool inBrowser}) async {
+    final uri = Uri.parse(kUpdateDownloadUrl);
+    try {
+      final launched = await launchUrl(
+        uri,
+        mode: inBrowser
+            ? LaunchMode.externalApplication
+            : LaunchMode.externalApplication,
+      );
+      if (!launched && mounted) {
+        setState(() {
+          _installFailed = true;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _installFailed = true;
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final connectivity = ref.watch(connectivityProvider);
     if (!connectivity) {
       return const SizedBox.shrink();
@@ -27,14 +58,14 @@ class UpdateAlert extends ConsumerWidget {
           ),
           actions: [
             TextButton(
-              onPressed: () async {
-                final uri = Uri.parse(kUpdateDownloadUrl);
-                if (await canLaunchUrl(uri)) {
-                  await launchUrl(uri, mode: LaunchMode.externalApplication);
-                }
-              },
+              onPressed: () => _launchDownload(inBrowser: false),
               child: const Text('Download Update'),
             ),
+            if (_installFailed)
+              TextButton(
+                onPressed: () => _launchDownload(inBrowser: true),
+                child: const Text('Download via Browser'),
+              ),
           ],
         );
       },

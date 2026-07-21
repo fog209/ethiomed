@@ -10,10 +10,47 @@ import 'forced_update_gate.dart';
 /// Unlike [UpdateAlert] (a soft, online-only dialog), this gate is evaluated
 /// offline against a hardcoded constant so it always blocks outdated installs
 /// even with no connectivity.
-class ForcedUpdateScreen extends StatelessWidget {
+class ForcedUpdateScreen extends StatefulWidget {
   const ForcedUpdateScreen({super.key});
 
-  static const String _downloadUrl = 'https://t.me/wardready_channel';
+  static const String _telegramUrl = 'https://t.me/wardready_channel';
+
+  @override
+  State<ForcedUpdateScreen> createState() => _ForcedUpdateScreenState();
+}
+
+class _ForcedUpdateScreenState extends State<ForcedUpdateScreen> {
+  bool _installFailed = false;
+
+  Future<void> _launchUrl(Uri uri, {required bool inBrowser}) async {
+    try {
+      final launched = await launchUrl(
+        uri,
+        mode: inBrowser
+            ? LaunchMode.externalApplication
+            : LaunchMode.externalApplication,
+      );
+      if (!launched) {
+        throw Exception('Launch failed');
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _installFailed = true;
+        });
+      }
+    }
+  }
+
+  Future<void> _downloadViaTelegram() async {
+    final uri = Uri.parse(ForcedUpdateScreen._telegramUrl);
+    await _launchUrl(uri, inBrowser: false);
+  }
+
+  Future<void> _downloadViaBrowser() async {
+    final uri = Uri.parse(ForcedUpdateScreen._telegramUrl);
+    await _launchUrl(uri, inBrowser: true);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -68,14 +105,25 @@ class ForcedUpdateScreen extends StatelessWidget {
                   ),
                   icon: const Icon(Icons.download_rounded),
                   label: const Text('Download Latest APK'),
-                  onPressed: () async {
-                    final uri = Uri.parse(_downloadUrl);
-                    if (await canLaunchUrl(uri)) {
-                      await launchUrl(uri, mode: LaunchMode.externalApplication);
-                    }
-                  },
+                  onPressed: _downloadViaTelegram,
                 ),
               ),
+              if (_installFailed) ...[
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: theme.colorScheme.secondary,
+                      side: BorderSide(color: theme.colorScheme.secondary),
+                      minimumSize: const Size.fromHeight(52),
+                    ),
+                    icon: const Icon(Icons.open_in_browser_rounded),
+                    label: const Text('Download Update via Browser'),
+                    onPressed: _downloadViaBrowser,
+                  ),
+                ),
+              ],
             ],
           ),
         ),

@@ -8,10 +8,11 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/errors/app_exception.dart';
 import '../../../core/config/app_config.dart';
 import '../../../main.dart' show supabaseInitializedProvider;
+import '../../articles/data/content_update_service.dart';
 
 final authServiceProvider = Provider<AuthService>((ref) {
   final supabaseAvailable = ref.watch(supabaseInitializedProvider);
-  return AuthService(supabaseAvailable: supabaseAvailable);
+  return AuthService(supabaseAvailable: supabaseAvailable, ref: ref);
 });
 
 final authSessionProvider = StreamProvider<Session?>((ref) {
@@ -135,9 +136,11 @@ final authControllerProvider =
 class AuthService {
   final bool supabaseAvailable;
   final FlutterSecureStorage _secureStorage;
+  final Ref? _ref;
 
-  AuthService({this.supabaseAvailable = false})
-    : _secureStorage = const FlutterSecureStorage();
+  AuthService({this.supabaseAvailable = false, Ref? ref})
+    : _ref = ref,
+      _secureStorage = const FlutterSecureStorage();
 
   Stream<Session?> get authStateStream {
     if (!supabaseAvailable) {
@@ -263,11 +266,15 @@ class AuthService {
   Future<void> signOut() async {
     if (!supabaseAvailable) {
       await clearStoredTokens();
+      _ref?.read(contentUpdateAvailableProvider.notifier).state = false;
+      _ref?.read(sectionRegistryProvider.notifier).state = const {};
       return;
     }
     try {
       await Supabase.instance.client.auth.signOut();
       await clearStoredTokens();
+      _ref?.read(contentUpdateAvailableProvider.notifier).state = false;
+      _ref?.read(sectionRegistryProvider.notifier).state = const {};
     } on PostgrestException catch (e) {
       debugPrint('Supabase error: ${e.message}');
       rethrow;
