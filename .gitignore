@@ -85,3 +85,8 @@ android/key.properties
 
 # Obfuscated build debug symbols (uploaded as CI artifacts, not committed)
 build/symbols/
+
+# Large data files from APKG processing (not committed)
+scripts/apkg_flashcards_purged.json
+scripts/apkg_flashcards.json
+scripts/apkg_flashcards_deduped.json
