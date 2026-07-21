@@ -90,3 +90,4 @@ build/symbols/
 scripts/apkg_flashcards_purged.json
 scripts/apkg_flashcards.json
 scripts/apkg_flashcards_deduped.json
+scripts/pubspec.lock
