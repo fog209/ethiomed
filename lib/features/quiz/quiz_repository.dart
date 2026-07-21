@@ -17,6 +17,36 @@ import '../../../core/database/app_database.dart';
 import '../../../core/errors/app_exception.dart';
 import '../../../features/articles/domain/models/article.dart' as model;
 
+const _pageSize = 1000;
+
+Future<T> withNetworkRetry<T>(
+  Future<T> Function() request, {
+  int maxRetries = 3,
+  Duration baseDelay = const Duration(seconds: 2),
+}) async {
+  var attempt = 0;
+  while (true) {
+    try {
+      return await request();
+    } on SocketException {
+      if (attempt >= maxRetries) rethrow;
+      await Future.delayed(baseDelay * (1 << attempt));
+      attempt++;
+    } on DioException catch (e) {
+      final shouldRetry = (e.type == DioExceptionType.connectionTimeout ||
+              e.type == DioExceptionType.receiveTimeout ||
+              e.type == DioExceptionType.sendTimeout ||
+              (e.response?.statusCode != null &&
+                  e.response!.statusCode! >= 500 &&
+                  e.response!.statusCode! < 600)) &&
+          attempt < maxRetries;
+      if (!shouldRetry) rethrow;
+      await Future.delayed(baseDelay * (1 << attempt));
+      attempt++;
+    }
+  }
+}
+
 enum QuestionScope { all, newOnly, incorrectOnly }
 
 class QuizRepository {
@@ -266,13 +296,26 @@ class QuizRepository {
 
   Future<int> syncQuestionsFromSupabase() async {
     try {
-      final response = await _supabase.from('questions').select();
-      final questions = response
-          .map(_questionFromJson)
-          .whereType<QuizQuestionEntity>()
-          .toList(growable: false);
-      await upsertQuestions(questions);
-      return questions.length;
+      var totalSynced = 0;
+      var offset = 0;
+
+      while (true) {
+        final response = await withNetworkRetry(() => _supabase
+            .from('questions')
+            .select()
+            .range(offset, offset + _pageSize - 1));
+        final questions = response
+            .map(_questionFromJson)
+            .whereType<QuizQuestionEntity>()
+            .toList(growable: false);
+        if (questions.isEmpty) break;
+        await upsertQuestions(questions);
+        totalSynced += questions.length;
+        offset += _pageSize;
+        if (questions.length < _pageSize) break;
+      }
+
+      return totalSynced;
     } catch (e) {
       debugPrint('Sync questions error: $e');
       return 0;
@@ -281,16 +324,27 @@ class QuizRepository {
 
   Future<int> syncQuestionsByCategory(String category) async {
     try {
-      final response = await _supabase
-          .from('questions')
-          .select()
-          .eq('category', category.trim());
-      final questions = response
-          .map(_questionFromJson)
-          .whereType<QuizQuestionEntity>()
-          .toList(growable: false);
-      await upsertQuestions(questions);
-      return questions.length;
+      var totalSynced = 0;
+      var offset = 0;
+
+      while (true) {
+        final response = await withNetworkRetry(() => _supabase
+            .from('questions')
+            .select()
+            .eq('category', category.trim())
+            .range(offset, offset + _pageSize - 1));
+        final questions = response
+            .map(_questionFromJson)
+            .whereType<QuizQuestionEntity>()
+            .toList(growable: false);
+        if (questions.isEmpty) break;
+        await upsertQuestions(questions);
+        totalSynced += questions.length;
+        offset += _pageSize;
+        if (questions.length < _pageSize) break;
+      }
+
+      return totalSynced;
     } catch (e) {
       debugPrint('Sync questions by category error: $e');
       return 0;
@@ -299,39 +353,51 @@ class QuizRepository {
 
   Future<int> syncArticlesByCategory(String parentCategory) async {
     try {
-      final response = await _supabase
-          .from('articles')
-          .select('*, is_high_yield')
-          .eq('parent_category', parentCategory.trim());
-      final articles = response
-          .map((json) => model.Article.fromJson(json))
-          .toList(growable: false);
+      var totalSynced = 0;
+      var offset = 0;
 
-      await _db.transaction(() async {
-        for (final article in articles) {
-          await _db
-              .into(_db.articles)
-              .insertOnConflictUpdate(
-                ArticlesCompanion.insert(
-                  id: article.id,
-                  title: article.title,
-                  category: Value(article.subcategory.isNotEmpty
-                      ? article.subcategory
-                      : article.parentCategory),
-                  parentCategory: Value(article.parentCategory.isNotEmpty
-                      ? article.parentCategory
-                      : null),
-                  subcategory: Value(
-                      article.subcategory.isNotEmpty ? article.subcategory : null),
-                  content: Value(jsonEncode(article.content ?? const <String, dynamic>{})),
-                  imageUrl: Value(article.imageUrl),
-                  videoUrl: Value(article.videoUrl),
-                  isHighYield: Value(article.isHighYield),
-                ),
-              );
-        }
-      });
-      return articles.length;
+      while (true) {
+        final response = await withNetworkRetry(() => _supabase
+            .from('articles')
+            .select('*, is_high_yield')
+            .eq('parent_category', parentCategory.trim())
+            .range(offset, offset + _pageSize - 1));
+        final articles = response
+            .map((json) => model.Article.fromJson(json))
+            .toList(growable: false);
+        if (articles.isEmpty) break;
+
+        await _db.transaction(() async {
+          for (final article in articles) {
+            await _db
+                .into(_db.articles)
+                .insertOnConflictUpdate(
+                  ArticlesCompanion.insert(
+                    id: article.id,
+                    title: article.title,
+                    category: Value(article.subcategory.isNotEmpty
+                        ? article.subcategory
+                        : article.parentCategory),
+                    parentCategory: Value(article.parentCategory.isNotEmpty
+                        ? article.parentCategory
+                        : null),
+                    subcategory: Value(
+                        article.subcategory.isNotEmpty ? article.subcategory : null),
+                    content: Value(jsonEncode(article.content ?? const <String, dynamic>{})),
+                    imageUrl: Value(article.imageUrl),
+                    videoUrl: Value(article.videoUrl),
+                    isHighYield: Value(article.isHighYield),
+                  ),
+                );
+          }
+        });
+
+        totalSynced += articles.length;
+        offset += _pageSize;
+        if (articles.length < _pageSize) break;
+      }
+
+      return totalSynced;
     } catch (e) {
       debugPrint('Sync articles by category error: $e');
       return 0;
@@ -340,32 +406,45 @@ class QuizRepository {
 
   Future<int> syncFlashcards() async {
     try {
-      final response = await _supabase.from('flashcards').select();
-      final flashcards = response
-          .map(_flashcardFromJson)
-          .whereType<FlashcardEntity>()
-          .toList(growable: false);
+      var totalSynced = 0;
+      var offset = 0;
 
-      await _db.transaction(() async {
-        for (final fc in flashcards) {
-          final companion = FlashcardTableCompanion.insert(
-            remoteId: Value(fc.remoteId ?? 0),
-            deckName: fc.deckName,
-            frontText: fc.frontText,
-            backText: fc.backText,
-            sourceArticleId: Value(fc.sourceArticleId ?? ''),
-            easeFactor: Value(fc.easeFactor),
-            createdAt: Value(fc.createdAt),
-            track: Value(fc.track),
-            category: Value(fc.category),
-          );
-          await _db
-              .into(_db.flashcardTable)
-              .insert(companion, onConflict: DoUpdate((_) => companion));
-        }
-      });
+      while (true) {
+        final response = await withNetworkRetry(() => _supabase
+            .from('flashcards')
+            .select()
+            .range(offset, offset + _pageSize - 1));
+        final flashcards = response
+            .map(_flashcardFromJson)
+            .whereType<FlashcardEntity>()
+            .toList(growable: false);
+        if (flashcards.isEmpty) break;
 
-      return flashcards.length;
+        await _db.transaction(() async {
+          for (final fc in flashcards) {
+            final companion = FlashcardTableCompanion.insert(
+              remoteId: Value(fc.remoteId ?? 0),
+              deckName: fc.deckName,
+              frontText: fc.frontText,
+              backText: fc.backText,
+              sourceArticleId: Value(fc.sourceArticleId ?? ''),
+              easeFactor: Value(fc.easeFactor),
+              createdAt: Value(fc.createdAt),
+              track: Value(fc.track),
+              category: Value(fc.category),
+            );
+            await _db
+                .into(_db.flashcardTable)
+                .insert(companion, onConflict: DoUpdate((_) => companion));
+          }
+        });
+
+        totalSynced += flashcards.length;
+        offset += _pageSize;
+        if (flashcards.length < _pageSize) break;
+      }
+
+      return totalSynced;
     } on PostgrestException catch (e) {
       // Permission denied / RLS rejection / network — do NOT treat as
       // "0 new cards". Rethrow so the caller can show a real error
