@@ -99,6 +99,15 @@ Text("HOW TO ACTIVATE",
                 onPressed: () => ref.refresh(isSubscribedProvider),
                 child: const Text("I HAVE PAID - CHECK STATUS", style: TextStyle(fontWeight: FontWeight.bold)),
               ),
+              
+              const SizedBox(height: 40),
+              
+              // SUPPORT CONTACT
+              Text(
+                "Payment issues or account recovery? Contact @WardReadySupport on Telegram.",
+                textAlign: TextAlign.center,
+                style: TextStyle(color: theme.colorScheme.onSurfaceVariant, fontSize: 14),
+              ),
             ],
           ),
         ),
