@@ -1,0 +1,11 @@
+name: purge_media_script
+description: A standalone script to purge media from APKG files
+environment:
+  sdk: ^3.11.0
+
+dependencies:
+  archive: ^3.4.10
+  sqlite3: ^2.9.4
+
+dev_dependencies:
+  lints: ^5.0.0
