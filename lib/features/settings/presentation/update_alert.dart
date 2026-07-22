@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:url_launcher/url_launcher.dart';
+import '../../../core/utils/app_url_launcher.dart';
 import '../../../core/providers/connectivity_notifier.dart';
 import 'version_checker.dart';
 
@@ -29,9 +29,7 @@ class UpdateAlert extends ConsumerWidget {
             TextButton(
               onPressed: () async {
                 final uri = Uri.parse(kUpdateDownloadUrl);
-                if (await canLaunchUrl(uri)) {
-                  await launchUrl(uri, mode: LaunchMode.externalApplication);
-                }
+                await launchHttpsUrl(context, uri);
               },
               child: const Text('Download Update'),
             ),
