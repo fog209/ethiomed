@@ -32,7 +32,7 @@ import 'features/cases/presentation/case_screen.dart';
 import 'features/flashcards/presentation/flashcard_stage_prompt_screen.dart';
 import 'features/home/presentation/article_list_screen.dart';
 import 'features/home/presentation/subcategory_screen.dart';
-import 'features/legal/disclaimer_screen.dart';
+import 'features/legal/disclaimer_screen.dart' show MedicalDisclaimerModal;
 import 'features/legal/privacy_screen.dart';
 import 'features/legal/terms_screen.dart';
 import 'features/onboarding/onboarding_screen.dart';
@@ -181,7 +181,7 @@ final _router = GoRouter(
   redirect: (context, state) async {
     final prefs = await SharedPreferences.getInstance();
     final hasSeenOnboarding = prefs.getBool('hasSeenOnboarding') ?? false;
-    final hasSeenDisclaimer = prefs.getBool('hasSeenDisclaimer') ?? false;
+    final hasSeenMedicalDisclaimer = prefs.getBool('has_seen_medical_disclaimer') ?? false;
     final location = state.uri.path;
 
     // 0. Forced-update gate — highest priority. An installed version below the
@@ -200,7 +200,7 @@ final _router = GoRouter(
     }
 
     // 2. Disclaimer gate (only fires if not already on the disclaimer route)
-    if (!hasSeenDisclaimer) {
+    if (!hasSeenMedicalDisclaimer) {
       if (location != '/disclaimer') return '/disclaimer';
       return null;
     }
@@ -274,7 +274,7 @@ final _router = GoRouter(
     ),
     GoRoute(
       path: '/disclaimer',
-      builder: (context, state) => const DisclaimerScreen(),
+      builder: (context, state) => const MedicalDisclaimerModal(),
     ),
     GoRoute(
       path: '/login',
