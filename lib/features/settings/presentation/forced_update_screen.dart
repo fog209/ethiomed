@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 
+import '../../../core/utils/app_url_launcher.dart';
 import 'forced_update_gate.dart';
 
 /// Full-screen blocking screen shown when the installed app version is below
@@ -70,9 +70,7 @@ class ForcedUpdateScreen extends StatelessWidget {
                   label: const Text('Download Latest APK'),
                   onPressed: () async {
                     final uri = Uri.parse(_downloadUrl);
-                    if (await canLaunchUrl(uri)) {
-                      await launchUrl(uri, mode: LaunchMode.externalApplication);
-                    }
+                    await launchHttpsUrl(context, uri);
                   },
                 ),
               ),

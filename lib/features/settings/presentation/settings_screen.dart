@@ -4,7 +4,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:url_launcher/url_launcher.dart';
+
+import '../../../core/utils/app_url_launcher.dart';
 
 import '../../../core/database/app_database.dart';
 import '../../../core/services/error_logger_service.dart';
@@ -27,11 +28,9 @@ class SettingsScreen extends ConsumerWidget {
 
   const SettingsScreen({super.key});
 
-  static Future<void> _openAdminTelegram() async {
+  static Future<void> _openAdminTelegram(BuildContext context) async {
     final url = Uri.parse(_adminTelegramUrl);
-    if (await canLaunchUrl(url)) {
-      await launchUrl(url, mode: LaunchMode.externalApplication);
-    }
+    await launchHttpsUrl(context, url);
   }
 
   @override
@@ -222,13 +221,13 @@ class SettingsScreen extends ConsumerWidget {
       ListTile(
         leading: Icon(Icons.bug_report, color: primaryColor),
         title: const Text('Report Medical Error'),
-        onTap: _openAdminTelegram,
+        onTap: () => _openAdminTelegram(context),
       ),
       ListTile(
         leading: Icon(Icons.help_outline, color: primaryColor),
         title: const Text('Technical Support'),
         subtitle: const Text('support@wardready.app'),
-        onTap: _openAdminTelegram,
+        onTap: () => _openAdminTelegram(context),
       ),
       ListTile(
         leading: Icon(Icons.copy_all, color: primaryColor),
@@ -247,7 +246,7 @@ class SettingsScreen extends ConsumerWidget {
         leading: Icon(Icons.feedback, color: primaryColor),
         title: const Text('Support & Feedback'),
         subtitle: const Text('Send us your questions and suggestions'),
-        onTap: _openAdminTelegram,
+        onTap: () => _openAdminTelegram(context),
       ),
       const Divider(),
       Padding(

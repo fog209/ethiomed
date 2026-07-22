@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:url_launcher/url_launcher.dart';
+import '../../../../core/utils/app_url_launcher.dart';
 import '../data/subscription_repository.dart';
 
 class PaywallScreen extends ConsumerWidget {
@@ -79,10 +79,8 @@ Text("HOW TO ACTIVATE",
                 icon: const Icon(Icons.send),
                 label: const Text("SEND PAYMENT SCREENSHOT (TELEGRAM)"),
                 onPressed: () async {
-                  final url = Uri.parse(telegramAdmin);
-                  if (await canLaunchUrl(url)) {
-                    await launchUrl(url, mode: LaunchMode.externalApplication);
-                  }
+                  final uri = Uri.parse(telegramAdmin);
+                  await launchHttpsUrl(context, uri);
                 },
               ),
               

@@ -10,11 +10,11 @@ import 'package:go_router/go_router.dart';
 import 'package:markdown/markdown.dart' as md;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../../features/articles/presentation/article_markdown_helpers.dart';
 
 import '../../../core/database/app_database.dart';
+import '../../../core/utils/app_url_launcher.dart';
 import '../../../features/articles/article_providers.dart';
 import '../../../features/articles/data/content_update_service.dart';
 import '../../../features/articles/models/article_model.dart';
@@ -435,13 +435,16 @@ if (pastExamInfo == null || !pastExamInfo.isHighYield) {
               icon: const Icon(Icons.play_circle_fill),
               label: const Text('WATCH INSTRUCTOR VIDEO'),
               onPressed: () async {
-                final url = Uri.tryParse(videoUrl);
-                if (url == null) {
+                final uri = Uri.tryParse(videoUrl);
+                if (uri == null) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Invalid or insecure link detected.')),
+                    );
+                  }
                   return;
                 }
-                if (await canLaunchUrl(url)) {
-                  await launchUrl(url, mode: LaunchMode.externalApplication);
-                }
+                await launchHttpsUrl(context, uri);
               },
             ),
 
