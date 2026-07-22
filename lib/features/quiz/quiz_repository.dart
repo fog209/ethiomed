@@ -12,10 +12,13 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/errors/error_exceptions.dart';
 import '../../../core/providers/connectivity_notifier.dart';
 import '../../../core/providers/sync_state_provider.dart';
+import '../../../core/services/network_config.dart';
 import '../../../core/services/postgrest_status_helper.dart';
 import '../../../core/database/app_database.dart';
 import '../../../core/errors/app_exception.dart';
 import '../../../features/articles/domain/models/article.dart' as model;
+
+const _pageSize = 1000;
 
 enum QuestionScope { all, newOnly, incorrectOnly }
 
@@ -122,9 +125,6 @@ class QuizRepository {
                   target: [_db.quizContent.remoteId],
                 ),
               );
-          // Preserve existing SM-2 progress; only seed a default row for
-          // brand-new content so first-review + due logic work. Never
-          // overwrite a user's spaced-repetition state on re-sync.
           await _db.customStatement(
             'INSERT OR IGNORE INTO quiz_progress (content_id, ease_factor) '
             'VALUES (?, 2.5)',
@@ -278,13 +278,26 @@ class QuizRepository {
 
   Future<int> syncQuestionsFromSupabase() async {
     try {
-      final response = await _supabase.from('questions').select();
-      final questions = response
-          .map(_questionFromJson)
-          .whereType<QuizQuestionEntity>()
-          .toList(growable: false);
-      await upsertQuestions(questions);
-      return questions.length;
+      var totalSynced = 0;
+      var offset = 0;
+
+      while (true) {
+        final response = await withNetworkRetry(() => _supabase
+            .from('questions')
+            .select()
+            .range(offset, offset + _pageSize - 1));
+        final questions = response
+            .map(_questionFromJson)
+            .whereType<QuizQuestionEntity>()
+            .toList(growable: false);
+        if (questions.isEmpty) break;
+        await upsertQuestions(questions);
+        totalSynced += questions.length;
+        offset += _pageSize;
+        if (questions.length < _pageSize) break;
+      }
+
+      return totalSynced;
     } catch (e) {
       debugPrint('Sync questions error: $e');
       return 0;
@@ -293,16 +306,27 @@ class QuizRepository {
 
   Future<int> syncQuestionsByCategory(String category) async {
     try {
-      final response = await _supabase
-          .from('questions')
-          .select()
-          .eq('category', category.trim());
-      final questions = response
-          .map(_questionFromJson)
-          .whereType<QuizQuestionEntity>()
-          .toList(growable: false);
-      await upsertQuestions(questions);
-      return questions.length;
+      var totalSynced = 0;
+      var offset = 0;
+
+      while (true) {
+        final response = await withNetworkRetry(() => _supabase
+            .from('questions')
+            .select()
+            .eq('category', category.trim())
+            .range(offset, offset + _pageSize - 1));
+        final questions = response
+            .map(_questionFromJson)
+            .whereType<QuizQuestionEntity>()
+            .toList(growable: false);
+        if (questions.isEmpty) break;
+        await upsertQuestions(questions);
+        totalSynced += questions.length;
+        offset += _pageSize;
+        if (questions.length < _pageSize) break;
+      }
+
+      return totalSynced;
     } catch (e) {
       debugPrint('Sync questions by category error: $e');
       return 0;
@@ -311,39 +335,51 @@ class QuizRepository {
 
   Future<int> syncArticlesByCategory(String parentCategory) async {
     try {
-      final response = await _supabase
-          .from('articles')
-          .select('*, is_high_yield')
-          .eq('parent_category', parentCategory.trim());
-      final articles = response
-          .map((json) => model.Article.fromJson(json))
-          .toList(growable: false);
+      var totalSynced = 0;
+      var offset = 0;
 
-      await _db.transaction(() async {
-        for (final article in articles) {
-          await _db
-              .into(_db.articles)
-              .insertOnConflictUpdate(
-                ArticlesCompanion.insert(
-                  id: article.id,
-                  title: article.title,
-                  category: Value(article.subcategory.isNotEmpty
-                      ? article.subcategory
-                      : article.parentCategory),
-                  parentCategory: Value(article.parentCategory.isNotEmpty
-                      ? article.parentCategory
-                      : null),
-                  subcategory: Value(
-                      article.subcategory.isNotEmpty ? article.subcategory : null),
-                  content: Value(jsonEncode(article.content ?? const <String, dynamic>{})),
-                  imageUrl: Value(article.imageUrl),
-                  videoUrl: Value(article.videoUrl),
-                  isHighYield: Value(article.isHighYield),
-                ),
-              );
-        }
-      });
-      return articles.length;
+      while (true) {
+        final response = await withNetworkRetry(() => _supabase
+            .from('articles')
+            .select('*, is_high_yield')
+            .eq('parent_category', parentCategory.trim())
+            .range(offset, offset + _pageSize - 1));
+        final articles = response
+            .map((json) => model.Article.fromJson(json))
+            .toList(growable: false);
+        if (articles.isEmpty) break;
+
+        await _db.transaction(() async {
+          for (final article in articles) {
+            await _db
+                .into(_db.articles)
+                .insertOnConflictUpdate(
+                  ArticlesCompanion.insert(
+                    id: article.id,
+                    title: article.title,
+                    category: Value(article.subcategory.isNotEmpty
+                        ? article.subcategory
+                        : article.parentCategory),
+                    parentCategory: Value(article.parentCategory.isNotEmpty
+                        ? article.parentCategory
+                        : null),
+                    subcategory: Value(
+                        article.subcategory.isNotEmpty ? article.subcategory : null),
+                    content: Value(jsonEncode(article.content ?? const <String, dynamic>{})),
+                    imageUrl: Value(article.imageUrl),
+                    videoUrl: Value(article.videoUrl),
+                    isHighYield: Value(article.isHighYield),
+                  ),
+                );
+          }
+        });
+
+        totalSynced += articles.length;
+        offset += _pageSize;
+        if (articles.length < _pageSize) break;
+      }
+
+      return totalSynced;
     } catch (e) {
       debugPrint('Sync articles by category error: $e');
       return 0;
@@ -352,29 +388,25 @@ class QuizRepository {
 
   Future<int> syncFlashcards() async {
     try {
-      final response = await _supabase.from('flashcards').select();
-      final flashcards = response
-          .map(_flashcardFromJson)
-          .whereType<FlashcardEntity>()
-          .toList(growable: false);
+      var totalSynced = 0;
+      var offset = 0;
 
-      await _db.transaction(() async {
-        for (final fc in flashcards) {
-          final contentId = await _db
-              .into(_db.flashcardContent)
-              .insert(
-                FlashcardContentCompanion.insert(
-                  remoteId: Value(fc.remoteId ?? 0),
-                  deckName: fc.deckName,
-                  frontText: fc.frontText,
-                  backText: fc.backText,
-                  sourceArticleId: Value(fc.sourceArticleId ?? ''),
-                  createdAt: Value(fc.createdAt),
-                  track: Value(fc.track),
-                  category: Value(fc.category),
-                ),
-                onConflict: DoUpdate(
-                  (_) => FlashcardContentCompanion.insert(
+      while (true) {
+        final response = await withNetworkRetry(() => _supabase
+            .from('flashcards')
+            .select()
+            .range(offset, offset + _pageSize - 1));
+        final flashcards = response
+            .map(_flashcardFromJson)
+            .whereType<FlashcardEntity>()
+            .toList(growable: false);
+        if (flashcards.isEmpty) break;
+        await _db.transaction(() async {
+          for (final fc in flashcards) {
+            final contentId = await _db
+                .into(_db.flashcardContent)
+                .insert(
+                  FlashcardContentCompanion.insert(
                     remoteId: Value(fc.remoteId ?? 0),
                     deckName: fc.deckName,
                     frontText: fc.frontText,
@@ -384,23 +416,35 @@ class QuizRepository {
                     track: Value(fc.track),
                     category: Value(fc.category),
                   ),
-                  target: [_db.flashcardContent.remoteId],
-                ),
-              );
-          // Seed default SM-2 progress; never overwrite an existing row.
-          await _db.customStatement(
-            'INSERT OR IGNORE INTO flashcard_progress (content_id, ease_factor) '
-            'VALUES (?, 2.5)',
-            [contentId],
-          );
-        }
-      });
+                  onConflict: DoUpdate(
+                    (_) => FlashcardContentCompanion.insert(
+                      remoteId: Value(fc.remoteId ?? 0),
+                      deckName: fc.deckName,
+                      frontText: fc.frontText,
+                      backText: fc.backText,
+                      sourceArticleId: Value(fc.sourceArticleId ?? ''),
+                      createdAt: Value(fc.createdAt),
+                      track: Value(fc.track),
+                      category: Value(fc.category),
+                    ),
+                    target: [_db.flashcardContent.remoteId],
+                  ),
+                );
+            await _db.customStatement(
+              'INSERT OR IGNORE INTO flashcard_progress (content_id, ease_factor) '
+              'VALUES (?, 2.5)',
+              [contentId],
+            );
+          }
+        });
 
-      return flashcards.length;
+        totalSynced += flashcards.length;
+        offset += _pageSize;
+        if (flashcards.length < _pageSize) break;
+      }
+
+      return totalSynced;
     } on PostgrestException catch (e) {
-      // Permission denied / RLS rejection / network — do NOT treat as
-      // "0 new cards". Rethrow so the caller can show a real error
-      // instead of a misleading "items updated" success message.
       debugPrint('Sync flashcards error (permission/network): ${e.message}');
       rethrow;
     } catch (e) {

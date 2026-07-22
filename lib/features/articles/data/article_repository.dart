@@ -13,11 +13,13 @@ import '../../../core/errors/app_exception.dart';
 import '../../../core/errors/error_exceptions.dart';
 import '../../../core/providers/connectivity_notifier.dart';
 import '../../../core/providers/sync_state_provider.dart';
+import '../../../core/services/network_config.dart';
 import '../../../core/services/postgrest_status_helper.dart';
 import '../../../main.dart' show supabaseInitializedProvider;
 import '../article_providers.dart';
 import '../domain/models/article.dart' as model;
 
+const _pageSize = 1000;
 const int _articlesPageSize = 20;
 
 class ArticleRepository {
@@ -50,45 +52,55 @@ class ArticleRepository {
     // TODO: Implement rate limiter check - if user pulls more than 50 articles in 1 minute,
     // pause sync and show rate limit warning to prevent content scraping abuse.
     try {
-      final response = await _supabase
-          .from('articles')
-          .select('*, is_high_yield');
-      final List<model.Article> remoteArticles = response
-          .map((json) => model.Article.fromJson(json))
-          .toList(growable: false);
+      var offset = 0;
 
-      await _db.transaction(() async {
-        for (final article in remoteArticles) {
-          await _db
-              .into(_db.articles)
-              .insertOnConflictUpdate(
-                ArticlesCompanion.insert(
-                  id: article.id,
-                  title: article.title,
-                  category: Value(
-                    article.subcategory.isNotEmpty
-                        ? article.subcategory
-                        : article.parentCategory,
+      while (true) {
+        final response = await withNetworkRetry(
+            () => _supabase.from('articles').select('*, is_high_yield').range(
+                  offset,
+                  offset + _pageSize - 1,
+                ));
+        final List<model.Article> remoteArticles = response
+            .map((json) => model.Article.fromJson(json))
+            .toList(growable: false);
+
+        if (remoteArticles.isEmpty) break;
+
+        await _db.transaction(() async {
+          for (final article in remoteArticles) {
+            await _db
+                .into(_db.articles)
+                .insertOnConflictUpdate(
+                  ArticlesCompanion.insert(
+                    id: article.id,
+                    title: article.title,
+                    category: Value(
+                      article.subcategory.isNotEmpty
+                          ? article.subcategory
+                          : article.parentCategory,
+                    ),
+                    parentCategory: Value(
+                      article.parentCategory.isNotEmpty
+                          ? article.parentCategory
+                          : null,
+                    ),
+                    subcategory: Value(
+                      article.subcategory.isNotEmpty ? article.subcategory : null,
+                    ),
+                    categoryPath: Value(jsonEncode(article.category)),
+                    content: Value(
+                      jsonEncode(article.content ?? const <String, dynamic>{}),
+                    ),
+                    imageUrl: Value(article.imageUrl),
+                    videoUrl: Value(article.videoUrl),
+                    isHighYield: Value(article.isHighYield),
                   ),
-                  parentCategory: Value(
-                    article.parentCategory.isNotEmpty
-                        ? article.parentCategory
-                        : null,
-                  ),
-                  subcategory: Value(
-                    article.subcategory.isNotEmpty ? article.subcategory : null,
-                  ),
-                  categoryPath: Value(jsonEncode(article.category)),
-                  content: Value(
-                    jsonEncode(article.content ?? const <String, dynamic>{}),
-                  ),
-                  imageUrl: Value(article.imageUrl),
-                  videoUrl: Value(article.videoUrl),
-                  isHighYield: Value(article.isHighYield),
-                ),
-              );
-        }
-      });
+                );
+          }
+        });
+
+        offset += _pageSize;
+      }
 
       _onSuccessfulSync();
     } on PostgrestException catch (e) {
