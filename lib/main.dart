@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:firebase_performance/firebase_performance.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -112,6 +113,14 @@ void main() async {
     firebaseInitialized = true;
   } catch (e) {
     debugPrint('Firebase init skipped: $e');
+  }
+
+  if (firebaseInitialized) {
+    try {
+      await FirebasePerformance.instance.setPerformanceCollectionEnabled(true);
+    } catch (e) {
+      debugPrint('Firebase Performance init skipped: $e');
+    }
   }
 
   FlutterError.onError = (details) {
