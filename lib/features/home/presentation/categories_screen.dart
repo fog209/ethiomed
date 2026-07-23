@@ -99,72 +99,75 @@ class _CategoryTile extends ConsumerWidget {
     final progressAsyncValue = ref.watch(categoryProgressProvider(name));
     final theme = Theme.of(context);
 
-return progressAsyncValue.when(
-       data: (progress) => InkWell(
-        onTap: () {
-          if (TaxonomyConfig.hasChildren(name)) {
-            context.push('/subcategories/${Uri.encodeComponent(name)}');
-          } else {
-            context.push('/article-list/${Uri.encodeComponent(name)}');
-          }
-        },
-          child: Card(
-            elevation: 4,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(15),
-            ),
-            child: Padding(
-               padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 8),
-               child: Column(
-                 mainAxisAlignment: MainAxisAlignment.center,
-                 mainAxisSize: MainAxisSize.min,
-                 children: [
-                   Icon(icon, size: 40, color: theme.colorScheme.secondary),
-                   const SizedBox(height: 12),
-                  Text(
-                    name,
-                    textAlign: TextAlign.center,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: theme.colorScheme.onSurface,
-                    ),
+    return progressAsyncValue.when(
+      data: (progress) => Card(
+        margin: const EdgeInsets.only(bottom: 12),
+        color: theme.colorScheme.secondaryContainer,
+        child: InkWell(
+          onTap: () {
+            if (TaxonomyConfig.hasChildren(name)) {
+              context.push('/subcategories/${Uri.encodeComponent(name)}');
+            } else {
+              context.push('/article-list/${Uri.encodeComponent(name)}');
+            }
+          },
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Icon(icon, color: theme.colorScheme.secondary, size: 32),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        name,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: theme.colorScheme.onSecondaryContainer,
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      LinearProgressIndicator(
+                        minHeight: 3,
+                        backgroundColor: theme.colorScheme.surface.withValues(alpha: 0.2),
+                        color: theme.colorScheme.primary,
+                        value: _categoryProgressValue(progress),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 8),
-                  LinearProgressIndicator(
-                    minHeight: 3,
-                    backgroundColor: theme.colorScheme.surface.withValues(alpha: 0.2),
-                    color: theme.colorScheme.primary,
-                    value: _categoryProgressValue(progress),
-                  ),
-                ],
-              ),
+                ),
+                Icon(
+                  Icons.arrow_forward_ios,
+                  color: theme.colorScheme.onSecondaryContainer,
+                  size: 16,
+                ),
+              ],
             ),
           ),
-       ),
+        ),
+      ),
       loading: () => const SizedBox.shrink(),
       error: (error, stack) => Card(
-        elevation: 4,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        child: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
+        margin: const EdgeInsets.only(bottom: 12),
+        color: theme.colorScheme.secondaryContainer,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
             children: [
-              Icon(Icons.sync_problem, color: theme.colorScheme.secondary, size: 48),
-              const SizedBox(height: 8),
-              Text(
-                'Could not sync. Showing cached data.',
-                textAlign: TextAlign.center,
-                style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
-              ),
-              TextButton(
-                onPressed: () {
-                  debugPrint('SYNC_ERROR_TYPE: ${error.runtimeType}');
-                  debugPrint('SYNC_ERROR_DETAIL: $error');
-                  ref.invalidate(categoryProgressProvider(name));
-                },
-                child: const Text('Retry'),
+              Icon(Icons.sync_problem, color: theme.colorScheme.error, size: 32),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Text(
+                  'Could not load',
+                  style: TextStyle(
+                    color: theme.colorScheme.onSecondaryContainer,
+                    fontSize: 14,
+                  ),
+                ),
               ),
             ],
           ),
@@ -249,18 +252,18 @@ todayPlanAsync.when(
                  ),
               ]),
             ),
-            if (streak.isLoading) _buildShimmerCategorySliverGrid(),
+            if (streak.isLoading) _buildShimmerCategoryList(),
             SliverToBoxAdapter(
               child: _buildSectionHeader('Clinical'),
             ),
-            _buildCategorySliverGrid(AppConfig.topLevelClinicalCategories),
-            const SliverToBoxAdapter(
-              child: SizedBox(height: 24),
-            ),
-            SliverToBoxAdapter(
-              child: _buildSectionHeader('Preclinical'),
-            ),
-            _buildCategorySliverGrid(AppConfig.preclinicalCategories),
+_buildCategoryList(AppConfig.topLevelClinicalCategories),
+             const SliverToBoxAdapter(
+               child: SizedBox(height: 24),
+             ),
+             SliverToBoxAdapter(
+               child: _buildSectionHeader('Preclinical'),
+             ),
+             _buildCategoryList(AppConfig.preclinicalCategories),
             const SliverToBoxAdapter(
               child: SizedBox(height: 80),
             ),
@@ -294,15 +297,10 @@ todayPlanAsync.when(
     );
   }
 
-  Widget _buildShimmerCategorySliverGrid() {
+  Widget _buildShimmerCategoryList() {
     final categories = AppConfig.clinicalCategories.take(6).toList();
 
-    return SliverGrid(
-      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-        maxCrossAxisExtent: 150,
-        crossAxisSpacing: 15,
-        mainAxisSpacing: 15,
-      ),
+    return SliverList(
       delegate: SliverChildBuilderDelegate(
         (context, index) {
           final shimmerTheme = Theme.of(context);
@@ -310,28 +308,41 @@ todayPlanAsync.when(
             baseColor: shimmerTheme.colorScheme.surfaceContainerHighest,
             highlightColor: shimmerTheme.colorScheme.surface,
             child: Card(
-              elevation: 4,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15),
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: shimmerTheme.colorScheme.onSurface.withValues(alpha: 0.1),
-                      shape: BoxShape.circle,
+              margin: const EdgeInsets.only(bottom: 12),
+              color: shimmerTheme.colorScheme.secondaryContainer,
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(
+                        color: shimmerTheme.colorScheme.onSurface.withValues(alpha: 0.1),
+                        shape: BoxShape.circle,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 12),
-                  Container(
-                    height: 12,
-                    width: 100,
-                    color: shimmerTheme.colorScheme.onSurface.withValues(alpha: 0.1),
-                  ),
-                ],
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            height: 16,
+                            width: 120,
+                            color: shimmerTheme.colorScheme.onSurface.withValues(alpha: 0.1),
+                          ),
+                          const SizedBox(height: 8),
+                          Container(
+                            height: 3,
+                            width: double.infinity,
+                            color: shimmerTheme.colorScheme.onSurface.withValues(alpha: 0.1),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           );
@@ -341,13 +352,8 @@ todayPlanAsync.when(
     );
   }
 
-  Widget _buildCategorySliverGrid(List<Map<String, Object?>> categories) {
-    return SliverGrid(
-      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-        maxCrossAxisExtent: 150,
-        crossAxisSpacing: 15,
-        mainAxisSpacing: 15,
-      ),
+  Widget _buildCategoryList(List<Map<String, Object?>> categories) {
+    return SliverList(
       delegate: SliverChildBuilderDelegate(
         (context, index) {
           final category = categories[index];
