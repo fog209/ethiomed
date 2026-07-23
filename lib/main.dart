@@ -214,14 +214,16 @@ final _router = GoRouter(
       return null;
     }
 
-    // 3. Auth gate — skipped entirely when Supabase is not configured
-    if (!_supabaseInitialized) {
-      debugPrint('Router: Supabase not initialized — skipping auth/subscription gate.');
-      if (location == '/') return '/home';
-      return null;
+    // 3. Auth gate — redirect to login if no valid session
+    // Note: We still check for a session even if Supabase is not configured,
+    // because an uninitialized Supabase should NOT bypass authentication.
+    Session? session;
+    try {
+      session = Supabase.instance.client.auth.currentSession;
+    } catch (e) {
+      // Supabase not initialized or client unavailable
+      debugPrint('Router: Supabase client unavailable — redirecting to /login.');
     }
-
-    final session = Supabase.instance.client.auth.currentSession;
     if (session == null) {
       debugPrint('Router: No auth session — redirecting to /login.');
       if (!_isAtLoginOrSubscription(location)) return '/login';
@@ -231,7 +233,7 @@ final _router = GoRouter(
     // 4. Subscription / admin gate (only for authenticated users)
     try {
       final user = Supabase.instance.client.auth.currentUser;
-      if (user != null) {
+      if (user != null && _supabaseInitialized) {
         final profile = await Supabase.instance.client
             .from('profiles')
             .select('is_admin')
@@ -259,9 +261,18 @@ final _router = GoRouter(
           if (location != '/subscription') return '/subscription';
           return null;
         }
+      } else if (!_supabaseInitialized) {
+        // Supabase not initialized but we have a session - treat as invalid
+        // This handles edge cases where local storage has stale session info
+        debugPrint('Router: Supabase not initialized but session exists — redirecting to /login.');
+        if (!_isAtLoginOrSubscription(location)) return '/login';
+        return null;
       }
     } catch (e) {
-      debugPrint('Router: Subscription check error — allowing access: $e');
+      debugPrint('Router: Subscription check error — redirecting to /subscription: $e');
+      // On error, require subscription state to ensure security
+      if (!_isAtLoginOrSubscription(location)) return '/subscription';
+      return null;
     }
 
     // 5. All checks passed — allow through (or land on Home from the root path)
