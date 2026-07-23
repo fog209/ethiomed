@@ -24,6 +24,7 @@ class TaxonomyConfig {
       'Infectious Diseases',
       'Gastroenterology',
       'Endocrinology',
+      'Hematology',
     ],
     'Pediatrics': <String>[
       'Neonatology',
