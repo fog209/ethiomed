@@ -23,7 +23,6 @@ class AppConfig {
         {'name': 'Radiology', 'icon': Icons.medical_services},
         {'name': 'Emergency Medicine', 'icon': Icons.emergency},
         {'name': 'Orthopedics', 'icon': Icons.accessibility},
-        {'name': 'Hematology', 'icon': Icons.bloodtype},
       ];
 
   static const List<Map<String, Object?>> preclinicalCategories =
@@ -43,9 +42,8 @@ class AppConfig {
   /// ONLY; do not duplicate this map elsewhere.
   ///
   /// Cardiology, Neurology, Nephrology, Pulmonology, Infectious
-  /// Diseases, Gastroenterology, and Endocrinology are subspecialties
-  /// of Internal Medicine (not top-level categories). Hematology is a
-  /// separate top-level clinical category (not under Internal Medicine).
+  /// Diseases, Gastroenterology, Endocrinology, and Hematology are
+  /// subspecialties of Internal Medicine (not top-level categories).
   static const Map<String, String> categoryToParent = {
     'Cardiology': 'Internal Medicine',
     'Neurology': 'Internal Medicine',
@@ -54,6 +52,7 @@ class AppConfig {
     'Infectious Diseases': 'Internal Medicine',
     'Gastroenterology': 'Internal Medicine',
     'Endocrinology': 'Internal Medicine',
+    'Hematology': 'Internal Medicine',
     'Neonatology': 'Pediatrics',
     'Developmental Milestones': 'Pediatrics',
     'Obstetrics': 'OB/GYN',

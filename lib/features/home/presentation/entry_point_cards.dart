@@ -184,6 +184,69 @@ class LocalGuidelinesEntryCard extends ConsumerWidget {
   }
 }
 
+class DrugsEntryCard extends ConsumerWidget {
+  const DrugsEntryCard({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    return Card(
+      margin: const EdgeInsets.only(bottom: 16),
+      color: theme.colorScheme.secondaryContainer,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            Icon(
+              Icons.medication,
+              color: theme.colorScheme.secondary,
+              size: 32,
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Drugs',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: theme.colorScheme.onSecondaryContainer,
+                      fontSize: 16,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Ethiopian drug reference coming soon',
+                    style: TextStyle(
+                      color: theme.colorScheme.onSecondaryContainer,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class SearchEntryCard extends ConsumerWidget {
+  const SearchEntryCard({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return _EntryCard(
+      icon: Icons.search,
+      title: 'Search',
+      subtitle: 'Articles, flashcards, questions',
+      onTap: () => context.push('/spotlight'),
+    );
+  }
+}
+
 class FlashcardsEntryCard extends ConsumerWidget {
   const FlashcardsEntryCard({super.key});
 

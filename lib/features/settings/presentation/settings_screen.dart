@@ -102,7 +102,7 @@ class SettingsScreen extends ConsumerWidget {
       SwitchListTile(
         value: themeMode == ThemeMode.dark,
         title: const Text('Dark Mode'),
-        subtitle: const Text('Use dark theme throughout the app'),
+        subtitle: Text(_themeModeSubtitle(themeMode)),
         secondary: Icon(Icons.dark_mode, color: primaryColor),
         onChanged: (enabled) async {
           final newMode = enabled ? ThemeMode.dark : ThemeMode.light;
@@ -113,6 +113,7 @@ class SettingsScreen extends ConsumerWidget {
           }
         },
       ),
+      _buildThemeModeSelector(context, ref, primaryColor),
       _buildReadingModeSection(context, ref, primaryColor),
       ListTile(
         leading: Icon(Icons.system_update_alt, color: primaryColor),
@@ -315,6 +316,75 @@ class SettingsScreen extends ConsumerWidget {
     items.add(const ContentResetButton());
 
     return items;
+  }
+
+  String _themeModeSubtitle(ThemeMode mode) {
+    switch (mode) {
+      case ThemeMode.system:
+        return 'Follow system theme';
+      case ThemeMode.light:
+        return 'Always use light theme';
+      case ThemeMode.dark:
+        return 'Always use dark theme';
+    }
+  }
+
+  Widget _buildThemeModeSelector(
+    BuildContext context,
+    WidgetRef ref,
+    Color primaryColor,
+  ) {
+    final theme = Theme.of(context);
+    final currentMode = ref.watch(themeModeProvider);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Theme Mode',
+            style: TextStyle(
+              color: theme.colorScheme.onSurfaceVariant,
+              fontSize: 13,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 8),
+          SegmentedButton<ThemeMode>(
+            segments: const [
+              ButtonSegment(
+                value: ThemeMode.system,
+                label: Text('System'),
+                icon: Icon(Icons.settings_system_daydream, size: 18),
+              ),
+              ButtonSegment(
+                value: ThemeMode.light,
+                label: Text('Light'),
+                icon: Icon(Icons.wb_sunny, size: 18),
+              ),
+              ButtonSegment(
+                value: ThemeMode.dark,
+                label: Text('Dark'),
+                icon: Icon(Icons.nights_stay, size: 18),
+              ),
+            ],
+            selected: {currentMode},
+            onSelectionChanged: (modes) async {
+              if (modes.isEmpty) return;
+              final newMode = modes.first;
+              await saveThemeMode(newMode);
+              ref.read(themeModeProvider.notifier).state = newMode;
+              if (!context.mounted) return;
+            },
+            style: SegmentedButton.styleFrom(
+              foregroundColor: primaryColor,
+              backgroundColor: theme.colorScheme.surface,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildReadingModeSection(
