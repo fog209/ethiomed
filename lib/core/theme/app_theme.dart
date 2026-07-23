@@ -35,6 +35,12 @@ final ThemeData darkTheme = ThemeData(
     surfaceTintColor: Colors.transparent,
   ),
   dividerTheme: const DividerThemeData(color: Color(0xFF252A45)),
+  tabBarTheme: const TabBarThemeData(
+    labelColor: Color(0xFFE8EAF6),
+    unselectedLabelColor: Color(0xFF9FA8DA),
+    indicatorColor: Color(0xFFF9A825),
+    dividerColor: Color(0xFF252A45),
+  ),
 );
 
 final ThemeData lightTheme = ThemeData(
@@ -71,4 +77,10 @@ final ThemeData lightTheme = ThemeData(
     surfaceTintColor: Colors.transparent,
   ),
   dividerTheme: const DividerThemeData(color: Color(0xFFD0D3E0)),
+  tabBarTheme: const TabBarThemeData(
+    labelColor: Color(0xFFFFFFFF),
+    unselectedLabelColor: Color(0xFFB3B8D8),
+    indicatorColor: Color(0xFFF9A825),
+    dividerColor: Color(0xFFD0D3E0),
+  ),
 );

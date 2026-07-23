@@ -23,6 +23,103 @@ class UpdateSheet extends ConsumerWidget {
     final state = ref.watch(updaterProvider);
     final theme = Theme.of(context);
 
+    if (state.status == UpdaterStatus.checking) {
+      return Container(
+        padding: EdgeInsets.only(
+          left: 20,
+          right: 20,
+          top: 16,
+          bottom: MediaQuery.of(context).padding.bottom + 20,
+        ),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surfaceContainerHighest,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.system_update_alt_rounded,
+                  color: theme.colorScheme.secondary,
+                  size: 28,
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  'Checking for updates…',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    color: theme.colorScheme.onSurface,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            LinearProgressIndicator(
+              color: theme.colorScheme.secondary,
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (state.status == UpdaterStatus.upToDate) {
+      return Container(
+        padding: EdgeInsets.only(
+          left: 20,
+          right: 20,
+          top: 16,
+          bottom: MediaQuery.of(context).padding.bottom + 20,
+        ),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surfaceContainerHighest,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+children: [
+               Icon(
+                 Icons.check_circle_rounded,
+                 color: theme.colorScheme.secondary,
+                 size: 28,
+               ),
+               const SizedBox(width: 12),
+               Text(
+                 "You're up to date",
+                 style: theme.textTheme.titleMedium?.copyWith(
+                   color: theme.colorScheme.onSurface,
+                   fontWeight: FontWeight.bold,
+                 ),
+               ),
+             ],
+           ),
+            const SizedBox(height: 12),
+            Text(
+              'WardReady ${state.manifest?.version ?? kInstalledAppVersion} is the latest version.',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurface,
+              ),
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: TextButton(
+                onPressed: () {
+                  if (context.canPop()) context.pop();
+                },
+                child: const Text('Dismiss'),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
     if (state.status != UpdaterStatus.updateAvailable &&
         state.status != UpdaterStatus.downloading &&
         state.status != UpdaterStatus.readyToInstall &&
@@ -235,7 +332,9 @@ void showUpdateSheetIfNeeded(BuildContext context, WidgetRef ref) {
   final status = ref.read(updaterProvider).status;
   if (status == UpdaterStatus.updateAvailable ||
       status == UpdaterStatus.readyToInstall ||
-      status == UpdaterStatus.error) {
+      status == UpdaterStatus.error ||
+      status == UpdaterStatus.checking ||
+      status == UpdaterStatus.upToDate) {
     showModalBottomSheet<void>(
       context: context,
       isDismissible: true,
