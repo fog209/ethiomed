@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shimmer/shimmer.dart';
@@ -371,7 +372,10 @@ if (question.articleId.isNotEmpty)
       ),
       onPressed: notifier.isRecordingReview
           ? null
-          : () => _recordReviewAndAdvance(question, quality, notifier),
+          : () {
+              HapticFeedback.mediumImpact();
+              _recordReviewAndAdvance(question, quality, notifier);
+            },
       child: Text(label),
     );
   }
@@ -588,11 +592,14 @@ if (question.articleId.isNotEmpty)
             ? theme.colorScheme.error
             : theme.colorScheme.outline;
 
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+return Padding(
+       padding: const EdgeInsets.only(bottom: 10),
+       child: InkWell(
+         onTap: () {
+           HapticFeedback.selectionClick();
+           onTap();
+         },
+         borderRadius: BorderRadius.circular(12),
         child: Container(
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
