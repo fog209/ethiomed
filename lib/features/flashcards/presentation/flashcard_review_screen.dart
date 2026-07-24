@@ -9,6 +9,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/database/app_database.dart';
 import '../../../core/services/security_service.dart';
 import '../../../core/widgets/empty_state.dart';
+import '../../../features/settings/reading_mode_provider.dart';
 import '../../quiz/quiz_repository.dart';
 import '../flashcard_review_service.dart';
 import '../flashcard_track_provider.dart';
@@ -246,6 +247,13 @@ class _FlashcardReviewScreenState extends ConsumerState<FlashcardReviewScreen> {
 
   Widget _buildReviewCard(BuildContext context, FlashcardEntity card) {
     final theme = Theme.of(context);
+    final readingMode = ref.watch(readingModeProvider);
+    final effectiveBackground = readingMode.sepia
+        ? const Color(0xFFF4ECD8)
+        : theme.colorScheme.surfaceContainerHighest;
+    final textColor = readingMode.sepia
+        ? const Color(0xFF3B2F1E)
+        : theme.colorScheme.onSurface;
 
     return SingleChildScrollView(
       child: Padding(
@@ -261,7 +269,7 @@ class _FlashcardReviewScreenState extends ConsumerState<FlashcardReviewScreen> {
                 constraints: const BoxConstraints(minHeight: 200),
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.surfaceContainerHighest,
+                  color: effectiveBackground,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Column(
@@ -273,7 +281,7 @@ class _FlashcardReviewScreenState extends ConsumerState<FlashcardReviewScreen> {
                       style: TextStyle(
                         fontSize: 18,
                         height: 1.4,
-                        color: theme.colorScheme.onSurface,
+                        color: textColor,
                       ),
                     ),
                     if (!isRevealed) ...[
@@ -283,7 +291,9 @@ class _FlashcardReviewScreenState extends ConsumerState<FlashcardReviewScreen> {
                         child: Text(
                           'Tap to reveal answer',
                           style: TextStyle(
-                            color: theme.colorScheme.onSurfaceVariant,
+                            color: readingMode.sepia
+                                ? const Color(0xFF5D4E37)
+                                : theme.colorScheme.onSurfaceVariant,
                             fontSize: 12,
                           ),
                         ),

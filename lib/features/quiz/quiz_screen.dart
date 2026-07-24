@@ -13,6 +13,7 @@ import '../../../features/content/presentation/content_flag_widget.dart';
 import '../../../features/progress/streak_notifier.dart';
 import 'quiz_notifier.dart';
 import 'quiz_option.dart';
+import '../../../features/settings/reading_mode_provider.dart';
 
 const _defaultQuizCategory = AppConfig.internalMedicineCategory;
 const _navy = Color(0xFF1A237E);
@@ -170,9 +171,17 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
   ) {
     final theme = Theme.of(context);
     final question = notifier.currentQuestion;
+    final readingMode = ref.watch(readingModeProvider);
     if (question == null) {
       return const SizedBox.shrink();
     }
+
+    final effectiveBackground = readingMode.sepia
+        ? const Color(0xFFF4ECD8)
+        : theme.colorScheme.surfaceContainerHighest;
+    final textColor = readingMode.sepia
+        ? const Color(0xFF3B2F1E)
+        : theme.colorScheme.onSurface;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -216,82 +225,86 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
           isAnswerRevealed: notifier.isAnswerRevealed,
           onTap: () => notifier.selectOption(QuizOption.d),
         ),
-        if (notifier.isAnswerRevealed) ...[
-          const SizedBox(height: 16),
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: theme.colorScheme.secondary),
-            ),
-            child: Text(
-              'Explanation: ${question.explanation}',
-              style: TextStyle(height: 1.5, color: theme.colorScheme.onSurface),
-            ),
-          ),
-          if (question.attendingTip != null &&
-              question.attendingTip!.isNotEmpty) ...[
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.secondaryContainer,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: theme.colorScheme.secondary),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.tips_and_updates,
-                        size: 18,
-                        color: theme.colorScheme.secondary,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Attending Tip',
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          color: theme.colorScheme.secondary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    question.attendingTip!,
-                    style: TextStyle(
-                      height: 1.5,
-                      color: theme.colorScheme.onSurface,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-          const SizedBox(height: 16),
-if (question.articleId.isNotEmpty)
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  icon: const Icon(Icons.article_outlined, size: 18),
-                  label: const Text('Source Article'),
-                  onPressed: () => context.push('/article-detail', extra: {'id': question.articleId, 'section': question.testedField}),
-                ),
-              ),
-          const SizedBox(height: 12),
-          ContentFlagWidget(
-            contentType: ContentType.question,
-            contentId: question.remoteId,
-          ),
-          _buildSm2Buttons(question, notifier),
-        ],
-      ],
-    );
-  }
+if (notifier.isAnswerRevealed) ...[
+           const SizedBox(height: 16),
+           Container(
+             padding: const EdgeInsets.all(16),
+             decoration: BoxDecoration(
+               color: effectiveBackground,
+               borderRadius: BorderRadius.circular(12),
+               border: Border.all(color: theme.colorScheme.secondary),
+             ),
+             child: Text(
+               'Explanation: ${question.explanation}',
+               style: TextStyle(height: 1.5, color: textColor),
+             ),
+           ),
+           if (question.attendingTip != null &&
+               question.attendingTip!.isNotEmpty) ...[
+             const SizedBox(height: 12),
+             Container(
+               padding: const EdgeInsets.all(16),
+               decoration: BoxDecoration(
+                 color: readingMode.sepia
+                     ? const Color(0xFFE8DCC0)
+                     : theme.colorScheme.secondaryContainer,
+                 borderRadius: BorderRadius.circular(12),
+                 border: Border.all(color: theme.colorScheme.secondary),
+               ),
+               child: Column(
+                 crossAxisAlignment: CrossAxisAlignment.start,
+                 children: [
+                   Row(
+                     children: [
+                       Icon(
+                         Icons.tips_and_updates,
+                         size: 18,
+                         color: theme.colorScheme.secondary,
+                       ),
+                       const SizedBox(width: 8),
+                       Text(
+                         'Attending Tip',
+                         style: theme.textTheme.titleSmall?.copyWith(
+                           color: readingMode.sepia
+                               ? const Color(0xFF3B2F1E)
+                               : theme.colorScheme.secondary,
+                           fontWeight: FontWeight.bold,
+                         ),
+                       ),
+                     ],
+                   ),
+                   const SizedBox(height: 8),
+                   Text(
+                     question.attendingTip!,
+                     style: TextStyle(
+                       height: 1.5,
+                       color: textColor,
+                     ),
+                   ),
+                 ],
+               ),
+             ),
+           ],
+           const SizedBox(height: 16),
+           if (question.articleId.isNotEmpty)
+             SizedBox(
+               width: double.infinity,
+               child: OutlinedButton.icon(
+                 icon: const Icon(Icons.article_outlined, size: 18),
+                 label: const Text('Source Article'),
+                 onPressed: () => context.push('/article-detail', extra: {'id': question.articleId, 'section': question.testedField}),
+               ),
+             ),
+           const SizedBox(height: 12),
+           ContentFlagWidget(
+             contentType: ContentType.question,
+             contentId: question.remoteId,
+           ),
+           _buildSm2Buttons(question, notifier),
+         ],
+       ],
+     );
+   }
 
   Widget _buildSm2Buttons(QuizTableData question, QuizNotifier notifier) {
     return Column(
