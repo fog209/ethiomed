@@ -102,6 +102,8 @@ class BookmarksScreen extends ConsumerWidget {
             icon: emptyIcon,
             title: emptyTitle,
             subtitle: emptySubtitle,
+            onAction: () => context.go('/home'),
+            actionLabel: 'Browse Articles',
           );
         }
 
@@ -151,11 +153,12 @@ class BookmarksScreen extends ConsumerWidget {
 
         final notes = snapshot.data ?? [];
         if (notes.isEmpty) {
-          return const EmptyState(
+          return EmptyState(
             icon: Icons.note_alt_outlined,
             title: 'No notes yet',
-            subtitle:
-                'Open any article and tap "My Notes" to start jotting.',
+            subtitle: 'Open any article and tap "My Notes" to start jotting.',
+            onAction: () => context.go('/home'),
+            actionLabel: 'Browse Articles',
           );
         }
 

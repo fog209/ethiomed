@@ -14,6 +14,7 @@ import 'package:shimmer/shimmer.dart';
 import '../../../features/articles/presentation/article_markdown_helpers.dart';
 
 import '../../../core/database/app_database.dart';
+import '../../../core/widgets/skeleton_widget.dart';
 import '../../../core/utils/app_url_launcher.dart';
 import '../../../features/articles/article_providers.dart';
 import '../../../features/articles/data/content_update_service.dart';
@@ -224,9 +225,9 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
           });
           return _buildContent(fetchedArticle);
         },
-        loading: () => const Scaffold(
-          body: Center(child: CircularProgressIndicator()),
-        ),
+loading: () => const Scaffold(
+           body: _ArticleSkeleton(),
+         ),
         error: (error, stack) => Scaffold(
           body: Center(child: Text('Error loading article: $error')),
         ),
@@ -274,10 +275,10 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 const Text('HY'),
-                Switch(
-                  value: _filterHighYieldBody,
-                  activeColor: theme.colorScheme.secondary,
-                  onChanged: (value) {
+Switch(
+                   value: _filterHighYieldBody,
+                   activeThumbColor: theme.colorScheme.secondary,
+                   onChanged: (value) {
                     setState(() {
                       _filterHighYieldBody = value;
                     });
@@ -1059,5 +1060,42 @@ Padding(
     }
 
     return null;
+  }
+}
+
+class _ArticleSkeleton extends StatelessWidget {
+  const _ArticleSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SkeletonWidget(height: 28, width: 300),
+          const SizedBox(height: 8),
+          SkeletonWidget(height: 14, width: 180),
+          const SizedBox(height: 24),
+          SkeletonWidget(height: 14),
+          const SizedBox(height: 8),
+          SkeletonWidget(height: 14, width: 320),
+          const SizedBox(height: 8),
+          SkeletonWidget(height: 14),
+          const SizedBox(height: 8),
+          SkeletonWidget(height: 14, width: 260),
+          const SizedBox(height: 24),
+          SkeletonWidget(height: 200, borderRadius: 12),
+          const SizedBox(height: 16),
+          SkeletonWidget(height: 14),
+          const SizedBox(height: 8),
+          SkeletonWidget(height: 14, width: 300),
+          const SizedBox(height: 8),
+          SkeletonWidget(height: 14),
+          const SizedBox(height: 8),
+          SkeletonWidget(height: 14, width: 200),
+        ],
+      ),
+    );
   }
 }
