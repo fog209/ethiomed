@@ -16,11 +16,11 @@
 | `0003_section_registry_overrides.sql` | ✅ | ? | Unknown |
 | `0004_flashcard_track_category.sql` | ✅ | ? | Unknown |
 | `0005_server_now_rpc.sql` | ✅ | ❌ | Feather-light batch, NOT yet applied |
-| `0006_subscriptions_admin_rls.sql` | ✅ | ❌ | Feather-light batch, NOT yet applied |
+| `0006_subscriptions_admin_rls.sql` | ✅ | ✅ | Applied 2026-07-24 (Phase 7) |
 | `0007_questions_attending_tip.sql` | ✅ | ❌ | Feather-light batch, NOT yet applied |
-| `0008_activation_log.sql` | ❌ | ❌ | **Pending — to be created and applied** |
+| `0008_activation_log.sql` | ✅ | ✅ | Applied 2026-07-24 (Phase 7) |
 | `0009_*` | ❌ | ❌ | **SKIP — paused under Hard Freeze** |
-| `0011_user_reports.sql` | ❌ | ❌ | **Pending — to be created and applied** |
+| `0011_user_reports.sql` | ✅ | ✅ | Applied 2026-07-24 (Phase 7) |
 
 ---
 
@@ -485,11 +485,11 @@ DROP TABLE IF EXISTS public.user_reports CASCADE;
 
 ## Summary Table
 
-| Step | Migration | File | Precondition | Rollback |
-|------|-----------|------|-------------|----------|
-| 1 | `0005` | On disk ✅ | None | `DROP FUNCTION server_now()` |
-| 2 | `0006` | On disk ✅ | Step 1 | `DROP FUNCTION is_user_admin` + `DROP POLICY` x2 |
-| 3 | Diagnostic | N/A | Step 2 | N/A |
-| 4 | `0008` | **Create new** ✅ (SQL above) | Step 2 + dedup check | `ALTER TABLE DROP CONSTRAINT` + `DROP TABLE activation_log CASCADE` |
-| — | `0009` | **SKIP** | Paused under Hard Freeze | — |
-| 5 | `0011` | **Create new** ✅ (SQL above) | Step 2 | `DROP TABLE user_reports CASCADE` |
+| Step | Migration | File | Applied | Precondition | Rollback |
+|------|-----------|------|---------|-------------|----------|
+| 1 | `0005` | On disk ✅ | ❌ | None | `DROP FUNCTION server_now()` |
+| 2 | `0006` | On disk ✅ | ✅ 2026-07-24 | Step 1 | `DROP FUNCTION is_user_admin` + `DROP POLICY` x2 |
+| 3 | Diagnostic | N/A | ✅ 2026-07-24 | Step 2 | N/A |
+| 4 | `0008` | On disk ✅ | ✅ 2026-07-24 | Step 2 + dedup check | `ALTER TABLE DROP CONSTRAINT` + `DROP TABLE activation_log CASCADE` |
+| — | `0009` | **SKIP** | — | Paused under Hard Freeze | — |
+| 5 | `0011` | On disk ✅ | ✅ 2026-07-24 | Step 2 | `DROP TABLE user_reports CASCADE` |
