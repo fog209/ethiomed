@@ -2,4 +2,5 @@
 <resources>
     <color name="navy_launch">#0D0F1A</color>
     <color name="gold_launch">#F9A825</color>
+	<color name="ic_launcher_background">#1A237E</color>
 </resources>

@@ -42,6 +42,8 @@ dev_dependencies:
     sdk: flutter
   integration_test:
     sdk: flutter
+  flutter_launcher_icons: ^0.14.3
+  flutter_native_splash: ^2.4.4
   riverpod_generator: ^2.4.0
   riverpod_lint: ^2.6.5
 
@@ -50,3 +52,18 @@ flutter:
   assets:
     - assets/flashcards/
     - assets/data/
+
+flutter_launcher_icons:
+  android: true
+  ios: false
+  image_path: "C:/Users/TestUser/Desktop/New folder/dR.png"
+  adaptive_icon_background: "#1A237E"
+  adaptive_icon_foreground: "C:/Users/TestUser/Desktop/New folder/dR.png"
+
+flutter_native_splash:
+  color: "#1A237E"
+  color_dark: "#0D0F1A"
+  image: "C:/Users/TestUser/Desktop/New folder/dR.png"
+  image_dark: "C:/Users/TestUser/Desktop/New folder/dR.png"
+  android: true
+  ios: false
