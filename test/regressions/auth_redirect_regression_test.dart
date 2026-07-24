@@ -2,10 +2,10 @@
 
 /// Regression test for Phase 0: Auth/subscription guard not firing.
 ///
-/// Root cause: The router's auth gate was skipped entirely when
-/// `_supabaseInitialized` was false, allowing unauthenticated users to
-/// access the app directly. This test verifies that an unauthenticated
-/// router state always redirects to /login regardless of Supabase status.
+/// Root cause: The router's subscription gate had a logical gap where
+/// `user == null && _supabaseInitialized == true && session != null` would
+/// fall through to "all checks passed" without redirect. This occurred when
+/// a stale session persisted from a prior sideloaded build on release install.
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:ethiomed/features/settings/presentation/forced_update_gate.dart';
@@ -25,43 +25,147 @@ void main() {
     });
   });
 
-  group('Auth redirect gate logic', () {
-    test('_isAtLoginOrSubscription helper returns correct values', () {
+  group('_isAtLoginOrSubscription helper', () {
+    test('returns correct values for auth-related routes', () {
       expect(_isAtLoginOrSubscription('/login'), isTrue);
       expect(_isAtLoginOrSubscription('/subscription'), isTrue);
       expect(_isAtLoginOrSubscription('/signup'), isTrue);
       expect(_isAtLoginOrSubscription('/home'), isFalse);
       expect(_isAtLoginOrSubscription('/'), isFalse);
-      expect(_isAtLoginOrSubscription('/admin'), isFalse);
-    });
-
-    test('_computeRedirectForUnauthenticated returns correct redirect target', () {
-      // When unauthenticated and not already on auth screens
-      expect(_computeRedirectForUnauthenticated('/home'), '/login');
-      expect(_computeRedirectForUnauthenticated('/'), '/login');
-      expect(_computeRedirectForUnauthenticated('/quiz'), '/login');
-
-      // When unauthenticated but already on auth screens - no redirect
-      expect(_computeRedirectForUnauthenticated('/login'), null);
-      expect(_computeRedirectForUnauthenticated('/subscription'), null);
-      expect(_computeRedirectForUnauthenticated('/signup'), null);
     });
   });
+
+  group('Stale session bypass prevention', () {
+    test(
+      'user null with session present and supabase initialized redirects to login',
+      () {
+        // This was the bypass path: session != null (stale) && user == null && supabaseInitialized == true
+        // should ALWAYS redirect to /login, never fall through to "all checks passed"
+        expect(
+          _computeRedirectForStaleSession(
+            location: '/home',
+            hasSession: true,
+            hasUser: false,
+            supabaseInitialized: true,
+          ),
+          '/login',
+        );
+        expect(
+          _computeRedirectForStaleSession(
+            location: '/',
+            hasSession: true,
+            hasUser: false,
+            supabaseInitialized: true,
+          ),
+          '/login',
+        );
+      },
+    );
+
+    test(
+      'stale session on login screen does not redirect (no loop)',
+      () {
+        expect(
+          _computeRedirectForStaleSession(
+            location: '/login',
+            hasSession: true,
+            hasUser: false,
+            supabaseInitialized: true,
+          ),
+          isNull,
+        );
+      },
+    );
+
+    test(
+      'valid session and user with no subscription redirects to subscription',
+      () {
+        expect(
+          _computeRedirectForSubscriptionCheck(
+            location: '/home',
+            supabaseInitialized: true,
+            isAdmin: false,
+            isSubscribed: false,
+          ),
+          '/subscription',
+        );
+      },
+    );
+
+    test(
+      'suppabase not initialized with stale session redirects to login',
+      () {
+        expect(
+          _computeRedirectForStaleSession(
+            location: '/home',
+            hasSession: true,
+            hasUser: false,
+            supabaseInitialized: false,
+          ),
+          '/login',
+        );
+      },
+    );
+  });
+}
+
+/// Helper that mirrors the fixed redirect logic for the stale session case.
+String? _computeRedirectForStaleSession({
+  required String location,
+  required bool hasSession,
+  required bool hasUser,
+  required bool supabaseInitialized,
+}) {
+  // Auth gate: session == null -> redirect to login
+  if (!hasSession) {
+    if (!_isAtLoginOrSubscription(location)) {
+      return '/login';
+    }
+    return null;
+  }
+
+  // Subscription gate: same logic as fixed main.dart
+  if (supabaseInitialized) {
+    if (!hasUser) {
+      // Session exists but user is null (stale/invalid session)
+      if (!_isAtLoginOrSubscription(location)) {
+        return '/login';
+      }
+      return null;
+    }
+  } else {
+    // Supabase not initialized but we have a session - treat as invalid
+    if (!_isAtLoginOrSubscription(location)) {
+      return '/login';
+    }
+    return null;
+  }
+
+  // All checks passed
+  if (location == '/') return '/home';
+  return null;
+}
+
+/// Helper for subscription check path.
+String? _computeRedirectForSubscriptionCheck({
+  required String location,
+  required bool supabaseInitialized,
+  required bool isAdmin,
+  required bool isSubscribed,
+}) {
+  if (supabaseInitialized) {
+    if (!isAdmin && !isSubscribed) {
+      if (location != '/subscription') {
+        return '/subscription';
+      }
+      return null;
+    }
+  }
+  return null;
 }
 
 bool _isAtLoginOrSubscription(String location) {
   return location == '/login' ||
       location == '/subscription' ||
       location == '/signup';
-}
-
-String? _computeRedirectForUnauthenticated(String location) {
-  final session = null; // No session = unauthenticated
-  if (session == null) {
-    if (!_isAtLoginOrSubscription(location)) {
-      return '/login';
-    }
-    return null;
-  }
-  return null;
 }

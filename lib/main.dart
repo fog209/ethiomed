@@ -233,7 +233,13 @@ final _router = GoRouter(
     // 4. Subscription / admin gate (only for authenticated users)
     try {
       final user = Supabase.instance.client.auth.currentUser;
-      if (user != null && _supabaseInitialized) {
+      if (_supabaseInitialized) {
+        if (user == null) {
+          // Session exists but user is null (stale/invalid session)
+          debugPrint('Router: User is null despite session — redirecting to /login.');
+          if (!_isAtLoginOrSubscription(location)) return '/login';
+          return null;
+        }
         final profile = await Supabase.instance.client
             .from('profiles')
             .select('is_admin')
